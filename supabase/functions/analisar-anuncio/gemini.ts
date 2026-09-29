@@ -1,22 +1,43 @@
 import { schema } from './schema.ts'
 import { buildPrompt } from './prompt.ts'
 
-export async function askGemini(key:string,link:string,texto:string,preco:number){
+type InputImage={mime_type:string;data:string;name?:string}
+
+export async function askGemini(
+  key:string,
+  origem:string,
+  link:string,
+  texto:string,
+  preco:number,
+  imagens:InputImage[]
+){
   const responseFormat={
     type:'text',
     mime_type:'application/json',
     schema,
   }
 
-  const tools=link ? [{type:'url_context'}] : undefined
+  const input:any[]=[
+    {type:'text',text:buildPrompt(origem,link,texto,preco,imagens.length)}
+  ]
+
+  for(const image of imagens){
+    input.push({
+      type:'image',
+      mime_type:image.mime_type,
+      data:image.data
+    })
+  }
 
   const body:any={
     model:'gemini-3.5-flash',
-    input:buildPrompt(link,texto,preco),
+    input,
     response_format:responseFormat
   }
 
-  if(tools) body.tools=tools
+  if(origem==='olx'&&link){
+    body.tools=[{type:'url_context'}]
+  }
 
   const r=await fetch('https://generativelanguage.googleapis.com/v1beta/interactions',{
     method:'POST',
