@@ -1,3 +1,16 @@
 import { BarChart3,History,Sparkles } from 'lucide-react'
 export type View='dashboard'|'new'|'history'
-export function BottomNav({view,setView}:{view:View;setView:(v:View)=>void}){const items=[['dashboard','Painel',BarChart3],['new','Analisar',Sparkles],['history','Histórico',History]] as const;return <nav className="mobile-nav fixed inset-x-3 bottom-3 z-50 grid h-[76px] grid-cols-3 rounded-[24px] border border-slate-700/60 bg-[#0b1726]/88 p-2 shadow-2xl backdrop-blur-2xl lg:hidden">{items.map(([k,label,Icon])=>{const active=view===k;return <button key={k} onClick={()=>setView(k)} className={`relative grid place-items-center content-center gap-1 rounded-[18px] text-[10px] font-semibold ${active?'text-white':'text-slate-500'}`}>{active&&<span className={`absolute inset-0 rounded-[18px] ${k==='new'?'bg-gradient-to-br from-emerald-400/20 to-blue-500/15':'bg-white/[.035]'}`}/>}<span className={`relative grid h-8 w-8 place-items-center rounded-2xl ${active&&k==='new'?'bg-emerald-400/12 text-emerald-300':''}`}><Icon size={18}/></span><span className="relative">{label}</span></button>})}</nav>}
+
+export function BottomNav({view,setView}:{view:View;setView:(v:View)=>void}){
+  const items=[['dashboard','Painel',BarChart3],['new','Analisar',Sparkles],['history','Histórico',History]] as const
+  return <nav className="mobile-nav app-mobile-nav fixed inset-x-3 bottom-3 z-50 grid h-[76px] grid-cols-3 rounded-[24px] border p-2 shadow-2xl backdrop-blur-2xl lg:hidden">
+    {items.map(([k,label,Icon])=>{
+      const active=view===k
+      return <button key={k} onClick={()=>setView(k)} className={`mobile-nav-item relative grid place-items-center content-center gap-1 rounded-[18px] text-[10px] font-semibold ${active?'is-active':''}`}>
+        {active&&<span className={`absolute inset-0 rounded-[18px] ${k==='new'?'mobile-nav-highlight':''}`}/>}
+        <span className={`relative grid h-8 w-8 place-items-center rounded-2xl ${active&&k==='new'?'bg-emerald-400/12 text-emerald-300':''}`}><Icon size={18}/></span>
+        <span className="relative">{label}</span>
+      </button>
+    })}
+  </nav>
+}
