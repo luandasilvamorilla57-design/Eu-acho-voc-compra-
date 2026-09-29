@@ -1,3 +1,10 @@
-import { Download,Filter,Search } from 'lucide-react'
-import type { Status } from '../../types/database'
-export function HistoryFilters({q,setQ,status,setStatus,onExport}:{q:string;setQ:(v:string)=>void;status:'todos'|Status;setStatus:(v:'todos'|Status)=>void;onExport:()=>void}){return <section className="glass rounded-[22px] p-4 sm:p-5"><div className="grid gap-3 md:grid-cols-[1fr_auto_auto]"><div className="flex h-11 items-center gap-2 rounded-xl border border-slate-800 bg-slate-950/40 px-3"><Search size={15} className="text-slate-600"/><input value={q} onChange={e=>setQ(e.target.value)} className="w-full bg-transparent text-xs outline-none" placeholder="Buscar produto ou categoria..."/></div><div className="flex h-11 items-center gap-2 rounded-xl border border-slate-800 bg-slate-950/40 px-3"><Filter size={14}/><select value={status} onChange={e=>setStatus(e.target.value as any)} className="bg-transparent text-xs text-slate-400"><option value="todos">Todos</option><option value="analisado">Analisados</option><option value="visitei">Visitados</option><option value="comprei">Comprados</option><option value="vendi">Vendidos</option></select></div><button onClick={onExport} className="flex h-11 items-center justify-center gap-2 rounded-xl border border-slate-800 px-4 text-xs text-slate-400"><Download size={15}/> CSV</button></div></section>}
+import { Download,Search } from 'lucide-react'
+
+export function HistoryFilters({q,setQ,onExport}:{q:string;setQ:(v:string)=>void;onExport:()=>void}){
+  return <section className="glass rounded-[22px] p-4 sm:p-5">
+    <div className="grid gap-3 md:grid-cols-[1fr_auto]">
+      <div className="flex h-11 items-center gap-2 rounded-xl border border-slate-800 bg-slate-950/40 px-3"><Search size={15} className="text-slate-600"/><input value={q} onChange={e=>setQ(e.target.value)} className="w-full bg-transparent text-xs outline-none" placeholder="Buscar produto ou categoria..."/></div>
+      <button onClick={onExport} className="flex h-11 items-center justify-center gap-2 rounded-xl border border-slate-800 px-4 text-xs text-slate-400"><Download size={15}/> CSV</button>
+    </div>
+  </section>
+}
