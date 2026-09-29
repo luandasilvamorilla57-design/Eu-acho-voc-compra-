@@ -41,7 +41,7 @@ Deno.serve(async req=>{
       }
     }
 
-    const {raw,ai}=await askGemini(key,origem,link,texto,preco,imagens)
+    const {raw,ai,model,fallback}=await askGemini(key,origem,link,texto,preco,imagens)
     const c=calculate(ai,preco)
 
     if(origem==='facebook'&&(!ai?.produto||String(ai.produto).toLowerCase().includes('não identificado'))){
@@ -56,7 +56,8 @@ Deno.serve(async req=>{
       calculado:{...c.calculated,classificacao:c.classification},
       fontes_verificadas:sources(raw),
       meta:{
-        modelo:'gemini-3.5-flash',
+        modelo:model,
+        fallback_automatico:fallback,
         origem,
         analisado_em:new Date().toISOString(),
         aviso:origem==='facebook'
@@ -73,8 +74,14 @@ Deno.serve(async req=>{
 
     if(lower.includes('quota')||lower.includes('rate limit')||lower.includes('resource_exhausted')){
       return Response.json({
-        error:'A cota gratuita da Gemini foi atingida. Aguarde a renovação do limite ou tente novamente mais tarde.'
+        error:'A cota gratuita da Gemini foi atingida. Aguarde a renovação do limite e tente novamente.'
       },{status:429,headers:cors})
+    }
+
+    if(lower.includes('high demand')||lower.includes('service unavailable')||lower.includes('try again later')){
+      return Response.json({
+        error:'Os modelos gratuitos da Gemini estão temporariamente congestionados. O Radar já tentou o modelo reserva automaticamente; aguarde alguns instantes e tente novamente.'
+      },{status:503,headers:cors})
     }
 
     return Response.json({error:message},{status:500,headers:cors})
