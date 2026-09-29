@@ -6,7 +6,8 @@ import { AccountMenu } from './AccountMenu'
 const meta={
   dashboard:['VISÃO DE MERCADO','Painel de oportunidades','Acompanhe score, lucro e negócios salvos no radar.'],
   new:['ANÁLISE GUIADA','Nova análise inteligente','Cole um anúncio e receba uma leitura estratégica.'],
-  history:['ACOMPANHAMENTO','Histórico do radar','Atualize status, compra, venda e resultado real.']
+  bought:['CARTEIRA DE COMPRAS','Itens comprados','Registre compras, acompanhe estoque e feche vendas com lucro real.'],
+  history:['ACOMPANHAMENTO','Histórico do radar','Revise análises, status e oportunidades anteriores.']
 } as const
 
 export function TopHeader({view,dark,setDark,email}:{view:View;dark:boolean;setDark:(v:boolean)=>void;email?:string}){
@@ -21,15 +22,8 @@ export function TopHeader({view,dark,setDark,email}:{view:View;dark:boolean;setD
           <p className="mt-1 text-sm text-slate-500">{desc}</p>
         </div>
       </div>
-
       <div className="flex items-center gap-2">
-        <button
-          type="button"
-          onClick={()=>setDark(!dark)}
-          className="theme-toggle grid h-11 w-11 place-items-center rounded-2xl border transition"
-          aria-label={dark?'Ativar tema claro':'Ativar tema escuro'}
-          title={dark?'Tema claro':'Tema escuro'}
-        >
+        <button type="button" onClick={()=>setDark(!dark)} className="theme-toggle grid h-11 w-11 place-items-center rounded-2xl border transition" aria-label={dark?'Ativar tema claro':'Ativar tema escuro'} title={dark?'Tema claro':'Tema escuro'}>
           {dark?<Sun size={17}/>:<Moon size={17}/>}
         </button>
         <AccountMenu email={email}/>

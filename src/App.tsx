@@ -1,9 +1,11 @@
 import { useEffect, useState } from 'react'
 import { useSessionAuth } from './hooks/useSessionAuth'
 import { useAnalyses } from './hooks/useAnalyses'
+import { usePurchases } from './hooks/usePurchases'
 import { AuthPage } from './pages/AuthPage'
 import { DashboardPage } from './pages/DashboardPage'
 import { NewAnalysisPage } from './pages/NewAnalysisPage'
+import { BoughtPage } from './pages/BoughtPage'
 import { HistoryPage } from './pages/HistoryPage'
 import { AppShell } from './components/AppShell'
 import { AnalysisModal } from './components/AnalysisModal'
@@ -26,6 +28,7 @@ export default function App(){
   const [selected,setSelected]=useState<AnaliseRow|null>(null)
   const [editing,setEditing]=useState<AnaliseRow|null>(null)
   const {items,load,updateStatus}=useAnalyses(!!session)
+  const {items:purchases,load:loadPurchases,createPurchase,markSold}=usePurchases(!!session)
 
   useEffect(()=>{
     window.localStorage.setItem('brike-theme',dark?'dark':'light')
@@ -37,14 +40,24 @@ export default function App(){
   if(!session||reset)return <AuthPage initialMode={reset?'reset':'login'}/>
 
   const page=view==='dashboard'
-    ?<DashboardPage items={items} onNew={()=>setView('new')} onOpen={setSelected}/>
+    ?<DashboardPage items={items} purchases={purchases} onNew={()=>setView('new')} onOpen={setSelected}/>
     :view==='new'
       ?<NewAnalysisPage onSaved={()=>{load();setView('dashboard')}}/>
-      :<HistoryPage items={items} onOpen={setSelected} onEdit={setEditing}/>
+      :view==='bought'
+        ?<BoughtPage
+            analyses={items}
+            purchases={purchases}
+            onCreate={async input=>{await createPurchase(input);await load()}}
+            onSold={async(id,salePrice)=>{await markSold(id,salePrice);await load()}}
+          />
+        :<HistoryPage items={items} onOpen={setSelected} onEdit={setEditing}/>
 
   return <AppShell view={view} setView={setView} dark={dark} setDark={setDark} email={session.user.email}>
     {page}
     <AnalysisModal item={selected} onClose={()=>setSelected(null)}/>
-    <StatusEditor item={editing} onClose={()=>setEditing(null)} onSave={async(s,b,v)=>{await updateStatus(editing!.id,s,b,v)}}/>
+    <StatusEditor item={editing} onClose={()=>setEditing(null)} onSave={async(s,b,v)=>{
+      const err=await updateStatus(editing!.id,s,b,v)
+      if(!err)await loadPurchases()
+    }}/>
   </AppShell>
 }

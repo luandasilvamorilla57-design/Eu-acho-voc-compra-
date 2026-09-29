@@ -1,10 +1,16 @@
-import { BarChart3, History, LogOut, Sparkles } from 'lucide-react'
+import { BarChart3, History, LogOut, PackageCheck, Sparkles } from 'lucide-react'
 import { Brand } from '../Brand'
 import type { View } from '../BottomNav'
 import { supabase } from '../../lib/supabase'
 
 export function DesktopSidebar({view,setView}:{view:View;setView:(v:View)=>void}){
- const nav=[['dashboard','Painel',BarChart3],['new','Nova análise',Sparkles],['history','Histórico',History]] as const
+ const nav=[
+   ['dashboard','Painel',BarChart3],
+   ['new','Nova análise',Sparkles],
+   ['bought','Comprei',PackageCheck],
+   ['history','Histórico',History]
+ ] as const
+
  return <aside className="app-sidebar fixed inset-y-0 left-0 z-40 hidden w-[262px] border-r p-5 lg:flex lg:flex-col">
   <Brand/>
   <div className="mt-10 grid gap-2">
