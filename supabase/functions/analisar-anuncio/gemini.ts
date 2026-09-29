@@ -8,9 +8,15 @@ export async function askGemini(key:string,link:string,texto:string,preco:number
     schema,
   }
 
-  const tools=link
-    ? [{type:'url_context'},{type:'google_search'}]
-    : [{type:'google_search'}]
+  const tools=link ? [{type:'url_context'}] : undefined
+
+  const body:any={
+    model:'gemini-3.5-flash',
+    input:buildPrompt(link,texto,preco),
+    response_format:responseFormat
+  }
+
+  if(tools) body.tools=tools
 
   const r=await fetch('https://generativelanguage.googleapis.com/v1beta/interactions',{
     method:'POST',
@@ -19,12 +25,7 @@ export async function askGemini(key:string,link:string,texto:string,preco:number
       'x-goog-api-key':key,
       'Api-Revision':'2026-05-20'
     },
-    body:JSON.stringify({
-      model:'gemini-3.8-flash',
-      input:buildPrompt(link,texto,preco),
-      tools,
-      response_format:responseFormat
-    })
+    body:JSON.stringify(body)
   })
 
   const raw=await r.json()
