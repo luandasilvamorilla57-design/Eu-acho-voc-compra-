@@ -1,0 +1,4 @@
+import { useMemo } from 'react'
+import type { AnaliseRow } from '../types/database'
+import { dateBR } from '../utils/format'
+export function useDashboardData(items:AnaliseRow[]){return useMemo(()=>{const bought=items.filter(i=>['comprei','vendi'].includes(i.status)).length,sold=items.filter(i=>i.status==='vendi').length,profit=items.reduce((x,i)=>x+(i.lucro_realizado??0),0),rs=items.filter(i=>i.preco_compra_real&&i.lucro_realizado!=null).map(i=>i.lucro_realizado!/i.preco_compra_real!*100),roi=rs.length?rs.reduce((a,b)=>a+b,0)/rs.length:0;const chart=items.slice().reverse().reduce((a:any[],i)=>{a.push({d:dateBR(i.data_criacao),lucro:(a.at(-1)?.lucro??0)+(i.lucro_realizado??0)});return a},[]);const top=items.slice().sort((x,y)=>((y.analise_ia as any)?.calculado?.score_oportunidade??0)-((x.analise_ia as any)?.calculado?.score_oportunidade??0))[0];return{bought,sold,profit,roi,chart,top}},[items])}

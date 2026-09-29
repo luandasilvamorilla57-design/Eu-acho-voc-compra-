@@ -1,0 +1,3 @@
+import type { AnaliseRow } from '../types/database'
+import { dateBR } from './format'
+export function exportHistoryCsv(items:AnaliseRow[]){const h=['Produto','Categoria','Preço original','Preço compra','Preço venda','Lucro','Status','Data'];const rows=items.map(i=>[i.titulo_anuncio,i.categoria??'',i.preco_anunciado,i.preco_compra_real??'',i.preco_venda_real??'',i.lucro_realizado??'',i.status,dateBR(i.data_criacao)]);const csv=[h,...rows].map(r=>r.map(v=>`"${String(v).replaceAll('"','""')}"`).join(';')).join('\n');const b=new Blob(['\ufeff'+csv],{type:'text/csv;charset=utf-8'}),u=URL.createObjectURL(b),a=document.createElement('a');a.href=u;a.download='brike-radar-historico.csv';a.click();URL.revokeObjectURL(u)}

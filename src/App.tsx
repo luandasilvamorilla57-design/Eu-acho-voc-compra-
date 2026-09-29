@@ -1,0 +1,13 @@
+import { useState } from 'react'
+import { useSessionAuth } from './hooks/useSessionAuth'
+import { useAnalyses } from './hooks/useAnalyses'
+import { AuthPage } from './pages/AuthPage'
+import { DashboardPage } from './pages/DashboardPage'
+import { NewAnalysisPage } from './pages/NewAnalysisPage'
+import { HistoryPage } from './pages/HistoryPage'
+import { AppShell } from './components/AppShell'
+import { AnalysisModal } from './components/AnalysisModal'
+import { StatusEditor } from './components/StatusEditor'
+import type { View } from './components/BottomNav'
+import type { AnaliseRow } from './types/database'
+export default function App(){const {session,ready,reset}=useSessionAuth(),[view,setView]=useState<View>('dashboard'),[dark,setDark]=useState(true),[selected,setSelected]=useState<AnaliseRow|null>(null),[editing,setEditing]=useState<AnaliseRow|null>(null);const {items,load,updateStatus}=useAnalyses(!!session);if(!ready)return <div className="grid min-h-screen place-items-center bg-[#06101c] text-xs text-slate-600">Carregando radar...</div>;if(!session||reset)return <AuthPage initialMode={reset?'reset':'login'}/>;const page=view==='dashboard'?<DashboardPage items={items} onNew={()=>setView('new')} onOpen={setSelected}/>:view==='new'?<NewAnalysisPage onSaved={()=>{load();setView('dashboard')}}/>:<HistoryPage items={items} onOpen={setSelected} onEdit={setEditing}/>;return <AppShell view={view} setView={setView} dark={dark} setDark={setDark} email={session.user.email}>{page}<AnalysisModal item={selected} onClose={()=>setSelected(null)}/><StatusEditor item={editing} onClose={()=>setEditing(null)} onSave={async(s,b,v)=>{await updateStatus(editing!.id,s,b,v)}}/></AppShell>}

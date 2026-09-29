@@ -1,0 +1,5 @@
+import type { AnalysisResult } from '../../types/analysis'
+import { money } from '../../utils/format'
+import { PanelHeader } from './PanelHeader'
+export function MarketPanel({a}:{a:AnalysisResult}){return <section className="glass rounded-[22px] p-5"><PanelHeader eyebrow="FAIXA DE MERCADO" title="Preço e teto de compra"/><div className="mt-4 grid grid-cols-3 gap-2"><Tiny label="Mercado mín." value={money(a.mercado.preco_min)}/><Tiny label="Mediana" value={money(a.mercado.preco_mediano)} accent/><Tiny label="Mercado máx." value={money(a.mercado.preco_max)}/></div><div className="mt-3 rounded-xl bg-slate-950/40 p-4 text-xs leading-5 text-slate-400">{a.mercado.justificativa}</div></section>}
+function Tiny({label,value,accent=false}:{label:string;value:string;accent?:boolean}){return <div className="rounded-xl bg-slate-950/35 p-3"><span className="block text-[8px] text-slate-600">{label}</span><strong className={`font-display mt-1 block text-xs ${accent?'text-emerald-300':'text-slate-300'}`}>{value}</strong></div>}

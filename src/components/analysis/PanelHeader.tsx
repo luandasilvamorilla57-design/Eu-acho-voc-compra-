@@ -1,0 +1,1 @@
+export function PanelHeader({eyebrow,title}:{eyebrow:string;title:string}){return <div><span className="text-[9px] font-bold uppercase tracking-[.17em] text-slate-500">{eyebrow}</span><h3 className="font-display mt-1 text-lg font-bold">{title}</h3></div>}

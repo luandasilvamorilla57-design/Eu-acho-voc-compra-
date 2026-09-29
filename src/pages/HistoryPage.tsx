@@ -1,0 +1,6 @@
+import { useMemo,useState } from 'react'
+import type { AnaliseRow,Status } from '../types/database'
+import { HistoryFilters } from '../components/history/HistoryFilters'
+import { HistoryList } from '../components/history/HistoryList'
+import { exportHistoryCsv } from '../utils/exportCsv'
+export function HistoryPage({items,onOpen,onEdit}:{items:AnaliseRow[];onOpen:(a:AnaliseRow)=>void;onEdit:(a:AnaliseRow)=>void}){const [q,setQ]=useState(''),[status,setStatus]=useState<'todos'|Status>('todos');const filtered=useMemo(()=>items.filter(i=>(status==='todos'||i.status===status)&&`${i.titulo_anuncio} ${i.categoria??''}`.toLowerCase().includes(q.toLowerCase())),[items,q,status]);return <div className="space-y-4"><div><div className="text-[9px] font-bold tracking-[.2em] text-emerald-400">HISTÓRICO</div><h2 className="font-display mt-2 text-[32px] font-extrabold tracking-[-.05em] sm:text-4xl">Seu radar de negócios.</h2><p className="mt-2 text-sm text-slate-500">Analisado, visitado, comprado ou vendido — tudo em um único histórico.</p></div><HistoryFilters q={q} setQ={setQ} status={status} setStatus={setStatus} onExport={()=>exportHistoryCsv(filtered)}/><HistoryList items={filtered} onOpen={onOpen} onEdit={onEdit}/></div>}
