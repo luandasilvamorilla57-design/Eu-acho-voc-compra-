@@ -36,6 +36,18 @@ anuncios_revenda:{
  Update:{origem_item?:ResaleDraftOrigin;compra_id?:string|null;analise_id?:string|null;produto?:string;categoria?:string|null;marca?:string|null;modelo?:string|null;condicao?:string|null;tempo_uso?:string|null;observacoes?:string|null;preco_minimo?:number|null;preco_ideal?:number|null;fotos?:Json;resultado_ia?:Json|null;titulo?:string|null;descricao?:string|null;preco_venda_rapida?:number|null;preco_equilibrado?:number|null;preco_premium?:number|null;status?:ResaleDraftStatus;data_atualizacao?:string}
  Relationships:[]
 }
+assinaturas:{
+ Row:{id:string;user_id:string;plano:AccountPlan;gateway:string;ambiente:'test'|'production';mercadopago_subscription_id:string|null;mercadopago_plan_id:string|null;external_reference:string|null;payer_email:string|null;status:string;valor:number|null;currency_id:string;proxima_cobranca:string|null;ultimo_pagamento_em:string|null;valido_ate:string|null;cancelada_em:string|null;dados_gateway:Json;created_at:string;updated_at:string}
+ Insert:{id?:string;user_id:string;plano:AccountPlan;gateway?:string;ambiente?:'test'|'production';mercadopago_subscription_id?:string|null;mercadopago_plan_id?:string|null;external_reference?:string|null;payer_email?:string|null;status?:string;valor?:number|null;currency_id?:string;proxima_cobranca?:string|null;ultimo_pagamento_em?:string|null;valido_ate?:string|null;cancelada_em?:string|null;dados_gateway?:Json;created_at?:string;updated_at?:string}
+ Update:{plano?:AccountPlan;status?:string;valor?:number|null;proxima_cobranca?:string|null;ultimo_pagamento_em?:string|null;valido_ate?:string|null;cancelada_em?:string|null;dados_gateway?:Json;updated_at?:string}
+ Relationships:[]
+}
+planos_catalogo:{
+ Row:{slug:AccountPlan;nome:string;preco_mensal:number;analises_mes:number;analises_dia:number;destaque:boolean;descricao:string;recursos:Json;ordem:number;ativo:boolean;updated_at:string}
+ Insert:{slug:AccountPlan;nome:string;preco_mensal:number;analises_mes:number;analises_dia:number;destaque?:boolean;descricao?:string;recursos?:Json;ordem?:number;ativo?:boolean;updated_at?:string}
+ Update:{nome?:string;preco_mensal?:number;analises_mes?:number;analises_dia?:number;destaque?:boolean;descricao?:string;recursos?:Json;ordem?:number;ativo?:boolean;updated_at?:string}
+ Relationships:[]
+}
 client_errors:{
  Row:{id:string;user_id:string;context:string;message:string;stack:string|null;metadata:Json;created_at:string}
  Insert:{id?:string;user_id?:string;context?:string;message:string;stack?:string|null;metadata?:Json;created_at?:string}
