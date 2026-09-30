@@ -97,12 +97,12 @@ export function SalePreparationModal({
     if(images.length===0){setError('Envie pelo menos uma foto que você pretende usar no anúncio.');return}
     const p=source==='radar'?selectedPurchase:null
     const finalProduct=p?.produto??product.trim()
-    const finalCategory=p?.categoria??category.trim()||null
+    const finalCategory=p?.categoria??(category.trim()||null)
     const finalBrand=source==='radar'?radarMeta.brand:brand.trim()
     const finalModel=source==='radar'?radarMeta.model:model.trim()
     const finalCondition=source==='radar'?radarMeta.condition:condition.trim()
     const finalNotes=source==='radar'?[p?.observacoes,p?.custos_observacao].filter(Boolean).join(' · '):notes.trim()
-    const finalMin=p?.preco_minimo_venda??Number(minPrice||0)||0
+    const finalMin=p?.preco_minimo_venda??(Number(minPrice||0)||0)
     const finalIdeal=source==='externo'?Number(idealPrice||0)||0:0
 
     setBusy(true);setError('')
