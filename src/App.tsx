@@ -29,11 +29,12 @@ export default function App(){
   const [selected,setSelected]=useState<AnaliseRow|null>(null)
   const [editing,setEditing]=useState<AnaliseRow|null>(null)
 
-  const {items,load,updateStatus,resolveNegotiation,addNegotiationLog,reinspect}=useAnalyses(!!session)
-  const {items:purchases,load:loadPurchases,createPurchase,markSold,updatePurchase,uploadPhotos,removePhoto}=usePurchases(!!session)
   const {config,loading:configLoading,save:saveConfig}=useRadarConfig(!!session)
-  const {loading:planLoading,checked:planChecked,hasAccess,refresh:refreshAccess}=usePlanAccess(!!session,config.acesso_total)
-  const {items:drafts,saveGenerated:saveResaleDraft,updateCopy:updateResaleDraftCopy,remove:removeResaleDraft}=useResaleDrafts(!!session)
+  const {loading:planLoading,checked:planChecked,hasAccess,refresh:refreshAccess}=usePlanAccess(!!session)
+  const appDataActive=!!session&&hasAccess
+  const {items,load,updateStatus,resolveNegotiation,addNegotiationLog,reinspect}=useAnalyses(appDataActive)
+  const {items:purchases,load:loadPurchases,createPurchase,markSold,updatePurchase,uploadPhotos,removePhoto}=usePurchases(appDataActive)
+  const {items:drafts,saveGenerated:saveResaleDraft,updateCopy:updateResaleDraftCopy,remove:removeResaleDraft}=useResaleDrafts(appDataActive)
 
   const alerts=useMemo(()=>buildRadarAlerts(items,purchases,config),[items,purchases,config])
   const intelligence=useMemo(()=>buildUserIntelligence(purchases,items),[purchases,items])
@@ -42,8 +43,8 @@ export default function App(){
 
   if(!ready)return <div className="grid min-h-screen place-items-center bg-[#06101c] text-xs text-slate-600">Carregando radar...</div>
   if(!session||reset)return <AuthPage initialMode={reset?'reset':'login'}/>
-  if(configLoading||!config.user_id||(!config.acesso_total&&(planLoading||!planChecked)))return <div className="grid min-h-screen place-items-center bg-[#06101c] text-xs text-slate-600">Validando seu acesso...</div>
-  if(!config.acesso_total&&!hasAccess)return <PlansPage email={session.user.email} onRefreshAccess={refreshAccess}/>
+  if(configLoading||!config.user_id||planLoading||!planChecked)return <div className="grid min-h-screen place-items-center bg-[#06101c] text-xs text-slate-500">Validando seu acesso com segurança...</div>
+  if(!hasAccess)return <PlansPage email={session.user.email} onRefreshAccess={refreshAccess}/>
 
   let page:React.ReactNode
   if(view==='dashboard')page=<DashboardPage items={items} purchases={purchases} config={config} onSaveConfig={saveConfig} onNew={()=>setView('new')} onOpen={setSelected}/>
