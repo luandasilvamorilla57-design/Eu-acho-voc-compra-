@@ -9,13 +9,13 @@ export function BottomNav({view,setView}:{view:View;setView:(v:View)=>void}){
     ['history','Histórico',History]
   ] as const
 
-  return <nav className="mobile-nav app-mobile-nav fixed inset-x-3 bottom-3 z-50 grid h-[76px] grid-cols-4 rounded-[24px] border p-2 shadow-2xl backdrop-blur-2xl lg:hidden">
+  return <nav className="mobile-nav app-mobile-nav fixed inset-x-3 bottom-3 z-50 grid h-[82px] grid-cols-4 rounded-[27px] border p-2 shadow-2xl backdrop-blur-2xl lg:hidden">
     {items.map(([k,label,Icon])=>{
       const active=view===k
-      return <button key={k} onClick={()=>setView(k)} className={`mobile-nav-item relative grid place-items-center content-center gap-1 rounded-[18px] text-[9px] font-semibold ${active?'is-active':''}`}>
-        {active&&<span className={`absolute inset-0 rounded-[18px] ${k==='new'||k==='bought'?'mobile-nav-highlight':''}`}/>}
-        <span className={`relative grid h-8 w-8 place-items-center rounded-2xl ${active&&(k==='new'||k==='bought')?'bg-emerald-400/12 text-emerald-300':''}`}><Icon size={18}/></span>
-        <span className="relative">{label}</span>
+      return <button key={k} onClick={()=>setView(k)} className={'mobile-nav-item relative grid place-items-center content-center gap-1 rounded-[20px] font-semibold '+(active?'is-active':'')}>
+        {active&&<span className={'absolute inset-0 rounded-[20px] '+(k==='new'||k==='bought'?'mobile-nav-highlight':'')}/>}
+        <span className={'mobile-nav-icon relative grid h-9 w-9 place-items-center rounded-2xl '+(active&&(k==='new'||k==='bought')?'bg-emerald-400/12 text-emerald-300':'')}><Icon size={19}/></span>
+        <span className="mobile-nav-label relative">{label}</span>
       </button>
     })}
   </nav>

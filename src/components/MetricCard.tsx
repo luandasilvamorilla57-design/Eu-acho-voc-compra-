@@ -1,2 +1,11 @@
 import type { LucideIcon } from 'lucide-react'
-export function MetricCard({icon:Icon,label,value,hint,tone='green'}:{icon:LucideIcon;label:string;value:string;hint:string;tone?:'green'|'blue'|'amber'}){const toneMap={green:'bg-emerald-400/10 text-emerald-300',blue:'bg-blue-400/10 text-blue-300',amber:'bg-amber-400/10 text-amber-300'};return <div className="glass rounded-2xl p-4 sm:p-5"><div className={`mb-4 grid h-9 w-9 place-items-center rounded-xl ${toneMap[tone]}`}><Icon size={18}/></div><span className="text-[11px] font-medium text-slate-400">{label}</span><strong className="font-display mt-1 block text-[23px] font-extrabold tracking-[-.04em] text-white">{value}</strong><small className="mt-1 block text-[9px] text-slate-600">{hint}</small></div>}
+
+export function MetricCard({icon:Icon,label,value,hint,tone='green'}:{icon:LucideIcon;label:string;value:string;hint:string;tone?:'green'|'blue'|'amber'}){
+  const toneMap={green:'metric-card-premium__icon--green',blue:'metric-card-premium__icon--blue',amber:'metric-card-premium__icon--amber'}
+  return <div className="glass metric-card-premium">
+    <div className={'metric-card-premium__icon '+toneMap[tone]}><Icon size={19}/></div>
+    <span className="metric-card-premium__label">{label}</span>
+    <strong className="font-display metric-card-premium__value">{value}</strong>
+    <small className="metric-card-premium__hint">{hint}</small>
+  </div>
+}

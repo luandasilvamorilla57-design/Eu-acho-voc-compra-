@@ -1,2 +1,15 @@
-import { Sparkles } from 'lucide-react'
-export function DashboardHero({onNew}:{onNew:()=>void}){return <section className="noise radar-grid glass relative overflow-hidden rounded-[30px] p-5 shadow-[0_28px_80px_rgba(0,0,0,.24)] sm:p-7 lg:p-9"><div className="absolute -right-20 -top-28 h-80 w-80 rounded-full bg-blue-500/10 blur-3xl"/><div className="relative flex flex-col gap-7 lg:flex-row lg:items-end lg:justify-between"><div className="max-w-3xl"><div className="flex items-center gap-2 text-[10px] text-slate-400"><span className="h-2 w-2 rounded-full bg-emerald-400"/> Inteligência de oportunidade ativa</div><h2 className="font-display mt-4 text-[34px] font-extrabold leading-[1.02] tracking-[-.055em] sm:text-5xl">Transforme anúncios em <span className="text-emerald-400">decisões lucrativas.</span></h2><p className="mt-4 max-w-2xl text-sm leading-6 text-slate-400">Preço de mercado, risco, liquidez e estratégia antes de colocar dinheiro no produto.</p></div><button onClick={onNew} className="flex h-12 items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-emerald-400 to-cyan-400 px-5 font-bold text-slate-950"><Sparkles size={17}/> Nova análise</button></div></section>}
+import { ArrowRight,Sparkles } from 'lucide-react'
+
+export function DashboardHero({onNew}:{onNew:()=>void}){
+  return <section className="noise radar-grid glass dashboard-hero-premium relative overflow-hidden rounded-[30px] p-5 sm:p-7 lg:p-9">
+    <div className="dashboard-hero-premium__glow"/>
+    <div className="relative flex flex-col gap-7 lg:flex-row lg:items-end lg:justify-between">
+      <div className="max-w-3xl">
+        <div className="dashboard-live"><span/> Inteligência de oportunidade ativa</div>
+        <h2 className="font-display mt-4 text-[35px] font-extrabold leading-[1.02] tracking-[-.055em] sm:text-5xl">Transforme anúncios em <span>decisões lucrativas.</span></h2>
+        <p className="mt-4 max-w-2xl text-[14px] leading-6 text-slate-400 sm:text-[15px]">Preço de mercado, risco, liquidez, teto de compra e estratégia antes de colocar dinheiro no produto.</p>
+      </div>
+      <button onClick={onNew} className="dashboard-new-analysis"><Sparkles size={18}/><span>Nova análise</span><ArrowRight size={16}/></button>
+    </div>
+  </section>
+}

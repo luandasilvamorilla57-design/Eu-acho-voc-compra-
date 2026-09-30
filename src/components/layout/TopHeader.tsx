@@ -4,28 +4,26 @@ import type { View } from '../BottomNav'
 import { AccountMenu } from './AccountMenu'
 
 const meta={
-  dashboard:['VISÃO DE MERCADO','Painel de oportunidades','Acompanhe score, lucro e negócios salvos no radar.'],
-  new:['ANÁLISE GUIADA','Nova análise inteligente','Cole um anúncio e receba uma leitura estratégica.'],
-  bought:['CARTEIRA DE COMPRAS','Itens comprados','Registre compras, acompanhe estoque e feche vendas com lucro real.'],
-  history:['ACOMPANHAMENTO','Histórico do radar','Revise análises, status e oportunidades anteriores.']
+  dashboard:['VISÃO DE MERCADO','Painel de oportunidades','Acompanhe capital, margem, lucro e negócios ativos no radar.'],
+  new:['ANÁLISE GUIADA','Nova análise inteligente','Cole um anúncio e receba uma leitura estratégica antes de negociar.'],
+  bought:['CARTEIRA DE COMPRAS','Itens comprados','Controle custo real, estoque, preço mínimo e resultado de cada venda.'],
+  history:['ACOMPANHAMENTO','Histórico do radar','Revise análises, negociações, visitas e oportunidades anteriores.']
 } as const
 
 export function TopHeader({view,dark,setDark,email}:{view:View;dark:boolean;setDark:(v:boolean)=>void;email?:string}){
   const [eyebrow,title,desc]=meta[view]
   return <header className="app-top-header sticky top-0 z-30 border-b backdrop-blur-2xl">
-    <div className="flex min-h-[86px] items-center justify-between px-4 py-3 sm:px-6 lg:min-h-[104px] lg:px-8">
+    <div className="flex min-h-[88px] items-center justify-between px-4 py-3 sm:px-6 lg:min-h-[106px] lg:px-8">
       <div>
         <div className="lg:hidden"><Brand compact/></div>
         <div className="hidden lg:block">
-          <div className="text-[10px] font-bold tracking-[.24em] text-emerald-400">{eyebrow}</div>
-          <h1 className="font-display mt-1 text-[28px] font-extrabold tracking-[-.05em] app-heading">{title}</h1>
-          <p className="mt-1 text-sm text-slate-500">{desc}</p>
+          <div className="premium-eyebrow text-emerald-400">{eyebrow}</div>
+          <h1 className="font-display mt-1.5 text-[29px] font-extrabold tracking-[-.05em] app-heading">{title}</h1>
+          <p className="mt-1.5 text-[14px] text-slate-500">{desc}</p>
         </div>
       </div>
       <div className="flex items-center gap-2">
-        <button type="button" onClick={()=>setDark(!dark)} className="theme-toggle grid h-11 w-11 place-items-center rounded-2xl border transition" aria-label={dark?'Ativar tema claro':'Ativar tema escuro'} title={dark?'Tema claro':'Tema escuro'}>
-          {dark?<Sun size={17}/>:<Moon size={17}/>}
-        </button>
+        <button type="button" onClick={()=>setDark(!dark)} className="theme-toggle grid h-11 w-11 place-items-center rounded-2xl border transition" aria-label={dark?'Ativar tema claro':'Ativar tema escuro'} title={dark?'Tema claro':'Tema escuro'}>{dark?<Sun size={18}/>:<Moon size={18}/>}</button>
         <AccountMenu email={email}/>
       </div>
     </div>
