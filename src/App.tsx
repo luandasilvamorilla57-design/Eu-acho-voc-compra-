@@ -42,8 +42,8 @@ export default function App(){
 
   if(!ready)return <div className="grid min-h-screen place-items-center bg-[#06101c] text-xs text-slate-600">Carregando radar...</div>
   if(!session||reset)return <AuthPage initialMode={reset?'reset':'login'}/>
-  if(configLoading||!config.user_id||planLoading||!planChecked)return <div className="grid min-h-screen place-items-center bg-[#06101c] text-xs text-slate-600">Validando seu acesso...</div>
-  if(!hasAccess)return <PlansPage email={session.user.email} onRefreshAccess={refreshAccess}/>
+  if(configLoading||!config.user_id||(!config.acesso_total&&(planLoading||!planChecked)))return <div className="grid min-h-screen place-items-center bg-[#06101c] text-xs text-slate-600">Validando seu acesso...</div>
+  if(!config.acesso_total&&!hasAccess)return <PlansPage email={session.user.email} onRefreshAccess={refreshAccess}/>
 
   let page:React.ReactNode
   if(view==='dashboard')page=<DashboardPage items={items} purchases={purchases} config={config} onSaveConfig={saveConfig} onNew={()=>setView('new')} onOpen={setSelected}/>
