@@ -11,6 +11,7 @@ export type SubscriptionAccess={
 
 export function usePlanAccess(active:boolean,accessTotal:boolean){
   const [loading,setLoading]=useState(active)
+  const [checked,setChecked]=useState(false)
   const [hasAccess,setHasAccess]=useState(false)
   const [subscription,setSubscription]=useState<SubscriptionAccess|null>(null)
 
@@ -18,6 +19,7 @@ export function usePlanAccess(active:boolean,accessTotal:boolean){
     if(!active){
       setHasAccess(false)
       setSubscription(null)
+      setChecked(false)
       setLoading(false)
       return false
     }
@@ -26,6 +28,7 @@ export function usePlanAccess(active:boolean,accessTotal:boolean){
 
     if(accessTotal){
       setHasAccess(true)
+      setChecked(true)
       setLoading(false)
       return true
     }
@@ -40,6 +43,7 @@ export function usePlanAccess(active:boolean,accessTotal:boolean){
     if(error){
       console.error('subscription access',error)
       setHasAccess(false)
+      setChecked(true)
       setLoading(false)
       return false
     }
@@ -55,11 +59,12 @@ export function usePlanAccess(active:boolean,accessTotal:boolean){
     const allowed=Boolean(paid&&(activeStatus||canceledStillValid))
 
     setHasAccess(allowed)
+    setChecked(true)
     setLoading(false)
     return allowed
   },[active,accessTotal])
 
   useEffect(()=>{void refresh()},[refresh])
 
-  return{loading,hasAccess,subscription,refresh}
+  return{loading,checked,hasAccess,subscription,refresh}
 }
