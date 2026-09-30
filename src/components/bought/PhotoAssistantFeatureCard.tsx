@@ -3,6 +3,7 @@ import type { AccountPlan } from '../../types/database'
 import { planLabel } from '../../utils/plan'
 
 export function PhotoAssistantFeatureCard({plan,unlocked,fullAccess,onLockedClick,onStart}:{plan:AccountPlan;unlocked:boolean;fullAccess:boolean;onLockedClick:()=>void;onStart:()=>void}){
+  const action=unlocked?onStart:onLockedClick
   return <section className={'photo-feature-card '+(unlocked?'is-unlocked':'is-locked')}>
     <div className="photo-feature-card__glow"/>
     <div className="relative">
@@ -26,8 +27,15 @@ export function PhotoAssistantFeatureCard({plan,unlocked,fullAccess,onLockedClic
         <span><Home size={13}/> Item que já é seu</span>
       </div>
 
-      {unlocked?<button type="button" onClick={onStart} className="photo-feature-card__start"><Sparkles size={16}/><span><strong>Preparar venda com IA</strong><small>Item do Radar ou algo que você já tem em casa</small></span><ArrowRight size={16}/></button>
-      :<button type="button" onClick={onLockedClick} className="photo-feature-card__cta"><LockKeyhole size={14}/> Ver recurso do BRIKE Pro <ArrowRight size={14}/></button>}
+      <button type="button" onClick={action} className={'photo-feature-card__start '+(!unlocked?'is-locked':'')}>
+        <span className="photo-feature-card__start-icon">{unlocked?<Sparkles size={19}/>:<LockKeyhole size={18}/>}</span>
+        <span className="photo-feature-card__start-copy">
+          <span className="photo-feature-card__start-eyebrow"><b>PRO</b> PREPARAÇÃO DE VENDA</span>
+          <strong>{unlocked?'Preparar venda com IA':'Desbloquear preparação de venda'}</strong>
+          <small>{unlocked?'Item do Radar ou algo que você já tem em casa.':'Avaliação de fotos + anúncio automático disponível no BRIKE Pro.'}</small>
+        </span>
+        <ArrowRight size={17} className="photo-feature-card__start-arrow"/>
+      </button>
     </div>
   </section>
 }
