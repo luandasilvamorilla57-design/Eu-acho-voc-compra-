@@ -8,6 +8,8 @@ export type RadarDecision = 'compensa' | 'nao_compensa'
 export type PipelineStatus = 'analisado'|'aguardando_negociacao'|'descartado'|'negociacao_falhou'|'comprado'|'vendido'
 export type ProfitGoalMode='valor'|'percentual'
 export type AccountPlan='start'|'pro'|'max'
+export type ResaleDraftOrigin='radar'|'externo'
+export type ResaleDraftStatus='rascunho'|'pronto'
 
 export type Database = { public: { Tables: {
 analises: {
@@ -28,6 +30,12 @@ radar_config:{
  Update:{capital_disponivel?:number;lucro_minimo?:number;lucro_minimo_modo?:ProfitGoalMode;lucro_minimo_percentual?:number;roi_minimo?:number;dias_alerta_estoque?:number;plano_atual?:AccountPlan;data_atualizacao?:string}
  Relationships:[]
 }
+anuncios_revenda:{
+ Row:{id:string;user_id:string;origem_item:ResaleDraftOrigin;compra_id:string|null;analise_id:string|null;produto:string;categoria:string|null;marca:string|null;modelo:string|null;condicao:string|null;tempo_uso:string|null;observacoes:string|null;preco_minimo:number|null;preco_ideal:number|null;fotos:Json;resultado_ia:Json|null;titulo:string|null;descricao:string|null;preco_venda_rapida:number|null;preco_equilibrado:number|null;preco_premium:number|null;status:ResaleDraftStatus;data_criacao:string;data_atualizacao:string}
+ Insert:{id?:string;user_id?:string;origem_item:ResaleDraftOrigin;compra_id?:string|null;analise_id?:string|null;produto:string;categoria?:string|null;marca?:string|null;modelo?:string|null;condicao?:string|null;tempo_uso?:string|null;observacoes?:string|null;preco_minimo?:number|null;preco_ideal?:number|null;fotos?:Json;resultado_ia?:Json|null;titulo?:string|null;descricao?:string|null;preco_venda_rapida?:number|null;preco_equilibrado?:number|null;preco_premium?:number|null;status?:ResaleDraftStatus;data_criacao?:string;data_atualizacao?:string}
+ Update:{origem_item?:ResaleDraftOrigin;compra_id?:string|null;analise_id?:string|null;produto?:string;categoria?:string|null;marca?:string|null;modelo?:string|null;condicao?:string|null;tempo_uso?:string|null;observacoes?:string|null;preco_minimo?:number|null;preco_ideal?:number|null;fotos?:Json;resultado_ia?:Json|null;titulo?:string|null;descricao?:string|null;preco_venda_rapida?:number|null;preco_equilibrado?:number|null;preco_premium?:number|null;status?:ResaleDraftStatus;data_atualizacao?:string}
+ Relationships:[]
+}
 client_errors:{
  Row:{id:string;user_id:string;context:string;message:string;stack:string|null;metadata:Json;created_at:string}
  Insert:{id?:string;user_id?:string;context?:string;message:string;stack?:string|null;metadata?:Json;created_at?:string}
@@ -39,3 +47,4 @@ client_errors:{
 export type AnaliseRow=Database['public']['Tables']['analises']['Row']
 export type PurchaseRow=Database['public']['Tables']['compras']['Row']
 export type RadarConfigRow=Database['public']['Tables']['radar_config']['Row']
+export type ResaleDraftRow=Database['public']['Tables']['anuncios_revenda']['Row']

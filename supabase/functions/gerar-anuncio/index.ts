@@ -2,32 +2,48 @@ import 'jsr:@supabase/functions-js/edge-runtime.d.ts'
 import { createClient } from '@supabase/supabase-js'
 
 const cors={'Access-Control-Allow-Origin':'*','Access-Control-Allow-Headers':'authorization, x-client-info, apikey, content-type'}
+
 const photoReview={type:'object',properties:{
   indice:{type:'number'},nota:{type:'number'},qualidade:{type:'string'},
   pontos_fortes:{type:'array',items:{type:'string'}},
   problemas:{type:'array',items:{type:'string'}},
   acao_recomendada:{type:'string'}
 },required:['indice','nota','qualidade','pontos_fortes','problemas','acao_recomendada']}
+
 const photoAudit={type:'object',properties:{
-  nota_geral:{type:'number'},pronta_para_publicar:{type:'boolean'},resumo:{type:'string'},foto_principal_indice:{type:'number'},
+  nota_geral:{type:'number'},
+  nitidez_score:{type:'number'},
+  iluminacao_score:{type:'number'},
+  apresentacao_score:{type:'number'},
+  pronta_para_publicar:{type:'boolean'},
+  resumo:{type:'string'},
+  foto_principal_indice:{type:'number'},
   avaliacoes:{type:'array',items:photoReview},
   problemas_gerais:{type:'array',items:{type:'string'}},
   plano_de_fotos:{type:'array',items:{type:'string'}}
-},required:['nota_geral','pronta_para_publicar','resumo','foto_principal_indice','avaliacoes','problemas_gerais','plano_de_fotos']}
+},required:['nota_geral','nitidez_score','iluminacao_score','apresentacao_score','pronta_para_publicar','resumo','foto_principal_indice','avaliacoes','problemas_gerais','plano_de_fotos']}
+
 const schema={type:'object',properties:{
-  titulo:{type:'string'},descricao:{type:'string'},
-  preco_venda_rapida:{type:'number'},preco_equilibrado:{type:'number'},preco_premium:{type:'number'},
+  titulo:{type:'string'},
+  descricao:{type:'string'},
+  preco_venda_rapida:{type:'number'},
+  preco_equilibrado:{type:'number'},
+  preco_premium:{type:'number'},
   pontos_destaque:{type:'array',items:{type:'string'}},
   checklist_fotos:{type:'array',items:{type:'string'}},
   resposta_negociacao:{type:'string'},
   foto_auditoria:photoAudit
 },required:['titulo','descricao','preco_venda_rapida','preco_equilibrado','preco_premium','pontos_destaque','checklist_fotos','resposta_negociacao','foto_auditoria']}
+
 const MODELS=['gemini-3.5-flash','gemini-3.5-flash-lite']
 
 function transient(raw:any,status:number){
   const message=String(raw?.error?.message||'').toLowerCase()
   return status===429||status===503||message.includes('high demand')||message.includes('temporarily')||message.includes('resource exhausted')
 }
+function n(v:any){const x=Number(v);return Number.isFinite(x)?x:0}
+function clip(v:any,max=300){return String(v||'').trim().slice(0,max)}
+function score(v:any){return Math.max(0,Math.min(100,n(v)))}
 
 Deno.serve(async req=>{
   if(req.method==='OPTIONS')return new Response('ok',{headers:cors})
@@ -55,69 +71,91 @@ Deno.serve(async req=>{
     }
 
     const b=await req.json()
-    const produto=String(b.produto||'').trim().slice(0,300)
-    if(!produto)return Response.json({error:'Produto não informado.',request_id:requestId},{status:400,headers:cors})
+    const origin=b.origem_item==='externo'?'externo':'radar'
+    const product=clip(b.produto,300)
+    if(!product)return Response.json({error:'Produto não informado.',request_id:requestId},{status:400,headers:cors})
 
-    const imagens=Array.isArray(b.imagens)?b.imagens.slice(0,6):[]
-    if(!imagens.length)return Response.json({error:'Envie pelo menos uma foto para o Anúncio Inteligente.',request_id:requestId},{status:400,headers:cors})
-    for(const image of imagens){
+    const images=Array.isArray(b.imagens)?b.imagens.slice(0,6):[]
+    if(!images.length)return Response.json({error:'Envie pelo menos uma foto para o Anúncio Inteligente.',request_id:requestId},{status:400,headers:cors})
+    for(const image of images){
       if(!image?.data||typeof image.data!=='string'||image.data.length>3_000_000)return Response.json({error:'Uma das fotos é inválida ou grande demais.',request_id:requestId},{status:400,headers:cors})
       if(!['image/jpeg','image/png','image/webp'].includes(image.mime_type))return Response.json({error:'Formato de foto não suportado.',request_id:requestId},{status:400,headers:cors})
     }
 
-    const context=JSON.stringify({
-      produto,
-      categoria:String(b.categoria||'').slice(0,120),
-      observacoes:String(b.observacoes||'').slice(0,2000),
-      custo_total:Number(b.custo_total||0),
-      preco_minimo:Number(b.preco_minimo||0),
+    const context={
+      origem_item:origin,
+      produto:product,
+      categoria:clip(b.categoria,120),
+      marca:clip(b.marca,120),
+      modelo:clip(b.modelo,160),
+      condicao:clip(b.condicao,300),
+      tempo_uso:clip(b.tempo_uso,200),
+      observacoes:clip(b.observacoes,2200),
+      custo_total:Math.max(0,n(b.custo_total)),
+      preco_minimo:Math.max(0,n(b.preco_minimo)),
+      preco_ideal:Math.max(0,n(b.preco_ideal)),
       analise:b.analise||null
-    }).slice(0,26000)
+    }
 
-    const prompt=`Você é o Assistente de Venda do BRIKE RADAR, especializado em transformar fotos reais de produtos usados em anúncios honestos e bem apresentados para OLX e Facebook Marketplace no Brasil.
+    const prompt=`Você é o Assistente de Venda do BRIKE RADAR, especialista brasileiro em apresentação de produtos usados e criação de anúncios para OLX e Facebook Marketplace.
 
-Você recebeu ${imagens.length} foto(s). A ordem visual das imagens corresponde a Foto 1, Foto 2, etc.
+OBJETIVO
+Transformar fotos REAIS e dados confirmados em:
+1. um diagnóstico visual profissional e fácil de agir;
+2. um anúncio honesto, humano e pronto para copiar.
 
-FAÇA DUAS TAREFAS CONECTADAS:
+ORIGEM DO ITEM
+- "radar": item registrado pelo usuário na carteira do BRIKE RADAR. Pode existir uma análise anterior no contexto.
+- "externo": item que o usuário já tinha em casa ou adquiriu fora do Radar. NÃO trate como compra do estoque e NÃO invente histórico de aquisição.
 
-1) AUDITORIA VISUAL DAS FOTOS
-Avalie cada foto APENAS pelo que está realmente visível.
-Analise:
-- nitidez e possível desfoque;
-- iluminação: escura, estourada ou equilibrada;
-- enquadramento e cortes do produto;
-- resolução/aparência de baixa qualidade;
-- fundo muito poluído ou elementos que distraiam;
-- reflexos fortes;
-- apresentação/limpeza VISIVEL do produto;
-- se o ângulo ajuda a entender o estado;
-- se faltam fotos importantes como frente, traseira, laterais, etiqueta/modelo, acessórios, conectores, tela ligada ou detalhes de avarias, conforme o tipo de produto.
+AUDITORIA VISUAL
+Você recebeu ${images.length} foto(s). A ordem é Foto 1, Foto 2, etc.
+Para cada foto, avalie somente o que é visível:
+- nitidez/desfoque;
+- iluminação;
+- enquadramento/cortes;
+- aparência de resolução ruim;
+- fundo e distrações;
+- reflexos;
+- apresentação e limpeza APARENTE;
+- utilidade daquele ângulo para aumentar confiança;
+- inconsistência entre o produto descrito e o que aparece na foto.
 
-Não invente sujeira, defeitos ou baixa resolução quando isso não puder ser observado.
-Se algo parecer sujeira mas houver dúvida, escreva como possibilidade: "há marcas aparentes que vale limpar ou fotografar melhor".
-nota deve ficar entre 0 e 100.
-qualidade deve ser exatamente "boa", "atencao" ou "refazer".
-foto_principal_indice deve apontar a melhor foto para capa. Se nenhuma for aceitável, use 0.
-pronta_para_publicar só pode ser true quando o conjunto já for utilizável sem uma falha visual importante.
-plano_de_fotos deve ser um roteiro prático, específico ao produto, em ordem de prioridade.
+REGRAS VISUAIS
+- Não diga que está sujo se isso não estiver visível com segurança. Em caso de dúvida: "há marcas aparentes; vale limpar ou fotografar melhor".
+- Não invente defeitos.
+- Se a foto mostrar OUTRO produto, dê nota muito baixa e diga claramente para substituir a imagem.
+- qualidade deve ser exatamente "boa", "atencao" ou "refazer".
+- nota, nota_geral, nitidez_score, iluminacao_score e apresentacao_score: 0 a 100.
+- foto_principal_indice: melhor foto para capa; use 0 se nenhuma for aceitável.
+- pronta_para_publicar=false quando houver imagem de produto errado, fotos muito ruins ou ausência de ângulos essenciais.
+- plano_de_fotos deve ser um roteiro prático e específico ao tipo de produto.
 
-2) ANÚNCIO
-Crie título e descrição baseados somente nas informações confirmadas do contexto e nas fotos.
-Não invente especificações, acessórios, estado, funcionamento ou defeitos.
-Se uma característica não estiver confirmada, não a afirme.
-O texto deve parecer escrito por uma pessoa experiente, não por uma IA.
-A descrição deve ser curta o suficiente para Marketplace/OLX, escaneável e transparente.
-preco_venda_rapida nunca pode ficar abaixo de preco_minimo quando preco_minimo > 0.
-preco_venda_rapida <= preco_equilibrado <= preco_premium.
-Se não houver base suficiente para diferenciar preços, mantenha a faixa conservadora.
-checklist_fotos deve complementar a auditoria, focando em fotos que aumentem confiança.
-resposta_negociacao deve ser curta, natural e firme sem soar robótica.
+ANÚNCIO
+- Título curto, natural, pesquisável e sem caixa alta exagerada.
+- Descrição pronta para copiar, escaneável e transparente.
+- Nunca invente armazenamento, voltagem, acessórios, funcionamento, estado, garantia ou especificações.
+- Defeitos informados pelo usuário devem aparecer com transparência quando relevantes.
+- Use as fotos para confirmar aparência, não para criar fatos técnicos invisíveis.
+- resposta_negociacao: curta, natural e firme.
 
-CONTEXTO DO ITEM:
-${context}`
+PREÇO
+- Se houver análise anterior do Radar, use-a como referência secundária.
+- Se preco_ideal > 0 em item externo, trate como objetivo do usuário, NÃO como preço de mercado verificado.
+- Se preco_minimo > 0, preco_venda_rapida nunca pode ficar abaixo dele.
+- preco_venda_rapida <= preco_equilibrado <= preco_premium.
+- Sem análise anterior e sem âncora de preço suficiente, seja conservador e não diga que o preço é "de mercado". Não invente comparáveis.
+
+ESTILO
+- Português do Brasil.
+- Sem frases genéricas de IA.
+- Recomendações objetivas, curtas e acionáveis.
+
+CONTEXTO CONFIRMADO:
+${JSON.stringify(context).slice(0,28000)}`
 
     const input:any[]=[{type:'text',text:prompt}]
-    for(const image of imagens)input.push({type:'image',mime_type:image.mime_type,data:image.data})
+    for(const image of images)input.push({type:'image',mime_type:image.mime_type,data:image.data})
 
     let lastMessage='Falha ao gerar anúncio.'
     for(let i=0;i<MODELS.length;i++){
@@ -136,20 +174,27 @@ ${context}`
       if(!text){lastMessage='A IA não retornou a avaliação das fotos.';if(i<MODELS.length-1)continue;throw new Error(lastMessage)}
 
       const ad=JSON.parse(text)
-      ad.foto_auditoria.nota_geral=Math.max(0,Math.min(100,Number(ad.foto_auditoria.nota_geral||0)))
-      ad.foto_auditoria.avaliacoes=(ad.foto_auditoria.avaliacoes||[]).map((photo:any,index:number)=>({
-        ...photo,
-        indice:index+1,
-        nota:Math.max(0,Math.min(100,Number(photo.nota||0))),
-        qualidade:['boa','atencao','refazer'].includes(photo.qualidade)?photo.qualidade:'atencao'
-      })).slice(0,imagens.length)
-      const minPrice=Math.max(0,Number(b.preco_minimo||0))
-      ad.preco_venda_rapida=Math.max(minPrice,Number(ad.preco_venda_rapida||0))
-      ad.preco_equilibrado=Math.max(ad.preco_venda_rapida,Number(ad.preco_equilibrado||0))
-      ad.preco_premium=Math.max(ad.preco_equilibrado,Number(ad.preco_premium||0))
+      ad.foto_auditoria={
+        ...ad.foto_auditoria,
+        nota_geral:score(ad.foto_auditoria?.nota_geral),
+        nitidez_score:score(ad.foto_auditoria?.nitidez_score),
+        iluminacao_score:score(ad.foto_auditoria?.iluminacao_score),
+        apresentacao_score:score(ad.foto_auditoria?.apresentacao_score),
+        avaliacoes:(ad.foto_auditoria?.avaliacoes||[]).map((photo:any,index:number)=>({
+          ...photo,
+          indice:index+1,
+          nota:score(photo.nota),
+          qualidade:['boa','atencao','refazer'].includes(photo.qualidade)?photo.qualidade:'atencao'
+        })).slice(0,images.length)
+      }
+
+      const minPrice=Math.max(0,context.preco_minimo)
+      ad.preco_venda_rapida=Math.max(minPrice,n(ad.preco_venda_rapida))
+      ad.preco_equilibrado=Math.max(ad.preco_venda_rapida,n(ad.preco_equilibrado))
+      ad.preco_premium=Math.max(ad.preco_equilibrado,n(ad.preco_premium))
       ad.gerado_em=new Date().toISOString()
 
-      console.log('PHOTO_AD_OK',JSON.stringify({requestId,userId:user.id,produto,model:MODELS[i],fallback:i>0,imageCount:imagens.length,score:ad.foto_auditoria.nota_geral}))
+      console.log('PHOTO_AD_OK',JSON.stringify({requestId,userId:user.id,origin,product,model:MODELS[i],fallback:i>0,imageCount:images.length,score:ad.foto_auditoria.nota_geral}))
       return Response.json({ad,request_id:requestId,model:MODELS[i],fallback:i>0},{headers:cors})
     }
 

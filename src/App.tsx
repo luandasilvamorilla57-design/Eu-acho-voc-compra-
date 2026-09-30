@@ -3,6 +3,7 @@ import { useSessionAuth } from './hooks/useSessionAuth'
 import { useAnalyses } from './hooks/useAnalyses'
 import { usePurchases } from './hooks/usePurchases'
 import { useRadarConfig } from './hooks/useRadarConfig'
+import { useResaleDrafts } from './hooks/useResaleDrafts'
 import { AuthPage } from './pages/AuthPage'
 import { DashboardPage } from './pages/DashboardPage'
 import { RadarPage } from './pages/RadarPage'
@@ -27,8 +28,9 @@ export default function App(){
   const [editing,setEditing]=useState<AnaliseRow|null>(null)
 
   const {items,load,updateStatus,resolveNegotiation,addNegotiationLog,reinspect}=useAnalyses(!!session)
-  const {items:purchases,load:loadPurchases,createPurchase,markSold,updatePurchase,uploadPhotos,removePhoto,saveResaleAd}=usePurchases(!!session)
+  const {items:purchases,load:loadPurchases,createPurchase,markSold,updatePurchase,uploadPhotos,removePhoto}=usePurchases(!!session)
   const {config,save:saveConfig}=useRadarConfig(!!session)
+  const {items:drafts,saveGenerated:saveResaleDraft,updateCopy:updateResaleDraftCopy,remove:removeResaleDraft}=useResaleDrafts(!!session)
 
   const alerts=useMemo(()=>buildRadarAlerts(items,purchases,config),[items,purchases,config])
   const intelligence=useMemo(()=>buildUserIntelligence(purchases,items),[purchases,items])
@@ -42,7 +44,7 @@ export default function App(){
   if(view==='dashboard')page=<DashboardPage items={items} purchases={purchases} config={config} onSaveConfig={saveConfig} onNew={()=>setView('new')} onOpen={setSelected}/>
   else if(view==='radar')page=<RadarPage analyses={items} purchases={purchases} config={config} alerts={alerts} insights={intelligence.insights} onNavigate={setView} onOpen={setSelected}/>
   else if(view==='new')page=<NewAnalysisPage config={config} userProfile={intelligence.profile} onSaved={async destination=>{await load();setView(destination)}}/>
-  else if(view==='bought')page=<BoughtPage analyses={items} purchases={purchases} config={config} onCreate={async input=>{await createPurchase(input);await load()}} onSold={async(id,salePrice)=>{await markSold(id,salePrice);await load()}} onUpdate={updatePurchase} onUploadPhotos={uploadPhotos} onRemovePhoto={removePhoto} onSaveResaleAd={saveResaleAd}/>
+  else if(view==='bought')page=<BoughtPage analyses={items} purchases={purchases} drafts={drafts} config={config} onCreate={async input=>{await createPurchase(input);await load()}} onSold={async(id,salePrice)=>{await markSold(id,salePrice);await load()}} onUpdate={updatePurchase} onUploadPhotos={uploadPhotos} onRemovePhoto={removePhoto} onSaveDraft={saveResaleDraft} onUpdateDraftCopy={updateResaleDraftCopy} onDeleteDraft={removeResaleDraft}/>
   else page=<HistoryPage items={items} config={config} onOpen={setSelected} onEdit={setEditing} onNegotiationBought={async(id,price)=>{await resolveNegotiation(id,'bought',price);await loadPurchases()}} onNegotiationFailed={async id=>{await resolveNegotiation(id,'failed')}} onNegotiationLog={addNegotiationLog} onReinspect={reinspect}/>
 
   return <AppShell view={view} setView={setView} dark={dark} setDark={setDark} email={session.user.email} radarCount={alerts.length}>

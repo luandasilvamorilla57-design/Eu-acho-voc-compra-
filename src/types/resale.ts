@@ -11,6 +11,9 @@ export type PhotoReview={
 
 export type PhotoAudit={
   nota_geral:number
+  nitidez_score:number
+  iluminacao_score:number
+  apresentacao_score:number
   pronta_para_publicar:boolean
   resumo:string
   foto_principal_indice:number
@@ -28,6 +31,6 @@ export type ResaleAd={
   pontos_destaque:string[]
   checklist_fotos:string[]
   resposta_negociacao:string
-  foto_auditoria?:PhotoAudit
+  foto_auditoria:PhotoAudit
   gerado_em:string
 }

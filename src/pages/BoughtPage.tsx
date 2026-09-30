@@ -1,24 +1,42 @@
 import { useMemo,useState } from 'react'
 import { BadgeDollarSign,Boxes,PackageCheck,Plus,TrendingUp } from 'lucide-react'
-import type { AnaliseRow,PurchaseRow,RadarConfigRow } from '../types/database'
+import type { AnaliseRow,PurchaseRow,RadarConfigRow,ResaleDraftRow } from '../types/database'
 import type { NewPurchaseInput,PurchaseUpdateInput } from '../hooks/usePurchases'
-import type { ResaleAd } from '../types/resale'
+import type { SaveResaleDraftInput } from '../hooks/useResaleDrafts'
 import { PurchaseFormModal } from '../components/bought/PurchaseFormModal'
 import { PurchaseCard } from '../components/bought/PurchaseCard'
 import { PurchaseManageModal } from '../components/bought/PurchaseManageModal'
-import { ResaleAdModal } from '../components/bought/ResaleAdModal'
 import { SellModal } from '../components/bought/SellModal'
 import { PhotoAssistantFeatureCard } from '../components/bought/PhotoAssistantFeatureCard'
 import { FeatureLockedModal } from '../components/bought/FeatureLockedModal'
+import { SalePreparationModal } from '../components/bought/SalePreparationModal'
+import { ResaleDrafts } from '../components/bought/ResaleDrafts'
 import { money,pct } from '../utils/format'
 import { purchaseTotalCost } from '../utils/purchase'
 import { hasPhotoAssistant } from '../utils/plan'
 
-export function BoughtPage({analyses,purchases,config,onCreate,onSold,onUpdate,onUploadPhotos,onRemovePhoto,onSaveResaleAd}:{analyses:AnaliseRow[];purchases:PurchaseRow[];config:RadarConfigRow;onCreate:(input:NewPurchaseInput)=>Promise<void>;onSold:(id:string,salePrice:number)=>Promise<void>;onUpdate:(id:string,patch:PurchaseUpdateInput)=>Promise<void>;onUploadPhotos:(id:string,files:FileList|null)=>Promise<string[]>;onRemovePhoto:(id:string,path:string)=>Promise<void>;onSaveResaleAd:(id:string,ad:ResaleAd)=>Promise<void>}){
+type SaleFlow={purchase?:PurchaseRow|null;draft?:ResaleDraftRow|null}|null
+
+export function BoughtPage({
+  analyses,purchases,drafts,config,onCreate,onSold,onUpdate,onUploadPhotos,onRemovePhoto,onSaveDraft,onUpdateDraftCopy,onDeleteDraft
+}:{
+  analyses:AnaliseRow[]
+  purchases:PurchaseRow[]
+  drafts:ResaleDraftRow[]
+  config:RadarConfigRow
+  onCreate:(input:NewPurchaseInput)=>Promise<void>
+  onSold:(id:string,salePrice:number)=>Promise<void>
+  onUpdate:(id:string,patch:PurchaseUpdateInput)=>Promise<void>
+  onUploadPhotos:(id:string,files:FileList|null)=>Promise<string[]>
+  onRemovePhoto:(id:string,path:string)=>Promise<void>
+  onSaveDraft:(input:SaveResaleDraftInput)=>Promise<ResaleDraftRow>
+  onUpdateDraftCopy:(id:string,title:string,description:string)=>Promise<void>
+  onDeleteDraft:(id:string)=>Promise<void>
+}){
   const [adding,setAdding]=useState(false)
   const [selling,setSelling]=useState<PurchaseRow|null>(null)
   const [managing,setManaging]=useState<PurchaseRow|null>(null)
-  const [advertising,setAdvertising]=useState<PurchaseRow|null>(null)
+  const [saleFlow,setSaleFlow]=useState<SaleFlow>(null)
   const [featureLocked,setFeatureLocked]=useState(false)
   const photoAssistantUnlocked=hasPhotoAssistant(config.plano_atual,config.acesso_total)
 
@@ -33,10 +51,14 @@ export function BoughtPage({analyses,purchases,config,onCreate,onSold,onUpdate,o
   },[purchases])
 
   const sorted=useMemo(()=>purchases.slice().sort((a,b)=>{if(a.status!==b.status)return a.status==='comprado'?-1:1;return new Date(b.data_compra).getTime()-new Date(a.data_compra).getTime()}),[purchases])
-  const linkedAnalysis=advertising?.analise_id?analyses.find(a=>a.id===advertising.analise_id):undefined
+
+  const startSale=(purchase?:PurchaseRow|null)=>{
+    if(!photoAssistantUnlocked){setFeatureLocked(true);return}
+    setSaleFlow({purchase:purchase??null})
+  }
 
   return <div className="bought-page space-y-5 lg:space-y-6">
-    <section className="purchase-hero relative overflow-hidden rounded-[28px] p-5 sm:p-7"><div className="purchase-hero__orb"/><div className="relative flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between"><div><div className="bought-hero-eyebrow flex items-center gap-2 font-bold uppercase tracking-[.2em] text-emerald-300"><PackageCheck size={14}/> CARTEIRA DE COMPRAS</div><h2 className="bought-hero-title font-display mt-3 font-extrabold leading-[1.02] tracking-[-.055em]">Seu dinheiro está onde?</h2><p className="bought-hero-copy mt-3 max-w-xl text-slate-400">Acompanhe custo total, capital preso, saúde do estoque, preço mínimo e prepare cada item para revenda.</p></div><button onClick={()=>setAdding(true)} className="flex h-12 shrink-0 items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-emerald-400 to-cyan-400 px-5 font-bold text-slate-950"><Plus size={17}/> Registrar compra</button></div></section>
+    <section className="purchase-hero relative overflow-hidden rounded-[28px] p-5 sm:p-7"><div className="purchase-hero__orb"/><div className="relative flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between"><div><div className="bought-hero-eyebrow flex items-center gap-2 font-bold uppercase tracking-[.2em] text-emerald-300"><PackageCheck size={14}/> CARTEIRA DE COMPRAS</div><h2 className="bought-hero-title font-display mt-3 font-extrabold leading-[1.02] tracking-[-.055em]">Seu dinheiro está onde?</h2><p className="bought-hero-copy mt-3 max-w-xl text-slate-400">Acompanhe custo total, capital preso, saúde do estoque, preço mínimo e prepare itens para revenda — inclusive coisas que você já tem em casa.</p></div><button onClick={()=>setAdding(true)} className="flex h-12 shrink-0 items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-emerald-400 to-cyan-400 px-5 font-bold text-slate-950"><Plus size={17}/> Registrar compra</button></div></section>
 
     <div className="grid grid-cols-2 gap-3 xl:grid-cols-4">
       <MiniMetric icon={Boxes} label="Em estoque" value={String(stats.stock)} hint={money(stats.invested)+' de capital preso'}/>
@@ -45,16 +67,18 @@ export function BoughtPage({analyses,purchases,config,onCreate,onSold,onUpdate,o
       <MiniMetric icon={TrendingUp} label="ROI médio" value={pct(stats.roi)} hint="sobre custo total"/>
     </div>
 
-    <PhotoAssistantFeatureCard plan={config.plano_atual} unlocked={photoAssistantUnlocked} fullAccess={config.acesso_total} onLockedClick={()=>setFeatureLocked(true)}/>
+    <PhotoAssistantFeatureCard plan={config.plano_atual} unlocked={photoAssistantUnlocked} fullAccess={config.acesso_total} onLockedClick={()=>setFeatureLocked(true)} onStart={()=>startSale(null)}/>
+
+    {photoAssistantUnlocked&&<ResaleDrafts items={drafts} onOpen={draft=>setSaleFlow({draft})} onDelete={onDeleteDraft}/>}
 
     <div><div className="mb-3 flex items-end justify-between"><div><span className="bought-section-eyebrow premium-eyebrow text-slate-500">SEUS ITENS</span><h3 className="bought-section-title font-display mt-1.5 font-bold purchase-title">Compras registradas</h3></div><span className="bought-section-count text-slate-600">{purchases.length} {purchases.length===1?'item':'itens'}</span></div>
-      {sorted.length?<div className="grid gap-3 xl:grid-cols-2">{sorted.map(item=><PurchaseCard key={item.id} item={item} onSell={setSelling} onManage={setManaging} onAd={setAdvertising} onLockedAd={()=>setFeatureLocked(true)} alertDays={config.dias_alerta_estoque} photoAssistantUnlocked={photoAssistantUnlocked}/>)}</div>:<div className="glass rounded-[24px] p-8 text-center"><span className="mx-auto grid h-12 w-12 place-items-center rounded-2xl bg-emerald-400/10 text-emerald-400"><PackageCheck size={21}/></span><h3 className="font-display mt-4 text-lg font-bold purchase-title">Nenhuma compra registrada</h3><p className="mx-auto mt-2 max-w-sm text-[12px] leading-5 text-slate-500">Quando fechar um negócio, registre preço e custos reais para acompanhar sua margem.</p><button onClick={()=>setAdding(true)} className="mt-5 rounded-xl bg-emerald-400 px-4 py-2.5 text-xs font-bold text-slate-950">Registrar primeira compra</button></div>}
+      {sorted.length?<div className="grid gap-3 xl:grid-cols-2">{sorted.map(item=><PurchaseCard key={item.id} item={item} onSell={setSelling} onManage={setManaging} onAd={()=>startSale(item)} onLockedAd={()=>setFeatureLocked(true)} alertDays={config.dias_alerta_estoque} photoAssistantUnlocked={photoAssistantUnlocked}/>)}</div>:<div className="glass rounded-[24px] p-8 text-center"><span className="mx-auto grid h-12 w-12 place-items-center rounded-2xl bg-emerald-400/10 text-emerald-400"><PackageCheck size={21}/></span><h3 className="font-display mt-4 text-lg font-bold purchase-title">Nenhuma compra registrada</h3><p className="mx-auto mt-2 max-w-sm text-[13px] leading-6 text-slate-500">Você ainda pode usar o Anúncio Inteligente com qualquer item que já tenha em casa.</p>{photoAssistantUnlocked&&<button onClick={()=>startSale(null)} className="mt-5 rounded-xl bg-emerald-400 px-4 py-3 text-xs font-bold text-slate-950">Preparar um item por fora</button>}</div>}
     </div>
 
     {adding&&<PurchaseFormModal analyses={analyses} purchases={purchases} config={config} onClose={()=>setAdding(false)} onCreate={onCreate}/>}
     {selling&&<SellModal item={selling} onClose={()=>setSelling(null)} onSold={onSold}/>}
     {managing&&<PurchaseManageModal item={managing} onClose={()=>setManaging(null)} onSave={onUpdate} onUploadPhotos={onUploadPhotos} onRemovePhoto={onRemovePhoto}/>}
-    {advertising&&photoAssistantUnlocked&&<ResaleAdModal item={advertising} analysis={linkedAnalysis} onClose={()=>setAdvertising(null)} onSave={onSaveResaleAd}/>}
+    {saleFlow&&photoAssistantUnlocked&&<SalePreparationModal purchases={purchases} analyses={analyses} initialPurchase={saleFlow.purchase} initialDraft={saleFlow.draft} onClose={()=>setSaleFlow(null)} onSaveDraft={onSaveDraft} onUpdateCopy={onUpdateDraftCopy}/>}
     {featureLocked&&<FeatureLockedModal onClose={()=>setFeatureLocked(false)}/>}
   </div>
 }
