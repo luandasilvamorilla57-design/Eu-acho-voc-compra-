@@ -15,7 +15,7 @@ export async function runAuthAction(mode:AuthMode,email:string,password:string,c
      options:{emailRedirectTo:APP_URL}
    })
    if(error)throw error
-   return 'Conta criada. Verifique seu e-mail para confirmar o cadastro.'
+   return 'Conta criada. Confirme seu e-mail e depois entre para escolher seu plano.'
  }
  if(mode==='login'){
    const {error}=await supabase.auth.signInWithPassword({email,password})
