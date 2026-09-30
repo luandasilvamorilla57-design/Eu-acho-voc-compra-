@@ -8,14 +8,19 @@ import { PurchaseCard } from '../components/bought/PurchaseCard'
 import { PurchaseManageModal } from '../components/bought/PurchaseManageModal'
 import { ResaleAdModal } from '../components/bought/ResaleAdModal'
 import { SellModal } from '../components/bought/SellModal'
+import { PhotoAssistantFeatureCard } from '../components/bought/PhotoAssistantFeatureCard'
+import { FeatureLockedModal } from '../components/bought/FeatureLockedModal'
 import { money,pct } from '../utils/format'
 import { purchaseTotalCost } from '../utils/purchase'
+import { hasPhotoAssistant } from '../utils/plan'
 
 export function BoughtPage({analyses,purchases,config,onCreate,onSold,onUpdate,onUploadPhotos,onRemovePhoto,onSaveResaleAd}:{analyses:AnaliseRow[];purchases:PurchaseRow[];config:RadarConfigRow;onCreate:(input:NewPurchaseInput)=>Promise<void>;onSold:(id:string,salePrice:number)=>Promise<void>;onUpdate:(id:string,patch:PurchaseUpdateInput)=>Promise<void>;onUploadPhotos:(id:string,files:FileList|null)=>Promise<string[]>;onRemovePhoto:(id:string,path:string)=>Promise<void>;onSaveResaleAd:(id:string,ad:ResaleAd)=>Promise<void>}){
   const [adding,setAdding]=useState(false)
   const [selling,setSelling]=useState<PurchaseRow|null>(null)
   const [managing,setManaging]=useState<PurchaseRow|null>(null)
   const [advertising,setAdvertising]=useState<PurchaseRow|null>(null)
+  const [featureLocked,setFeatureLocked]=useState(false)
+  const photoAssistantUnlocked=hasPhotoAssistant(config.plano_atual)
 
   const stats=useMemo(()=>{
     const stock=purchases.filter(p=>p.status!=='vendido')
@@ -40,14 +45,17 @@ export function BoughtPage({analyses,purchases,config,onCreate,onSold,onUpdate,o
       <MiniMetric icon={TrendingUp} label="ROI médio" value={pct(stats.roi)} hint="sobre custo total"/>
     </div>
 
+    <PhotoAssistantFeatureCard plan={config.plano_atual} unlocked={photoAssistantUnlocked} onLockedClick={()=>setFeatureLocked(true)}/>
+
     <div><div className="mb-3 flex items-end justify-between"><div><span className="premium-eyebrow text-slate-500">SEUS ITENS</span><h3 className="font-display mt-1.5 text-xl font-bold purchase-title">Compras registradas</h3></div><span className="text-[11px] text-slate-600">{purchases.length} {purchases.length===1?'item':'itens'}</span></div>
-      {sorted.length?<div className="grid gap-3 xl:grid-cols-2">{sorted.map(item=><PurchaseCard key={item.id} item={item} onSell={setSelling} onManage={setManaging} onAd={setAdvertising} alertDays={config.dias_alerta_estoque}/>)}</div>:<div className="glass rounded-[24px] p-8 text-center"><span className="mx-auto grid h-12 w-12 place-items-center rounded-2xl bg-emerald-400/10 text-emerald-400"><PackageCheck size={21}/></span><h3 className="font-display mt-4 text-lg font-bold purchase-title">Nenhuma compra registrada</h3><p className="mx-auto mt-2 max-w-sm text-[12px] leading-5 text-slate-500">Quando fechar um negócio, registre preço e custos reais para acompanhar sua margem.</p><button onClick={()=>setAdding(true)} className="mt-5 rounded-xl bg-emerald-400 px-4 py-2.5 text-xs font-bold text-slate-950">Registrar primeira compra</button></div>}
+      {sorted.length?<div className="grid gap-3 xl:grid-cols-2">{sorted.map(item=><PurchaseCard key={item.id} item={item} onSell={setSelling} onManage={setManaging} onAd={setAdvertising} onLockedAd={()=>setFeatureLocked(true)} alertDays={config.dias_alerta_estoque} photoAssistantUnlocked={photoAssistantUnlocked}/>)}</div>:<div className="glass rounded-[24px] p-8 text-center"><span className="mx-auto grid h-12 w-12 place-items-center rounded-2xl bg-emerald-400/10 text-emerald-400"><PackageCheck size={21}/></span><h3 className="font-display mt-4 text-lg font-bold purchase-title">Nenhuma compra registrada</h3><p className="mx-auto mt-2 max-w-sm text-[12px] leading-5 text-slate-500">Quando fechar um negócio, registre preço e custos reais para acompanhar sua margem.</p><button onClick={()=>setAdding(true)} className="mt-5 rounded-xl bg-emerald-400 px-4 py-2.5 text-xs font-bold text-slate-950">Registrar primeira compra</button></div>}
     </div>
 
     {adding&&<PurchaseFormModal analyses={analyses} purchases={purchases} config={config} onClose={()=>setAdding(false)} onCreate={onCreate}/>}
     {selling&&<SellModal item={selling} onClose={()=>setSelling(null)} onSold={onSold}/>}
     {managing&&<PurchaseManageModal item={managing} onClose={()=>setManaging(null)} onSave={onUpdate} onUploadPhotos={onUploadPhotos} onRemovePhoto={onRemovePhoto}/>}
-    {advertising&&<ResaleAdModal item={advertising} analysis={linkedAnalysis} onClose={()=>setAdvertising(null)} onSave={onSaveResaleAd}/>}
+    {advertising&&photoAssistantUnlocked&&<ResaleAdModal item={advertising} analysis={linkedAnalysis} onClose={()=>setAdvertising(null)} onSave={onSaveResaleAd}/>}
+    {featureLocked&&<FeatureLockedModal onClose={()=>setFeatureLocked(false)}/>}
   </div>
 }
 

@@ -1,11 +1,11 @@
-import { AlertTriangle,BadgeCheck,CalendarDays,ClipboardList,FilePenLine,PackageOpen,Settings2,ShoppingBag } from 'lucide-react'
+import { AlertTriangle,BadgeCheck,CalendarDays,ClipboardList,FilePenLine,LockKeyhole,PackageOpen,Settings2,ShoppingBag } from 'lucide-react'
 import type { PurchaseRow } from '../../types/database'
 import { dateBR,money,pct } from '../../utils/format'
 import { daysSince,purchaseExtraCosts,purchasePhotoPaths,purchaseTotalCost } from '../../utils/purchase'
 import { inventoryHealth } from '../../utils/radarAlerts'
 import { PurchasePhotos } from './PurchasePhotos'
 
-export function PurchaseCard({item,onSell,onManage,onAd,alertDays}:{item:PurchaseRow;onSell:(item:PurchaseRow)=>void;onManage:(item:PurchaseRow)=>void;onAd:(item:PurchaseRow)=>void;alertDays:number}){
+export function PurchaseCard({item,onSell,onManage,onAd,onLockedAd,alertDays,photoAssistantUnlocked}:{item:PurchaseRow;onSell:(item:PurchaseRow)=>void;onManage:(item:PurchaseRow)=>void;onAd:(item:PurchaseRow)=>void;onLockedAd:()=>void;alertDays:number;photoAssistantUnlocked:boolean}){
   const sold=item.status==='vendido'
   const days=daysSince(item.data_compra)
   const extra=purchaseExtraCosts(item)
@@ -23,10 +23,7 @@ export function PurchaseCard({item,onSell,onManage,onAd,alertDays}:{item:Purchas
         <span className={'purchase-card__icon '+(sold?'is-sold':'')}>{sold?<BadgeCheck size={18}/>:<ShoppingBag size={18}/>}</span>
         <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-2"><h3 className="font-display truncate text-base font-bold purchase-title">{item.produto}</h3><span className={'purchase-status '+(sold?'is-sold':'')}>{label}</span></div>
-          <div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-[10px] text-slate-500">
-            <span className="flex items-center gap-1"><CalendarDays size={11}/>{dateBR(item.data_compra)} · {days} dias</span>
-            <span className="flex items-center gap-1">{item.origem_compra==='analise'?<ClipboardList size={11}/>:<PackageOpen size={11}/>} {item.origem_compra==='analise'?'Veio do Radar':'Compra por fora'}</span>
-          </div>
+          <div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-[10px] text-slate-500"><span className="flex items-center gap-1"><CalendarDays size={11}/>{dateBR(item.data_compra)} · {days} dias</span><span className="flex items-center gap-1">{item.origem_compra==='analise'?<ClipboardList size={11}/>:<PackageOpen size={11}/>} {item.origem_compra==='analise'?'Veio do Radar':'Compra por fora'}</span></div>
         </div>
       </div>
       <span className={'inventory-health is-'+health.key}>{health.label}</span>
@@ -45,7 +42,10 @@ export function PurchaseCard({item,onSell,onManage,onAd,alertDays}:{item:Purchas
 
     <div className={'mt-4 grid gap-2 '+(!sold?'grid-cols-3':'grid-cols-2')}>
       <button onClick={()=>onManage(item)} className="purchase-manage"><Settings2 size={14}/> Gerenciar</button>
-      <button onClick={()=>onAd(item)} className={adReady?'purchase-ad is-ready':'purchase-ad'}><FilePenLine size={14}/>{adReady?'Anúncio pronto':'Preparar venda'}</button>
+      <button onClick={()=>photoAssistantUnlocked?onAd(item):onLockedAd()} className={'purchase-ad '+(adReady?'is-ready ':'')+(!photoAssistantUnlocked?'is-locked':'')}>
+        {photoAssistantUnlocked?<FilePenLine size={14}/>:<LockKeyhole size={14}/>}
+        {photoAssistantUnlocked?(adReady?'Anúncio pronto':'Preparar venda'):'Pro · Anúncio IA'}
+      </button>
       {!sold&&<button onClick={()=>onSell(item)} className="purchase-sell"><BadgeCheck size={15}/> Já vendeu?</button>}
     </div>
   </article>
