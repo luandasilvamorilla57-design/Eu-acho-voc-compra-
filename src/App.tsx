@@ -3,6 +3,7 @@ import { useSessionAuth } from './hooks/useSessionAuth'
 import { useAnalyses } from './hooks/useAnalyses'
 import { usePurchases } from './hooks/usePurchases'
 import { useRadarConfig } from './hooks/useRadarConfig'
+import { usePlanAccess } from './hooks/usePlanAccess'
 import { useResaleDrafts } from './hooks/useResaleDrafts'
 import { AuthPage } from './pages/AuthPage'
 import { DashboardPage } from './pages/DashboardPage'
@@ -10,6 +11,7 @@ import { RadarPage } from './pages/RadarPage'
 import { NewAnalysisPage } from './pages/NewAnalysisPage'
 import { BoughtPage } from './pages/BoughtPage'
 import { HistoryPage } from './pages/HistoryPage'
+import { PlansPage } from './pages/PlansPage'
 import { AppShell } from './components/AppShell'
 import { AnalysisModal } from './components/AnalysisModal'
 import { StatusEditor } from './components/StatusEditor'
@@ -29,7 +31,8 @@ export default function App(){
 
   const {items,load,updateStatus,resolveNegotiation,addNegotiationLog,reinspect}=useAnalyses(!!session)
   const {items:purchases,load:loadPurchases,createPurchase,markSold,updatePurchase,uploadPhotos,removePhoto}=usePurchases(!!session)
-  const {config,save:saveConfig}=useRadarConfig(!!session)
+  const {config,loading:configLoading,save:saveConfig}=useRadarConfig(!!session)
+  const {loading:planLoading,checked:planChecked,hasAccess,refresh:refreshAccess}=usePlanAccess(!!session,config.acesso_total)
   const {items:drafts,saveGenerated:saveResaleDraft,updateCopy:updateResaleDraftCopy,remove:removeResaleDraft}=useResaleDrafts(!!session)
 
   const alerts=useMemo(()=>buildRadarAlerts(items,purchases,config),[items,purchases,config])
@@ -39,6 +42,8 @@ export default function App(){
 
   if(!ready)return <div className="grid min-h-screen place-items-center bg-[#06101c] text-xs text-slate-600">Carregando radar...</div>
   if(!session||reset)return <AuthPage initialMode={reset?'reset':'login'}/>
+  if(configLoading||!config.user_id||planLoading||!planChecked)return <div className="grid min-h-screen place-items-center bg-[#06101c] text-xs text-slate-600">Validando seu acesso...</div>
+  if(!hasAccess)return <PlansPage email={session.user.email} onRefreshAccess={refreshAccess}/>
 
   let page:React.ReactNode
   if(view==='dashboard')page=<DashboardPage items={items} purchases={purchases} config={config} onSaveConfig={saveConfig} onNew={()=>setView('new')} onOpen={setSelected}/>
