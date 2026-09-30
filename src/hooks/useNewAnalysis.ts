@@ -3,7 +3,9 @@ import { supabase } from '../lib/supabase'
 import type { AnalysisResult } from '../types/analysis'
 import type { PipelineStatus,RadarDecision } from '../types/database'
 import type { AdOrigin } from '../components/new-analysis/AnalysisForm'
+import type { MarketReferenceInput } from '../types/market'
 import { prepareScreenshots, revokePreviews, type PreparedImage, MAX_IMAGES } from '../utils/imageInput'
+import { reportClientError } from '../lib/errorReporter'
 
 async function readFunctionError(error:any){
   try{
@@ -16,11 +18,12 @@ async function readFunctionError(error:any){
   return error?.message||'Não foi possível analisar.'
 }
 
-export function useNewAnalysis(onSaved:(destination:'dashboard'|'history')=>void){
+export function useNewAnalysis(onSaved:(destination:'dashboard'|'history')=>void,userProfile=''){
   const [origem,setOrigemState]=useState<AdOrigin>('olx')
   const [link,setLink]=useState('')
   const [texto,setTexto]=useState('')
   const [preco,setPreco]=useState('')
+  const [marketRefs,setMarketRefs]=useState<MarketReferenceInput[]>([])
   const [images,setImages]=useState<PreparedImage[]>([])
   const [imageBusy,setImageBusy]=useState(false)
   const [busy,setBusy]=useState(false)
@@ -59,18 +62,38 @@ export function useNewAnalysis(onSaved:(destination:'dashboard'|'history')=>void
     })
   }
 
+  const addMarketRef=()=>setMarketRefs(current=>current.length>=5?current:[...current,{url:'',price:0,note:''}])
+  const updateMarketRef=(index:number,patch:Partial<MarketReferenceInput>)=>setMarketRefs(current=>current.map((r,i)=>i===index?{...r,...patch}:r))
+  const removeMarketRef=(index:number)=>setMarketRefs(current=>current.filter((_,i)=>i!==index))
+
   const analyze=async()=>{
     setError('');setResult(null)
     if(origem==='olx'&&!link.trim()){setError('Cole o link do anúncio da OLX.');return}
     if(origem==='facebook'&&!images.length){setError('Envie pelo menos um print do anúncio do Facebook Marketplace.');return}
     if(origem==='manual'&&!texto.trim()){setError('Cole os dados do anúncio para continuar.');return}
 
+    const refs=marketRefs
+      .map(r=>({url:r.url.trim(),price:Number(r.price||0),note:r.note.trim()}))
+      .filter(r=>r.url||r.price>0||r.note)
+
     setBusy(true)
     const {data,error:e}=await supabase.functions.invoke('analisar-anuncio',{
-      body:{origem,link:origem==='olx'?link:'',texto,preco:Number(preco||0),imagens:origem==='facebook'?images.map(({mime_type,data,name})=>({mime_type,data,name})):[]}
+      body:{
+        origem,
+        link:origem==='olx'?link:'',
+        texto,
+        preco:Number(preco||0),
+        imagens:origem==='facebook'?images.map(({mime_type,data,name})=>({mime_type,data,name})):[],
+        referencias_mercado:refs,
+        perfil_usuario:userProfile
+      }
     })
     setBusy(false)
-    if(e){setError(await readFunctionError(e));return}
+    if(e){
+      const msg=await readFunctionError(e)
+      reportClientError(e,'analysis.invoke',{origem})
+      setError(msg);return
+    }
     if(data?.error){setError(data?.details||data.error);return}
     setResult(data.analysis as AnalysisResult)
   }
@@ -79,6 +102,7 @@ export function useNewAnalysis(onSaved:(destination:'dashboard'|'history')=>void
     if(!result)return
     setSaving(true);setDecisionBusy(action);setError('')
     const textoPersistido=texto.trim() || (origem==='facebook'? `Análise por ${images.length} print(s) do Facebook Marketplace` : '')
+    const refs=marketRefs.map(r=>({url:r.url.trim(),price:Number(r.price||0),note:r.note.trim()})).filter(r=>r.url||r.price>0||r.note)
     const {error:e}=await supabase.from('analises').insert({
       origem,
       titulo_anuncio:result.produto,
@@ -87,6 +111,7 @@ export function useNewAnalysis(onSaved:(destination:'dashboard'|'history')=>void
       link_anuncio:origem==='olx'&&link?link:null,
       texto_anuncio:textoPersistido,
       analise_ia:result as any,
+      referencias_usuario:refs as any,
       margem_lucro_potencial:result.calculado.margem_percentual,
       oferta_recomendada:result.precos.oferta_equilibrada,
       status:'analisado',
@@ -94,9 +119,9 @@ export function useNewAnalysis(onSaved:(destination:'dashboard'|'history')=>void
       veredito_radar
     })
     setSaving(false);setDecisionBusy(null)
-    if(e){setError(e.message);return}
+    if(e){setError(e.message);reportClientError(e,'analysis.save');return}
     onSaved(destination)
   }
 
-  return{origem,link,texto,preco,images,imageBusy,busy,saving,decisionBusy,error,result,setOrigem,setLink,setTexto,setPreco,addImages,removeImage,analyze,save}
+  return{origem,link,texto,preco,marketRefs,images,imageBusy,busy,saving,decisionBusy,error,result,setOrigem,setLink,setTexto,setPreco,addMarketRef,updateMarketRef,removeMarketRef,addImages,removeImage,analyze,save}
 }

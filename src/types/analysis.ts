@@ -1,10 +1,14 @@
 export type RiskLevel = 'baixo' | 'medio' | 'alto'
 export type Classification = 'excelente' | 'boa' | 'atencao' | 'arriscada' | 'evitar'
+export type MarketReferenceSource='usuario'|'url_context'|'estimativa'
 export interface AnalysisResult {
   produto:string; marca:string; modelo:string; categoria:string; condicao_estimada:string; resumo:string;
   pontos_fortes:string[]; pontos_fracos:string[]; confianca_geral:number; confianca_identificacao:number; confianca_preco:number;
   dados_faltantes?:string[];
-  mercado:{preco_min:number;preco_mediano:number;preco_max:number;demanda:'baixa'|'media'|'alta';liquidez_score:number;justificativa:string;referencias:{titulo:string;preco:number;observacao:string}[]};
+  mercado:{
+    preco_min:number;preco_mediano:number;preco_max:number;demanda:'baixa'|'media'|'alta';liquidez_score:number;justificativa:string;
+    referencias:{titulo:string;preco:number;observacao:string;url:string;fonte:MarketReferenceSource}[]
+  };
   precos:{preco_anunciado:number;oferta_agressiva:number;oferta_equilibrada:number;teto_compra:number;revenda_conservadora:number;revenda_provavel:number;revenda_otimista:number;custos_estimados:number};
   risco_score:number; negociabilidade_score:number;
   riscos:{titulo:string;nivel:RiskLevel;detalhe:string;como_verificar:string;impacto_financeiro_estimado:number}[];

@@ -2,6 +2,7 @@ import { schema } from './schema.ts'
 import { buildPrompt } from './prompt.ts'
 
 type InputImage={mime_type:string;data:string;name?:string}
+type MarketRef={url?:string;price?:number;note?:string}
 type GeminiResult={raw:any;ai:any;model:string;fallback:boolean}
 const MODELS=['gemini-3.5-flash','gemini-3.5-flash-lite'] as const
 
@@ -11,9 +12,9 @@ function shouldFallback(raw:any,status:number){
   return status===429||status===503||code.includes('service_unavailable')||code.includes('resource_exhausted')||message.includes('high demand')||message.includes('temporarily unavailable')||message.includes('try again later')
 }
 
-async function callModel(key:string,model:string,origem:string,link:string,input:any[],responseFormat:any){
+async function callModel(key:string,model:string,input:any[],responseFormat:any,useUrlContext:boolean){
   const body:any={model,input,response_format:responseFormat}
-  if(origem==='olx'&&link)body.tools=[{type:'url_context'}]
+  if(useUrlContext)body.tools=[{type:'url_context'}]
   const response=await fetch('https://generativelanguage.googleapis.com/v1beta/interactions',{method:'POST',headers:{'Content-Type':'application/json','x-goog-api-key':key,'Api-Revision':'2026-05-20'},body:JSON.stringify(body)})
   const raw=await response.json()
   return {response,raw}
@@ -21,17 +22,20 @@ async function callModel(key:string,model:string,origem:string,link:string,input
 
 export async function askGemini(
   key:string,origem:string,link:string,texto:string,preco:number,imagens:InputImage[],
-  modo='anuncio',contextoAnterior:any=null,inspecaoNotas=''
+  modo='anuncio',contextoAnterior:any=null,inspecaoNotas='',referencias:MarketRef[]=[],perfilUsuario=''
 ):Promise<GeminiResult>{
   const responseFormat={type:'text',mime_type:'application/json',schema}
   const context=contextoAnterior?JSON.stringify(contextoAnterior).slice(0,24000):''
-  const input:any[]=[{type:'text',text:buildPrompt(origem,link,texto,preco,imagens.length,modo,context,inspecaoNotas)}]
+  const refs=JSON.stringify(referencias.slice(0,5)).slice(0,8000)
+  const input:any[]=[{type:'text',text:buildPrompt(origem,link,texto,preco,imagens.length,modo,context,inspecaoNotas,refs,perfilUsuario.slice(0,5000))}]
   for(const image of imagens)input.push({type:'image',mime_type:image.mime_type,data:image.data})
+  const hasReferenceUrl=referencias.some(r=>typeof r.url==='string'&&/^https?:\/\//i.test(r.url))
+  const useUrlContext=(origem==='olx'&&!!link)||hasReferenceUrl
 
   let lastError:any=null
   for(let index=0;index<MODELS.length;index++){
     const model=MODELS[index]
-    const {response,raw}=await callModel(key,model,origem,link,input,responseFormat)
+    const {response,raw}=await callModel(key,model,input,responseFormat,useUrlContext)
     if(!response.ok){
       console.error('GEMINI_API_ERROR',model,response.status,JSON.stringify(raw))
       lastError={raw,status:response.status,model}
