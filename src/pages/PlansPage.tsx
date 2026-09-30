@@ -1,8 +1,8 @@
 import { useEffect,useMemo,useState } from 'react'
 import {
-  ArrowRight,BarChart3,BadgeCheck,Camera,Check,ChevronDown,CircleDollarSign,
-  Clock3,Crown,Flame,Gauge,LockKeyhole,LogOut,MessageCircle,RefreshCw,
-  SearchCheck,ShieldAlert,ShieldCheck,Sparkles,Target,TrendingDown,
+  ArrowRight,BadgeCheck,Banknote,BarChart3,Camera,Check,ChevronDown,Crown,
+  Flame,LockKeyhole,LogOut,MessageCircle,PackageOpen,RefreshCw,SearchCheck,
+  ShieldAlert,ShieldCheck,ShoppingCart,Sparkles,Tag,Target,TrendingDown,
   TrendingUp,WalletCards,Zap
 } from 'lucide-react'
 import { Brand } from '../components/Brand'
@@ -22,86 +22,104 @@ type PlanRow={
 }
 
 const fallback:PlanRow[]=[
-  {
-    slug:'start',nome:'Start',preco_mensal:9.90,analises_mes:40,analises_dia:7,destaque:false,
-    descricao:'Para parar de comprar no escuro sem pesar no bolso.',
-    recursos:['40 análises por mês','Até 7 análises por dia','Score de oportunidade','Preço, risco e teto de compra','Mensagens para negociar','Histórico das análises'],ordem:1
-  },
-  {
-    slug:'pro',nome:'Pro',preco_mensal:19.90,analises_mes:120,analises_dia:15,destaque:true,
-    descricao:'Para quem quer comprar melhor e também vender melhor.',
-    recursos:['120 análises por mês','Até 15 análises por dia','Diagnóstico Premium','20 preparações de venda com IA/mês','Avaliação das fotos do anúncio','Título, descrição e estratégia de preço'],ordem:2
-  },
-  {
-    slug:'max',nome:'Max',preco_mensal:34.90,analises_mes:300,analises_dia:30,destaque:false,
-    descricao:'Para uso intenso, garimpo frequente e maior volume.',
-    recursos:['300 análises por mês','Até 30 análises por dia','Diagnóstico Premium','60 preparações de venda com IA/mês','Avaliação das fotos do anúncio','Título, descrição e estratégia de preço'],ordem:3
-  },
+  {slug:'start',nome:'Start',preco_mensal:9.90,analises_mes:40,analises_dia:7,destaque:false,descricao:'Para começar a garimpar com mais critério e menos chute.',recursos:['40 análises por mês','Até 7 análises por dia','Score de oportunidade','Preço, risco e teto de compra','Mensagens para negociar','Histórico das análises'],ordem:1},
+  {slug:'pro',nome:'Pro',preco_mensal:19.90,analises_mes:120,analises_dia:15,destaque:true,descricao:'Para quem compra para revender e quer ganhar também na saída.',recursos:['120 análises por mês','Até 15 análises por dia','Diagnóstico Premium','20 preparações de venda com IA/mês','Avaliação das fotos do anúncio','Título, descrição e estratégia de preço'],ordem:2},
+  {slug:'max',nome:'Max',preco_mensal:34.90,analises_mes:300,analises_dia:30,destaque:false,descricao:'Para quem garimpa todo dia e precisa de volume para girar capital.',recursos:['300 análises por mês','Até 30 análises por dia','Diagnóstico Premium','60 preparações de venda com IA/mês','Avaliação das fotos do anúncio','Título, descrição e estratégia de preço'],ordem:3},
 ]
 
 const money=(value:number)=>value.toLocaleString('pt-BR',{style:'currency',currency:'BRL'})
 const perDay=(value:number)=>(value/30).toLocaleString('pt-BR',{style:'currency',currency:'BRL',minimumFractionDigits:2})
 
-const pains=[
-  {icon:WalletCards,eyebrow:'PREÇO',title:'Pagar mais do que vale',text:'Sem referência, o desconto parece bom até você descobrir que o preço real era ainda menor.'},
-  {icon:ShieldAlert,eyebrow:'RISCO',title:'Descobrir o problema tarde',text:'Defeito, procedência e detalhe ignorado aparecem depois — quando o dinheiro já saiu da sua mão.'},
-  {icon:TrendingDown,eyebrow:'MARGEM',title:'Comprar sem espaço para lucro',text:'Uma compra apertada prende capital e pode transformar uma revenda promissora em dor de cabeça.'},
+const operatorProfiles=[
+  {icon:ShoppingCart,tag:'REVENDEDOR',title:'Compra barato para vender mais caro',text:'Garimpa produto usado, negocia forte e precisa saber se ainda existe margem antes de fechar.'},
+  {icon:SearchCheck,tag:'GARIMPEIRO',title:'Procura oportunidade todo dia',text:'Abre Marketplace e OLX várias vezes por dia e não quer perder tempo com anúncio que não fecha a conta.'},
+  {icon:WalletCards,tag:'GIRO DE CAPITAL',title:'Precisa colocar dinheiro no item certo',text:'Cada compra prende caixa. O objetivo é entrar onde existe preço, saída e espaço para negociação.'},
 ]
 
 const benefits=[
-  {icon:SearchCheck,title:'Diagnóstico objetivo',text:'Produto, condição, sinais de risco e informações que ainda precisam ser confirmadas.'},
-  {icon:Gauge,title:'Score da oportunidade',text:'Uma leitura rápida para separar anúncio interessante de anúncio que merece cautela.'},
-  {icon:Target,title:'Oferta e teto de compra',text:'Saiba onde começar a negociação e qual limite não faz sentido ultrapassar.'},
-  {icon:MessageCircle,title:'Negociação pronta',text:'Mensagens naturais para primeiro contato, contraproposta e fechamento.'},
-  {icon:Camera,title:'Venda assistida no Pro',text:'Fotos avaliadas, anúncio estruturado e estratégia de preço para publicar melhor.'},
-  {icon:BarChart3,title:'Histórico que vira contexto',text:'Suas análises e resultados ajudam você a enxergar padrões no que compra e vende.'},
+  {icon:Tag,title:'Preço pedido × preço que faz sentido',text:'Entenda se o anúncio está realmente barato ou só parece barato.'},
+  {icon:Target,title:'Oferta sugerida e teto',text:'Saiba onde começar a proposta e o máximo que ainda preserva a operação.'},
+  {icon:ShieldAlert,title:'Riscos antes de sair de casa',text:'Veja o que precisa perguntar, conferir ou desconfiar antes de perder tempo e dinheiro.'},
+  {icon:TrendingUp,title:'Margem de revenda',text:'Analise a compra pensando também na saída e no espaço que sobra para lucro.'},
+  {icon:MessageCircle,title:'Negociação pronta',text:'Tenha mensagens naturais para oferta inicial, contraproposta e fechamento.'},
+  {icon:Camera,title:'Venda assistida no Pro',text:'Depois da compra, o Pro ajuda a apresentar melhor o item para revender.'},
 ]
 
 const compareRows=[
-  {label:'Análises com score, risco e teto',start:'40/mês',pro:'120/mês',max:'300/mês'},
-  {label:'Limite diário de análises',start:'7/dia',pro:'15/dia',max:'30/dia'},
-  {label:'Mensagens de negociação',start:'Incluído',pro:'Incluído',max:'Incluído'},
+  {label:'Análises de oportunidade',start:'40/mês',pro:'120/mês',max:'300/mês'},
+  {label:'Limite diário',start:'7/dia',pro:'15/dia',max:'30/dia'},
+  {label:'Oferta sugerida + teto de compra',start:'Incluído',pro:'Incluído',max:'Incluído'},
   {label:'Diagnóstico Premium',start:'—',pro:'Incluído',max:'Incluído'},
   {label:'Preparar venda com IA',start:'—',pro:'20/mês',max:'60/mês'},
-  {label:'Avaliação das fotos',start:'—',pro:'Incluído',max:'Incluído'},
-]
-
-const howItWorks=[
-  {n:'01',icon:SearchCheck,title:'Cole o anúncio',text:'Envie o link, os prints ou os dados do produto que você está avaliando.'},
-  {n:'02',icon:Gauge,title:'O Radar cruza os sinais',text:'Preço, risco, margem, liquidez, pontos de atenção e estratégia de negociação.'},
-  {n:'03',icon:Target,title:'Você decide com limite',text:'Receba oferta sugerida, teto de compra e checklist antes de colocar dinheiro.'},
+  {label:'Avaliação de fotos e anúncio',start:'—',pro:'Incluído',max:'Incluído'},
 ]
 
 const faqs=[
-  ['Quando meu acesso é liberado?','Depois que o Mercado Pago confirma o pagamento e o backend do Radar valida a assinatura. A interface sozinha não consegue liberar um plano.'],
-  ['Por que o Pro é o plano mais destacado?','Porque ele combina mais análises com os recursos de Diagnóstico Premium e Preparar venda com IA, sem chegar ao volume do Max.'],
-  ['O Start já analisa anúncios?','Sim. O Start inclui as funções principais de análise, score de oportunidade, faixa de preço, riscos, teto de compra e negociação.'],
-  ['O que o Pro adiciona?','Diagnóstico Premium, avaliação das fotos e Preparar venda com IA para transformar um item em anúncio mais bem apresentado.'],
-  ['Posso entrar no painel sem pagar?','Não. Contas sem assinatura confirmada ficam nesta área de planos e as funções principais também são protegidas no servidor.'],
-  ['O pagamento fica armazenado no Radar?','O processamento é feito pelo Mercado Pago. O Radar recebe os eventos necessários para controlar assinatura e acesso.'],
+  ['Isso é para quem compra no Marketplace e na OLX?','Sim. O foco do BRIKE RADAR é ajudar quem garimpa anúncios de usados, negocia a compra e quer avaliar se existe espaço para revenda.'],
+  ['O Radar garante lucro?','Não. Ele organiza preço, risco, teto de compra e sinais da operação para você decidir melhor. A decisão e o resultado continuam sendo seus.'],
+  ['Quando meu acesso é liberado?','Depois que o Mercado Pago confirma o pagamento e o backend do Radar valida a assinatura. A interface sozinha não libera plano.'],
+  ['Qual plano faz mais sentido para quem revende?','O Pro concentra os recursos de compra e venda: mais análises, Diagnóstico Premium e Preparar venda com IA.'],
+  ['O Start já serve para analisar oportunidades?','Sim. Ele inclui score, preço, riscos, oferta sugerida, teto de compra, negociação e histórico.'],
+  ['Posso entrar no painel sem pagar?','Não. Contas sem assinatura confirmada ficam nesta área de planos e as funções protegidas também são bloqueadas no servidor.'],
 ]
 
 function ValueTick({children}:{children:React.ReactNode}){
   return <span className="plans-value-tick"><Check size={12}/>{children}</span>
 }
 
+function DealBoard(){
+  return <div className="deal-board">
+    <div className="deal-board__top">
+      <div>
+        <span className="deal-board__eyebrow">EXEMPLO DE ANÁLISE</span>
+        <h3>iPhone 13 • 128 GB</h3>
+      </div>
+      <span className="deal-board__platform">Marketplace</span>
+    </div>
+
+    <div className="deal-board__listing">
+      <div className="deal-board__photo">
+        <div className="deal-board__phone"/>
+        <span>anúncio</span>
+      </div>
+      <div className="deal-board__listing-copy">
+        <small>PREÇO PEDIDO</small>
+        <strong>R$ 1.900</strong>
+        <p>Usado • retirada em mãos</p>
+        <div className="deal-board__signal"><span/> anúncio interessante para negociar</div>
+      </div>
+    </div>
+
+    <div className="deal-board__numbers">
+      <div><span>OFERTA INICIAL</span><strong>R$ 1.650</strong></div>
+      <div><span>TETO DE COMPRA</span><strong>R$ 1.780</strong></div>
+      <div className="is-profit"><span>SAÍDA ESTIMADA*</span><strong>R$ 2.350</strong></div>
+    </div>
+
+    <div className="deal-board__bottom">
+      <div className="deal-board__score"><span>OPORTUNIDADE</span><strong>8,7</strong><small>/10</small></div>
+      <div className="deal-board__warnings">
+        <span><Check size={11}/> Conferir bateria</span>
+        <span><Check size={11}/> Testar Face ID</span>
+        <span><Check size={11}/> Validar IMEI</span>
+      </div>
+    </div>
+    <p className="deal-board__note">*Exemplo visual de como a análise organiza a operação. Valores meramente ilustrativos.</p>
+  </div>
+}
+
 function PlanCard({plan,busy,onChoose}:{plan:PlanRow;busy:AccountPlan|null;onChoose:(plan:AccountPlan)=>void}){
   const featured=plan.slug==='pro'
   const Icon=plan.slug==='max'?Crown:featured?Sparkles:Zap
-  const cta=featured?'Quero o BRIKE Pro':plan.slug==='max'?'Escolher Max':'Começar no Start'
-  const micro=featured?'Melhor equilíbrio entre preço, volume e recursos premium':plan.slug==='max'?'Para quem usa o Radar com frequência':'A porta de entrada para comprar com mais critério'
+  const cta=featured?'Quero o plano Pro':plan.slug==='max'?'Escolher Max':'Começar no Start'
+  const micro=featured?'Para quem compra e também revende':plan.slug==='max'?'Para operação de maior volume':'Para começar a garimpar melhor'
 
-  return <article id={featured?'plano-pro':undefined} className={`plan-card plan-reveal relative overflow-hidden rounded-[32px] border p-5 sm:p-6 ${featured?'plan-card--featured border-emerald-300/50 bg-gradient-to-b from-emerald-300/[.14] via-slate-950/78 to-slate-950/96 lg:-translate-y-4':'border-slate-800/90 bg-slate-950/68'}`}>
-    <div className="plan-card__noise"/>
-    {featured&&<>
-      <div className="plan-card__popular"><Flame size={12}/> MAIS ESCOLHIDO</div>
-      <div className="plan-card__halo"/>
-    </>}
-
+  return <article id={featured?'plano-pro':undefined} className={`plan-card plan-reveal relative overflow-hidden rounded-[30px] border p-5 sm:p-6 ${featured?'plan-card--featured border-emerald-300/48 bg-gradient-to-b from-emerald-300/[.12] via-slate-950/80 to-slate-950/96 lg:-translate-y-4':'border-slate-800/90 bg-slate-950/70'}`}>
+    {featured&&<div className="plan-card__popular"><Flame size={12}/> MAIS ESCOLHIDO POR QUEM REVENDE</div>}
     <div className="relative">
       <div className="flex items-start justify-between gap-3">
         <div className={`grid h-12 w-12 place-items-center rounded-2xl border ${featured?'border-emerald-300/25 bg-emerald-300/10 text-emerald-300':'border-slate-800 bg-slate-900 text-slate-300'}`}><Icon size={21}/></div>
-        {!featured&&<span className="plan-card__fit">{plan.slug==='max'?'USO INTENSO':'ESSENCIAL'}</span>}
+        {!featured&&<span className="plan-card__fit">{plan.slug==='max'?'ALTO VOLUME':'ENTRADA'}</span>}
       </div>
 
       <h3 className="mt-5 text-[1.45rem] font-black tracking-[-.04em]">{plan.nome}</h3>
@@ -111,10 +129,7 @@ function PlanCard({plan,busy,onChoose}:{plan:PlanRow;busy:AccountPlan|null;onCho
         <strong className="text-[2.75rem] font-black leading-none tracking-[-.075em]">{money(plan.preco_mensal)}</strong>
         <span className="pb-1 text-xs text-slate-500">/mês</span>
       </div>
-      <div className="mt-2 flex items-center gap-2 text-[10px] font-bold tracking-[.08em] text-slate-600">
-        <span>≈ {perDay(plan.preco_mensal)} POR DIA</span>
-        {featured&&<span className="rounded-full bg-emerald-300/10 px-2 py-1 text-emerald-300">CUSTO-BENEFÍCIO</span>}
-      </div>
+      <div className="mt-2 text-[10px] font-bold tracking-[.08em] text-slate-600">≈ {perDay(plan.preco_mensal)} POR DIA</div>
 
       <div className="mt-5 grid grid-cols-2 gap-2">
         <div className="plan-stat"><strong>{plan.analises_mes}</strong><span>análises / mês</span></div>
@@ -127,11 +142,7 @@ function PlanCard({plan,busy,onChoose}:{plan:PlanRow;busy:AccountPlan|null;onCho
         {plan.recursos.map(item=><li key={item} className="flex gap-2.5 text-xs leading-5 text-slate-300"><span className="mt-0.5 grid h-4 w-4 shrink-0 place-items-center rounded-full bg-emerald-300/10"><Check size={11} className="text-emerald-300"/></span><span>{item}</span></li>)}
       </ul>
 
-      <button
-        onClick={()=>onChoose(plan.slug)}
-        disabled={busy!==null}
-        className={`mt-6 flex h-[54px] w-full items-center justify-center gap-2 rounded-2xl text-sm font-black transition disabled:cursor-not-allowed disabled:opacity-50 ${featured?'plan-cta-pro bg-gradient-to-r from-emerald-300 via-teal-300 to-cyan-300 text-slate-950 shadow-[0_16px_45px_rgba(45,212,191,.22)] hover:scale-[1.01]':'border border-slate-700 bg-slate-900 text-white hover:border-slate-600 hover:bg-slate-800'}`}
-      >
+      <button onClick={()=>onChoose(plan.slug)} disabled={busy!==null} className={`mt-6 flex h-[54px] w-full items-center justify-center gap-2 rounded-2xl text-sm font-black transition disabled:cursor-not-allowed disabled:opacity-50 ${featured?'plan-cta-pro bg-gradient-to-r from-emerald-300 via-teal-300 to-cyan-300 text-slate-950 shadow-[0_16px_45px_rgba(45,212,191,.20)] hover:scale-[1.01]':'border border-slate-700 bg-slate-900 text-white hover:border-slate-600 hover:bg-slate-800'}`}>
         {busy===plan.slug?'Abrindo pagamento...':<>{cta}<ArrowRight size={16}/></>}
       </button>
 
@@ -153,11 +164,7 @@ export function PlansPage({email,onRefreshAccess}:{email?:string;onRefreshAccess
       .eq('ativo',true)
       .order('ordem')
       .then(({data})=>{
-        if(data?.length)setPlans(data.map((p:any)=>({
-          ...p,
-          preco_mensal:Number(p.preco_mensal),
-          recursos:Array.isArray(p.recursos)?p.recursos:[],
-        })))
+        if(data?.length)setPlans(data.map((p:any)=>({...p,preco_mensal:Number(p.preco_mensal),recursos:Array.isArray(p.recursos)?p.recursos:[]})))
       })
   },[])
 
@@ -214,73 +221,47 @@ export function PlansPage({email,onRefreshAccess}:{email?:string;onRefreshAccess
 
   return <div className="plans-gate min-h-screen text-white">
     <div className="plans-grid-bg pointer-events-none fixed inset-0"/>
-    <div className="plans-grain pointer-events-none fixed inset-0"/>
-    <div className="plans-orb pointer-events-none fixed -left-28 -top-24 h-[400px] w-[400px] rounded-full bg-emerald-400/10 blur-[105px]"/>
-    <div className="plans-orb plans-orb--delay pointer-events-none fixed -right-36 top-[28%] h-[470px] w-[470px] rounded-full bg-cyan-400/10 blur-[125px]"/>
+    <div className="plans-orb pointer-events-none fixed -left-28 -top-24 h-[400px] w-[400px] rounded-full bg-emerald-400/10 blur-[110px]"/>
+    <div className="plans-orb plans-orb--delay pointer-events-none fixed -right-36 top-[26%] h-[470px] w-[470px] rounded-full bg-cyan-400/[.07] blur-[125px]"/>
 
     <header className="plans-header relative z-30 mx-auto flex max-w-[1280px] items-center justify-between px-5 py-5 sm:px-8">
       <Brand/>
-      <div className="flex items-center gap-2">
-        <span className="hidden items-center gap-2 rounded-xl border border-emerald-300/10 bg-emerald-300/[.05] px-3 py-2 text-[10px] font-bold text-emerald-200/75 sm:flex"><ShieldCheck size={13}/> CONTA PROTEGIDA</span>
-        <button onClick={()=>supabase.auth.signOut()} className="flex items-center gap-2 rounded-xl border border-slate-800/90 bg-slate-950/55 px-3 py-2 text-xs font-semibold text-slate-400 backdrop-blur transition hover:border-slate-700 hover:text-white"><LogOut size={14}/> Sair</button>
-      </div>
+      <button onClick={()=>supabase.auth.signOut()} className="flex items-center gap-2 rounded-xl border border-slate-800/90 bg-slate-950/55 px-3 py-2 text-xs font-semibold text-slate-400 backdrop-blur transition hover:border-slate-700 hover:text-white"><LogOut size={14}/> Sair</button>
     </header>
 
     <main className="relative z-10 overflow-hidden">
-      <section className="plans-hero mx-auto grid max-w-[1280px] gap-10 px-5 pb-14 pt-4 sm:px-8 lg:grid-cols-[1.08fr_.92fr] lg:items-center lg:pb-20 lg:pt-12">
+      <section className="plans-hero mx-auto grid max-w-[1280px] gap-10 px-5 pb-14 pt-4 sm:px-8 lg:grid-cols-[1.02fr_.98fr] lg:items-center lg:pb-20 lg:pt-12">
         <div className="plan-reveal">
-          <div className="plans-account-ready"><span className="pulse-dot h-1.5 w-1.5 rounded-full bg-emerald-300"/> CONTA CRIADA • AGORA ESCOLHA SEU ACESSO</div>
-          <h1 className="plans-hero-title font-display mt-5 max-w-[790px] text-[2.7rem] font-black leading-[.92] tracking-[-.078em] sm:text-[4.35rem] xl:text-[5.2rem]">Pare de comprar no escuro. <span>Descubra se é oportunidade ou prejuízo antes de pagar.</span></h1>
-          <p className="mt-6 max-w-2xl text-[15px] leading-7 text-slate-400 sm:text-base">O BRIKE RADAR transforma anúncio, preço e condição em uma leitura prática: <b className="font-semibold text-slate-200">quanto vale, quanto oferecer, o que conferir e até onde a compra ainda faz sentido.</b></p>
+          <div className="plans-account-ready"><span className="pulse-dot h-1.5 w-1.5 rounded-full bg-emerald-300"/> FEITO PARA QUEM GARIMPA E REVENDE</div>
+          <h1 className="plans-hero-title font-display mt-5 max-w-[800px] text-[2.72rem] font-black leading-[.93] tracking-[-.078em] sm:text-[4.35rem] xl:text-[5.15rem]">Compre mais barato no Marketplace e na OLX. <span>Revenda com mais margem e menos chute.</span></h1>
+          <p className="mt-6 max-w-2xl text-[15px] leading-7 text-slate-400 sm:text-base">O BRIKE RADAR foi feito para quem vive de oportunidade: analisa o anúncio, ajuda a entender o preço, sugere uma oferta, mostra o teto de compra e organiza os riscos antes de você colocar dinheiro na operação.</p>
+
+          <div className="mt-6 flex flex-wrap gap-2">
+            <span className="platform-chip">Facebook Marketplace</span>
+            <span className="platform-chip">OLX</span>
+            <span className="platform-chip">Compra de usados</span>
+            <span className="platform-chip">Revenda</span>
+          </div>
 
           <div className="mt-6 grid max-w-2xl grid-cols-2 gap-2 sm:grid-cols-3">
-            <ValueTick>Preço justo</ValueTick>
+            <ValueTick>Oferta sugerida</ValueTick>
             <ValueTick>Teto de compra</ValueTick>
-            <ValueTick>Score 0–100</ValueTick>
+            <ValueTick>Margem de revenda</ValueTick>
             <ValueTick>Riscos</ValueTick>
             <ValueTick>Negociação</ValueTick>
-            <ValueTick>Revenda</ValueTick>
+            <ValueTick>Giro de capital</ValueTick>
           </div>
 
           <div className="mt-7 flex flex-col gap-3 sm:flex-row sm:items-center">
-            <a href="#planos" className="plans-primary-cta flex h-[52px] items-center justify-center gap-2 rounded-2xl bg-white px-5 text-sm font-black text-slate-950 transition hover:scale-[1.01]">Ver planos e liberar acesso <ArrowRight size={16}/></a>
-            <span className="flex items-center justify-center gap-2 text-[11px] text-slate-600 sm:justify-start"><LockKeyhole size={13}/> Sem pagamento confirmado, o painel continua bloqueado.</span>
+            <a href="#planos" className="plans-primary-cta flex h-[52px] items-center justify-center gap-2 rounded-2xl bg-white px-5 text-sm font-black text-slate-950 transition hover:scale-[1.01]">Quero usar no meu garimpo <ArrowRight size={16}/></a>
+            <span className="flex items-center justify-center gap-2 text-[11px] text-slate-600 sm:justify-start"><LockKeyhole size={13}/> O painel só libera depois do pagamento confirmado.</span>
           </div>
 
           {email&&<div className="mt-4 text-[11px] text-slate-600">Conta conectada: {email}</div>}
         </div>
 
-        <div className="plan-reveal relative mx-auto w-full max-w-[550px]">
-          <div className="radar-core plans-radar-card relative aspect-square overflow-hidden rounded-[40px] border border-emerald-300/20 bg-slate-950/72 p-6 sm:p-8">
-            <div className="plans-radar-glow"/>
-            <div className="absolute inset-[10%] rounded-full border border-emerald-300/10"/>
-            <div className="absolute inset-[24%] rounded-full border border-emerald-300/10"/>
-            <div className="absolute inset-[38%] rounded-full border border-emerald-300/10"/>
-            <div className="absolute bottom-1/2 left-[9%] right-[9%] border-t border-emerald-300/10"/>
-            <div className="absolute bottom-[9%] top-[9%] left-1/2 border-l border-emerald-300/10"/>
-            <div className="radar-sweep absolute left-1/2 top-1/2 h-[43%] w-[43%] -translate-x-full -translate-y-full"/>
-            <div className="pulse-dot absolute left-[31%] top-[28%] h-2.5 w-2.5 rounded-full bg-emerald-300 shadow-[0_0_22px_rgba(52,211,153,.9)]"/>
-            <div className="pulse-dot absolute right-[26%] top-[41%] h-2 w-2 rounded-full bg-cyan-300 shadow-[0_0_20px_rgba(103,232,249,.85)]" style={{animationDelay:'-.8s'}}/>
-            <div className="pulse-dot absolute bottom-[30%] left-[39%] h-1.5 w-1.5 rounded-full bg-amber-300 shadow-[0_0_18px_rgba(252,211,77,.8)]" style={{animationDelay:'-1.25s'}}/>
-
-            <div className="plans-radar-score">
-              <span>OPORTUNIDADE</span>
-              <strong>84</strong>
-              <small>/100</small>
-            </div>
-
-            <div className="absolute inset-x-5 bottom-5 rounded-[25px] border border-slate-800/90 bg-[#081521]/94 p-4 backdrop-blur sm:inset-x-8 sm:bottom-8">
-              <div className="flex items-center justify-between gap-3">
-                <div><div className="text-[9px] font-black tracking-[.17em] text-emerald-300">ANTES DE FECHAR</div><div className="mt-1 text-lg font-extrabold tracking-[-.03em]">Você quer respostas, não achismo.</div></div>
-                <BadgeCheck size={27} className="shrink-0 text-emerald-300"/>
-              </div>
-              <div className="mt-4 grid grid-cols-3 gap-2 text-center">
-                <div className="plans-radar-mini"><b>R$ 420</b><span>oferta</span></div>
-                <div className="plans-radar-mini"><b>R$ 470</b><span>teto</span></div>
-                <div className="plans-radar-mini"><b>Baixo</b><span>risco</span></div>
-              </div>
-            </div>
-          </div>
+        <div className="plan-reveal mx-auto w-full max-w-[570px]">
+          <DealBoard/>
         </div>
       </section>
 
@@ -293,40 +274,39 @@ export function PlansPage({email,onRefreshAccess}:{email?:string;onRefreshAccess
 
       <section className="plans-marquee-wrap border-y border-slate-800/65 bg-slate-950/32">
         <div className="plans-marquee">
-          {[...Array(2)].flatMap((_,i)=>['PREÇO JUSTO','RISCO','TETO DE COMPRA','ROI','NEGOCIAÇÃO','CHECKLIST','REVENDABILIDADE','FOTOS','ANÚNCIO'].map(item=><span key={i+item}><i/> {item}</span>))}
+          {[...Array(2)].flatMap((_,i)=>['MARKETPLACE','OLX','GARIMPO','OFERTA','TETO DE COMPRA','MARGEM','GIRO','NEGOCIAÇÃO','REVENDA'].map(item=><span key={i+item}><i/> {item}</span>))}
         </div>
       </section>
 
       <section className="mx-auto max-w-[1280px] px-5 py-14 sm:px-8 lg:py-20">
         <div className="mx-auto max-w-3xl text-center">
-          <div className="plans-kicker plans-kicker--danger">O CUSTO DO ACHISMO</div>
-          <h2 className="font-display mt-3 text-3xl font-black tracking-[-.055em] sm:text-[2.9rem]">O problema não é encontrar anúncio. <span className="text-slate-500">É descobrir tarde demais que a conta não fechava.</span></h2>
-          <p className="mx-auto mt-4 max-w-2xl text-sm leading-7 text-slate-500">Uma decisão ruim pode custar em preço, reparo, tempo parado ou margem de revenda. O Radar existe para colocar esses sinais na mesa antes da compra.</p>
+          <div className="plans-kicker">PARA QUEM É O BRIKE RADAR</div>
+          <h2 className="font-display mt-3 text-3xl font-black tracking-[-.055em] sm:text-[2.9rem]">Para quem abre anúncio procurando margem, não só produto.</h2>
+          <p className="mx-auto mt-4 max-w-2xl text-sm leading-7 text-slate-500">Se você compra usado abaixo do preço, negocia e revende, o Radar foi pensado em cima dessa rotina.</p>
         </div>
         <div className="mt-9 grid gap-3 md:grid-cols-3">
-          {pains.map(({icon:Icon,eyebrow,title,text})=><article key={title} className="pain-card plan-reveal rounded-[26px] border border-slate-800/90 bg-slate-950/50 p-5">
-            <div className="flex items-center justify-between"><div className="grid h-11 w-11 place-items-center rounded-2xl bg-rose-400/10 text-rose-300"><Icon size={18}/></div><span className="text-[9px] font-black tracking-[.16em] text-rose-300/55">{eyebrow}</span></div>
-            <h3 className="mt-5 text-lg font-extrabold tracking-[-.03em]">{title}</h3>
-            <p className="mt-2 text-xs leading-6 text-slate-500">{text}</p>
+          {operatorProfiles.map(({icon:Icon,tag,title,text})=><article key={title} className="operator-card">
+            <div className="operator-card__top"><div className="operator-card__icon"><Icon size={19}/></div><span>{tag}</span></div>
+            <h3>{title}</h3><p>{text}</p>
           </article>)}
         </div>
       </section>
 
       <section className="border-y border-slate-800/70 bg-slate-950/30">
-        <div className="mx-auto grid max-w-[1280px] gap-8 px-5 py-14 sm:px-8 lg:grid-cols-[.8fr_1.2fr] lg:items-center lg:py-20">
+        <div className="mx-auto grid max-w-[1280px] gap-8 px-5 py-14 sm:px-8 lg:grid-cols-[.78fr_1.22fr] lg:items-center lg:py-20">
           <div>
-            <div className="plans-kicker">NO ACHISMO × COM RADAR</div>
-            <h2 className="font-display mt-3 text-3xl font-black tracking-[-.055em] sm:text-[2.85rem]">Troque “acho que compensa” por uma decisão com limite.</h2>
-            <p className="mt-4 text-sm leading-7 text-slate-500">O Radar não compra por você. Ele organiza os sinais que mais pesam na decisão para você negociar com mais clareza.</p>
+            <div className="plans-kicker plans-kicker--danger">ONDE A MARGEM SOME</div>
+            <h2 className="font-display mt-3 text-3xl font-black tracking-[-.055em] sm:text-[2.85rem]">Quem vive de revenda não perde dinheiro só no preço. <span className="text-slate-500">Perde no chute.</span></h2>
+            <p className="mt-4 text-sm leading-7 text-slate-500">Oferta alta demais, defeito ignorado, saída ruim e capital parado corroem a operação sem parecer grandes erros no começo.</p>
           </div>
           <div className="plans-before-after">
             <div className="plans-before">
-              <div className="plans-compare-head"><TrendingDown size={17}/> SEM RADAR</div>
-              {['“Parece barato”','“Acho que dá para revender”','“Depois eu vejo o defeito”','“Vou oferecer qualquer valor”'].map(x=><span key={x}>{x}</span>)}
+              <div className="plans-compare-head"><TrendingDown size={17}/> NO ACHISMO</div>
+              {['“Tá barato, vou pegar”','“Depois eu descubro o defeito”','“Acho que vendo por mais”','“Vou oferecer qualquer valor”'].map(x=><span key={x}>{x}</span>)}
             </div>
             <div className="plans-after">
-              <div className="plans-compare-head"><TrendingUp size={17}/> COM RADAR</div>
-              {['Faixa de preço e score','Margem e revenda estimada','Riscos e checklist específico','Oferta sugerida e teto de compra'].map(x=><span key={x}><Check size={12}/>{x}</span>)}
+              <div className="plans-compare-head"><TrendingUp size={17}/> COM BRIKE RADAR</div>
+              {['Preço contextualizado','Checklist antes de fechar','Margem pensada na saída','Oferta sugerida + teto de compra'].map(x=><span key={x}><Check size={12}/>{x}</span>)}
             </div>
           </div>
         </div>
@@ -334,8 +314,9 @@ export function PlansPage({email,onRefreshAccess}:{email?:string;onRefreshAccess
 
       <section className="mx-auto max-w-[1280px] px-5 py-14 sm:px-8 lg:py-20">
         <div className="max-w-3xl">
-          <div className="plans-kicker">O QUE ENTRA NA SUA DECISÃO</div>
-          <h2 className="font-display mt-3 text-3xl font-black tracking-[-.055em] sm:text-[2.85rem]">Menos dúvida. Mais contexto para negociar.</h2>
+          <div className="plans-kicker">DA COMPRA À REVENDA</div>
+          <h2 className="font-display mt-3 text-3xl font-black tracking-[-.055em] sm:text-[2.85rem]">Seu lucro começa antes de você buscar o produto.</h2>
+          <p className="mt-4 max-w-2xl text-sm leading-7 text-slate-500">O Radar organiza a entrada para você não descobrir tarde demais que pagou demais, esqueceu um risco ou não deixou espaço para negociar a saída.</p>
         </div>
         <div className="mt-9 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {benefits.map(({icon:Icon,title,text})=><article key={title} className="benefit-card rounded-[25px] border border-slate-800/90 bg-[#091725]/74 p-5">
@@ -346,18 +327,20 @@ export function PlansPage({email,onRefreshAccess}:{email?:string;onRefreshAccess
         </div>
       </section>
 
-      <section className="plans-how border-y border-slate-800/70">
+      <section className="resale-flow-section border-y border-slate-800/70">
         <div className="mx-auto max-w-[1280px] px-5 py-14 sm:px-8 lg:py-20">
           <div className="mx-auto max-w-3xl text-center">
-            <div className="plans-kicker">3 PASSOS PARA SAIR DO ESCURO</div>
-            <h2 className="font-display mt-3 text-3xl font-black tracking-[-.055em] sm:text-[2.85rem]">Do anúncio à decisão sem transformar tudo em planilha.</h2>
+            <div className="plans-kicker">A OPERAÇÃO COMPLETA</div>
+            <h2 className="font-display mt-3 text-3xl font-black tracking-[-.055em] sm:text-[2.85rem]">Garimpar. Negociar. Comprar. Preparar. Revender.</h2>
           </div>
-          <div className="mt-10 grid gap-3 md:grid-cols-3">
-            {howItWorks.map(({n,icon:Icon,title,text})=><div key={n} className="plans-step">
-              <span className="plans-step__number">{n}</span>
-              <div className="plans-step__icon"><Icon size={19}/></div>
-              <h3>{title}</h3>
-              <p>{text}</p>
+          <div className="resale-flow mt-9">
+            {[
+              ['01','GARIMPE',SearchCheck,'Ache o anúncio que parece abaixo do mercado.'],
+              ['02','ANALISE',BarChart3,'Veja preço, risco, teto e margem antes de sair de casa.'],
+              ['03','NEGOCIE',MessageCircle,'Entre com uma oferta e saiba até onde ainda faz sentido subir.'],
+              ['04','REVENDA',PackageOpen,'No Pro, prepare fotos, título, descrição e estratégia de preço.'],
+            ].map(([n,label,Icon,text]:any)=><div className="resale-flow__step" key={n}>
+              <span>{n}</span><div><Icon size={18}/></div><strong>{label}</strong><p>{text}</p>
             </div>)}
           </div>
         </div>
@@ -365,9 +348,9 @@ export function PlansPage({email,onRefreshAccess}:{email?:string;onRefreshAccess
 
       <section id="planos" className="fine-scroll mx-auto max-w-[1280px] px-5 py-16 sm:px-8 lg:py-24">
         <div className="mx-auto max-w-3xl text-center">
-          <div className="plans-kicker"><LockKeyhole size={12}/> ACESSO PROTEGIDO</div>
-          <h2 className="font-display mt-4 text-[2.3rem] font-black tracking-[-.065em] sm:text-[3.6rem]">Escolha o nível de radar que cabe no seu ritmo.</h2>
-          <p className="mx-auto mt-4 max-w-2xl text-sm leading-7 text-slate-500">Todos os planos são liberados somente após a confirmação do pagamento no backend. O Pro concentra os recursos premium e continua sendo a escolha mais equilibrada.</p>
+          <div className="plans-kicker"><LockKeyhole size={12}/> ESCOLHA SEU RITMO DE GARIMPO</div>
+          <h2 className="font-display mt-4 text-[2.3rem] font-black tracking-[-.065em] sm:text-[3.6rem]">Comece analisando melhor. No Pro, compre e venda melhor.</h2>
+          <p className="mx-auto mt-4 max-w-2xl text-sm leading-7 text-slate-500">O Start cobre a análise da compra. O Pro adiciona a preparação da revenda. O Max aumenta o volume para quem usa a ferramenta todos os dias.</p>
         </div>
 
         {error&&<div className="mx-auto mt-7 max-w-2xl rounded-2xl border border-red-400/20 bg-red-400/10 px-4 py-3 text-sm text-red-200">{error}</div>}
@@ -376,13 +359,9 @@ export function PlansPage({email,onRefreshAccess}:{email?:string;onRefreshAccess
           {plans.map(plan=><PlanCard key={plan.slug} plan={plan} busy={busy} onChoose={subscribe}/>)}
         </div>
 
-        <div className="plans-pro-proof mx-auto mt-10 max-w-5xl">
-          <div className="plans-pro-proof__icon"><CircleDollarSign size={22}/></div>
-          <div>
-            <div className="plans-kicker">UMA REFERÊNCIA SIMPLES DE VALOR</div>
-            <h3>Negociar R$ 50 a menos em uma única compra já supera dois meses do Pro.</h3>
-            <p>O objetivo não é prometer economia. É mostrar por que ter limite, preço e risco na mesma tela pode valer muito mais do que decidir no impulso.</p>
-          </div>
+        <div className="pro-reseller-callout mx-auto mt-10 max-w-5xl">
+          <div className="pro-reseller-callout__icon"><Banknote size={22}/></div>
+          <div><span>POR QUE O PRO É O PLANO DE REVENDA</span><h3>Você usa o Radar na entrada e a IA na saída.</h3><p>Analisa a compra, negocia com teto e depois prepara o anúncio para vender o item com uma apresentação melhor.</p></div>
           <a href="#plano-pro">Ver Pro <ArrowRight size={15}/></a>
         </div>
       </section>
@@ -390,28 +369,21 @@ export function PlansPage({email,onRefreshAccess}:{email?:string;onRefreshAccess
       <section className="border-y border-slate-800/70 bg-slate-950/30">
         <div className="mx-auto max-w-[1180px] px-5 py-14 sm:px-8 lg:py-20">
           <div className="mx-auto max-w-3xl text-center">
-            <div className="plans-kicker">COMPARE SEM LETRA MIÚDA</div>
-            <h2 className="font-display mt-3 text-3xl font-black tracking-[-.055em] sm:text-[2.8rem]">O que muda de verdade entre Start, Pro e Max.</h2>
+            <div className="plans-kicker">COMPARE SEM ENROLAÇÃO</div>
+            <h2 className="font-display mt-3 text-3xl font-black tracking-[-.055em] sm:text-[2.8rem]">Escolha pelo seu volume e pelo quanto você quer fazer dentro do Radar.</h2>
           </div>
           <div className="plans-compare-table mt-9 overflow-hidden rounded-[28px] border border-slate-800/90">
-            <div className="plans-compare-row plans-compare-row--head">
-              <span>RECURSO</span><b>START</b><b className="is-pro">PRO</b><b>MAX</b>
-            </div>
-            {compareRows.map(row=><div className="plans-compare-row" key={row.label}>
-              <span>{row.label}</span>
-              <b>{row.start}</b>
-              <b className="is-pro">{row.pro}</b>
-              <b>{row.max}</b>
-            </div>)}
+            <div className="plans-compare-row plans-compare-row--head"><span>RECURSO</span><b>START</b><b className="is-pro">PRO</b><b>MAX</b></div>
+            {compareRows.map(row=><div className="plans-compare-row" key={row.label}><span>{row.label}</span><b>{row.start}</b><b className="is-pro">{row.pro}</b><b>{row.max}</b></div>)}
           </div>
         </div>
       </section>
 
       <section className="mx-auto grid max-w-[1180px] gap-5 px-5 py-14 sm:px-8 lg:grid-cols-[1.15fr_.85fr] lg:py-20">
         <div className="plans-security-card">
-          <div className="plans-kicker"><ShieldCheck size={12}/> PAGAMENTO E ACESSO</div>
-          <h2 className="font-display mt-3 text-3xl font-black tracking-[-.055em]">Seu plano não é liberado por um botão escondido no navegador.</h2>
-          <p className="mt-4 max-w-2xl text-sm leading-7 text-slate-500">O pagamento é processado pelo Mercado Pago e o acesso é validado no servidor. Se a assinatura não estiver confirmada, as funções protegidas continuam bloqueadas.</p>
+          <div className="plans-kicker"><ShieldCheck size={12}/> ACESSO E PAGAMENTO</div>
+          <h2 className="font-display mt-3 text-3xl font-black tracking-[-.055em]">Sem assinatura confirmada, não existe atalho para entrar.</h2>
+          <p className="mt-4 max-w-2xl text-sm leading-7 text-slate-500">O Mercado Pago processa o pagamento e o backend valida a assinatura antes de liberar o painel e os recursos protegidos.</p>
           <div className="mt-6 grid gap-2 sm:grid-cols-2">
             <ValueTick>Checkout via Mercado Pago</ValueTick>
             <ValueTick>Webhook validado</ValueTick>
@@ -420,18 +392,18 @@ export function PlansPage({email,onRefreshAccess}:{email?:string;onRefreshAccess
           </div>
         </div>
         <div className="plans-pro-mini">
-          <div className="plans-pro-mini__badge"><Sparkles size={14}/> RECOMENDADO</div>
+          <div className="plans-pro-mini__badge"><Sparkles size={14}/> PARA QUEM REVENDE</div>
           <strong>BRIKE Pro</strong>
           <span>{money(pro.preco_mensal)}/mês</span>
-          <p>Para usar o Radar na compra e ainda transformar fotos em anúncio com IA.</p>
-          <button onClick={()=>subscribe('pro')} disabled={busy!==null}>{busy==='pro'?'Abrindo...':'Escolher Pro'}<ArrowRight size={15}/></button>
+          <p>Mais análises na compra + Diagnóstico Premium + Preparar venda com IA na saída.</p>
+          <button onClick={()=>subscribe('pro')} disabled={busy!==null}>{busy==='pro'?'Abrindo...':'Quero o Pro'}<ArrowRight size={15}/></button>
         </div>
       </section>
 
       <section className="mx-auto max-w-[940px] px-5 pb-28 sm:px-8 lg:pb-28">
         <div className="text-center">
-          <div className="plans-kicker plans-kicker--muted">DÚVIDAS ANTES DE ENTRAR</div>
-          <h2 className="font-display mt-3 text-3xl font-black tracking-[-.055em] sm:text-[2.8rem]">O essencial, sem enrolação.</h2>
+          <div className="plans-kicker plans-kicker--muted">DÚVIDAS DE QUEM REVENDE</div>
+          <h2 className="font-display mt-3 text-3xl font-black tracking-[-.055em] sm:text-[2.8rem]">O essencial antes de assinar.</h2>
         </div>
         <div className="mt-8 grid gap-2">
           {faqs.map(([q,a])=><details key={q} className="plans-faq group rounded-2xl border border-slate-800/90 bg-slate-950/48">
@@ -441,11 +413,10 @@ export function PlansPage({email,onRefreshAccess}:{email?:string;onRefreshAccess
         </div>
 
         <div className="plans-final-cta mt-10 overflow-hidden rounded-[30px] border border-emerald-300/18 p-6 text-center sm:p-8">
-          <div className="plans-final-cta__glow"/>
           <div className="relative">
-            <div className="plans-kicker mx-auto w-max">PRONTO PARA USAR</div>
-            <h3 className="font-display mx-auto mt-4 max-w-2xl text-3xl font-black tracking-[-.06em] sm:text-[2.7rem]">Escolha seu plano e coloque o próximo anúncio no radar antes de colocar dinheiro na compra.</h3>
-            <p className="mx-auto mt-4 max-w-xl text-sm leading-7 text-slate-500">Seu acesso é liberado somente depois da confirmação do pagamento.</p>
+            <div className="plans-kicker mx-auto w-max">PRÓXIMA OPORTUNIDADE</div>
+            <h3 className="font-display mx-auto mt-4 max-w-2xl text-3xl font-black tracking-[-.06em] sm:text-[2.7rem]">Quando aparecer aquele anúncio barato, entre sabendo quanto oferecer e até onde vale ir.</h3>
+            <p className="mx-auto mt-4 max-w-xl text-sm leading-7 text-slate-500">Escolha o plano que combina com seu volume de garimpo e revenda.</p>
             <a href="#planos" className="mt-6 inline-flex h-[52px] items-center gap-2 rounded-2xl bg-emerald-300 px-6 text-sm font-black text-slate-950 transition hover:scale-[1.01]">Escolher meu plano <ArrowRight size={16}/></a>
           </div>
         </div>
@@ -455,8 +426,8 @@ export function PlansPage({email,onRefreshAccess}:{email?:string;onRefreshAccess
     </main>
 
     <div className="plans-mobile-sticky lg:hidden">
-      <div><span>MAIS ESCOLHIDO</span><strong>Pro • {money(pro.preco_mensal)}/mês</strong></div>
-      <button onClick={()=>subscribe('pro')} disabled={busy!==null}>{busy==='pro'?'Abrindo...':'Escolher Pro'}<ArrowRight size={15}/></button>
+      <div><span>PARA QUEM REVENDE</span><strong>Pro • {money(pro.preco_mensal)}/mês</strong></div>
+      <button onClick={()=>subscribe('pro')} disabled={busy!==null}>{busy==='pro'?'Abrindo...':'Quero Pro'}<ArrowRight size={15}/></button>
     </div>
   </div>
 }
