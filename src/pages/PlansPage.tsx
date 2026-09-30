@@ -22,8 +22,8 @@ type PlanRow={
 
 const fallback:PlanRow[]=[
   {slug:'start',nome:'Start',preco_mensal:9.90,analises_mes:40,analises_dia:7,destaque:false,descricao:'Para parar de comprar no escuro sem pesar no bolso.',recursos:['40 análises por mês','Até 7 análises por dia','Score de oportunidade','Preço, risco e teto de compra','Mensagens para negociar','Histórico das análises'],ordem:1},
-  {slug:'pro',nome:'Pro',preco_mensal:19.90,analises_mes:120,analises_dia:15,destaque:true,descricao:'Para quem quer comprar melhor e também vender melhor.',recursos:['120 análises por mês','Até 15 análises por dia','Tudo do Start','Diagnóstico Premium','Preparar venda com IA','Avaliação das fotos do anúncio'],ordem:2},
-  {slug:'max',nome:'Max',preco_mensal:34.90,analises_mes:300,analises_dia:30,destaque:false,descricao:'Para uso intenso, garimpo frequente e maior volume.',recursos:['300 análises por mês','Até 30 análises por dia','Tudo do Pro','Diagnóstico Premium','Preparar venda com IA','Maior franquia para uso intenso'],ordem:3},
+  {slug:'pro',nome:'Pro',preco_mensal:19.90,analises_mes:120,analises_dia:15,destaque:true,descricao:'Para quem quer comprar melhor e também vender melhor.',recursos:['120 análises por mês','Até 15 análises por dia','Diagnóstico Premium','20 preparações de venda com IA/mês','Avaliação das fotos do anúncio','Título, descrição e estratégia de preço'],ordem:2},
+  {slug:'max',nome:'Max',preco_mensal:34.90,analises_mes:300,analises_dia:30,destaque:false,descricao:'Para uso intenso, garimpo frequente e maior volume.',recursos:['300 análises por mês','Até 30 análises por dia','Diagnóstico Premium','60 preparações de venda com IA/mês','Avaliação das fotos do anúncio','Título, descrição e estratégia de preço'],ordem:3},
 ]
 
 const money=(value:number)=>value.toLocaleString('pt-BR',{style:'currency',currency:'BRL'})
