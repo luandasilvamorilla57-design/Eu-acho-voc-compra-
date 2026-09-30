@@ -2,69 +2,80 @@ import { useCallback,useEffect,useState } from 'react'
 import { supabase } from '../lib/supabase'
 import type { AccountPlan } from '../types/database'
 
-export type SubscriptionAccess={
-  plano:AccountPlan
-  status:string
-  ultimo_pagamento_em:string|null
+export type AccessStatus={
+  liberado:boolean
+  plano:AccountPlan|null
+  owner_access:boolean
+  assinatura_status:string|null
   valido_ate:string|null
+  analises_mes:number
+  analises_dia:number
+  usadas_mes:number
+  usadas_dia:number
 }
 
-export function usePlanAccess(active:boolean,accessTotal:boolean){
+const empty:AccessStatus={
+  liberado:false,
+  plano:null,
+  owner_access:false,
+  assinatura_status:null,
+  valido_ate:null,
+  analises_mes:0,
+  analises_dia:0,
+  usadas_mes:0,
+  usadas_dia:0,
+}
+
+export function usePlanAccess(active:boolean){
   const [loading,setLoading]=useState(active)
   const [checked,setChecked]=useState(false)
-  const [hasAccess,setHasAccess]=useState(false)
-  const [subscription,setSubscription]=useState<SubscriptionAccess|null>(null)
+  const [status,setStatus]=useState<AccessStatus>(empty)
 
   const refresh=useCallback(async()=>{
     if(!active){
-      setHasAccess(false)
-      setSubscription(null)
+      setStatus(empty)
       setChecked(false)
       setLoading(false)
       return false
     }
 
     setLoading(true)
+    try{
+      const {data,error}=await supabase.functions.invoke('status-acesso',{body:{}})
+      if(error)throw error
 
-    if(accessTotal){
-      setHasAccess(true)
+      const next:AccessStatus={
+        liberado:Boolean(data?.liberado),
+        plano:(data?.plano??null) as AccountPlan|null,
+        owner_access:Boolean(data?.owner_access),
+        assinatura_status:data?.assinatura_status??null,
+        valido_ate:data?.valido_ate??null,
+        analises_mes:Number(data?.analises_mes||0),
+        analises_dia:Number(data?.analises_dia||0),
+        usadas_mes:Number(data?.usadas_mes||0),
+        usadas_dia:Number(data?.usadas_dia||0),
+      }
+      setStatus(next)
       setChecked(true)
-      setLoading(false)
-      return true
-    }
-
-    const {data,error}=await supabase
-      .from('assinaturas')
-      .select('plano,status,ultimo_pagamento_em,valido_ate')
-      .order('updated_at',{ascending:false})
-      .limit(1)
-      .maybeSingle()
-
-    if(error){
-      console.error('subscription access',error)
-      setHasAccess(false)
+      return next.liberado
+    }catch(error){
+      console.error('access status',error)
+      // Fail closed: se não conseguimos validar no servidor, não liberamos a ferramenta.
+      setStatus(empty)
       setChecked(true)
-      setLoading(false)
       return false
+    }finally{
+      setLoading(false)
     }
-
-    const row=(data??null) as SubscriptionAccess|null
-    setSubscription(row)
-
-    const paid=Boolean(row?.ultimo_pagamento_em)
-    const currentStatus=String(row?.status||'').toLowerCase()
-    const activeStatus=currentStatus==='authorized'||currentStatus==='active'
-    const validUntil=row?.valido_ate?new Date(row.valido_ate).getTime():0
-    const canceledStillValid=currentStatus==='cancelled'&&paid&&validUntil>Date.now()
-    const allowed=Boolean(paid&&(activeStatus||canceledStillValid))
-
-    setHasAccess(allowed)
-    setChecked(true)
-    setLoading(false)
-    return allowed
-  },[active,accessTotal])
+  },[active])
 
   useEffect(()=>{void refresh()},[refresh])
 
-  return{loading,checked,hasAccess,subscription,refresh}
+  return{
+    loading,
+    checked,
+    hasAccess:status.liberado,
+    status,
+    refresh,
+  }
 }
