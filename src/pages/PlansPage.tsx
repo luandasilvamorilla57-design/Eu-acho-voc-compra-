@@ -272,22 +272,21 @@ export function PlansPage({email,onRefreshAccess}:{email?:string;onRefreshAccess
       <section className="plans-hero">
         <div className="plans-shell plans-hero__grid">
           <div className="plans-hero__copy plan-reveal">
-            <div className="plans-eyebrow"><span/> MARKETPLACE · OLX · REVENDA</div>
+            <div className="plans-eyebrow"><span/> ANÁLISE DE OPORTUNIDADE · MARKETPLACE · OLX</div>
             <h1>
-              Garimpe anúncio bom.<br/>
-              Compre abaixo do preço.<br/>
+              Compre melhor no Marketplace e na OLX.<br/>
               <em>Revenda com margem.</em>
             </h1>
-            <p>O BRIKE RADAR foi feito para quem compra usado para revender. Ele organiza preço, oferta, teto de compra e riscos para você decidir melhor antes de colocar dinheiro na operação.</p>
+            <p>O BRIKE RADAR foi criado para quem encontra usados abaixo do preço, negocia a entrada e precisa saber se a operação ainda faz sentido antes de imobilizar dinheiro.</p>
 
             <div className="plans-hero__facts">
-              <div><span>01</span><strong>OFERTA</strong><small>onde começar</small></div>
-              <div><span>02</span><strong>TETO</strong><small>onde parar</small></div>
+              <div><span>01</span><strong>PREÇO</strong><small>se está interessante</small></div>
+              <div><span>02</span><strong>OFERTA</strong><small>quanto propor</small></div>
               <div><span>03</span><strong>RISCO</strong><small>o que conferir</small></div>
             </div>
 
             <div className="plans-hero__actions">
-              <a href="#planos" className="plans-primary-cta">Escolher plano <ArrowRight size={16}/></a>
+              <a href="#planos" className="plans-primary-cta">Ver planos e liberar acesso <ArrowRight size={16}/></a>
               <a href="#como-funciona" className="plans-text-link">Ver como funciona</a>
             </div>
 
