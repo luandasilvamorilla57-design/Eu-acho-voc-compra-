@@ -10,8 +10,8 @@ export const authCopy: Record<AuthMode, AuthCopy> = {
   register: {
     eyebrow: 'CRIAR CONTA',
     title: 'Pare de perder margem por falta de informação.',
-    subtitle: 'Crie sua conta, analise o primeiro anúncio e descubra quanto oferecer, quanto pode lucrar e o que conferir antes de pagar.',
-    button: 'Criar conta e analisar anúncio',
+    subtitle: 'Crie sua conta, confirme seu e-mail e escolha o plano ideal para começar a usar o Radar do Brique.',
+    button: 'Criar conta e escolher plano',
   },
   recover: {
     eyebrow: 'RECUPERAR ACESSO',
