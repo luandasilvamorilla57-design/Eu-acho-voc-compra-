@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useSessionAuth } from './hooks/useSessionAuth'
 import { useAnalyses } from './hooks/useAnalyses'
 import { usePurchases } from './hooks/usePurchases'
+import { useRadarConfig } from './hooks/useRadarConfig'
 import { AuthPage } from './pages/AuthPage'
 import { DashboardPage } from './pages/DashboardPage'
 import { NewAnalysisPage } from './pages/NewAnalysisPage'
@@ -21,8 +22,10 @@ export default function App(){
   const [dark,setDark]=useState(initialDark)
   const [selected,setSelected]=useState<AnaliseRow|null>(null)
   const [editing,setEditing]=useState<AnaliseRow|null>(null)
-  const {items,load,updateStatus,resolveNegotiation}=useAnalyses(!!session)
-  const {items:purchases,load:loadPurchases,createPurchase,markSold}=usePurchases(!!session)
+
+  const {items,load,updateStatus,resolveNegotiation,addNegotiationLog,reinspect}=useAnalyses(!!session)
+  const {items:purchases,load:loadPurchases,createPurchase,markSold,updatePurchase}=usePurchases(!!session)
+  const {config,save:saveConfig}=useRadarConfig(!!session)
 
   useEffect(()=>{window.localStorage.setItem('brike-theme',dark?'dark':'light');document.documentElement.style.colorScheme=dark?'dark':'light';document.body.style.background=dark?'#06101c':'#eef5f4'},[dark])
 
@@ -30,22 +33,24 @@ export default function App(){
   if(!session||reset)return <AuthPage initialMode={reset?'reset':'login'}/>
 
   const page=view==='dashboard'
-    ?<DashboardPage items={items} purchases={purchases} onNew={()=>setView('new')} onOpen={setSelected}/>
+    ?<DashboardPage items={items} purchases={purchases} config={config} onSaveConfig={saveConfig} onNew={()=>setView('new')} onOpen={setSelected}/>
     :view==='new'
-      ?<NewAnalysisPage onSaved={async destination=>{await load();setView(destination)}}/>
+      ?<NewAnalysisPage config={config} onSaved={async destination=>{await load();setView(destination)}}/>
       :view==='bought'
-        ?<BoughtPage analyses={items} purchases={purchases} onCreate={async input=>{await createPurchase(input);await load()}} onSold={async(id,salePrice)=>{await markSold(id,salePrice);await load()}}/>
+        ?<BoughtPage analyses={items} purchases={purchases} config={config} onCreate={async input=>{await createPurchase(input);await load()}} onSold={async(id,salePrice)=>{await markSold(id,salePrice);await load()}} onUpdate={updatePurchase}/>
         :<HistoryPage
             items={items}
             onOpen={setSelected}
             onEdit={setEditing}
             onNegotiationBought={async(id,price)=>{await resolveNegotiation(id,'bought',price);await loadPurchases()}}
             onNegotiationFailed={async id=>{await resolveNegotiation(id,'failed')}}
+            onNegotiationLog={addNegotiationLog}
+            onReinspect={reinspect}
           />
 
   return <AppShell view={view} setView={setView} dark={dark} setDark={setDark} email={session.user.email}>
     {page}
-    <AnalysisModal item={selected} onClose={()=>setSelected(null)}/>
+    <AnalysisModal item={selected} onClose={()=>setSelected(null)} config={config}/>
     <StatusEditor item={editing} onClose={()=>setEditing(null)} onSave={async(s,b,v)=>{const err=await updateStatus(editing!.id,s,b,v);if(!err)await loadPurchases()}}/>
   </AppShell>
 }
