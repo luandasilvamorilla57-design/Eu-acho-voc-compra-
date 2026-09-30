@@ -1,0 +1,126 @@
+/* BRIKE RADAR v6 — small-text legibility pass
+   Aumento sutil (≈ 1–2px) somente em microcopy/labels, preservando títulos e números. */
+
+/* Tailwind arbitrary micro text used throughout legacy/current components */
+.app-theme [class*="text-[8px]"]{font-size:9.5px!important}
+.app-theme [class*="text-[8.5px]"]{font-size:10px!important}
+.app-theme [class*="text-[9px]"]{font-size:10.5px!important}
+.app-theme [class*="text-[9.5px]"]{font-size:11px!important}
+.app-theme [class*="text-[10px]"]{font-size:11.25px!important}
+.app-theme [class*="text-[10.5px]"]{font-size:11.5px!important}
+.app-theme [class*="text-[11px]"]{font-size:12px!important}
+.app-theme [class*="text-[11.5px]"]{font-size:12.25px!important}
+.app-theme [class*="text-[12px]"]{font-size:12.75px!important}
+
+/* Shared labels and supporting copy */
+.app-theme .premium-eyebrow{font-size:11px!important;line-height:1.35}
+.app-theme small{font-size:11px;line-height:1.5}
+.app-theme label{line-height:1.45}
+
+/* Bottom nav — still compact, but much easier to read */
+.app-theme .mobile-nav-label,
+.app-theme .mobile-nav-item{font-size:11.5px!important}
+.app-theme .nav-alert-badge{font-size:8.5px!important}
+
+/* Bought / stock */
+.app-theme .bought-section-count{font-size:12.5px}
+.app-theme .bought-mini-metric__hint{font-size:11.5px}
+.app-theme .purchase-item-meta{font-size:12px}
+.app-theme .inventory-health{font-size:9.75px}
+.app-theme .purchase-status{font-size:9.5px}
+.app-theme .purchase-stat--large>span{font-size:10.75px!important}
+.app-theme .purchase-stat--large>small{font-size:10.75px!important}
+.app-theme .purchase-pro-action__eyebrow{font-size:9.5px}
+.app-theme .purchase-pro-action__eyebrow b{font-size:8.75px}
+.app-theme .purchase-pro-action__copy>small{font-size:11px;line-height:1.5}
+.app-theme .purchase-secondary-actions .purchase-manage,
+.app-theme .purchase-secondary-actions .purchase-sell{font-size:12px}
+
+/* Photo assistant hero */
+.app-theme .photo-feature-card__plan{font-size:10px}
+.app-theme .photo-feature-card__benefits span{font-size:11px}
+.app-theme .photo-feature-card__hint{font-size:12px}
+.app-theme .photo-feature-card__start small{font-size:11.5px}
+
+/* Radar / dashboard microcopy */
+.app-theme .radar-alert p{font-size:10.75px;line-height:1.55}
+.app-theme .radar-alert>span:last-child{font-size:10px}
+.app-theme .radar-insight>span{font-size:9.5px}
+.app-theme .radar-insight>p{font-size:10.75px;line-height:1.6}
+.app-theme .finance-metric>span{font-size:10.5px}
+.app-theme .finance-metric>small{font-size:10.25px}
+.app-theme .market-ref-result small{font-size:9.5px}
+
+/* History / pipeline */
+.app-theme .pipeline-tabs,
+.app-theme .pipeline-tab{font-size:11px}
+.app-theme .counter-live__grid small{font-size:9px}
+.app-theme .counter-live__grid b{font-size:11.5px}
+.app-theme .counter-live>p{font-size:10.5px}
+
+/* Account popover */
+.app-theme .account-popover small,
+.app-theme .account-popover__actions small{font-size:10.5px;line-height:1.45}
+
+/* Sale flow / diagnostic microcopy */
+.app-theme .sale-stepper b{font-size:10px}
+.app-theme .sale-stepper span{font-size:10px}
+.app-theme .sale-flow__intro>span{font-size:11px}
+.app-theme .sale-flow__label{font-size:12px}
+.app-theme .sale-source-grid em{font-size:11px}
+.app-theme .sale-radar-list small{font-size:11px}
+.app-theme .sale-photo-guide span{font-size:10.5px}
+.app-theme .sale-photo-grid b{font-size:9px}
+.app-theme .sale-photo-drop small{font-size:10px}
+.app-theme .sale-photo-drop em{font-size:10px}
+.app-theme .sale-photo-note p{font-size:10.5px}
+.app-theme .sale-flow__secure{font-size:10px}
+.app-theme .premium-diagnostic__score small{font-size:9px}
+.app-theme .premium-diagnostic__metrics span{font-size:11px}
+.app-theme .premium-photo-reviews header span{font-size:10px}
+.app-theme .premium-photo-reviews footer strong{font-size:10.5px}
+.app-theme .sale-ready__prices span{font-size:11px}
+.app-theme .sale-edit-block>div>span{font-size:10.5px}
+.app-theme .sale-edit-block button,
+.app-theme .sale-reply button{font-size:10.5px}
+.app-theme .sale-list>strong{font-size:10.75px}
+.app-theme .sale-list p{font-size:11.75px}
+.app-theme .sale-reply>div>span{font-size:9.75px}
+.app-theme .resale-drafts__head>span{font-size:11px}
+.app-theme .resale-draft-card__top>span,
+.app-theme .resale-draft-card__top>b{font-size:9.25px}
+.app-theme .resale-draft-card__meta{font-size:9.75px}
+.app-theme .resale-draft-card__actions>button{font-size:10px}
+
+/* Mobile gets the strongest readability benefit, still keeping the premium density. */
+@media(max-width:620px){
+  .app-theme [class*="text-[8px]"]{font-size:10px!important}
+  .app-theme [class*="text-[8.5px]"]{font-size:10.25px!important}
+  .app-theme [class*="text-[9px]"]{font-size:10.75px!important}
+  .app-theme [class*="text-[9.5px]"]{font-size:11.25px!important}
+  .app-theme [class*="text-[10px]"]{font-size:11.5px!important}
+  .app-theme [class*="text-[10.5px]"]{font-size:11.75px!important}
+  .app-theme [class*="text-[11px]"]{font-size:12.25px!important}
+  .app-theme [class*="text-[11.5px]"]{font-size:12.5px!important}
+  .app-theme [class*="text-[12px]"]{font-size:13px!important}
+
+  .app-theme .premium-eyebrow{font-size:11.5px!important}
+  .app-theme small{font-size:11.5px}
+  .app-theme .mobile-nav-label,
+  .app-theme .mobile-nav-item{font-size:12px!important}
+  .app-theme .purchase-item-meta{font-size:12.5px}
+  .app-theme .inventory-health{font-size:10px}
+  .app-theme .purchase-status{font-size:9.75px}
+  .app-theme .bought-mini-metric__hint{font-size:11.75px}
+  .app-theme .photo-feature-card__benefits span{font-size:11.5px}
+  .app-theme .photo-feature-card__hint{font-size:12.5px}
+  .app-theme .purchase-pro-action__copy>small{font-size:11.5px}
+  .app-theme .sale-stepper b{font-size:10px}
+  .app-theme .sale-photo-note p{font-size:11.5px;line-height:1.6}
+  .app-theme .sale-flow__secure{font-size:10.5px}
+  .app-theme .premium-diagnostic__score small{font-size:9.5px}
+  .app-theme .premium-diagnostic__metrics span{font-size:11.5px}
+  .app-theme .sale-ready__prices span{font-size:12.5px}
+  .app-theme .sale-list>strong{font-size:11.5px}
+  .app-theme .sale-list p{font-size:13px;line-height:1.55}
+}
