@@ -11,6 +11,7 @@ export const defaultRadarConfig:RadarConfigRow={
   roi_minimo:25,
   dias_alerta_estoque:14,
   plano_atual:'start',
+  acesso_total:false,
   data_atualizacao:new Date(0).toISOString()
 }
 

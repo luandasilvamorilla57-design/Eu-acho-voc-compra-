@@ -23,7 +23,7 @@ compras: {
  Relationships:[]
 }
 radar_config:{
- Row:{user_id:string;capital_disponivel:number;lucro_minimo:number;lucro_minimo_modo:ProfitGoalMode;lucro_minimo_percentual:number;roi_minimo:number;dias_alerta_estoque:number;plano_atual:AccountPlan;data_atualizacao:string}
+ Row:{user_id:string;capital_disponivel:number;lucro_minimo:number;lucro_minimo_modo:ProfitGoalMode;lucro_minimo_percentual:number;roi_minimo:number;dias_alerta_estoque:number;plano_atual:AccountPlan;acesso_total:boolean;data_atualizacao:string}
  Insert:{user_id?:string;capital_disponivel?:number;lucro_minimo?:number;lucro_minimo_modo?:ProfitGoalMode;lucro_minimo_percentual?:number;roi_minimo?:number;dias_alerta_estoque?:number;plano_atual?:AccountPlan;data_atualizacao?:string}
  Update:{capital_disponivel?:number;lucro_minimo?:number;lucro_minimo_modo?:ProfitGoalMode;lucro_minimo_percentual?:number;roi_minimo?:number;dias_alerta_estoque?:number;plano_atual?:AccountPlan;data_atualizacao?:string}
  Relationships:[]

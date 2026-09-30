@@ -2,7 +2,7 @@ import { ArrowRight,Camera,CheckCircle2,ImagePlus,LockKeyhole,Sparkles } from 'l
 import type { AccountPlan } from '../../types/database'
 import { planLabel } from '../../utils/plan'
 
-export function PhotoAssistantFeatureCard({plan,unlocked,onLockedClick}:{plan:AccountPlan;unlocked:boolean;onLockedClick:()=>void}){
+export function PhotoAssistantFeatureCard({plan,unlocked,fullAccess,onLockedClick}:{plan:AccountPlan;unlocked:boolean;fullAccess:boolean;onLockedClick:()=>void}){
   return <section className={'photo-feature-card '+(unlocked?'is-unlocked':'is-locked')}>
     <div className="photo-feature-card__glow"/>
     <div className="relative">
@@ -10,7 +10,7 @@ export function PhotoAssistantFeatureCard({plan,unlocked,onLockedClick}:{plan:Ac
         <div>
           <div className="flex flex-wrap items-center gap-2">
             <span className="premium-eyebrow text-cyan-400">ANÚNCIO INTELIGENTE</span>
-            <span className="photo-feature-card__plan">{unlocked?<><CheckCircle2 size={11}/> {planLabel(plan)} ativo</>:<><LockKeyhole size={11}/> BRIKE Pro</>}</span>
+            <span className="photo-feature-card__plan">{unlocked?<><CheckCircle2 size={11}/> {planLabel(plan,fullAccess)}</>:<><LockKeyhole size={11}/> BRIKE Pro</>}</span>
           </div>
           <h3 className="font-display mt-2 text-[23px] font-extrabold tracking-[-.04em] purchase-title">Suas fotos estão ajudando a vender?</h3>
           <p className="mt-2 max-w-2xl text-[12px] leading-5 text-slate-500">Envie as fotos do anúncio. O Radar avalia nitidez, luz, enquadramento, limpeza, fundo e ângulos faltando — depois cria título e descrição prontos para OLX ou Facebook.</p>

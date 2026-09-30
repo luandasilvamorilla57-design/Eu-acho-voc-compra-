@@ -47,9 +47,10 @@ Deno.serve(async req=>{
     const {data:{user},error:userError}=await admin.auth.getUser(token)
     if(userError||!user)return Response.json({error:'Sessão inválida ou expirada.',request_id:requestId},{status:401,headers:cors})
 
-    const {data:config}=await admin.from('radar_config').select('plano_atual').eq('user_id',user.id).maybeSingle()
+    const {data:config}=await admin.from('radar_config').select('plano_atual,acesso_total').eq('user_id',user.id).maybeSingle()
     const plan=String(config?.plano_atual||'start')
-    if(plan!=='pro'&&plan!=='max'){
+    const fullAccess=config?.acesso_total===true
+    if(!fullAccess&&plan!=='pro'&&plan!=='max'){
       return Response.json({error:'O Anúncio Inteligente com avaliação de fotos está disponível no BRIKE Pro.',code:'FEATURE_REQUIRES_PRO',request_id:requestId},{status:403,headers:cors})
     }
 
