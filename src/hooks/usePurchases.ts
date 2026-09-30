@@ -44,7 +44,7 @@ export function usePurchases(active:boolean){
   }
 
   const uploadPhotos=async(id:string,files:FileList|null):Promise<string[]>=>{
-    if(!files?.length)return purchasePhotoPaths(items.find(x=>x.id===id)!)
+    if(!files?.length){const current=items.find(x=>x.id===id);return current?purchasePhotoPaths(current):[]}
     const item=items.find(x=>x.id===id);if(!item)throw new Error('Compra não encontrada.')
     const existing=purchasePhotoPaths(item);const room=8-existing.length
     if(room<=0)throw new Error('Este item já tem 8 fotos.')
