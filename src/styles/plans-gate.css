@@ -1,0 +1,57 @@
+.plans-gate{
+  --pg-green:#37e7a0;
+  --pg-cyan:#59d5ff;
+  --pg-line:rgba(148,163,184,.14);
+  background:
+    radial-gradient(circle at 12% 8%,rgba(16,185,129,.16),transparent 28rem),
+    radial-gradient(circle at 88% 18%,rgba(34,211,238,.11),transparent 30rem),
+    linear-gradient(180deg,#06111d 0%,#071522 45%,#06101b 100%);
+}
+.plans-grid-bg{
+  background-image:linear-gradient(rgba(148,163,184,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(148,163,184,.04) 1px,transparent 1px);
+  background-size:42px 42px;
+  mask-image:linear-gradient(to bottom,black,transparent 82%);
+}
+.plans-orb{animation:plansFloat 8s ease-in-out infinite}
+.plans-orb--delay{animation-delay:-3.2s}
+.plan-reveal{animation:planReveal .62s cubic-bezier(.2,.75,.2,1) both}
+.plan-reveal:nth-child(2){animation-delay:.08s}
+.plan-reveal:nth-child(3){animation-delay:.16s}
+.plan-card{transition:transform .28s ease,border-color .28s ease,box-shadow .28s ease}
+.plan-card:hover{transform:translateY(-4px);border-color:rgba(148,163,184,.3)}
+.plan-card--featured{
+  box-shadow:0 30px 100px rgba(16,185,129,.15),inset 0 1px 0 rgba(255,255,255,.07);
+}
+.plan-card--featured:before{
+  content:"";position:absolute;inset:-1px;border-radius:inherit;padding:1px;
+  background:linear-gradient(135deg,rgba(52,211,153,.8),rgba(34,211,238,.15),rgba(52,211,153,.45));
+  -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);
+  -webkit-mask-composite:xor;mask-composite:exclude;pointer-events:none;
+}
+.plan-cta-pro{position:relative;overflow:hidden}
+.plan-cta-pro:after{
+  content:"";position:absolute;top:-70%;bottom:-70%;width:38%;left:-55%;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,.38),transparent);
+  transform:skewX(-18deg);animation:plansShine 3.4s ease-in-out infinite;
+}
+.pain-card,.benefit-card{transition:transform .25s ease,border-color .25s ease,background .25s ease}
+.pain-card:hover,.benefit-card:hover{transform:translateY(-3px);border-color:rgba(52,211,153,.22)}
+.radar-core{
+  box-shadow:0 0 0 1px rgba(52,211,153,.28),0 0 55px rgba(52,211,153,.18),inset 0 0 40px rgba(52,211,153,.08);
+}
+.radar-sweep{
+  transform-origin:100% 100%;
+  animation:radarSweep 3.1s linear infinite;
+  background:conic-gradient(from 0deg,rgba(52,211,153,0),rgba(52,211,153,.36),rgba(52,211,153,0) 28deg);
+}
+.pulse-dot{animation:planPulse 1.8s ease-in-out infinite}
+.fine-scroll{scroll-margin-top:24px}
+@keyframes planReveal{from{opacity:0;transform:translateY(16px) scale(.985)}to{opacity:1;transform:none}}
+@keyframes plansFloat{0%,100%{transform:translate3d(0,0,0)}50%{transform:translate3d(0,-14px,0)}}
+@keyframes plansShine{0%,58%{left:-55%}82%,100%{left:130%}}
+@keyframes radarSweep{to{transform:rotate(360deg)}}
+@keyframes planPulse{0%,100%{opacity:.45;transform:scale(.9)}50%{opacity:1;transform:scale(1.25)}}
+@media (prefers-reduced-motion:reduce){
+  .plans-orb,.plan-reveal,.plan-cta-pro:after,.radar-sweep,.pulse-dot{animation:none!important}
+  .plan-card,.pain-card,.benefit-card{transition:none!important}
+}
