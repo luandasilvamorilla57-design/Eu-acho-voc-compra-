@@ -32,9 +32,10 @@ export function usePlanAccess(active:boolean){
   const [checked,setChecked]=useState(false)
   const [status,setStatus]=useState<AccessStatus>(empty)
 
-  const refresh=useCallback(async()=>{
+  const refresh=useCallback(async(options?:{silent?:boolean})=>{
+    const silent=Boolean(options?.silent)
     if(!active){setStatus(empty);setChecked(false);setLoading(false);return false}
-    setLoading(true)
+    if(!silent)setLoading(true)
     try{
       const {data,error}=await supabase.functions.invoke('status-acesso',{body:{}})
       if(error)throw error
@@ -59,7 +60,7 @@ export function usePlanAccess(active:boolean){
     }catch(error){
       console.error('access status',error)
       setStatus(empty);setChecked(true);return false
-    }finally{setLoading(false)}
+    }finally{if(!silent)setLoading(false)}
   },[active])
 
   useEffect(()=>{void refresh()},[refresh])

@@ -75,14 +75,14 @@ export default function App(){
 
   if(!ready)return <div className="grid min-h-screen place-items-center bg-[#06101c] text-xs text-slate-600">Carregando radar...</div>
   if(!session||reset)return <AuthPage initialMode={reset?'reset':'login'}/>
-  if(configLoading||!config.user_id||planLoading||!planChecked)return <div className="grid min-h-screen place-items-center bg-[#06101c] text-xs text-slate-500">Validando seu acesso com segurança...</div>
+  if(configLoading||!config.user_id||!planChecked)return <div className="grid min-h-screen place-items-center bg-[#06101c] text-xs text-slate-500">Validando seu acesso com segurança...</div>
   if(!hasAccess)return <PlansPage email={session.user.email} onRefreshAccess={refreshAccess}/>
 
   let page:React.ReactNode
   if(view==='dashboard')page=<DashboardPage items={items} purchases={purchases} config={config} access={access} onSaveConfig={saveConfig} onManagePlan={()=>setView('subscription')} onNew={()=>setView('new')} onOpen={setSelected}/>
   else if(view==='radar')page=<RadarPage analyses={items} purchases={purchases} config={config} alerts={alerts} insights={intelligence.insights} onNavigate={setView} onOpen={setSelected}/>
-  else if(view==='new')page=<NewAnalysisPage config={config} userProfile={intelligence.profile} purchases={purchases} onUsageChanged={refreshAccess} onSaved={async destination=>{await load();await refreshAccess();setView(destination)}}/>
-  else if(view==='bought')page=<BoughtPage analyses={items} purchases={purchases} drafts={drafts} config={config} onCreate={async input=>{await createPurchase(input);await load()}} onSold={async(id,salePrice)=>{await markSold(id,salePrice);await load()}} onUpdate={updatePurchase} onUploadPhotos={uploadPhotos} onRemovePhoto={removePhoto} onSaveDraft={async input=>{const row=await saveResaleDraft(input);await refreshAccess();return row}} onUpdateDraftCopy={updateResaleDraftCopy} onDeleteDraft={removeResaleDraft}/>
+  else if(view==='new')page=<NewAnalysisPage config={config} userProfile={intelligence.profile} purchases={purchases} onUsageChanged={()=>refreshAccess({silent:true})} onSaved={async destination=>{await load();await refreshAccess();setView(destination)}}/>
+  else if(view==='bought')page=<BoughtPage analyses={items} purchases={purchases} drafts={drafts} config={config} onCreate={async input=>{await createPurchase(input);await load()}} onSold={async(id,salePrice)=>{await markSold(id,salePrice);await load()}} onUpdate={updatePurchase} onUploadPhotos={uploadPhotos} onRemovePhoto={removePhoto} onSaveDraft={async input=>{const row=await saveResaleDraft(input);void refreshAccess({silent:true});return row}} onUpdateDraftCopy={updateResaleDraftCopy} onDeleteDraft={removeResaleDraft}/>
   else if(view==='history')page=<HistoryPage items={items} drafts={drafts} config={config} onOpen={setSelected} onOpenAd={setSelectedDraft} onEdit={setEditing} onNegotiationBought={async(id,price)=>{await resolveNegotiation(id,'bought',price);await loadPurchases()}} onNegotiationFailed={async id=>{await resolveNegotiation(id,'failed')}} onNegotiationLog={addNegotiationLog} onReinspect={reinspect}/>
   else if(view==='subscription')page=<SubscriptionPage status={access} onBack={()=>setView('dashboard')} onRefresh={refreshAccess}/>
   else page=access.owner_access?<AdminPage onBack={()=>setView('dashboard')}/>:<DashboardPage items={items} purchases={purchases} config={config} access={access} onSaveConfig={saveConfig} onManagePlan={()=>setView('subscription')} onNew={()=>setView('new')} onOpen={setSelected}/>
@@ -91,7 +91,7 @@ export default function App(){
     {page}
     {!config.onboarding_concluido&&!access.owner_access&&<OnboardingModal config={config} onSave={saveConfig}/>}
     <AnalysisModal item={selected} onClose={()=>setSelected(null)} config={config}/>
-    {selectedDraft&&<SalePreparationModal purchases={purchases} analyses={items} initialDraft={selectedDraft} onClose={()=>setSelectedDraft(null)} onSaveDraft={async input=>{const row=await saveResaleDraft(input);await refreshAccess();setSelectedDraft(row);return row}} onUpdateCopy={async(id,title,description)=>{await updateResaleDraftCopy(id,title,description);const latest=drafts.find(d=>d.id===id);if(latest)setSelectedDraft({...latest,titulo:title,descricao:description} as ResaleDraftRow)}}/>}
+    {selectedDraft&&<SalePreparationModal purchases={purchases} analyses={items} initialDraft={selectedDraft} onClose={()=>setSelectedDraft(null)} onSaveDraft={async input=>{const row=await saveResaleDraft(input);setSelectedDraft(row);void refreshAccess({silent:true});return row}} onUpdateCopy={async(id,title,description)=>{await updateResaleDraftCopy(id,title,description);const latest=drafts.find(d=>d.id===id);if(latest)setSelectedDraft({...latest,titulo:title,descricao:description} as ResaleDraftRow)}}/>}
     <StatusEditor item={editing} onClose={()=>setEditing(null)} onSave={async(s,b,v)=>{const err=await updateStatus(editing!.id,s,b,v);if(!err)await loadPurchases()}}/>
   </AppShell>
 }
