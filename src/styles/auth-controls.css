@@ -1,1 +1,14 @@
 .auth-feature,.auth-pain-card{background:linear-gradient(145deg,rgba(10,21,36,.86),rgba(12,25,42,.72));border:1px solid rgba(110,137,167,.16)}.auth-feature__icon{display:grid;height:38px;width:38px;place-items:center;border-radius:14px;background:rgba(45,212,165,.12);color:#6ee7c7}.auth-pain-row{background:rgba(5,13,24,.44);border:1px solid rgba(100,116,139,.13)}.auth-pulse-badge{display:grid;height:42px;width:42px;place-items:center;border-radius:16px;background:rgba(45,212,165,.12);color:#75e8c8}.auth-mobile-benefit{display:grid;min-height:72px;place-items:center;align-content:center;gap:7px;border-radius:18px;border:1px solid rgba(100,116,139,.13);color:#62dfbd}.auth-mobile-benefit span{font-size:9px;color:#8293a8}.auth-tabs{box-shadow:inset 0 1px rgba(255,255,255,.02)}.auth-tab{height:42px;border-radius:14px;font-size:12px;font-weight:700;color:#7f92aa}.auth-tab--active{background:linear-gradient(135deg,rgba(45,212,165,.16),rgba(59,130,246,.12));color:#fff}.input-shell{display:flex;align-items:center;gap:10px;height:54px;border-radius:18px;border:1px solid #1e293b;background:rgba(2,8,16,.38);padding:0 14px}.input-shell:focus-within{border-color:rgba(45,212,165,.32);box-shadow:0 0 0 4px rgba(45,212,165,.06)}
+
+.password-rules{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;margin-top:-4px;border:1px solid rgba(100,116,139,.13);border-radius:16px;background:rgba(2,8,16,.22);padding:11px}
+.password-rule{display:flex;align-items:center;gap:7px;min-height:26px;font-size:10.5px;color:#708399;transition:.18s}
+.password-rule>span{display:grid;width:18px;height:18px;place-items:center;border:1px solid rgba(100,116,139,.18);border-radius:6px;color:#536579;transition:.18s}
+.password-rule__dot{width:4px;height:4px;border-radius:999px;background:#536579}
+.password-rule b{font-weight:650}
+.password-rule.is-ok{color:#77e4c8}
+.password-rule.is-ok>span{border-color:rgba(52,211,153,.24);background:rgba(52,211,153,.08);color:#65e2c1}
+.input-shell.is-invalid{border-color:rgba(248,113,113,.38);box-shadow:0 0 0 4px rgba(248,113,113,.055)}
+.password-match{display:flex;align-items:center;gap:7px;margin-top:-7px;padding:0 2px;font-size:10.5px;font-weight:650}
+.password-match.is-ok{color:#68dec1}
+.password-match.is-error{color:#f39aa5}
+@media(max-width:520px){.password-rules{grid-template-columns:1fr}.password-rule{font-size:10.5px}}
