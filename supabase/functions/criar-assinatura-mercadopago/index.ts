@@ -17,6 +17,8 @@ function corsHeaders(req:Request){
 }
 
 
+const TEST_PAYER_EMAIL="testuser5178526503119783585@testuser.com";
+
 type PlanSlug = "start" | "pro" | "max";
 
 const isPlan = (v: unknown): v is PlanSlug =>
@@ -129,11 +131,12 @@ Deno.serve(async (req: Request) => {
 
     const externalReference = `radar:${user.id}:${plan}`;
     const amount = Number(catalog.preco_mensal);
+    const payerEmail = environment === "test" ? TEST_PAYER_EMAIL : user.email;
 
     const payload = {
       reason: `Radar do Brique - Plano ${catalog.nome}`,
       external_reference: externalReference,
-      payer_email: user.email,
+      payer_email: payerEmail,
       auto_recurring: {
         frequency: 1,
         frequency_type: "months",
@@ -164,7 +167,7 @@ Deno.serve(async (req: Request) => {
       mercadopago_subscription_id: String(created.raw.id),
       mercadopago_plan_id: created.raw.preapproval_plan_id ?? null,
       external_reference: externalReference,
-      payer_email: user.email,
+      payer_email: payerEmail,
       status: String(created.raw.status ?? "pending"),
       valor: amount,
       currency_id: "BRL",
