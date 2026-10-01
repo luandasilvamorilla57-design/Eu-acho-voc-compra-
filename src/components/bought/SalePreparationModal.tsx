@@ -54,8 +54,10 @@ export function SalePreparationModal({
   const [copied,setCopied]=useState('')
   const [error,setError]=useState('')
   const bodyRef=useRef<HTMLDivElement|null>(null)
+  const imagesRef=useRef<PreparedImage[]>(images)
 
-  useEffect(()=>()=>revokePreviews(images),[])
+  useEffect(()=>{imagesRef.current=images},[images])
+  useEffect(()=>()=>revokePreviews(imagesRef.current),[])
   useEffect(()=>{
     if(!busy){setAnalysisSeconds(0);return}
     const started=Date.now()
@@ -182,7 +184,6 @@ export function SalePreparationModal({
     }catch(err){
       reportClientError(err,'sale-preparation.generate',{source,imageCount:images.length})
       setError(err instanceof Error?err.message:'Não foi possível concluir a análise das fotos.')
-      scrollFlowTop()
     }finally{
       setBusy(false)
     }
@@ -233,7 +234,7 @@ export function SalePreparationModal({
         {error&&<div className="sale-flow__error">{error}</div>}
       </div>
 
-      {step!=='source'&&<button type="button" onClick={back} className="sale-flow__back"><ArrowLeft size={15}/> Voltar</button>}
+      {step!=='source'&&<button type="button" onClick={back} disabled={busy} className="sale-flow__back"><ArrowLeft size={15}/> Voltar</button>}
     </div>
   </div>
 }

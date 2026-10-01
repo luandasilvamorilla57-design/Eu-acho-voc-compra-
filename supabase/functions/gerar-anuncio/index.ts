@@ -35,7 +35,7 @@ const schema={type:'object',properties:{
   foto_auditoria:photoAudit
 },required:['titulo','descricao','preco_venda_rapida','preco_equilibrado','preco_premium','pontos_destaque','checklist_fotos','resposta_negociacao','foto_auditoria']}
 
-const MODELS=['gemini-3.5-flash-lite']
+const MODELS=['gemini-3.5-flash','gemini-3.5-flash-lite']
 
 function transient(raw:any,status:number){
   const message=String(raw?.error?.message||'').toLowerCase()
