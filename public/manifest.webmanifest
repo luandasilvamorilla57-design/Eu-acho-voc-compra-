@@ -1,6 +1,6 @@
 {
   "name":"BRIKE RADAR",
-  "short_name":"BRIKE",
+  "short_name":"BRIKE RADAR",
   "description":"Inteligência para compra e revenda de produtos usados.",
   "start_url":"/",
   "scope":"/",
@@ -9,7 +9,7 @@
   "theme_color":"#071723",
   "orientation":"portrait-primary",
   "icons":[
-    {"src":"/brike-icon.svg","sizes":"any","type":"image/svg+xml","purpose":"any"},
-    {"src":"/brike-maskable.svg","sizes":"any","type":"image/svg+xml","purpose":"maskable"}
+    {"src":"/brike-icon.svg?v=2","sizes":"any","type":"image/svg+xml","purpose":"any"},
+    {"src":"/brike-maskable.svg?v=2","sizes":"any","type":"image/svg+xml","purpose":"maskable"}
   ]
 }
