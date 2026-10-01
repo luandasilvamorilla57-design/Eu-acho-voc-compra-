@@ -1,16 +1,16 @@
 import { useEffect,useMemo,useState } from 'react'
-import { ArrowRight,Camera,Clock3,Flame,MessageCircle,ScanSearch,ShieldAlert,ShoppingBag,Sparkles,WalletCards } from 'lucide-react'
+import { AlertTriangle,ArrowRight,Camera,Clock3,Flame,MessageCircle,ScanSearch,ShieldAlert,ShoppingBag,Sparkles,WalletCards } from 'lucide-react'
 import type { GiroPreferido,RadarConfigRow } from '../../types/database'
 import type { RadarConfigPatch } from '../../hooks/useRadarConfig'
 import { money } from '../../utils/format'
-import { briqueCapitalPresets,catalogGuideNote,opportunitiesFor } from '../../data/briqueCatalog'
+import { briqueCapitalPresets,catalogGuideNote,opportunitiesFor,type BriqueOpportunity,type OpportunityPriority } from '../../data/briqueCatalog'
 
 export function StrategyPanel({
   config,onSave,onAnalyze
 }:{
   config:RadarConfigRow
   onSave:(patch:RadarConfigPatch)=>Promise<void>
-  onAnalyze:()=>void
+  onAnalyze:(opportunity:BriqueOpportunity)=>void
 }){
   const [capital,setCapital]=useState(String(config.capital_disponivel||''))
   const [giro,setGiro]=useState<GiroPreferido>(config.giro_preferido||'rapido')
@@ -70,7 +70,7 @@ export function StrategyPanel({
       <div className="brique-hunt__hero-copy">
         <span className="brique-hunt__eyebrow"><Sparkles size={14}/> SEU CAIXA DE COMPRA</span>
         <h3 className="font-display brique-hunt__title">Quanto você tem para colocar no brique hoje?</h3>
-        <p>Você informa o caixa e escolhe o tipo de giro. O Radar usa a nossa tabela de produtos para recomendar o que faz sentido procurar nessa faixa — depois você manda o anúncio para <strong>Analisar</strong> antes de comprar.</p>
+        <p>Você informa o caixa e escolhe o tipo de giro. O Radar usa a nossa tabela estratégica para recomendar o que faz sentido procurar — depois você manda o anúncio real para <strong>Analisar</strong> antes de pagar.</p>
       </div>
       <span className="brique-hunt__hero-icon"><WalletCards size={23}/></span>
     </div>
@@ -113,7 +113,7 @@ export function StrategyPanel({
         </div>
         <div className="brique-turnover__note">
           <ScanSearch size={17}/>
-          <p>Seu caixa não é um teto para o <strong>preço anunciado</strong>. Com R$ 100, por exemplo, pode valer olhar um item anunciado por R$ 150 se houver margem real para negociar e fechar perto do seu caixa.</p>
+          <p>Seu caixa não é um teto para o <strong>preço anunciado</strong>. Um anúncio acima do seu caixa ainda pode ser interessante quando existe margem real para negociar.</p>
         </div>
       </div>
     </div>
@@ -133,7 +133,7 @@ export function StrategyPanel({
         <b>{progress}%</b>
       </div>
       <div className="brique-searching__track"><i style={{width:progress+'%'}}/></div>
-      <p>Selecionando na base do BRike Radar os produtos mais compatíveis com seu caixa e {giro==='rapido'?'giro rápido':'giro médio'}.</p>
+      <p>Selecionando na base do BRIKE RADAR os produtos mais compatíveis com seu caixa e {giro==='rapido'?'giro rápido':'giro médio'}.</p>
     </div>}
 
     {showResults&&<div id="brique-results" className="brique-results">
@@ -141,49 +141,71 @@ export function StrategyPanel({
         <div>
           <span className="brique-hunt__eyebrow"><Flame size={14}/> PRODUTOS PARA GARIMPAR</span>
           <h4>8 produtos para procurar com {money(cash)} · {giro==='rapido'?'giro rápido':'giro médio'}</h4>
-          <p>Recomendações da base estratégica do BRike Radar para esse caixa e tipo de giro. Encontre um anúncio real e envie para <strong>Analisar</strong> antes de comprar.</p>
+          <p>Essas são recomendações da base estratégica do BRIKE RADAR. Encontre um anúncio real e envie para <strong>Analisar</strong> antes de comprar.</p>
         </div>
         <span className="brique-results__count">8</span>
       </div>
 
+      <div className="brique-results__context">
+        <span><small>SEU CAIXA</small><b>{money(cash)}</b></span>
+        <span><small>ESTRATÉGIA</small><b>{giro==='rapido'?'⚡ Giro rápido':'◎ Giro médio'}</b></span>
+        <span><small>SELEÇÃO</small><b>{opportunities.length} oportunidades</b></span>
+      </div>
+
       <div className="brique-product-grid">
-        {opportunities.map(item=><article key={item.id} className="brique-product">
-          <div className="brique-product__top">
-            <span className={'brique-heat '+(item.heat==='muito-quente'?'is-hot':'')}>
-              <Flame size={13}/>{item.heat==='muito-quente'?'MUITO QUENTE':'QUENTE'}
-            </span>
-            <span className="brique-product__turn">{giro==='rapido'?'⚡ giro rápido':'◎ giro médio'}</span>
-          </div>
+        {opportunities.map(item=>{
+          const priority=priorityMeta(item.priority)
+          const target=cappedBuyRange(item.targetBuy,cash)
+          return <article key={item.id} className="brique-product">
+            <div className="brique-product__top">
+              <span className={'brique-priority '+priority.className}>
+                {priority.icon}{priority.label}
+              </span>
+              <span className="brique-product__turn">{giro==='rapido'?'⚡ giro rápido':'◎ giro médio'}</span>
+            </div>
 
-          <h5>{item.title}</h5>
+            <h5>{item.title}</h5>
 
-          <div className="brique-product__prices">
-            <span><small>Procure anúncios nessa faixa</small><b>{rangeMoney(item.marketAsk)}</b></span>
-            <span><small>Tente fechar a compra por</small><b>{rangeMoney(cappedBuyRange(item.targetBuy,cash))}</b></span>
-          </div>
+            <div className="brique-product__prices">
+              <span><small>Procure anúncios nessa faixa</small><b>{rangeMoney(item.marketAsk)}</b></span>
+              <span><small>Tente fechar a compra por</small><b>{rangeMoney(target)}</b></span>
+            </div>
 
-          <p className="brique-product__why">{item.why}</p>
+            <p className="brique-product__why">{item.why}</p>
 
-          <div className="brique-product__signal">
-            <ShoppingBag size={16}/>
-            <p><b>O que procurar para comprar barato</b>{item.signal}</p>
-          </div>
+            <div className="brique-product__critical">
+              <AlertTriangle size={16}/>
+              <p><small>MAIOR RISCO DESTA COMPRA</small><b>{item.critical}</b></p>
+            </div>
 
-          <div className="brique-product__risk">
-            <ShieldAlert size={16}/>
-            <p><b>Riscos antes de pagar</b>{item.risk}</p>
-          </div>
+            <div className="brique-product__intel-grid">
+              <div className="brique-product__signal">
+                <ShoppingBag size={16}/>
+                <p><b>Onde pode estar a margem</b>{item.signal}</p>
+              </div>
 
-          <div className="brique-product__deal">
-            <MessageCircle size={16}/>
-            <p><b>Abordagem natural</b>“Oi! Tenho interesse. Está funcionando tudo certinho? Tem algum detalhe além do que aparece nas fotos? Se eu conseguir retirar sem enrolação, você consegue melhorar um pouco o valor?”</p>
-          </div>
+              <div className="brique-product__risk">
+                <ShieldAlert size={16}/>
+                <p><b>Antes de pagar</b>{item.risk}</p>
+              </div>
+            </div>
 
-          <button type="button" className="brique-product__analyze" onClick={onAnalyze}>
-            <span><small>ACHEI UM ANÚNCIO</small><b>Analisar agora</b></span>
-            <span className="brique-product__analyze-arrow"><ArrowRight size={18}/></span>
-          </button>
-        </article>)}
+            <div className="brique-product__focus">
+              <span>FOCO DA ANÁLISE</span>
+              <div>{item.analysisFocus.map(point=><b key={point}>{point}</b>)}</div>
+            </div>
+
+            <div className="brique-product__deal">
+              <MessageCircle size={16}/>
+              <p><b>Abordagem para este produto</b>“{item.negotiation}”</p>
+            </div>
+
+            <button type="button" className="brique-product__analyze" onClick={()=>onAnalyze(item)}>
+              <span><small>ACHEI UM ANÚNCIO DESTE PRODUTO</small><b>Analisar este anúncio</b></span>
+              <span className="brique-product__analyze-arrow"><ArrowRight size={18}/></span>
+            </button>
+          </article>
+        })}
       </div>
 
       <div className="brique-flow">
@@ -193,8 +215,8 @@ export function StrategyPanel({
         </div>
         <div className="brique-flow__steps">
           <FlowStep n="01" title="Procure" text="Busque anúncio com foto ruim, sujeira, descrição fraca, desapego ou pequeno defeito simples — desde que o produto tenha potencial real de recuperação."/>
-          <FlowStep n="02" title="Analise" text="Achou algo? Mande print ou link para Analisar. O Radar verifica preço, riscos, testes e quanto vale tentar pagar."/>
-          <FlowStep n="03" title="Negocie" text="Não comece jogando o preço lá embaixo. Primeiro mostre interesse e confirme o estado; depois use problemas reais como argumento para negociar."/>
+          <FlowStep n="02" title="Analise" text="Achou algo? Mande print ou link. A análise já entra sabendo qual produto você estava garimpando e quais riscos precisam de atenção."/>
+          <FlowStep n="03" title="Negocie" text="Primeiro confirme o estado. Depois use problemas reais do produto como argumento para melhorar o preço sem começar com oferta ofensiva."/>
           <FlowStep n="04" title="Compre" text="Fechou? Registre em Comprei para acompanhar custo real, estoque, venda e lucro."/>
           <FlowStep n="05" title="Revenda" text="Faça limpeza caprichada, corrija detalhes simples e tire boas fotos. Depois use Vender com IA para preparar o anúncio."/>
         </div>
@@ -202,7 +224,7 @@ export function StrategyPanel({
 
       <div className="brique-discipline">
         <div><ShieldAlert size={19}/><strong>Regra de ouro da negociação</strong></div>
-        <p>Foto ruim, sujeira e pequenos defeitos podem reduzir a percepção de valor e abrir margem para o briqueiro. Use apenas pontos reais do produto para negociar. Seja natural, evite oferta ofensiva logo de cara e nunca deixe um preço barato fazer você ignorar procedência, teste ou sinal de golpe.</p>
+        <p>Foto ruim, sujeira e pequenos defeitos podem reduzir a percepção de valor e abrir margem. Use apenas pontos reais do produto para negociar e nunca deixe preço baixo fazer você ignorar procedência, teste ou sinal de golpe.</p>
       </div>
 
       <div className="brique-aftercare">
@@ -213,6 +235,12 @@ export function StrategyPanel({
       <p className="brique-market-note">{catalogGuideNote}</p>
     </div>}
   </section>
+}
+
+function priorityMeta(priority:OpportunityPriority){
+  if(priority==='muito-quente')return{label:'MUITO QUENTE',className:'is-hot',icon:'🔥 '}
+  if(priority==='giro-moderado')return{label:'GIRO MODERADO',className:'is-moderate',icon:'◷ '}
+  return{label:'BOA OPORTUNIDADE',className:'is-good',icon:'✓ '}
 }
 
 function FlowStep({n,title,text}:{n:string;title:string;text:string}){
