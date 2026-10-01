@@ -1,10 +1,12 @@
 import { FileText,Images,Link2,Plus,ScanSearch,ShoppingBag,Sparkles,Trash2,Upload,WalletCards,X } from 'lucide-react'
 import type { PreparedImage } from '../../utils/imageInput'
 import type { MarketReferenceInput } from '../../types/market'
+import type { BriqueOpportunity } from '../../data/briqueCatalog'
 
 export type AdOrigin='olx'|'facebook'|'manual'
 
 type P={
+  focus?:BriqueOpportunity|null
   origem:AdOrigin
   link:string
   texto:string
@@ -38,6 +40,21 @@ export function AnalysisForm(p:P){
       <div><span className="premium-eyebrow text-emerald-400">PASSO 01 · ORIGEM</span><h3 className="font-display">De onde vem esta oportunidade?</h3><p>O Radar adapta a leitura para cada plataforma e sinaliza quando faltam dados para decidir com segurança.</p></div>
       <span className="analysis-form-card__head-icon"><ScanSearch size={20}/></span>
     </div>
+
+    {p.focus&&<div className="analysis-garimpo-context">
+      <div className="analysis-garimpo-context__head">
+        <span className="analysis-garimpo-context__icon"><ScanSearch size={18}/></span>
+        <div>
+          <small>VOCÊ VEIO DO GARIMPO</small>
+          <strong>{p.focus.title}</strong>
+        </div>
+      </div>
+      <p>A análise já vai priorizar os pontos que mais podem transformar esta compra em lucro ou prejuízo.</p>
+      <div className="analysis-garimpo-context__risk"><b>Maior risco</b><span>{p.focus.critical}</span></div>
+      <div className="analysis-garimpo-context__focus">
+        {p.focus.analysisFocus.map(point=><span key={point}>{point}</span>)}
+      </div>
+    </div>}
 
     <div className="analysis-origin-grid">
       {origins.map(({id,label,desc,icon:Icon})=>{
