@@ -7,17 +7,19 @@ import { RecentList } from '../components/dashboard/RecentList'
 import { StrategyPanel } from '../components/dashboard/StrategyPanel'
 import { OpportunityCompare } from '../components/dashboard/OpportunityCompare'
 import { FinancialPeriodPanel } from '../components/dashboard/FinancialPeriodPanel'
+import { UsagePanel } from '../components/dashboard/UsagePanel'
 import { useDashboardData } from '../hooks/useDashboardData'
+import type { AccessStatus } from '../hooks/usePlanAccess'
 import type { AnaliseRow,PurchaseRow,RadarConfigRow } from '../types/database'
 import { money,pct } from '../utils/format'
+import type { RadarConfigPatch } from '../hooks/useRadarConfig'
 
-type ConfigPatch=Partial<Pick<RadarConfigRow,'capital_disponivel'|'lucro_minimo'|'lucro_minimo_modo'|'lucro_minimo_percentual'|'roi_minimo'|'dias_alerta_estoque'>>
-
-export function DashboardPage({items,purchases,config,onSaveConfig,onNew,onOpen}:{items:AnaliseRow[];purchases:PurchaseRow[];config:RadarConfigRow;onSaveConfig:(patch:ConfigPatch)=>Promise<void>;onNew:()=>void;onOpen:(a:AnaliseRow)=>void}){
+export function DashboardPage({items,purchases,config,access,onSaveConfig,onManagePlan,onNew,onOpen}:{items:AnaliseRow[];purchases:PurchaseRow[];config:RadarConfigRow;access:AccessStatus;onSaveConfig:(patch:RadarConfigPatch)=>Promise<void>;onManagePlan:()=>void;onNew:()=>void;onOpen:(a:AnaliseRow)=>void}){
   const s=useDashboardData(items,purchases)
   const available=config.capital_disponivel>0?Math.max(0,config.capital_disponivel-s.invested):0
   return <div className="space-y-4 lg:space-y-5">
     <DashboardHero onNew={onNew}/>
+    <UsagePanel status={access} onManage={onManagePlan}/>
     <div className="grid grid-cols-2 gap-3 xl:grid-cols-4">
       <MetricCard icon={Search} label="Análises" value={String(items.length)} hint="oportunidades avaliadas"/>
       <MetricCard icon={ShoppingCart} label="Comprados" value={String(s.bought)} hint={String(s.sold)+' já vendidos'} tone="blue"/>

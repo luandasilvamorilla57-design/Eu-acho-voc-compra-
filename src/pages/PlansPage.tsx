@@ -87,7 +87,7 @@ const compareRows=[
 const faqs=[
   ['É para quem compra no Marketplace e na OLX?','Sim. O BRIKE RADAR foi pensado para quem garimpa usados, negocia a compra e avalia se existe espaço para revenda.'],
   ['O Radar garante lucro?','Não. Ele organiza preço, risco, oferta e teto para apoiar sua decisão. Resultado de compra e revenda depende do produto, condição, mercado e execução.'],
-  ['Quando meu acesso é liberado?','Depois que o Mercado Pago confirma o pagamento e o backend do Radar valida a assinatura. A interface sozinha não libera acesso.'],
+  ['Quando meu acesso é liberado?','Depois que o gateway confirma o pagamento e o backend do Radar valida a assinatura. A interface sozinha não libera acesso.'],
   ['Qual plano é voltado para quem revende?','O Pro reúne análise de compra, Diagnóstico Premium e Preparar venda com IA. O Max amplia o volume para quem opera mais.'],
   ['O Start já analisa oportunidades?','Sim. O Start inclui score, preço, riscos, oferta sugerida, teto de compra, negociação e histórico.'],
   ['Posso entrar no painel sem pagar?','Não. Sem assinatura confirmada, o painel e as funções protegidas continuam bloqueados no servidor.'],
@@ -302,7 +302,7 @@ export function PlansPage({email,onRefreshAccess}:{email?:string;onRefreshAccess
       {returned&&<section className="plans-shell plans-payment-wrap">
         <div className="plans-payment-return">
           <div>
-            <strong>Pagamento enviado ao Mercado Pago.</strong>
+            <strong>Pagamento enviado ao checkout.</strong>
             <span>{checking?'Validando sua assinatura no servidor...':'Se você concluiu o pagamento, valide seu acesso.'}</span>
           </div>
           <button onClick={manualRefresh} disabled={checking}><RefreshCw size={14} className={checking?'animate-spin':''}/> Validar acesso</button>
@@ -456,9 +456,9 @@ export function PlansPage({email,onRefreshAccess}:{email?:string;onRefreshAccess
             <ShieldCheck size={22}/>
             <div className="plans-kicker">ACESSO PROTEGIDO</div>
             <h2>Pagamento confirmado no servidor. Sem atalho pelo navegador.</h2>
-            <p>O Mercado Pago processa a cobrança e o backend valida a assinatura antes de liberar o painel e os recursos do seu plano.</p>
+            <p>O gateway processa a cobrança e o backend valida a assinatura antes de liberar o painel e os recursos do seu plano.</p>
             <ul>
-              <li><Check size={13}/> checkout via Mercado Pago</li>
+              <li><Check size={13}/> checkout seguro</li>
               <li><Check size={13}/> webhook validado</li>
               <li><Check size={13}/> plano conferido no backend</li>
               <li><Check size={13}/> recursos premium protegidos no servidor</li>
@@ -499,7 +499,7 @@ export function PlansPage({email,onRefreshAccess}:{email?:string;onRefreshAccess
             <p>Escolha o plano que combina com seu ritmo de garimpo e revenda.</p>
             <a href="#planos">Escolher meu plano <ArrowRight size={16}/></a>
           </div>
-          <div className="plans-final__security"><ShieldCheck size={13}/> Pagamento processado pelo Mercado Pago · acesso validado no servidor.</div>
+          <div className="plans-final__security"><ShieldCheck size={13}/> Pagamento processado pelo gateway · acesso validado no servidor.</div>
         </div>
       </section>
     </main>

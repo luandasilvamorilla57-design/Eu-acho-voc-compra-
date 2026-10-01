@@ -12,9 +12,12 @@ import { NewAnalysisPage } from './pages/NewAnalysisPage'
 import { BoughtPage } from './pages/BoughtPage'
 import { HistoryPage } from './pages/HistoryPage'
 import { PlansPage } from './pages/PlansPage'
+import { SubscriptionPage } from './pages/SubscriptionPage'
+import { AdminPage } from './pages/AdminPage'
 import { AppShell } from './components/AppShell'
 import { AnalysisModal } from './components/AnalysisModal'
 import { StatusEditor } from './components/StatusEditor'
+import { OnboardingModal } from './components/onboarding/OnboardingModal'
 import type { View } from './components/BottomNav'
 import type { AnaliseRow } from './types/database'
 import { buildRadarAlerts } from './utils/radarAlerts'
@@ -30,7 +33,7 @@ export default function App(){
   const [editing,setEditing]=useState<AnaliseRow|null>(null)
 
   const {config,loading:configLoading,save:saveConfig}=useRadarConfig(!!session)
-  const {loading:planLoading,checked:planChecked,hasAccess,refresh:refreshAccess}=usePlanAccess(!!session)
+  const {loading:planLoading,checked:planChecked,hasAccess,status:access,refresh:refreshAccess}=usePlanAccess(!!session)
   const appDataActive=!!session&&hasAccess
   const {items,load,updateStatus,resolveNegotiation,addNegotiationLog,reinspect}=useAnalyses(appDataActive)
   const {items:purchases,load:loadPurchases,createPurchase,markSold,updatePurchase,uploadPhotos,removePhoto}=usePurchases(appDataActive)
@@ -39,7 +42,34 @@ export default function App(){
   const alerts=useMemo(()=>buildRadarAlerts(items,purchases,config),[items,purchases,config])
   const intelligence=useMemo(()=>buildUserIntelligence(purchases,items),[purchases,items])
 
-  useEffect(()=>{window.localStorage.setItem('brike-theme',dark?'dark':'light');document.documentElement.style.colorScheme=dark?'dark':'light';document.body.style.background=dark?'#06101c':'#eef5f4'},[dark])
+  useEffect(()=>{
+    window.localStorage.setItem('brike-theme',dark?'dark':'light')
+    document.documentElement.style.colorScheme=dark?'dark':'light'
+    document.body.style.background=dark?'#06101c':'#eef5f4'
+  },[dark])
+
+  useEffect(()=>{
+    if(!session||!hasAccess)return
+    const params=new URLSearchParams(window.location.search)
+    if(params.get('checkout')==='extra'){
+      setView('subscription')
+      void refreshAccess()
+      window.history.replaceState({},'',window.location.pathname)
+    }
+  },[session,hasAccess,refreshAccess])
+
+  useEffect(()=>{
+    if(!hasAccess||!config.notificacoes_ativas||typeof Notification==='undefined'||Notification.permission!=='granted')return
+    const alert=alerts.find(a=>a.severity==='high')
+    if(!alert)return
+    const day=new Date().toISOString().slice(0,10)
+    const key='brike-notification:'+day+':'+alert.id
+    if(localStorage.getItem(key))return
+    try{
+      new Notification('BRIKE RADAR · atenção',{body:alert.title+' — '+alert.recommendation,icon:'/brike-icon.svg'})
+      localStorage.setItem(key,'1')
+    }catch{}
+  },[alerts,config.notificacoes_ativas,hasAccess])
 
   if(!ready)return <div className="grid min-h-screen place-items-center bg-[#06101c] text-xs text-slate-600">Carregando radar...</div>
   if(!session||reset)return <AuthPage initialMode={reset?'reset':'login'}/>
@@ -47,14 +77,17 @@ export default function App(){
   if(!hasAccess)return <PlansPage email={session.user.email} onRefreshAccess={refreshAccess}/>
 
   let page:React.ReactNode
-  if(view==='dashboard')page=<DashboardPage items={items} purchases={purchases} config={config} onSaveConfig={saveConfig} onNew={()=>setView('new')} onOpen={setSelected}/>
+  if(view==='dashboard')page=<DashboardPage items={items} purchases={purchases} config={config} access={access} onSaveConfig={saveConfig} onManagePlan={()=>setView('subscription')} onNew={()=>setView('new')} onOpen={setSelected}/>
   else if(view==='radar')page=<RadarPage analyses={items} purchases={purchases} config={config} alerts={alerts} insights={intelligence.insights} onNavigate={setView} onOpen={setSelected}/>
-  else if(view==='new')page=<NewAnalysisPage config={config} userProfile={intelligence.profile} onSaved={async destination=>{await load();setView(destination)}}/>
-  else if(view==='bought')page=<BoughtPage analyses={items} purchases={purchases} drafts={drafts} config={config} onCreate={async input=>{await createPurchase(input);await load()}} onSold={async(id,salePrice)=>{await markSold(id,salePrice);await load()}} onUpdate={updatePurchase} onUploadPhotos={uploadPhotos} onRemovePhoto={removePhoto} onSaveDraft={saveResaleDraft} onUpdateDraftCopy={updateResaleDraftCopy} onDeleteDraft={removeResaleDraft}/>
-  else page=<HistoryPage items={items} config={config} onOpen={setSelected} onEdit={setEditing} onNegotiationBought={async(id,price)=>{await resolveNegotiation(id,'bought',price);await loadPurchases()}} onNegotiationFailed={async id=>{await resolveNegotiation(id,'failed')}} onNegotiationLog={addNegotiationLog} onReinspect={reinspect}/>
+  else if(view==='new')page=<NewAnalysisPage config={config} userProfile={intelligence.profile} purchases={purchases} onUsageChanged={refreshAccess} onSaved={async destination=>{await load();await refreshAccess();setView(destination)}}/>
+  else if(view==='bought')page=<BoughtPage analyses={items} purchases={purchases} drafts={drafts} config={config} onCreate={async input=>{await createPurchase(input);await load()}} onSold={async(id,salePrice)=>{await markSold(id,salePrice);await load()}} onUpdate={updatePurchase} onUploadPhotos={uploadPhotos} onRemovePhoto={removePhoto} onSaveDraft={async input=>{const row=await saveResaleDraft(input);await refreshAccess();return row}} onUpdateDraftCopy={updateResaleDraftCopy} onDeleteDraft={removeResaleDraft}/>
+  else if(view==='history')page=<HistoryPage items={items} config={config} onOpen={setSelected} onEdit={setEditing} onNegotiationBought={async(id,price)=>{await resolveNegotiation(id,'bought',price);await loadPurchases()}} onNegotiationFailed={async id=>{await resolveNegotiation(id,'failed')}} onNegotiationLog={addNegotiationLog} onReinspect={reinspect}/>
+  else if(view==='subscription')page=<SubscriptionPage status={access} onBack={()=>setView('dashboard')} onRefresh={refreshAccess}/>
+  else page=access.owner_access?<AdminPage onBack={()=>setView('dashboard')}/>:<DashboardPage items={items} purchases={purchases} config={config} access={access} onSaveConfig={saveConfig} onManagePlan={()=>setView('subscription')} onNew={()=>setView('new')} onOpen={setSelected}/>
 
-  return <AppShell view={view} setView={setView} dark={dark} setDark={setDark} email={session.user.email} radarCount={alerts.length}>
+  return <AppShell view={view} setView={setView} dark={dark} setDark={setDark} email={session.user.email} radarCount={alerts.length} ownerAccess={access.owner_access} onManageSubscription={()=>setView('subscription')} onOpenAdmin={()=>setView('admin')}>
     {page}
+    {!config.onboarding_concluido&&!access.owner_access&&<OnboardingModal config={config} onSave={saveConfig}/>}
     <AnalysisModal item={selected} onClose={()=>setSelected(null)} config={config}/>
     <StatusEditor item={editing} onClose={()=>setEditing(null)} onSave={async(s,b,v)=>{const err=await updateStatus(editing!.id,s,b,v);if(!err)await loadPurchases()}}/>
   </AppShell>

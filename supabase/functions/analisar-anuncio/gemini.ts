@@ -4,7 +4,7 @@ import { buildPrompt } from './prompt.ts'
 type InputImage={mime_type:string;data:string;name?:string}
 type MarketRef={url?:string;price?:number;note?:string}
 type GeminiResult={raw:any;ai:any;model:string;fallback:boolean}
-const MODELS=['gemini-3.5-flash','gemini-3.5-flash-lite'] as const
+const MODELS=['gemini-3.5-flash-lite'] as const
 
 function shouldFallback(raw:any,status:number){
   const code=String(raw?.error?.code||'').toLowerCase()

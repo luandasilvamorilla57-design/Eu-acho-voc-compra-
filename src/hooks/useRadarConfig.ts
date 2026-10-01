@@ -12,10 +12,16 @@ export const defaultRadarConfig:RadarConfigRow={
   dias_alerta_estoque:14,
   plano_atual:'start',
   acesso_total:false,
+  onboarding_concluido:false,
+  perfil_operacao:'revenda',
+  experiencia:'iniciante',
+  categorias_preferidas:[],
+  objetivo_lucro_mensal:0,
+  notificacoes_ativas:true,
   data_atualizacao:new Date(0).toISOString()
 }
 
-type ConfigPatch=Partial<Pick<RadarConfigRow,'capital_disponivel'|'lucro_minimo'|'lucro_minimo_modo'|'lucro_minimo_percentual'|'roi_minimo'|'dias_alerta_estoque'>>
+export type RadarConfigPatch=Partial<Omit<RadarConfigRow,'user_id'|'data_atualizacao'|'acesso_total'|'plano_atual'>>
 
 export function useRadarConfig(active:boolean){
   const [config,setConfig]=useState<RadarConfigRow>(defaultRadarConfig)
@@ -33,9 +39,9 @@ export function useRadarConfig(active:boolean){
     setLoading(false)
   },[active])
 
-  useEffect(()=>{load()},[load])
+  useEffect(()=>{void load()},[load])
 
-  const save=async(patch:ConfigPatch)=>{
+  const save=async(patch:RadarConfigPatch)=>{
     const {data,error}=await supabase.from('radar_config').upsert({...patch},{onConflict:'user_id'}).select('*').single()
     if(error)throw error
     if(data)setConfig({...defaultRadarConfig,...data})

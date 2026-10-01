@@ -1,9 +1,9 @@
 import { useEffect,useRef,useState } from 'react'
-import { ChevronRight,Download,KeyRound,LogOut,Mail,ShieldCheck,Trash2,UserRound,X } from 'lucide-react'
+import { ChevronRight,CreditCard,Download,KeyRound,LayoutDashboard,LogOut,Mail,ShieldCheck,Trash2,UserRound,X } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
 import { reportClientError } from '../../lib/errorReporter'
 
-export function AccountMenu({email}:{email?:string}){
+export function AccountMenu({email,onManageSubscription,onOpenAdmin,ownerAccess=false}:{email?:string;onManageSubscription?:()=>void;onOpenAdmin?:()=>void;ownerAccess?:boolean}){
   const [open,setOpen]=useState(false)
   const [passwordOpen,setPasswordOpen]=useState(false)
   const [deleteOpen,setDeleteOpen]=useState(false)
@@ -67,6 +67,8 @@ export function AccountMenu({email}:{email?:string}){
       <div className="account-popover__status"><ShieldCheck size={14}/><div><strong>Sessão protegida</strong><span>Autenticação via Supabase</span></div></div>
       <div className="account-popover__actions">
         {installPrompt&&<button type="button" onClick={install}><span className="account-action-icon"><Download size={15}/></span><span><strong>Instalar BRIKE RADAR</strong><small>Usar como aplicativo no celular</small></span><ChevronRight size={15}/></button>}
+        {onManageSubscription&&<button type="button" onClick={()=>{setOpen(false);onManageSubscription()}}><span className="account-action-icon"><CreditCard size={15}/></span><span><strong>{ownerAccess?'Acesso da conta':'Minha assinatura'}</strong><small>{ownerAccess?'Conta proprietária ilimitada':'Plano, consumo, créditos e cobrança'}</small></span><ChevronRight size={15}/></button>}
+        {ownerAccess&&onOpenAdmin&&<button type="button" onClick={()=>{setOpen(false);onOpenAdmin()}}><span className="account-action-icon"><LayoutDashboard size={15}/></span><span><strong>Painel proprietário</strong><small>Usuários, receita, consumo e erros</small></span><ChevronRight size={15}/></button>}
         <button type="button" onClick={()=>{resetModals();setPasswordOpen(true);setOpen(false)}}><span className="account-action-icon"><KeyRound size={15}/></span><span><strong>Alterar senha</strong><small>Defina uma nova senha de acesso</small></span><ChevronRight size={15}/></button>
         <button type="button" className="account-action--danger" onClick={()=>{resetModals();setDeleteOpen(true);setOpen(false)}}><span className="account-action-icon"><Trash2 size={15}/></span><span><strong>Excluir conta</strong><small>Apagar conta, dados e fotos privadas</small></span><ChevronRight size={15}/></button>
         <button type="button" className="account-action--danger" onClick={()=>supabase.auth.signOut()}><span className="account-action-icon"><LogOut size={15}/></span><span><strong>Sair da conta</strong><small>Encerrar esta sessão</small></span><ChevronRight size={15}/></button>

@@ -1,5 +1,5 @@
 import { BarChart3,History,PackageCheck,Radar,Sparkles } from 'lucide-react'
-export type View='dashboard'|'radar'|'new'|'bought'|'history'
+export type View='dashboard'|'radar'|'new'|'bought'|'history'|'subscription'|'admin'
 
 export function BottomNav({view,setView,radarCount=0}:{view:View;setView:(v:View)=>void;radarCount?:number}){
   const items=[

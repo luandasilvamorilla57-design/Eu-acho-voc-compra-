@@ -35,7 +35,7 @@ const schema={type:'object',properties:{
   foto_auditoria:photoAudit
 },required:['titulo','descricao','preco_venda_rapida','preco_equilibrado','preco_premium','pontos_destaque','checklist_fotos','resposta_negociacao','foto_auditoria']}
 
-const MODELS=['gemini-3.5-flash','gemini-3.5-flash-lite']
+const MODELS=['gemini-3.5-flash-lite']
 
 function transient(raw:any,status:number){
   const message=String(raw?.error?.message||'').toLowerCase()
@@ -49,6 +49,8 @@ Deno.serve(async req=>{
   if(req.method==='OPTIONS')return new Response('ok',{headers:cors})
   if(req.method!=='POST')return Response.json({error:'Método não permitido'},{status:405,headers:cors})
   const requestId=crypto.randomUUID()
+  let admin:any=null
+  let usageReserved=false
 
   try{
     const auth=req.headers.get('authorization')||''
@@ -59,15 +61,21 @@ Deno.serve(async req=>{
     if(!token)return Response.json({error:'Sessão ausente.',request_id:requestId},{status:401,headers:cors})
     if(!supabaseUrl||!serviceKey||!geminiKey)return Response.json({error:'Serviço temporariamente indisponível.',request_id:requestId},{status:503,headers:cors})
 
-    const admin=createClient(supabaseUrl,serviceKey,{auth:{persistSession:false,autoRefreshToken:false}})
+    admin=createClient(supabaseUrl,serviceKey,{auth:{persistSession:false,autoRefreshToken:false}})
     const {data:{user},error:userError}=await admin.auth.getUser(token)
     if(userError||!user)return Response.json({error:'Sessão inválida ou expirada.',request_id:requestId},{status:401,headers:cors})
 
-    const {data:config}=await admin.from('radar_config').select('plano_atual,acesso_total').eq('user_id',user.id).maybeSingle()
-    const plan=String(config?.plano_atual||'start')
-    const fullAccess=config?.acesso_total===true
-    if(!fullAccess&&plan!=='pro'&&plan!=='max'){
-      return Response.json({error:'O Anúncio Inteligente com avaliação de fotos está disponível no BRIKE Pro.',code:'FEATURE_REQUIRES_PRO',request_id:requestId},{status:403,headers:cors})
+    const {data:proAccess,error:accessError}=await admin.rpc('tem_recurso_pro',{p_user_id:user.id})
+    if(accessError){
+      console.error('PHOTO_AD_ACCESS_ERROR',requestId,accessError)
+      return Response.json({error:'Não foi possível validar seu plano agora.',code:'ACCESS_CHECK_FAILED',request_id:requestId},{status:503,headers:cors})
+    }
+    if(proAccess!==true){
+      const {data:baseAccess}=await admin.rpc('tem_acesso_radar',{p_user_id:user.id})
+      if(baseAccess!==true){
+        return Response.json({error:'Escolha um plano para usar o Radar do Brique.',code:'SUBSCRIPTION_REQUIRED',request_id:requestId},{status:402,headers:cors})
+      }
+      return Response.json({error:'O Preparar venda com IA e a avaliação de fotos são recursos dos planos Pro e Max.',code:'FEATURE_REQUIRES_PRO',request_id:requestId},{status:403,headers:cors})
     }
 
     const b=await req.json()
@@ -81,6 +89,21 @@ Deno.serve(async req=>{
       if(!image?.data||typeof image.data!=='string'||image.data.length>3_000_000)return Response.json({error:'Uma das fotos é inválida ou grande demais.',request_id:requestId},{status:400,headers:cors})
       if(!['image/jpeg','image/png','image/webp'].includes(image.mime_type))return Response.json({error:'Formato de foto não suportado.',request_id:requestId},{status:400,headers:cors})
     }
+
+    const {data:quotaData,error:quotaError}=await admin.rpc('reservar_uso_radar',{p_user_id:user.id,p_tipo:'preparar_venda',p_request_id:requestId})
+    if(quotaError){
+      console.error('PHOTO_AD_QUOTA_ERROR',requestId,quotaError)
+      return Response.json({error:'Não foi possível validar a franquia do seu plano.',code:'ACCESS_CHECK_FAILED',request_id:requestId},{status:503,headers:cors})
+    }
+    const quota=Array.isArray(quotaData)?quotaData[0]:quotaData
+    if(!quota?.permitido){
+      const code=String(quota?.motivo||'recurso_pro')
+      if(code==='assinatura_inativa')return Response.json({error:'Escolha um plano para usar o Radar do Brique.',code:'SUBSCRIPTION_REQUIRED',request_id:requestId},{status:402,headers:cors})
+      if(code==='recurso_pro')return Response.json({error:'O Diagnóstico Premium e o Preparar venda com IA estão disponíveis nos planos Pro e Max.',code:'FEATURE_REQUIRES_PRO',request_id:requestId},{status:403,headers:cors})
+      if(code==='limite_venda_ia')return Response.json({error:'Você atingiu a franquia mensal de Preparar venda com IA do seu plano.',code:'PREMIUM_MONTHLY_LIMIT',request_id:requestId},{status:429,headers:cors})
+      return Response.json({error:'Recurso indisponível para este plano.',code:'FEATURE_UNAVAILABLE',request_id:requestId},{status:403,headers:cors})
+    }
+    usageReserved=true
 
     const context={
       origem_item:origin,
@@ -194,12 +217,19 @@ ${JSON.stringify(context).slice(0,28000)}`
       ad.preco_premium=Math.max(ad.preco_equilibrado,n(ad.preco_premium))
       ad.gerado_em=new Date().toISOString()
 
+      if(usageReserved){
+        await admin.rpc('finalizar_uso_radar',{p_request_id:requestId,p_success:true,p_error:null})
+        usageReserved=false
+      }
       console.log('PHOTO_AD_OK',JSON.stringify({requestId,userId:user.id,origin,product,model:MODELS[i],fallback:i>0,imageCount:images.length,score:ad.foto_auditoria.nota_geral}))
-      return Response.json({ad,request_id:requestId,model:MODELS[i],fallback:i>0},{headers:cors})
+      return Response.json({ad,request_id:requestId,model:MODELS[i],fallback:i>0,quota:{restantes_mes:Number(quota?.restantes_mes||0)}},{headers:cors})
     }
 
     throw new Error(lastMessage)
   }catch(e){
+    if(usageReserved&&admin){
+      try{await admin.rpc('finalizar_uso_radar',{p_request_id:requestId,p_success:false,p_error:e instanceof Error?e.message:'erro_interno'})}catch{}
+    }
     console.error('PHOTO_AD_ERROR',requestId,e)
     const message=e instanceof Error?e.message:'Erro interno'
     const lower=message.toLowerCase()

@@ -18,7 +18,7 @@ async function readFunctionError(error:any){
   return error?.message||'Não foi possível analisar.'
 }
 
-export function useNewAnalysis(onSaved:(destination:'dashboard'|'history')=>void,userProfile=''){
+export function useNewAnalysis(onSaved:(destination:'dashboard'|'history')=>void,userProfile='',onUsageChanged?:()=>void|Promise<unknown>){
   const [origem,setOrigemState]=useState<AdOrigin>('olx')
   const [link,setLink]=useState('')
   const [texto,setTexto]=useState('')
@@ -96,6 +96,7 @@ export function useNewAnalysis(onSaved:(destination:'dashboard'|'history')=>void
     }
     if(data?.error){setError(data?.details||data.error);return}
     setResult(data.analysis as AnalysisResult)
+    void onUsageChanged?.()
   }
 
   const save=async(pipeline_status:PipelineStatus,veredito_radar:RadarDecision|null,destination:'dashboard'|'history',action:'negotiate'|'discard'|'save')=>{

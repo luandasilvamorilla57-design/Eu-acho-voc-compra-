@@ -35,22 +35,28 @@ export function buildUserIntelligence(purchases:PurchaseRow[],analyses:AnaliseRo
   }
   const avgDiscount=avg(discounts)
 
+  const saleVsSuggested:number[]=[]
+  for(const p of sold){
+    const ad=p.anuncio_revenda
+    if(!ad||typeof ad!=='object'||Array.isArray(ad))continue
+    const suggested=Number((ad as any).preco_equilibrado||0)
+    const actual=Number(p.preco_venda||0)
+    if(suggested>0&&actual>0)saleVsSuggested.push((actual-suggested)/suggested*100)
+  }
+  const avgSaleDeviation=avg(saleVsSuggested)
+
   const insights:UserInsight[]=[]
-  if(categories[0]){
-    insights.push({id:'category',eyebrow:'SEU MELHOR TERRENO',title:categories[0].name,detail:`ROI médio ${pct(categories[0].avgRoi)} · lucro médio ${money(categories[0].avgProfit)} · giro ${Math.round(categories[0].avgDays)} dias`,tone:'green'})
-  }
-  if(sold.length){
-    insights.push({id:'speed',eyebrow:'SEU GIRO REAL',title:`${Math.round(avgDays)} dias para vender`,detail:`Média de ${sold.length} venda(s) concluída(s). Quanto menor, menos capital fica preso.`,tone:'blue'})
-  }
-  if(discounts.length){
-    insights.push({id:'discount',eyebrow:'SUA NEGOCIAÇÃO',title:`${pct(avgDiscount)} abaixo do pedido`,detail:'Desconto médio conseguido nas compras que nasceram de uma análise do Radar.',tone:'amber'})
-  }
+  if(categories[0])insights.push({id:'category',eyebrow:'SEU MELHOR TERRENO',title:categories[0].name,detail:'ROI médio '+pct(categories[0].avgRoi)+' · lucro médio '+money(categories[0].avgProfit)+' · giro '+Math.round(categories[0].avgDays)+' dias',tone:'green'})
+  if(sold.length)insights.push({id:'speed',eyebrow:'SEU GIRO REAL',title:Math.round(avgDays)+' dias para vender',detail:'Média de '+sold.length+' venda(s) concluída(s). Quanto menor, menos capital fica preso.',tone:'blue'})
+  if(discounts.length)insights.push({id:'discount',eyebrow:'SUA NEGOCIAÇÃO',title:pct(avgDiscount)+' abaixo do pedido',detail:'Desconto médio conseguido nas compras que nasceram de uma análise do Radar.',tone:'amber'})
+  if(saleVsSuggested.length)insights.push({id:'suggested-sale',eyebrow:'PREÇO SUGERIDO × VENDA REAL',title:(avgSaleDeviation>=0?'+':'')+pct(avgSaleDeviation),detail:'Diferença média entre o preço equilibrado sugerido pelo Anúncio Inteligente e o valor realmente vendido em '+saleVsSuggested.length+' item(ns).',tone:avgSaleDeviation>=-5?'green':'amber'})
 
   const profile=[
-    sold.length?`Histórico real: ${sold.length} venda(s), ROI médio ${pct(avgRoi)}, lucro médio ${money(avgProfit)}, giro médio ${Math.round(avgDays)} dias.`:'',
-    discounts.length?`Nas compras vinculadas a anúncios, o desconto médio obtido foi ${pct(avgDiscount)}.`:'',
-    categories.slice(0,3).map(c=>`${c.name}: ${c.count} venda(s), ROI médio ${pct(c.avgRoi)}, lucro médio ${money(c.avgProfit)}, giro médio ${Math.round(c.avgDays)} dias.`).join(' ')
+    sold.length?'Histórico real: '+sold.length+' venda(s), ROI médio '+pct(avgRoi)+', lucro médio '+money(avgProfit)+', giro médio '+Math.round(avgDays)+' dias.':'',
+    discounts.length?'Nas compras vinculadas a anúncios, o desconto médio obtido foi '+pct(avgDiscount)+'.':'',
+    saleVsSuggested.length?'Nas vendas com anúncio inteligente, o preço real ficou em média '+pct(avgSaleDeviation)+' em relação ao preço equilibrado sugerido.':'',
+    categories.slice(0,3).map(c=>c.name+': '+c.count+' venda(s), ROI médio '+pct(c.avgRoi)+', lucro médio '+money(c.avgProfit)+', giro médio '+Math.round(c.avgDays)+' dias.').join(' ')
   ].filter(Boolean).join(' ')
 
-  return {soldCount:sold.length,avgRoi,avgProfit,avgDays,avgDiscount,categories,insights,profile}
+  return {soldCount:sold.length,avgRoi,avgProfit,avgDays,avgDiscount,avgSaleDeviation,categories,insights,profile}
 }
