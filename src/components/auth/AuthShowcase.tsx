@@ -1,108 +1,94 @@
-import { Activity,BarChart3,ScanSearch,ShieldCheck,Sparkles,TrendingUp } from 'lucide-react'
+import { ArrowRight,CheckCircle2,ScanSearch,ShieldCheck,Sparkles,TrendingUp,WalletCards } from 'lucide-react'
 import { Brand } from '../Brand'
-import { AuthPainCard } from './AuthPainCard'
-import { AuthBenefits } from './AuthBenefits'
-import type { AuthMode } from './authCopy'
 
-export function AuthShowcase({mode}:{mode:AuthMode}){
-  const detailed=mode==='register'
-  const recovery=mode==='recover'||mode==='reset'
-
-  return <section className={'auth-showcase auth-showcase--'+mode+' noise radar-grid relative overflow-hidden border-b border-slate-800/70 p-5 sm:p-7 lg:border-b-0 lg:border-r lg:p-[5.4vw]'}>
+export function AuthShowcase(){
+  return <section className="auth-showcase auth-showcase--register noise radar-grid relative overflow-hidden border-b border-slate-800/70 p-5 sm:p-7 lg:border-b-0 lg:border-r lg:p-[5.15vw]">
     <div className="auth-orb auth-orb--one"/>
     <div className="auth-orb auth-orb--two"/>
     <div className="auth-rings" aria-hidden="true"><span/><span/><span/></div>
     <div className="auth-scanline" aria-hidden="true"/>
 
-    <div className="relative z-10 mx-auto flex min-h-full max-w-[920px] flex-col justify-between">
-      <div>
-        <div className="auth-showcase__top">
-          <Brand/>
-          <div className="auth-showcase__meta"><span>COMPRA</span><i/><span>NEGOCIAÇÃO</span><i/><span>REVENDA</span></div>
-        </div>
-
-        <div className={'auth-hero-copy '+(detailed?'is-register':'is-simple')+' mt-8 sm:mt-11'}>
-          <div className="auth-kicker">{recovery?'ACESSO À SUA OPERAÇÃO':'FEITO PARA QUEM VIVE DE BRIQUE'}</div>
-          <h1 className="font-display mt-4">
-            {recovery
-              ?<>Seu histórico de compra e revenda continua <span>protegido.</span></>
-              :<>Compre melhor. Negocie melhor. <span>Revenda com margem.</span></>}
-          </h1>
-          <p>{recovery
-            ?'Recupere seu acesso para voltar às análises, compras, ações pendentes e histórico da sua operação.'
-            :'Para quem garimpa barato no Facebook Marketplace, OLX e outros classificados para revender mais caro. O BRIKE RADAR ajuda a decidir o que vale comprar antes de colocar dinheiro no negócio.'}</p>
-        </div>
-
-        {!recovery&&<div className="auth-marketplaces" aria-label="Onde o usuário encontra oportunidades">
-          <span>Facebook Marketplace</span>
-          <span>OLX</span>
-          <span>Classificados locais</span>
-          <span>Desapegos</span>
-        </div>}
-
-        {!detailed&&!recovery&&<div className="auth-simple-flow">
-          <span><b>01</b><strong>Garimpe</strong><small>Encontre o anúncio.</small></span>
-          <i/>
-          <span><b>02</b><strong>Analise</strong><small>Veja risco e teto.</small></span>
-          <i/>
-          <span><b>03</b><strong>Negocie</strong><small>Compre no preço certo.</small></span>
-          <i/>
-          <span><b>04</b><strong>Revenda</strong><small>Proteja sua margem.</small></span>
-        </div>}
-
-        {recovery&&<div className="auth-recovery-note">
-          <ShieldCheck size={20}/>
-          <div><strong>Seu histórico não é perdido.</strong><span>Redefinir a senha apenas recupera seu acesso à conta e aos dados já salvos.</span></div>
-        </div>}
-
-        {detailed&&<>
-          <div className="auth-intel-preview" aria-label="Exemplo de inteligência do BRIKE RADAR">
-            <div className="auth-intel-preview__head">
-              <div>
-                <span><ScanSearch size={13}/> ANÁLISE ANTES DA COMPRA</span>
-                <strong>Decisão baseada em preço, risco e giro.</strong>
-              </div>
-              <b>Score 86</b>
-            </div>
-            <div className="auth-intel-preview__grid">
-              <Metric icon={TrendingUp} label="Preço de compra" value="R$ 780" hint="teto recomendado"/>
-              <Metric icon={BarChart3} label="Revenda provável" value="R$ 1.050" hint="faixa estimada"/>
-              <Metric icon={ShieldCheck} label="Risco" value="Baixo" hint="checklist validado"/>
-            </div>
-            <div className="auth-intel-preview__signal">
-              <Activity size={15}/>
-              <span>O BRIKE RADAR conecta garimpo, análise, negociação, estoque, ações e revenda em um único fluxo.</span>
-            </div>
-          </div>
-
-          <AuthPainCard/>
-          <AuthBenefits/>
-        </>}
-
-        {detailed&&<div className="auth-register-positioning">
-          <strong>Do anúncio mal apresentado até a venda.</strong>
-          <p>Use o Radar para encontrar o que procurar com seu caixa, mande o anúncio para análise, negocie com base em fatos e depois acompanhe estoque, giro e revenda.</p>
-        </div>}
+    <div className="relative z-10 mx-auto flex min-h-full max-w-[920px] flex-col">
+      <div className="auth-showcase__top">
+        <Brand/>
+        <div className="auth-showcase__meta"><span>GARIMPO</span><i/><span>ANÁLISE</span><i/><span>NEGOCIAÇÃO</span><i/><span>REVENDA</span></div>
       </div>
 
-      <div className="auth-outcome mt-6 hidden lg:flex">
-        <div className="auth-outcome__icon"><Sparkles size={15}/></div>
+      <div className="auth-register-hero">
+        <div className="auth-kicker">PARA QUEM COMPRA BARATO E REVENDE MAIS CARO</div>
+        <h1 className="font-display">Pare de depender do <span>“acho que dá lucro”.</span></h1>
+        <p>Se você garimpa no Facebook Marketplace, OLX, classificados e desapegos, o BRIKE RADAR transforma cada anúncio em uma decisão mais clara antes de você colocar dinheiro no negócio.</p>
+      </div>
+
+      <div className="auth-register-promise">
+        <div className="auth-register-promise__lead">
+          <span><ScanSearch size={15}/> O QUE MUDA NA PRÁTICA</span>
+          <strong>Você deixa de olhar só o preço e passa a enxergar o negócio inteiro.</strong>
+        </div>
+        <div className="auth-register-promise__grid">
+          <PromiseItem icon={WalletCards} title="O que procurar" text="Informe seu caixa e o tipo de giro. O Radar mostra categorias que fazem sentido para garimpar."/>
+          <PromiseItem icon={ScanSearch} title="Antes de pagar" text="Mande o anúncio e veja teto de compra, riscos, testes e pontos para negociar."/>
+          <PromiseItem icon={TrendingUp} title="Depois da compra" text="Acompanhe estoque, capital, giro, revenda e as ações que pedem sua atenção."/>
+        </div>
+      </div>
+
+      <div className="auth-register-flow">
+        <div className="auth-register-flow__head">
+          <span>DO GARIMPO À REVENDA</span>
+          <strong>Um fluxo pensado para quem vive de brique.</strong>
+        </div>
+        <div className="auth-register-flow__steps">
+          <Flow n="01" title="Defina seu caixa" text="Ex.: tenho R$ 250 para girar."/>
+          <Flow n="02" title="Garimpe melhor" text="Veja o que vale procurar nessa faixa."/>
+          <Flow n="03" title="Analise o anúncio" text="Preço, risco, defeitos e teto de compra."/>
+          <Flow n="04" title="Negocie com contexto" text="Sem oferta ofensiva e usando fatos reais."/>
+          <Flow n="05" title="Revenda melhor" text="Limpeza, boas fotos e apoio do Vender com IA."/>
+        </div>
+      </div>
+
+      <div className="auth-register-convince">
+        <div className="auth-register-convince__copy">
+          <span><Sparkles size={15}/> MENOS ACHISMO. MAIS CRITÉRIO.</span>
+          <h2>Uma compra ruim prende seu dinheiro. Uma compra bem feita mantém o giro vivo.</h2>
+          <p>O BRIKE RADAR foi construído para ajudar você a reduzir compra por impulso, enxergar risco escondido e saber quando uma oportunidade merece atenção.</p>
+        </div>
+        <div className="auth-register-checks">
+          <CheckLine text="Produtos compatíveis com o seu caixa"/>
+          <CheckLine text="Checklist de risco por categoria"/>
+          <CheckLine text="Faixa para negociar sem estourar o caixa"/>
+          <CheckLine text="Central de Ação para estoque e negociações"/>
+          <CheckLine text="Histórico real de compras, vendas e ROI"/>
+        </div>
+      </div>
+
+      <div className="auth-register-final">
         <div>
-          <div>{detailed?'UMA OPERAÇÃO MAIS INTELIGENTE':recovery?'SEUS DADOS CONTINUAM LÁ':'CRIADO PARA O BRIQUE REAL'}</div>
-          <p>{detailed
-            ?'Garimpo por caixa, análise com IA, Central de Ação e apoio para preparar a revenda.'
-            :recovery
-              ?'Recupere sua conta e continue de onde parou.'
-              :'Não é só calcular lucro: é comprar melhor, reduzir risco e saber quando agir.'}</p>
+          <span>SE VOCÊ JÁ COMPRA PARA REVENDER</span>
+          <strong>Crie sua conta e coloque método no que hoje depende da experiência e do olho.</strong>
         </div>
+        <ArrowRight size={20}/>
       </div>
+
+      <p className="auth-register-disclaimer">A ferramenta ajuda na decisão e organização da operação. Resultado de revenda depende do preço de compra, condição do produto, negociação e mercado.</p>
     </div>
   </section>
 }
 
-function Metric({icon:Icon,label,value,hint}:{icon:any;label:string;value:string;hint:string}){
-  return <div className="auth-intel-metric">
-    <span><Icon size={15}/></span>
-    <div><small>{label}</small><strong>{value}</strong><em>{hint}</em></div>
+function PromiseItem({icon:Icon,title,text}:{icon:any;title:string;text:string}){
+  return <div className="auth-register-promise__item">
+    <span><Icon size={18}/></span>
+    <div><strong>{title}</strong><p>{text}</p></div>
   </div>
+}
+
+function Flow({n,title,text}:{n:string;title:string;text:string}){
+  return <div className="auth-register-flow__step">
+    <span>{n}</span>
+    <strong>{title}</strong>
+    <p>{text}</p>
+  </div>
+}
+
+function CheckLine({text}:{text:string}){
+  return <div className="auth-register-check"><CheckCircle2 size={15}/><span>{text}</span></div>
 }
