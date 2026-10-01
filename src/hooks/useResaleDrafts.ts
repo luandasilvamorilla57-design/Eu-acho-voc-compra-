@@ -1,6 +1,6 @@
 import { useCallback,useEffect,useState } from 'react'
 import { supabase } from '../lib/supabase'
-import type { ResaleDraftOrigin,ResaleDraftRow } from '../types/database'
+import type { ResaleDraftOrigin,ResaleDraftRow,ResaleSaleOutcome } from '../types/database'
 import type { ResaleAd } from '../types/resale'
 import type { PreparedImage } from '../utils/imageInput'
 import { reportClientError } from '../lib/errorReporter'
@@ -124,6 +124,20 @@ export function useResaleDrafts(active:boolean){
     await load()
   }
 
+  const setSaleOutcome=async(id:string,outcome:ResaleSaleOutcome,salePrice?:number|null)=>{
+    const {data,error}=await supabase.rpc('registrar_resultado_anuncio_revenda',{
+      p_anuncio_id:id,
+      p_resultado:outcome,
+      p_preco_venda:salePrice??null
+    })
+    if(error){
+      reportClientError(error,'resale-drafts.sale-outcome',{draftId:id,outcome})
+      throw error
+    }
+    await load()
+    return data as unknown as ResaleDraftRow
+  }
+
   const remove=async(id:string)=>{
     const current=items.find(x=>x.id===id)
     if(!current)return
@@ -134,5 +148,5 @@ export function useResaleDrafts(active:boolean){
     await load()
   }
 
-  return{items,loading,load,saveGenerated,updateCopy,remove}
+  return{items,loading,load,saveGenerated,updateCopy,setSaleOutcome,remove}
 }

@@ -39,7 +39,7 @@ export default function App(){
   const appDataActive=!!session&&hasAccess
   const {items,load,updateStatus,resolveNegotiation,addNegotiationLog,reinspect}=useAnalyses(appDataActive)
   const {items:purchases,load:loadPurchases,createPurchase,markSold,updatePurchase,uploadPhotos,removePhoto}=usePurchases(appDataActive)
-  const {items:drafts,saveGenerated:saveResaleDraft,updateCopy:updateResaleDraftCopy,remove:removeResaleDraft}=useResaleDrafts(appDataActive)
+  const {items:drafts,saveGenerated:saveResaleDraft,updateCopy:updateResaleDraftCopy,setSaleOutcome:setResaleSaleOutcome,remove:removeResaleDraft}=useResaleDrafts(appDataActive)
 
   const alerts=useMemo(()=>buildRadarAlerts(items,purchases,config),[items,purchases,config])
   const intelligence=useMemo(()=>buildUserIntelligence(purchases,items),[purchases,items])
@@ -79,13 +79,13 @@ export default function App(){
   if(!hasAccess)return <PlansPage email={session.user.email} onRefreshAccess={refreshAccess}/>
 
   let page:React.ReactNode
-  if(view==='dashboard')page=<DashboardPage items={items} purchases={purchases} config={config} access={access} onSaveConfig={saveConfig} onManagePlan={()=>setView('subscription')} onNew={()=>setView('new')} onOpen={setSelected}/>
+  if(view==='dashboard')page=<DashboardPage items={items} purchases={purchases} drafts={drafts} config={config} access={access} onSaveConfig={saveConfig} onManagePlan={()=>setView('subscription')} onNew={()=>setView('new')} onOpen={setSelected}/>
   else if(view==='radar')page=<RadarPage analyses={items} purchases={purchases} config={config} alerts={alerts} insights={intelligence.insights} onNavigate={setView} onOpen={setSelected}/>
   else if(view==='new')page=<NewAnalysisPage config={config} userProfile={intelligence.profile} purchases={purchases} onUsageChanged={()=>refreshAccess({silent:true})} onSaved={async destination=>{await load();await refreshAccess();setView(destination)}}/>
   else if(view==='bought')page=<BoughtPage analyses={items} purchases={purchases} drafts={drafts} config={config} onCreate={async input=>{await createPurchase(input);await load()}} onSold={async(id,salePrice)=>{await markSold(id,salePrice);await load()}} onUpdate={updatePurchase} onUploadPhotos={uploadPhotos} onRemovePhoto={removePhoto} onSaveDraft={async input=>{const row=await saveResaleDraft(input);void refreshAccess({silent:true});return row}} onUpdateDraftCopy={updateResaleDraftCopy} onDeleteDraft={removeResaleDraft}/>
-  else if(view==='history')page=<HistoryPage items={items} drafts={drafts} config={config} onOpen={setSelected} onOpenAd={setSelectedDraft} onEdit={setEditing} onNegotiationBought={async(id,price)=>{await resolveNegotiation(id,'bought',price);await loadPurchases()}} onNegotiationFailed={async id=>{await resolveNegotiation(id,'failed')}} onNegotiationLog={addNegotiationLog} onReinspect={reinspect}/>
+  else if(view==='history')page=<HistoryPage items={items} drafts={drafts} config={config} onOpen={setSelected} onOpenAd={setSelectedDraft} onAdSold={async(ad,price)=>{await setResaleSaleOutcome(ad.id,'vendido',price);await loadPurchases();await load()}} onAdNotSold={async ad=>{await setResaleSaleOutcome(ad.id,'nao_vendido');await loadPurchases()}} onEdit={setEditing} onNegotiationBought={async(id,price)=>{await resolveNegotiation(id,'bought',price);await loadPurchases()}} onNegotiationFailed={async id=>{await resolveNegotiation(id,'failed')}} onNegotiationLog={addNegotiationLog} onReinspect={reinspect}/>
   else if(view==='subscription')page=<SubscriptionPage status={access} onBack={()=>setView('dashboard')} onRefresh={refreshAccess}/>
-  else page=access.owner_access?<AdminPage onBack={()=>setView('dashboard')}/>:<DashboardPage items={items} purchases={purchases} config={config} access={access} onSaveConfig={saveConfig} onManagePlan={()=>setView('subscription')} onNew={()=>setView('new')} onOpen={setSelected}/>
+  else page=access.owner_access?<AdminPage onBack={()=>setView('dashboard')}/>:<DashboardPage items={items} purchases={purchases} drafts={drafts} config={config} access={access} onSaveConfig={saveConfig} onManagePlan={()=>setView('subscription')} onNew={()=>setView('new')} onOpen={setSelected}/>
 
   return <AppShell view={view} setView={setView} dark={dark} setDark={setDark} email={session.user.email} radarCount={alerts.length} ownerAccess={access.owner_access} onManageSubscription={()=>setView('subscription')} onOpenAdmin={()=>setView('admin')}>
     {page}

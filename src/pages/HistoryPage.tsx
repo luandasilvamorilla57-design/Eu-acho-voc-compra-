@@ -12,7 +12,7 @@ import { exportHistoryCsv } from '../utils/exportCsv'
 
 type Tab='waiting'|'all'|'ads'|'discarded'|'finished'
 
-export function HistoryPage({items,drafts,config,onOpen,onOpenAd,onEdit,onNegotiationBought,onNegotiationFailed,onNegotiationLog,onReinspect}:{items:AnaliseRow[];drafts:ResaleDraftRow[];config:RadarConfigRow;onOpen:(a:AnaliseRow)=>void;onOpenAd:(a:ResaleDraftRow)=>void;onEdit:(a:AnaliseRow)=>void;onNegotiationBought:(id:string,price:number)=>Promise<void>;onNegotiationFailed:(id:string)=>Promise<void>;onNegotiationLog:(id:string,offer:number|null,counter:number|null,response:string,note:string)=>Promise<void>;onReinspect:(id:string,notes:string,images:{mime_type:string;data:string;name:string}[])=>Promise<void>}){
+export function HistoryPage({items,drafts,config,onOpen,onOpenAd,onAdSold,onAdNotSold,onEdit,onNegotiationBought,onNegotiationFailed,onNegotiationLog,onReinspect}:{items:AnaliseRow[];drafts:ResaleDraftRow[];config:RadarConfigRow;onOpen:(a:AnaliseRow)=>void;onOpenAd:(a:ResaleDraftRow)=>void;onAdSold:(a:ResaleDraftRow,price:number)=>Promise<void>;onAdNotSold:(a:ResaleDraftRow)=>Promise<void>;onEdit:(a:AnaliseRow)=>void;onNegotiationBought:(id:string,price:number)=>Promise<void>;onNegotiationFailed:(id:string)=>Promise<void>;onNegotiationLog:(id:string,offer:number|null,counter:number|null,response:string,note:string)=>Promise<void>;onReinspect:(id:string,notes:string,images:{mime_type:string;data:string;name:string}[])=>Promise<void>}){
   const waiting=items.filter(i=>i.pipeline_status==='aguardando_negociacao')
   const [tab,setTab]=useState<Tab>(waiting.length?'waiting':'all')
   const [q,setQ]=useState('')
@@ -52,10 +52,10 @@ export function HistoryPage({items,drafts,config,onOpen,onOpenAd,onEdit,onNegoti
     <HistoryFilters q={q} setQ={setQ} onExport={()=>exportHistoryCsv(filtered)}/>
 
     {tab==='ads'
-      ? <ResaleHistoryList items={filteredDrafts} onOpen={onOpenAd}/>
+      ? <ResaleHistoryList items={filteredDrafts} onOpen={onOpenAd} onSold={onAdSold} onNotSold={onAdNotSold}/>
       : tab==='waiting'
         ? (filtered.length?<div className="grid gap-3 xl:grid-cols-2">{filtered.map(item=><NegotiationCard key={item.id} item={item} onOpen={onOpen} onUpdate={setUpdating} onLog={setLogging}/>)}</div>:<div className="glass rounded-[24px] p-8 text-center"><Clock3 className="mx-auto text-emerald-400" size={24}/><h3 className="font-display mt-3 text-lg font-bold pipeline-title">Nenhuma negociação aguardando</h3><p className="mt-2 text-xs text-slate-500">Quando o Radar disser que compensa negociar, a oportunidade aparecerá aqui.</p></div>)
-        : <div className="space-y-4"><HistoryList items={filtered} onOpen={onOpen} onEdit={onEdit} onInspect={setInspecting}/>{tab==='all'&&filteredDrafts.length>0&&<ResaleHistoryList items={filteredDrafts} onOpen={onOpenAd}/>}</div>
+        : <div className="space-y-4"><HistoryList items={filtered} onOpen={onOpen} onEdit={onEdit} onInspect={setInspecting}/>{tab==='all'&&filteredDrafts.length>0&&<ResaleHistoryList items={filteredDrafts} onOpen={onOpenAd} onSold={onAdSold} onNotSold={onAdNotSold}/>}</div>
     }
 
     {updating&&<NegotiationResultModal item={updating} onClose={()=>setUpdating(null)} onBought={onNegotiationBought} onFailed={onNegotiationFailed}/>}

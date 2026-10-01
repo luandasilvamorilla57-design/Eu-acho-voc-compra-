@@ -12,6 +12,7 @@ export type OperationProfile='revenda'|'garimpo'|'desapego'|'misto'
 export type ExperienceLevel='iniciante'|'intermediario'|'avancado'
 export type ResaleDraftOrigin='radar'|'externo'
 export type ResaleDraftStatus='rascunho'|'pronto'
+export type ResaleSaleOutcome='pendente'|'vendido'|'nao_vendido'
 
 export type Database = { public: { Tables: {
 analises: {
@@ -33,9 +34,9 @@ radar_config:{
  Relationships:[]
 }
 anuncios_revenda:{
- Row:{id:string;user_id:string;origem_item:ResaleDraftOrigin;compra_id:string|null;analise_id:string|null;produto:string;categoria:string|null;marca:string|null;modelo:string|null;condicao:string|null;tempo_uso:string|null;observacoes:string|null;preco_minimo:number|null;preco_ideal:number|null;fotos:Json;resultado_ia:Json|null;titulo:string|null;descricao:string|null;preco_venda_rapida:number|null;preco_equilibrado:number|null;preco_premium:number|null;status:ResaleDraftStatus;data_criacao:string;data_atualizacao:string}
- Insert:{id?:string;user_id?:string;origem_item:ResaleDraftOrigin;compra_id?:string|null;analise_id?:string|null;produto:string;categoria?:string|null;marca?:string|null;modelo?:string|null;condicao?:string|null;tempo_uso?:string|null;observacoes?:string|null;preco_minimo?:number|null;preco_ideal?:number|null;fotos?:Json;resultado_ia?:Json|null;titulo?:string|null;descricao?:string|null;preco_venda_rapida?:number|null;preco_equilibrado?:number|null;preco_premium?:number|null;status?:ResaleDraftStatus;data_criacao?:string;data_atualizacao?:string}
- Update:{origem_item?:ResaleDraftOrigin;compra_id?:string|null;analise_id?:string|null;produto?:string;categoria?:string|null;marca?:string|null;modelo?:string|null;condicao?:string|null;tempo_uso?:string|null;observacoes?:string|null;preco_minimo?:number|null;preco_ideal?:number|null;fotos?:Json;resultado_ia?:Json|null;titulo?:string|null;descricao?:string|null;preco_venda_rapida?:number|null;preco_equilibrado?:number|null;preco_premium?:number|null;status?:ResaleDraftStatus;data_atualizacao?:string}
+ Row:{id:string;user_id:string;origem_item:ResaleDraftOrigin;compra_id:string|null;analise_id:string|null;produto:string;categoria:string|null;marca:string|null;modelo:string|null;condicao:string|null;tempo_uso:string|null;observacoes:string|null;preco_minimo:number|null;preco_ideal:number|null;fotos:Json;resultado_ia:Json|null;titulo:string|null;descricao:string|null;preco_venda_rapida:number|null;preco_equilibrado:number|null;preco_premium:number|null;status:ResaleDraftStatus;resultado_venda:ResaleSaleOutcome;preco_venda_real:number|null;data_venda:string|null;data_criacao:string;data_atualizacao:string}
+ Insert:{id?:string;user_id?:string;origem_item:ResaleDraftOrigin;compra_id?:string|null;analise_id?:string|null;produto:string;categoria?:string|null;marca?:string|null;modelo?:string|null;condicao?:string|null;tempo_uso?:string|null;observacoes?:string|null;preco_minimo?:number|null;preco_ideal?:number|null;fotos?:Json;resultado_ia?:Json|null;titulo?:string|null;descricao?:string|null;preco_venda_rapida?:number|null;preco_equilibrado?:number|null;preco_premium?:number|null;status?:ResaleDraftStatus;resultado_venda?:ResaleSaleOutcome;preco_venda_real?:number|null;data_venda?:string|null;data_criacao?:string;data_atualizacao?:string}
+ Update:{origem_item?:ResaleDraftOrigin;compra_id?:string|null;analise_id?:string|null;produto?:string;categoria?:string|null;marca?:string|null;modelo?:string|null;condicao?:string|null;tempo_uso?:string|null;observacoes?:string|null;preco_minimo?:number|null;preco_ideal?:number|null;fotos?:Json;resultado_ia?:Json|null;titulo?:string|null;descricao?:string|null;preco_venda_rapida?:number|null;preco_equilibrado?:number|null;preco_premium?:number|null;status?:ResaleDraftStatus;resultado_venda?:ResaleSaleOutcome;preco_venda_real?:number|null;data_venda?:string|null;data_atualizacao?:string}
  Relationships:[]
 }
 assinaturas:{
@@ -56,7 +57,7 @@ client_errors:{
  Update:{}
  Relationships:[]
 }
-};Views:{};Functions:{};Enums:{analise_status:Status};CompositeTypes:{} } }
+};Views:{};Functions:{registrar_resultado_anuncio_revenda:{Args:{p_anuncio_id:string;p_resultado:ResaleSaleOutcome;p_preco_venda?:number|null};Returns:Json}};Enums:{analise_status:Status};CompositeTypes:{} } }
 
 export type AnaliseRow=Database['public']['Tables']['analises']['Row']
 export type PurchaseRow=Database['public']['Tables']['compras']['Row']
