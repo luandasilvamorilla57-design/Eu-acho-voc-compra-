@@ -40,6 +40,10 @@ Deno.serve(async(req:Request)=>{
     const {data:config}=await admin.from("radar_config").select("acesso_total").eq("user_id",user.id).maybeSingle();
     if(config?.acesso_total===true)return json({no_need:true,message:"Sua conta já possui acesso ilimitado."});
 
+    const {data:billing,error:billingError}=await admin.from("billing_config").select("ambiente").eq("id",1).single();
+    if(billingError)return json({error:"Ambiente de cobrança não configurado."},503);
+    const environment=billing?.ambiente==="production"?"production":"test";
+
     const body=await req.json().catch(()=>({}));
     const slug=String(body?.pacote||"extra20");
     const {data:pack,error:packError}=await admin.from("pacotes_extras_catalogo").select("*").eq("slug",slug).eq("ativo",true).single();
@@ -79,7 +83,6 @@ Deno.serve(async(req:Request)=>{
       return json({error:raw?.message||"Não foi possível abrir o pagamento do pacote."},response.status>=400&&response.status<600?response.status:502);
     }
 
-    const environment=mpToken.startsWith("TEST-")?"test":"production";
     await admin.from("pagamentos_extras").insert({
       user_id:user.id,
       gateway:"mercado_pago",
