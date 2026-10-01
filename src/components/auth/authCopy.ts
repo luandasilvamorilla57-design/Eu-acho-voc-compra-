@@ -1,28 +1,29 @@
 export type AuthMode = 'login' | 'register' | 'recover' | 'reset'
 export type AuthCopy = { eyebrow:string; title:string; subtitle:string; button:string }
+
 export const authCopy: Record<AuthMode, AuthCopy> = {
   login: {
     eyebrow: 'ACESSO SEGURO',
-    title: 'Entre para continuar no radar.',
-    subtitle: 'Acesse suas análises salvas, histórico de compra e venda e a próxima oportunidade de lucro.',
+    title: 'Entre para continuar no BRIKE RADAR.',
+    subtitle: 'Retome suas análises, compras, ações pendentes e oportunidades exatamente de onde parou.',
     button: 'Entrar no BRIKE RADAR',
   },
   register: {
     eyebrow: 'CRIAR CONTA',
-    title: 'Pare de perder margem por falta de informação.',
-    subtitle: 'Crie sua conta, confirme seu e-mail e escolha o plano ideal para começar a usar o Radar do Brique.',
+    title: 'Transforme garimpo em operação.',
+    subtitle: 'Crie sua conta para analisar anúncios, acompanhar compras e vendas e construir seu histórico de oportunidades.',
     button: 'Criar conta e escolher plano',
   },
   recover: {
     eyebrow: 'RECUPERAR ACESSO',
-    title: 'Recupere sua conta em poucos minutos.',
-    subtitle: 'Digite seu e-mail e receba um link seguro para redefinir sua senha.',
-    button: 'Receber link seguro',
+    title: 'Redefina sua senha e volte para o radar.',
+    subtitle: 'Informe seu e-mail para receber um link seguro de recuperação de acesso.',
+    button: 'Enviar link de recuperação',
   },
   reset: {
     eyebrow: 'NOVA SENHA',
-    title: 'Defina sua nova senha.',
-    subtitle: 'Crie uma nova senha para voltar ao seu radar.',
+    title: 'Crie uma nova senha segura.',
+    subtitle: 'Defina sua nova senha para retomar sua operação no BRIKE RADAR.',
     button: 'Salvar nova senha',
   },
 }

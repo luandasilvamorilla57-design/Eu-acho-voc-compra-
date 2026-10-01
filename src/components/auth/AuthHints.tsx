@@ -1,2 +1,21 @@
+import { KeyRound,Lightbulb,MailCheck,ShieldCheck } from 'lucide-react'
 import type { AuthMode } from './authCopy'
-export function AuthHints({mode,onRecover}:{mode:AuthMode;onRecover:()=>void}){if(mode==='login')return <div className="flex items-center justify-between gap-3 text-[11px] text-slate-500"><span>Seu histórico fica protegido por usuário.</span><button type="button" onClick={onRecover} className="text-emerald-300">Esqueci minha senha</button></div>;const data:any={register:['green','POR QUE CRIAR SUA CONTA','Salve análises, acompanhe compra e venda, revise ROI real e construa seu histórico de oportunidades.'],recover:['blue','COMO FUNCIONA','Você receberá um link seguro no e-mail informado para definir uma nova senha.'],reset:['green','RECUPERAÇÃO EM ANDAMENTO','Defina uma nova senha segura para voltar ao seu radar.']}[mode];if(!data)return null;const [tone,title,text]=data;return <div className={`rounded-[20px] p-4 text-[11px] leading-6 text-slate-300 ${tone==='green'?'border border-emerald-400/12 bg-emerald-400/6':'border border-blue-400/12 bg-blue-400/6'}`}><div className={`mb-1 text-[10px] font-bold tracking-[.18em] ${tone==='green'?'text-emerald-300':'text-blue-300'}`}>{title}</div>{text}</div>}
+
+export function AuthHints({mode,onRecover}:{mode:AuthMode;onRecover:()=>void}){
+  if(mode==='login')return <div className="auth-login-helper">
+    <span><ShieldCheck size={14}/> Seu histórico fica protegido por usuário.</span>
+    <button type="button" onClick={onRecover}>Esqueci minha senha</button>
+  </div>
+
+  const data={
+    register:[Lightbulb,'POR QUE CRIAR SUA CONTA','Salve análises, acompanhe compra e venda, revise seu ROI real e construa um histórico de oportunidades para a ferramenta aprender com sua operação.'],
+    recover:[MailCheck,'COMO FUNCIONA','Enviaremos um link seguro para o e-mail informado. Abra o link para definir uma nova senha e confira também a caixa de spam.'],
+    reset:[KeyRound,'RECUPERAÇÃO EM ANDAMENTO','Crie uma senha forte e diferente da anterior. Depois da atualização, você entrará novamente com a nova senha.']
+  } as const
+
+  const [Icon,title,text]=data[mode as 'register'|'recover'|'reset']
+  return <div className="auth-context-card">
+    <span className="auth-context-card__icon"><Icon size={19}/></span>
+    <div><b>{title}</b><p>{text}</p></div>
+  </div>
+}
