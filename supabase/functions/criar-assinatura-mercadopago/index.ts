@@ -17,7 +17,7 @@ function corsHeaders(req:Request){
 }
 
 
-const TEST_PAYER_EMAIL="testuser3728717908@testuser.com";
+const TEST_PAYER_EMAIL="test_payer_3728717908@testuser.com";
 
 type PlanSlug = "start" | "pro" | "max";
 
