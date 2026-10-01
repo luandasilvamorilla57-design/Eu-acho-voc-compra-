@@ -17,7 +17,6 @@ function corsHeaders(req:Request){
 }
 
 
-const TEST_PAYER_EMAIL="test_payer_3728717908@testuser.com";
 
 type PlanSlug = "start" | "pro" | "max";
 
@@ -78,7 +77,7 @@ Deno.serve(async (req: Request) => {
 
     const { data: billing, error: billingError } = await admin
       .from("billing_config")
-      .select("ambiente")
+      .select("ambiente,test_payer_email,test_payer_username,test_payer_password,test_payer_user_id")
       .eq("id", 1)
       .single();
     if (billingError) return json({ error: "Ambiente de cobrança não configurado." }, 503);
@@ -131,7 +130,54 @@ Deno.serve(async (req: Request) => {
 
     const externalReference = `radar:${user.id}:${plan}`;
     const amount = Number(catalog.preco_mensal);
-    const payerEmail = environment === "test" ? TEST_PAYER_EMAIL : user.email;
+
+    let payerEmail = user.email;
+    if (environment === "test") {
+      payerEmail = String(billing?.test_payer_email || "");
+      if (!payerEmail) {
+        const createdBuyer = await mpRequest("/users/test", accessToken, {
+          method: "POST",
+          body: JSON.stringify({
+            site_id: "MLB",
+            description: "BRIKE RADAR comprador de teste",
+          }),
+        });
+
+        if (!createdBuyer.response.ok || !createdBuyer.raw?.email) {
+          console.error("MP_CREATE_TEST_BUYER_ERROR", createdBuyer.response.status, JSON.stringify(createdBuyer.raw));
+          return json({
+            error: "Não foi possível preparar o comprador de teste do Mercado Pago.",
+          }, 502);
+        }
+
+        payerEmail = String(createdBuyer.raw.email);
+        const buyerUsername = String(createdBuyer.raw.nickname || "");
+        const buyerPassword = String(createdBuyer.raw.password || "");
+        const buyerUserId = String(createdBuyer.raw.id || "");
+
+        const { error: buyerSaveError } = await admin
+          .from("billing_config")
+          .update({
+            test_payer_email: payerEmail,
+            test_payer_username: buyerUsername || null,
+            test_payer_password: buyerPassword || null,
+            test_payer_user_id: buyerUserId || null,
+            updated_at: new Date().toISOString(),
+          })
+          .eq("id", 1);
+
+        if (buyerSaveError) {
+          console.error("MP_SAVE_TEST_BUYER_ERROR", JSON.stringify(buyerSaveError));
+          return json({ error: "Comprador de teste criado, mas não foi possível salvar a configuração." }, 500);
+        }
+
+        console.info("MP_TEST_BUYER_READY", JSON.stringify({
+          id: buyerUserId,
+          username: buyerUsername,
+          email: payerEmail,
+        }));
+      }
+    }
 
     const payload = {
       reason: `Radar do Brique - Plano ${catalog.nome}`,
