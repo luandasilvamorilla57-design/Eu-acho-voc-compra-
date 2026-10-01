@@ -2,6 +2,7 @@ import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "npm:@supabase/supabase-js@2.57.4";
 
 const APP_ORIGIN='https://radar-do-brique.vercel.app'
+const TEST_PAYER_EMAIL="testuser5178526503119783585@testuser.com"
 function corsHeaders(req:Request){
   const origin=req.headers.get('origin')||''
   const local=/^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin)
@@ -50,6 +51,7 @@ Deno.serve(async(req:Request)=>{
     if(packError||!pack)return json({error:"Pacote indisponível."},404);
 
     const externalReference=`radar-extra:${user.id}:${pack.quantidade}`;
+    const payerEmail=environment==="test"?TEST_PAYER_EMAIL:user.email;
     const notificationUrl=`${supabaseUrl}/functions/v1/mercadopago-webhook`;
     const payload={
       items:[{
@@ -60,7 +62,7 @@ Deno.serve(async(req:Request)=>{
         currency_id:"BRL",
         unit_price:Number(pack.preco)
       }],
-      payer:{email:user.email},
+      payer:{email:payerEmail},
       external_reference:externalReference,
       notification_url:notificationUrl,
       back_urls:{
