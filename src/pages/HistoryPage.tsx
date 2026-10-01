@@ -45,7 +45,7 @@ export function HistoryPage({items,drafts,config,onOpen,onOpenAd,onAdSold,onAdNo
   ] as const
 
   return <div className="space-y-4">
-    <div><div className="premium-eyebrow text-emerald-400">HISTÓRICO COMPLETO</div><h2 className="font-display mt-2 text-[32px] font-extrabold tracking-[-.05em] sm:text-4xl">Da análise até o anúncio e a compra.</h2><p className="mt-2 max-w-2xl text-[13px] leading-6 text-slate-500">Acompanhe análises, negociações, resultados e todos os anúncios preparados com IA em um único histórico.</p></div>
+    <div className="page-intro"><div className="premium-eyebrow text-emerald-400">HISTÓRICO COMPLETO</div><h2 className="font-display mt-2 text-[32px] font-extrabold tracking-[-.05em] sm:text-4xl">Da análise até o anúncio e a compra.</h2><p className="mt-2 max-w-2xl text-[13px] leading-6 text-slate-500">Acompanhe análises, negociações, resultados e todos os anúncios preparados com IA em um único histórico.</p></div>
 
     <div className="pipeline-tabs pipeline-tabs--history">{tabs.map(([id,label,Icon,count])=><button key={id} onClick={()=>setTab(id)} className={'pipeline-tab '+(tab===id?'is-active':'')}><Icon size={15}/><span>{label}</span><b>{count}</b></button>)}</div>
 

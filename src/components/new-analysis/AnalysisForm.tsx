@@ -1,4 +1,4 @@
-import { FileText, Images, Link2, Plus, ShoppingBag, Sparkles, Trash2, Upload, WalletCards, X } from 'lucide-react'
+import { FileText,Images,Link2,Plus,ScanSearch,ShoppingBag,Sparkles,Trash2,Upload,WalletCards,X } from 'lucide-react'
 import type { PreparedImage } from '../../utils/imageInput'
 import type { MarketReferenceInput } from '../../types/market'
 
@@ -27,57 +27,57 @@ type P={
 }
 
 const origins=[
-  {id:'olx' as const,label:'OLX',desc:'Cole o link do anúncio',icon:Link2},
+  {id:'olx' as const,label:'OLX',desc:'Cole o link público do anúncio',icon:Link2},
   {id:'facebook' as const,label:'Facebook',desc:'Envie prints do Marketplace',icon:Images},
   {id:'manual' as const,label:'Outro',desc:'Cole os dados manualmente',icon:FileText},
 ]
 
 export function AnalysisForm(p:P){
-  return <section className="glass rounded-[26px] p-4 sm:p-6">
-    <div className="mb-5">
-      <span className="premium-eyebrow text-slate-500">ORIGEM DO ANÚNCIO</span>
-      <h3 className="font-display mt-1.5 text-xl font-bold">De onde vem esta oportunidade?</h3>
-      <p className="mt-1.5 text-[12px] leading-5 text-slate-500">O Radar adapta a leitura para cada plataforma e deixa claro quando faltam dados.</p>
+  return <section className="glass analysis-form-card">
+    <div className="analysis-form-card__head">
+      <div><span className="premium-eyebrow text-emerald-400">PASSO 01 · ORIGEM</span><h3 className="font-display">De onde vem esta oportunidade?</h3><p>O Radar adapta a leitura para cada plataforma e sinaliza quando faltam dados para decidir com segurança.</p></div>
+      <span className="analysis-form-card__head-icon"><ScanSearch size={20}/></span>
     </div>
 
-    <div className="grid grid-cols-3 gap-2">
+    <div className="analysis-origin-grid">
       {origins.map(({id,label,desc,icon:Icon})=>{
         const active=p.origem===id
-        return <button key={id} type="button" onClick={()=>p.setOrigem(id)} className={`relative min-h-[96px] rounded-[20px] border p-3 text-left transition sm:min-h-[104px] sm:p-4 ${active?'border-emerald-400/35 bg-emerald-400/[.08] shadow-[0_14px_40px_rgba(16,185,129,.08)]':'border-slate-800 bg-slate-950/30 hover:border-slate-700'}`}>
-          <span className={`grid h-8 w-8 place-items-center rounded-xl ${active?'bg-emerald-400/12 text-emerald-300':'bg-slate-800/70 text-slate-500'}`}><Icon size={16}/></span>
-          <strong className="mt-3 block text-[12px] text-white">{label}</strong>
-          <span className="mt-1 hidden text-[10px] leading-4 text-slate-500 sm:block">{desc}</span>
+        return <button key={id} type="button" onClick={()=>p.setOrigem(id)} className={'analysis-origin-card '+(active?'is-active':'')}>
+          <span className="analysis-origin-card__icon"><Icon size={17}/></span>
+          <strong>{label}</strong>
+          <small>{desc}</small>
+          {active&&<i/>}
         </button>
       })}
     </div>
 
-    <div className="mt-5 grid gap-4">
+    <div className="analysis-form-fields">
       {p.origem==='olx'&&<>
-        <Info tone="blue"><b>OLX:</b> cole o link público. O Radar tenta ler o anúncio diretamente.</Info>
-        <label className="text-[12px] font-semibold text-slate-400">Link do anúncio<div className="analysis-input"><Link2 size={16}/><input value={p.link} onChange={e=>p.setLink(e.target.value)} placeholder="https://www.olx.com.br/..."/></div></label>
+        <Info tone="blue"><b>OLX:</b> cole o link público. O Radar tenta ler o anúncio diretamente e deixa claro se algum dado não pôde ser confirmado.</Info>
+        <label className="analysis-field-label">Link do anúncio<div className="analysis-input"><Link2 size={16}/><input value={p.link} onChange={e=>p.setLink(e.target.value)} placeholder="https://www.olx.com.br/..."/></div></label>
         <OptionalText p={p}/>
       </>}
 
       {p.origem==='facebook'&&<>
-        <Info tone="green"><b>Facebook Marketplace:</b> envie prints mostrando fotos do produto, título, preço e descrição.</Info>
+        <Info tone="green"><b>Facebook Marketplace:</b> envie prints com fotos, título, preço e descrição. Quanto mais completo, melhor a leitura.</Info>
         <label className="analysis-upload">
           <input type="file" accept="image/*" multiple className="absolute inset-0 cursor-pointer opacity-0" onChange={e=>{p.addImages(e.target.files);e.currentTarget.value=''}}/>
           <div><span><Upload size={21}/></span><strong>{p.imageBusy?'Preparando prints...':'Enviar prints do anúncio'}</strong><small>Até 6 imagens · compressão automática</small></div>
         </label>
-        {p.images.length>0&&<div className="grid grid-cols-3 gap-2 sm:grid-cols-6">{p.images.map((image,index)=><div key={image.preview} className="relative aspect-[4/5] overflow-hidden rounded-[16px] border border-slate-800 bg-slate-950"><img src={image.preview} alt={`Print ${index+1}`} className="h-full w-full object-cover"/><button type="button" onClick={()=>p.removeImage(index)} className="absolute right-1.5 top-1.5 grid h-7 w-7 place-items-center rounded-full bg-black/75 text-white"><X size={13}/></button></div>)}</div>}
-        <label className="text-[12px] font-semibold text-slate-400">Informação extra <span className="font-normal text-slate-600">(opcional)</span><textarea value={p.texto} onChange={e=>p.setTexto(e.target.value)} className="analysis-textarea" placeholder="Ex.: vendedor disse que a bateria foi trocada, aceita troca..."/></label>
+        {p.images.length>0&&<div className="analysis-image-grid">{p.images.map((image,index)=><div key={image.preview} className="analysis-image-thumb"><img src={image.preview} alt={`Print ${index+1}`}/><span>{index+1}</span><button type="button" onClick={()=>p.removeImage(index)}><X size={13}/></button></div>)}</div>}
+        <label className="analysis-field-label">Informação extra <span>(opcional)</span><textarea value={p.texto} onChange={e=>p.setTexto(e.target.value)} className="analysis-textarea" placeholder="Ex.: vendedor disse que a bateria foi trocada, aceita troca..."/></label>
       </>}
 
       {p.origem==='manual'&&<>
-        <Info><b>Outros anúncios:</b> use para grupos, WhatsApp, classificados ou anúncios recebidos por mensagem.</Info>
-        <label className="text-[12px] font-semibold text-slate-400">Dados do anúncio<textarea value={p.texto} onChange={e=>p.setTexto(e.target.value)} className="analysis-textarea min-h-36" placeholder="Cole título, descrição, estado do produto, acessórios e outras informações..."/></label>
+        <Info><b>Outros anúncios:</b> use para grupos, WhatsApp, classificados ou oportunidades recebidas por mensagem.</Info>
+        <label className="analysis-field-label">Dados do anúncio<textarea value={p.texto} onChange={e=>p.setTexto(e.target.value)} className="analysis-textarea min-h-36" placeholder="Cole título, descrição, estado do produto, acessórios e outras informações..."/></label>
       </>}
 
-      <label className="text-[12px] font-semibold text-slate-400">Preço anunciado <span className="font-normal text-slate-600">(se estiver nos prints, pode deixar vazio)</span><div className="analysis-input"><WalletCards size={16}/><input inputMode="decimal" value={p.preco} onChange={e=>p.setPreco(e.target.value.replace(',','.'))} placeholder="Ex.: 1500"/></div></label>
+      <label className="analysis-field-label">Preço anunciado <span>(se estiver nos prints, pode deixar vazio)</span><div className="analysis-input"><WalletCards size={16}/><input inputMode="decimal" value={p.preco} onChange={e=>p.setPreco(e.target.value.replace(',','.'))} placeholder="Ex.: 1500"/></div></label>
 
       <section className="market-ref-editor">
-        <div className="flex items-start justify-between gap-3">
-          <div><span className="premium-eyebrow text-blue-400">COMPARÁVEIS REAIS</span><h4 className="mt-1 text-[13px] font-bold text-slate-200">Tem anúncios parecidos? Dê dados concretos ao Radar.</h4><p className="mt-1 text-[10.5px] leading-5 text-slate-500">Cole links e preços de itens realmente comparáveis. Eles terão prioridade sobre estimativas genéricas.</p></div>
+        <div className="market-ref-editor__head">
+          <div><span className="premium-eyebrow text-blue-400">COMPARÁVEIS REAIS</span><h4>Tem anúncios parecidos? Dê dados concretos ao Radar.</h4><p>Links e preços realmente comparáveis têm prioridade sobre estimativas genéricas.</p></div>
           {p.marketRefs.length<5&&<button type="button" onClick={p.addMarketRef} className="market-ref-add"><Plus size={13}/> Adicionar</button>}
         </div>
         {p.marketRefs.length===0?<button type="button" onClick={p.addMarketRef} className="market-ref-empty"><ShoppingBag size={16}/><span><b>Adicionar referência de mercado</b><small>Opcional, mas aumenta a confiança do preço.</small></span></button>:<div className="mt-3 grid gap-2">{p.marketRefs.map((r,i)=><div key={i} className="market-ref-row">
@@ -89,11 +89,14 @@ export function AnalysisForm(p:P){
         </div>)}</div>}
       </section>
 
-      {p.error&&<div className="rounded-xl border border-red-400/15 bg-red-400/5 p-3 text-[12px] leading-5 text-red-300">{p.error}</div>}
-      <button disabled={p.busy||p.imageBusy} onClick={p.analyze} className="analysis-primary"><Sparkles size={17}/>{p.busy?'Radar analisando...':p.imageBusy?'Preparando imagens...':'Analisar oportunidade'}</button>
+      {p.error&&<div className="analysis-error">{p.error}</div>}
+      <div className="analysis-submit-zone">
+        <button disabled={p.busy||p.imageBusy} onClick={p.analyze} className="analysis-primary"><span><Sparkles size={17}/></span><strong>{p.busy?'Radar analisando...':p.imageBusy?'Preparando imagens...':'Analisar oportunidade'}</strong></button>
+        <small>O resultado separa fatos, estimativas e pontos que ainda precisam ser conferidos.</small>
+      </div>
     </div>
   </section>
 }
 
 function Info({children,tone='neutral'}:{children:React.ReactNode;tone?:'blue'|'green'|'neutral'}){return <div className={`analysis-info analysis-info--${tone}`}>{children}</div>}
-function OptionalText({p}:{p:P}){return <label className="text-[12px] font-semibold text-slate-400">Texto complementar <span className="font-normal text-slate-600">(opcional)</span><textarea value={p.texto} onChange={e=>p.setTexto(e.target.value)} className="analysis-textarea" placeholder="Se quiser, cole também a descrição do anúncio para aumentar a precisão."/></label>}
+function OptionalText({p}:{p:P}){return <label className="analysis-field-label">Texto complementar <span>(opcional)</span><textarea value={p.texto} onChange={e=>p.setTexto(e.target.value)} className="analysis-textarea" placeholder="Cole também a descrição do anúncio para aumentar a precisão."/></label>}
