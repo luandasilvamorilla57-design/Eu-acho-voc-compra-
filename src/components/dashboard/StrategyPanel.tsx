@@ -1,5 +1,5 @@
 import { useEffect,useMemo,useState } from 'react'
-import { ArrowRight,Camera,Clock3,Flame,MessageCircle,Save,ScanSearch,ShieldAlert,ShoppingBag,Sparkles,WalletCards } from 'lucide-react'
+import { ArrowRight,Camera,Clock3,Flame,MessageCircle,ScanSearch,ShieldAlert,ShoppingBag,Sparkles,WalletCards } from 'lucide-react'
 import type { GiroPreferido,RadarConfigRow } from '../../types/database'
 import type { RadarConfigPatch } from '../../hooks/useRadarConfig'
 import { money } from '../../utils/format'
@@ -14,8 +14,9 @@ export function StrategyPanel({
 }){
   const [capital,setCapital]=useState(String(config.capital_disponivel||''))
   const [giro,setGiro]=useState<GiroPreferido>(config.giro_preferido||'rapido')
-  const [saving,setSaving]=useState(false)
-  const [saved,setSaved]=useState(false)
+  const [searching,setSearching]=useState(false)
+  const [progress,setProgress]=useState(0)
+  const [showResults,setShowResults]=useState(false)
 
   useEffect(()=>{
     setCapital(String(config.capital_disponivel||''))
@@ -25,15 +26,42 @@ export function StrategyPanel({
   const cash=Math.max(0,Number(String(capital).replace(',','.'))||0)
   const opportunities=useMemo(()=>opportunitiesFor(cash,giro),[cash,giro])
 
-  const save=async()=>{
-    setSaving(true)
-    setSaved(false)
+  const updateCapital=(value:string)=>{
+    setCapital(value)
+    setShowResults(false)
+    setProgress(0)
+  }
+
+  const updateGiro=(value:GiroPreferido)=>{
+    setGiro(value)
+    setShowResults(false)
+    setProgress(0)
+  }
+
+  const searchOpportunities=async()=>{
+    if(searching||cash<=0)return
+    setSearching(true)
+    setShowResults(false)
+    setProgress(6)
+
+    const timer=window.setInterval(()=>{
+      setProgress(current=>{
+        if(current>=92)return current
+        const step=Math.max(2,Math.round((92-current)*.14))
+        return Math.min(92,current+step)
+      })
+    },110)
+
     try{
       await onSave({capital_disponivel:cash,giro_preferido:giro})
-      setSaved(true)
-      setTimeout(()=>setSaved(false),1600)
+      await new Promise(resolve=>window.setTimeout(resolve,900))
+      setProgress(100)
+      await new Promise(resolve=>window.setTimeout(resolve,260))
+      setShowResults(true)
+      window.setTimeout(()=>document.getElementById('brique-results')?.scrollIntoView({behavior:'smooth',block:'start'}),80)
     }finally{
-      setSaving(false)
+      window.clearInterval(timer)
+      setSearching(false)
     }
   }
 
@@ -62,23 +90,23 @@ export function StrategyPanel({
             aria-label="Valor disponível para investir no brique"
             inputMode="decimal"
             value={capital}
-            onChange={e=>setCapital(e.target.value.replace(/[^0-9,.]/g,'').replace(',','.'))}
+            onChange={e=>updateCapital(e.target.value.replace(/[^0-9,.]/g,'').replace(',','.'))}
             placeholder="100"
           />
         </label>
         <div className="brique-cash__presets" aria-label="Valores rápidos">
-          {briqueCapitalPresets.map(value=><button key={value} type="button" onClick={()=>setCapital(String(value))} className={cash===value?'is-active':''}>{money(value)}</button>)}
+          {briqueCapitalPresets.map(value=><button key={value} type="button" onClick={()=>updateCapital(String(value))} className={cash===value?'is-active':''}>{money(value)}</button>)}
         </div>
       </div>
 
       <div className="brique-turnover">
         <span className="brique-control-label">Qual tipo de giro você quer?</span>
         <div className="brique-turnover__grid">
-          <button type="button" className={giro==='rapido'?'is-active':''} onClick={()=>setGiro('rapido')}>
+          <button type="button" className={giro==='rapido'?'is-active':''} onClick={()=>updateGiro('rapido')}>
             <span className="brique-turnover__icon"><Flame size={19}/></span>
             <span><b>Giro rápido</b><small>Prioriza produtos com procura forte e maior chance de sair mais rápido quando comprados no preço certo.</small></span>
           </button>
-          <button type="button" className={giro==='medio'?'is-active':''} onClick={()=>setGiro('medio')}>
+          <button type="button" className={giro==='medio'?'is-active':''} onClick={()=>updateGiro('medio')}>
             <span className="brique-turnover__icon"><Clock3 size={19}/></span>
             <span><b>Giro médio</b><small>Aceita esperar um pouco mais e abre espaço para itens que podem entregar uma margem melhor.</small></span>
           </button>
@@ -90,17 +118,30 @@ export function StrategyPanel({
       </div>
     </div>
 
-    <button type="button" className="brique-save" onClick={save} disabled={saving||cash<=0}>
-      <Save size={17}/>
-      {saving?'Salvando...':saved?'Caixa e giro salvos':'Salvar meu caixa e giro'}
+    <button type="button" className="brique-search" onClick={searchOpportunities} disabled={searching||cash<=0}>
+      <span className={'brique-search__icon '+(searching?'is-searching':'')}><ScanSearch size={20}/></span>
+      <span>{searching?'Buscando oportunidades...':'Buscar oportunidades'}</span>
+      {!searching&&<ArrowRight size={18}/>}
     </button>
 
-    {cash>0&&<div className="brique-results">
+    {searching&&<div className="brique-searching" aria-live="polite">
+      <div className="brique-searching__top">
+        <div>
+          <span>PREPARANDO SEU GARIMPO</span>
+          <strong>Buscando oportunidades para {money(cash)}</strong>
+        </div>
+        <b>{progress}%</b>
+      </div>
+      <div className="brique-searching__track"><i style={{width:progress+'%'}}/></div>
+      <p>Selecionando na base do BRike Radar os produtos mais compatíveis com seu caixa e {giro==='rapido'?'giro rápido':'giro médio'}.</p>
+    </div>}
+
+    {showResults&&<div id="brique-results" className="brique-results">
       <div className="brique-results__head">
         <div>
           <span className="brique-hunt__eyebrow"><Flame size={14}/> PRODUTOS PARA GARIMPAR</span>
           <h4>8 produtos para procurar com {money(cash)} · {giro==='rapido'?'giro rápido':'giro médio'}</h4>
-          <p>Isso <strong>não é uma busca de anúncios em tempo real</strong>. É a tabela estratégica do BRike Radar: produtos que fazem sentido para esse caixa e tipo de giro. Você procura o anúncio e manda para <strong>Analisar</strong> antes de fechar.</p>
+          <p>Recomendações da base estratégica do BRike Radar para esse caixa e tipo de giro. Encontre um anúncio real e envie para <strong>Analisar</strong> antes de comprar.</p>
         </div>
         <span className="brique-results__count">8</span>
       </div>
@@ -139,14 +180,15 @@ export function StrategyPanel({
           </div>
 
           <button type="button" className="brique-product__analyze" onClick={onAnalyze}>
-            Achei um anúncio · mandar para Analisar <ArrowRight size={15}/>
+            <span><small>ACHEI UM ANÚNCIO</small><b>Analisar agora</b></span>
+            <span className="brique-product__analyze-arrow"><ArrowRight size={18}/></span>
           </button>
         </article>)}
       </div>
 
       <div className="brique-flow">
         <div className="brique-flow__head">
-          <span className="brique-hunt__eyebrow"><ScanSearch size={14}/> COMO O BRIQUE RADAR DEVE SER USADO</span>
+          <span className="brique-hunt__eyebrow"><ScanSearch size={14}/> COMO O BRIKE RADAR DEVE SER USADO</span>
           <h4>Garimpe barato. Valide antes. Venda melhor.</h4>
         </div>
         <div className="brique-flow__steps">

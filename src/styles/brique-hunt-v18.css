@@ -34,9 +34,21 @@
 .brique-turnover__note{display:grid;grid-template-columns:auto minmax(0,1fr);gap:10px;margin-top:14px;border-top:1px solid rgba(113,145,171,.09);padding-top:14px;color:#4fcfb1}
 .brique-turnover__note p{font-size:13px;line-height:1.6;color:#7d91a1}
 .brique-turnover__note strong{color:#b3d5cc}
-.brique-save{display:flex;width:100%;height:54px;align-items:center;justify-content:center;gap:9px;margin-top:14px;border:1px solid rgba(89,228,193,.19);border-radius:17px;background:linear-gradient(110deg,rgba(26,116,103,.35),rgba(21,96,103,.30));font-size:14px;font-weight:820;color:#75e9cd;transition:.2s}
-.brique-save:hover:not(:disabled){background:linear-gradient(110deg,rgba(34,132,116,.42),rgba(26,112,119,.37));transform:translateY(-1px)}
-.brique-save:disabled{cursor:not-allowed;opacity:.45}
+.brique-search{display:flex;width:100%;height:60px;align-items:center;justify-content:center;gap:10px;margin-top:14px;border:1px solid rgba(103,232,202,.30);border-radius:18px;background:linear-gradient(115deg,#1a8c79,#176f78);box-shadow:0 14px 32px rgba(27,135,118,.18),inset 0 1px 0 rgba(255,255,255,.12);font-size:15px;font-weight:850;color:#effffb;transition:transform .2s ease,filter .2s ease,box-shadow .2s ease}
+.brique-search:hover:not(:disabled){transform:translateY(-1px);filter:brightness(1.06);box-shadow:0 17px 38px rgba(27,135,118,.23),inset 0 1px 0 rgba(255,255,255,.14)}
+.brique-search:disabled{cursor:not-allowed;opacity:.66}
+.brique-search__icon{display:grid;place-items:center}
+.brique-search__icon.is-searching{animation:brique-search-pulse 1s ease-in-out infinite}
+@keyframes brique-search-pulse{0%,100%{transform:scale(.95);opacity:.7}50%{transform:scale(1.08);opacity:1}}
+.brique-searching{margin-top:14px;border:1px solid rgba(89,228,193,.18);border-radius:19px;background:linear-gradient(145deg,rgba(7,28,37,.94),rgba(8,20,32,.92));padding:17px;box-shadow:inset 0 1px rgba(255,255,255,.03)}
+.brique-searching__top{display:flex;align-items:center;justify-content:space-between;gap:16px}
+.brique-searching__top>div{display:grid;gap:4px}
+.brique-searching__top span{font-size:10px;font-weight:850;letter-spacing:.12em;color:#5dd9bc}
+.brique-searching__top strong{font-size:15px;color:#e8f4f1}
+.brique-searching__top>b{font-size:20px;color:#74e7ca}
+.brique-searching__track{height:8px;margin-top:14px;overflow:hidden;border-radius:999px;background:rgba(114,145,167,.11)}
+.brique-searching__track i{display:block;height:100%;border-radius:inherit;background:linear-gradient(90deg,#46d8b7,#43cbd2);box-shadow:0 0 16px rgba(76,219,192,.25);transition:width .12s linear}
+.brique-searching>p{margin-top:11px;font-size:12.5px;line-height:1.55;color:#758b9b}
 .brique-results{margin-top:28px;border-top:1px solid rgba(113,145,171,.10);padding-top:26px}
 .brique-results__head{display:flex;align-items:flex-start;justify-content:space-between;gap:18px}
 .brique-results__head h4,.brique-flow__head h4{margin-top:9px;font-size:26px;font-weight:840;line-height:1.15;letter-spacing:-.035em;color:#edf4f6}
@@ -62,7 +74,12 @@
 .brique-product__deal{background:rgba(89,228,193,.038);color:#64d9bd}
 .brique-product__signal p,.brique-product__risk p,.brique-product__deal p{font-size:13px;line-height:1.58;color:#7b91a1}
 .brique-product__signal b,.brique-product__risk b,.brique-product__deal b{display:block;margin-bottom:4px;font-size:11.5px;letter-spacing:.025em;color:#b2c2ca}
-.brique-product__analyze{display:flex;align-items:center;justify-content:space-between;gap:8px;min-height:46px;margin-top:auto;padding:14px 2px 0;border-top:1px solid rgba(113,145,171,.08);font-size:13.5px;font-weight:820;color:#6fe4c6}
+.brique-product__analyze{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:62px;margin-top:14px;border:1px solid rgba(98,231,199,.27);border-radius:16px;background:linear-gradient(115deg,rgba(39,160,137,.24),rgba(33,128,139,.18));padding:10px 12px 10px 15px;text-align:left;color:#eafff9;box-shadow:inset 0 1px 0 rgba(255,255,255,.04),0 10px 24px rgba(27,121,108,.08);transition:.2s}
+.brique-product__analyze:hover{transform:translateY(-1px);border-color:rgba(98,231,199,.40);background:linear-gradient(115deg,rgba(39,160,137,.31),rgba(33,128,139,.24))}
+.brique-product__analyze>span:first-child{display:grid;gap:2px}
+.brique-product__analyze small{font-size:9px;font-weight:850;letter-spacing:.12em;color:#68d8be}
+.brique-product__analyze b{font-size:15px;font-weight:850;color:#f2fffc}
+.brique-product__analyze-arrow{display:grid;flex:0 0 auto;width:36px;height:36px;place-items:center;border-radius:12px;background:rgba(91,229,198,.13);color:#72e7cb}
 .brique-flow{margin-top:24px;border:1px solid rgba(107,139,164,.10);border-radius:23px;background:rgba(4,16,27,.38);padding:20px}
 .brique-flow__steps{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:9px;margin-top:17px}
 .brique-flow__step{display:grid;grid-template-columns:auto minmax(0,1fr);gap:9px;border-left:1px solid rgba(89,228,193,.11);padding:9px 9px 9px 12px}
@@ -115,7 +132,10 @@
   .brique-turnover__grid b{font-size:16px}
   .brique-turnover__grid small{font-size:13px;line-height:1.5}
   .brique-turnover__note p{font-size:13.5px}
-  .brique-save{height:56px;font-size:14.5px}
+  .brique-search{height:60px;font-size:15px}
+  .brique-searching{padding:16px}
+  .brique-searching__top strong{font-size:15.5px}
+  .brique-searching>p{font-size:13px}
   .brique-results__head h4,.brique-flow__head h4{font-size:27px}
   .brique-results__head p{font-size:14.5px}
   .brique-product-grid{grid-template-columns:1fr}
@@ -128,7 +148,9 @@
   .brique-product__why{font-size:14.5px}
   .brique-product__signal p,.brique-product__risk p,.brique-product__deal p{font-size:13.5px}
   .brique-product__signal b,.brique-product__risk b,.brique-product__deal b{font-size:12px}
-  .brique-product__analyze{font-size:14px}
+  .brique-product__analyze{min-height:66px;padding:11px 12px 11px 15px}
+  .brique-product__analyze b{font-size:16px}
+  .brique-product__analyze small{font-size:9.5px}
   .brique-flow__steps{grid-template-columns:1fr}
   .brique-flow__step{padding:10px 5px 10px 11px}
   .brique-flow__step>span{font-size:11px}
