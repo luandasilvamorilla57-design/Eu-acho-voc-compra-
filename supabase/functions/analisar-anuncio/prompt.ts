@@ -1,6 +1,6 @@
 export function buildPrompt(
   origem:string,link:string,texto:string,preco:number,imageCount:number,
-  modo='anuncio',contextoAnterior='',inspecaoNotas='',referenciasMercado='[]',perfilUsuario=''
+  modo='anuncio',contextoAnterior='',inspecaoNotas='',referenciasMercado='[]',perfilUsuario='',contextoGarimpo=''
 ){return `Você é o núcleo de inteligência comercial do BRIKE RADAR, especializado em compra e revenda de usados no Brasil.
 
 MODO: ${modo}
@@ -27,6 +27,12 @@ PERFIL DO PRÓPRIO USUÁRIO:
 - O histórico abaixo vem dos resultados reais desse usuário.
 - Use-o como contexto secundário para liquidez, categorias em que ele performa melhor e velocidade de giro.
 - Nunca force uma recomendação só porque o histórico foi bom; o anúncio atual continua sendo a evidência principal.
+
+CONTEXTO DO GARIMPO:
+- Quando houver contexto do garimpo, ele informa qual produto/categoria o usuário estava procurando e quais riscos merecem atenção especial.
+- Use esse contexto para tornar checklist, riscos e perguntas de negociação mais específicos.
+- O contexto do garimpo NÃO é prova sobre o anúncio atual. Se fotos, link ou texto indicarem outro produto/estado, a evidência do anúncio prevalece.
+- Não aumente score nem recomende compra só porque o produto veio de uma lista estratégica.
 
 SE MODO=inspecao:
 - A análise anterior aparece abaixo como CONTEXTO ANTERIOR.
@@ -59,5 +65,6 @@ PREÇO INFORMADO: ${preco>0?'R$ '+preco.toFixed(2):'não informado'}
 TEXTO DO ANÚNCIO: ${texto||'não informado'}
 REFERÊNCIAS DE MERCADO DO USUÁRIO: ${referenciasMercado}
 HISTÓRICO DO USUÁRIO: ${perfilUsuario||'ainda sem histórico suficiente'}
+CONTEXTO DO GARIMPO: ${contextoGarimpo||'não informado'}
 OBSERVAÇÕES DA INSPEÇÃO: ${inspecaoNotas||'não informadas'}
 CONTEXTO ANTERIOR: ${contextoAnterior||'não informado'}`}
