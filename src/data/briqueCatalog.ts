@@ -1,23 +1,31 @@
 export type GiroPreferido='rapido'|'medio'
 export type BriqueTierId='ate100'|'100-150'|'150-250'|'250-400'|'400-700'|'700mais'
+export type OpportunityPriority='muito-quente'|'boa-oportunidade'|'giro-moderado'
+export type BriqueKind=
+  |'microwave'|'cooktop'|'airfryer'|'controller'|'drill'|'hair'|'fan'|'blender'
+  |'monitor'|'pressureWasher'|'coffeeCapsule'|'tv'|'console'|'iphone'|'android'
+  |'speaker'|'notebook'|'vacuum'|'bike'|'printer'|'stove'|'washer'|'fridge'
+  |'soundbar'|'powerTool'|'pc'|'freezer'|'kitchenSmall'
+
 export type BriqueOpportunity={
   id:string
   title:string
   tier:BriqueTierId
   giro:GiroPreferido
+  kind:BriqueKind
   marketAsk:[number,number]
   targetBuy:[number,number]
   heat:'muito-quente'|'quente'
+  priority:OpportunityPriority
   why:string
   risk:string
   signal:string
+  critical:string
+  negotiation:string
+  analysisFocus:string[]
 }
 
-type Kind=
-  |'microwave'|'cooktop'|'airfryer'|'controller'|'drill'|'hair'|'fan'|'blender'
-  |'monitor'|'pressureWasher'|'coffeeCapsule'|'tv'|'console'|'iphone'|'android'
-  |'speaker'|'notebook'|'vacuum'|'bike'|'printer'|'stove'|'washer'|'fridge'
-  |'soundbar'|'powerTool'|'pc'|'freezer'|'kitchenSmall'
+type Kind=BriqueKind
 
 const riskByKind:Record<Kind,string>={
   microwave:'Teste aquecimento com copo d’água, prato, painel, porta e trava. Ferrugem interna, faiscamento ou porta danificada reprovam; não abra o aparelho por risco de alta tensão.',
@@ -79,6 +87,109 @@ const signalByKind:Record<Kind,string>={
   pc:'Gabinete feio pode esconder configuração útil; confirme peça por peça antes de valorar.',
   freezer:'Aparência externa pode ser recuperada; refrigeração precisa ser comprovada.',
   kitchenSmall:'Foto ruim, sujeira e falta de caixa podem abrir margem quando funcionamento e acessórios estão certos.'
+}
+
+
+const criticalByKind:Record<Kind,string>={
+  microwave:'Ferrugem interna, faiscamento ou porta/trava danificada.',
+  cooktop:'Vidro trincado, vazamento de gás ou registro com falha.',
+  airfryer:'Antiaderente destruído, resistência irregular ou cheiro elétrico.',
+  controller:'Drift, controle paralelo vendido como original ou bateria ruim.',
+  drill:'Bateria fraca, mandril com folga ou motor com cheiro de queimado.',
+  hair:'Cabo ressecado, cheiro de queimado ou aquecimento instável.',
+  fan:'Motor pesado, capacitor fraco ou hélice/grade comprometida.',
+  blender:'Copo trincado, vazamento no eixo ou motor com cheiro de queimado.',
+  monitor:'Linha, mancha, pixel problemático em excesso ou tela piscando.',
+  pressureWasher:'Bomba sem pressão constante ou vazamento relevante.',
+  coffeeCapsule:'Bomba sem pressão, vazamento interno ou aquecimento falhando.',
+  tv:'Defeito de painel, manchas, linhas ou backlight comprometido.',
+  console:'Superaquecimento, HDMI/leitor falhando ou bloqueio de conta.',
+  iphone:'IMEI/iCloud, biometria, bateria e histórico de peças.',
+  android:'IMEI, conta Google, AMOLED com burn-in e bateria.',
+  speaker:'Falsificação, bateria cansada ou distorção em volume alto.',
+  notebook:'Placa instável, tela, dobradiça e armazenamento com falha.',
+  vacuum:'Motor fraco, cheiro de queimado ou ruído de rolamento.',
+  bike:'Quadro trincado, procedência duvidosa ou rodas muito empenadas.',
+  printer:'Falha de impressão, cabeçote/fusor ruim ou puxada de papel.',
+  stove:'Vazamento de gás, ferrugem estrutural ou forno comprometido.',
+  washer:'Rolamento, vazamento, centrifugação ou painel com falha.',
+  fridge:'Compressor, refrigeração, vedação e custo de transporte.',
+  soundbar:'Canais falhando, subwoofer incompleto ou conexão instável.',
+  powerTool:'Bateria, carregador, folgas e funcionamento sob carga.',
+  pc:'GPU/placa instável, fonte ruim ou configuração diferente do anúncio.',
+  freezer:'Compressor, refrigeração, vedação e frete.',
+  kitchenSmall:'Motor/aquecimento, cabo, acessórios e sinais de curto.'
+}
+
+const negotiationByKind:Record<Kind,string>={
+  microwave:'Oi! Tenho interesse. Ele aquece normalmente e não faisca? Tem ferrugem por dentro ou é só aparência externa? Se estiver tudo certo e eu retirar sem enrolação, consegue melhorar o valor?',
+  cooktop:'Oi! Tenho interesse. Todas as bocas e o acendimento estão funcionando? O vidro tem alguma trinca? Se estiver tudo certo e eu retirar, consegue melhorar um pouco o valor?',
+  airfryer:'Oi! Tenho interesse. Está aquecendo e ventilando normal? O cesto está muito descascado ou é mais sujeira de uso? Se estiver funcionando certinho, consegue melhorar o valor para retirada?',
+  controller:'Oi! Tenho interesse. É original mesmo? Os analógicos estão sem drift e a bateria segura carga? Se eu testar e estiver tudo certo, consegue melhorar o valor?',
+  drill:'Oi! Tenho interesse. Bateria e carregador estão bons? Tem folga no mandril ou alguma falha sob carga? Se estiver funcionando bem, consegue melhorar o valor para retirada?',
+  hair:'Oi! Tenho interesse. Está aquecendo e ventilando normal em todas as posições? O cabo está bom? Se estiver tudo certo, consegue fazer um valor melhor para retirada?',
+  fan:'Oi! Tenho interesse. Todas as velocidades e a oscilação funcionam? Faz algum barulho diferente? Se estiver tudo certo, consegue melhorar o valor?',
+  blender:'Oi! Tenho interesse. Motor, copo e lâmina estão bons, sem vazamento? Se estiver completo e funcionando, consegue melhorar o valor para retirada?',
+  monitor:'Oi! Tenho interesse. A tela está sem linhas, manchas e pixels ruins? HDMI e fonte estão funcionando? Se eu testar e estiver tudo certo, consegue melhorar o valor?',
+  pressureWasher:'Oi! Tenho interesse. Ela mantém pressão contínua? Mangueira e gatilho estão sem vazamento? Se estiver funcionando bem, consegue melhorar o valor para retirada?',
+  coffeeCapsule:'Oi! Tenho interesse. A bomba puxa água normal e não vaza? Está aquecendo certinho? Se estiver tudo funcionando, consegue melhorar o valor?',
+  tv:'Oi! Tenho interesse. A tela está sem manchas, linhas e falhas de iluminação? HDMI, som e controle estão ok? Se eu testar e estiver tudo certo, consegue melhorar o valor?',
+  console:'Oi! Tenho interesse. HDMI, leitor e controle estão funcionando? Ele aquece ou desliga sozinho? Se eu testar e estiver tudo certo, consegue melhorar o valor?',
+  iphone:'Oi! Tenho interesse. IMEI e iCloud estão livres? Face ID/Touch ID funciona e a bateria está em quantos %? Tem peça trocada? Se estiver tudo certo e eu retirar, consegue melhorar o valor?',
+  android:'Oi! Tenho interesse. IMEI está livre, tela sem burn-in e conta Google removida? Bateria e câmeras estão boas? Se estiver tudo certo, consegue melhorar o valor?',
+  speaker:'Oi! Tenho interesse. É original? Bateria segura carga e o som fica limpo em volume alto? Se estiver tudo certo, consegue melhorar o valor?',
+  notebook:'Oi! Tenho interesse. Tela, teclado, bateria e SSD estão bons? Tem algum problema de dobradiça ou aquecimento? Se eu testar e estiver tudo certo, consegue melhorar o valor?',
+  vacuum:'Oi! Tenho interesse. A sucção está forte e o motor não faz barulho diferente? Está completo? Se estiver tudo certo, consegue melhorar o valor?',
+  bike:'Oi! Tenho interesse. Quadro está sem trinca e rodas/freios estão bons? Tem algo além de regulagem e marcas de uso? Se eu retirar, consegue melhorar o valor?',
+  printer:'Oi! Tenho interesse. Você consegue mandar uma foto da página de teste? Ela puxa papel e imprime sem falhas? Se estiver tudo certo, consegue melhorar o valor?',
+  stove:'Oi! Tenho interesse. Todas as bocas e o forno funcionam? Tem algum vazamento ou ferrugem estrutural? Se estiver tudo certo e eu retirar, consegue melhorar o valor?',
+  washer:'Oi! Tenho interesse. Lava, drena e centrifuga normal? Tem vazamento ou barulho forte no rolamento? Se estiver tudo certo, consegue melhorar o valor?',
+  fridge:'Oi! Tenho interesse. Está gelando normalmente e o compressor trabalha sem barulho estranho? A borracha veda bem? Se eu organizar a retirada, consegue melhorar o valor?',
+  soundbar:'Oi! Tenho interesse. HDMI/óptico e Bluetooth funcionam? Está completa com subwoofer quando acompanha? Se estiver tudo certo, consegue melhorar o valor?',
+  powerTool:'Oi! Tenho interesse. Bateria e carregador estão bons e a ferramenta trabalha normal sob carga? Se eu testar e estiver tudo certo, consegue melhorar o valor?',
+  pc:'Oi! Tenho interesse. A configuração é exatamente a do anúncio? Está estável, sem travar e com temperaturas normais? Se eu testar e estiver tudo certo, consegue melhorar o valor?',
+  freezer:'Oi! Tenho interesse. Está congelando normalmente e o compressor trabalha bem? A vedação está boa? Se eu organizar a retirada, consegue melhorar o valor?',
+  kitchenSmall:'Oi! Tenho interesse. Está funcionando tudo normalmente e acompanha os acessórios? Tem algum detalhe além do que aparece nas fotos? Se estiver tudo certo, consegue melhorar o valor?'
+}
+
+const focusByKind:Record<Kind,string[]>={
+  microwave:['aquecimento','ferrugem interna','faiscamento','porta e trava'],
+  cooktop:['vidro','vazamento de gás','acendimento','registros'],
+  airfryer:['resistência','ventilador','antiaderente','painel/timer'],
+  controller:['originalidade','drift','bateria','Bluetooth/USB'],
+  drill:['bateria','mandril','motor sob carga','carregador'],
+  hair:['aquecimento','ventilação','cabo','seletor'],
+  fan:['velocidades','oscilação','ruído','motor/capacitor'],
+  blender:['motor','copo','lâmina','vazamento'],
+  monitor:['linhas/manchas','pixels','HDMI','fonte'],
+  pressureWasher:['pressão','bomba','mangueira','vazamentos'],
+  coffeeCapsule:['bomba','aquecimento','vazamentos','alavanca'],
+  tv:['painel','backlight','HDMI','Wi‑Fi/controle'],
+  console:['HDMI','leitor','aquecimento','controle'],
+  iphone:['IMEI/iCloud','Face ID/Touch ID','bateria','peças e tela'],
+  android:['IMEI/conta Google','AMOLED','bateria','câmeras'],
+  speaker:['originalidade','bateria','distorção','carregamento'],
+  notebook:['tela','SSD/HD','bateria','dobradiça/temperatura'],
+  vacuum:['sucção','motor','filtro','mangueira'],
+  bike:['quadro','rodas','freios','procedência'],
+  printer:['página de teste','toner/cabeçote','papel','conectividade'],
+  stove:['gás','forno','acendimento','estrutura'],
+  washer:['lavagem','drenagem','centrifugação','rolamento'],
+  fridge:['refrigeração','compressor','vedação','transporte'],
+  soundbar:['canais','Bluetooth','HDMI/óptico','subwoofer'],
+  powerTool:['bateria','carregador','folga','teste sob carga'],
+  pc:['configuração','fonte','temperaturas','GPU/armazenamento'],
+  freezer:['refrigeração','compressor','vedação','frete'],
+  kitchenSmall:['funcionamento','cabo','acessórios','estrutura']
+}
+
+function priorityFor(id:string,kind:Kind,giro:GiroPreferido):OpportunityPriority{
+  if(giro==='medio')return ['iphone','tv','console','notebook','speaker'].includes(kind)?'boa-oportunidade':'giro-moderado'
+  if(kind==='tv')return 'muito-quente'
+  if(kind==='iphone'&&/iphone11|iphonex|iphone8|iphone7/i.test(id))return 'muito-quente'
+  if(kind==='controller'&&/100|150/.test(id))return 'muito-quente'
+  if(kind==='microwave'&&/100|150/.test(id))return 'muito-quente'
+  return 'boa-oportunidade'
 }
 
 const seeds:Array<[string,string,BriqueTierId,GiroPreferido,number,number,number,number,Kind,'muito-quente'|'quente',string]>=[
@@ -193,7 +304,19 @@ const seeds:Array<[string,string,BriqueTierId,GiroPreferido,number,number,number
 
 function makeOpportunity(row:typeof seeds[number]):BriqueOpportunity{
   const [id,title,tier,giro,askMin,askMax,buyMin,buyMax,kind,heat,why]=row
-  return {id,title,tier,giro,marketAsk:[askMin,askMax],targetBuy:[buyMin,buyMax],heat,why,risk:riskByKind[kind],signal:signalByKind[kind]}
+  return {
+    id,title,tier,giro,kind,
+    marketAsk:[askMin,askMax],
+    targetBuy:[buyMin,buyMax],
+    heat,
+    priority:priorityFor(id,kind,giro),
+    why,
+    risk:riskByKind[kind],
+    signal:signalByKind[kind],
+    critical:criticalByKind[kind],
+    negotiation:negotiationByKind[kind],
+    analysisFocus:focusByKind[kind]
+  }
 }
 
 export const briqueCatalog:BriqueOpportunity[]=seeds.map(makeOpportunity)
