@@ -6,6 +6,7 @@ import type { AdOrigin } from '../components/new-analysis/AnalysisForm'
 import type { MarketReferenceInput } from '../types/market'
 import { prepareScreenshots, revokePreviews, type PreparedImage, MAX_IMAGES } from '../utils/imageInput'
 import { reportClientError } from '../lib/errorReporter'
+import type { BriqueOpportunity } from '../data/briqueCatalog'
 
 async function readFunctionError(error:any){
   try{
@@ -18,7 +19,7 @@ async function readFunctionError(error:any){
   return error?.message||'Não foi possível analisar.'
 }
 
-export function useNewAnalysis(onSaved:(destination:'dashboard'|'history')=>void,userProfile='',onUsageChanged?:()=>void|Promise<unknown>){
+export function useNewAnalysis(onSaved:(destination:'dashboard'|'history')=>void,userProfile='',onUsageChanged?:()=>void|Promise<unknown>,focus:BriqueOpportunity|null=null){
   const [origem,setOrigemState]=useState<AdOrigin>('olx')
   const [link,setLink]=useState('')
   const [texto,setTexto]=useState('')
@@ -85,7 +86,16 @@ export function useNewAnalysis(onSaved:(destination:'dashboard'|'history')=>void
         preco:Number(preco||0),
         imagens:origem==='facebook'?images.map(({mime_type,data,name})=>({mime_type,data,name})):[],
         referencias_mercado:refs,
-        perfil_usuario:userProfile
+        perfil_usuario:userProfile,
+        contexto_garimpo:focus?{
+          produto:focus.title,
+          categoria:focus.kind,
+          maior_risco:focus.critical,
+          foco_analise:focus.analysisFocus,
+          faixa_anuncio:focus.marketAsk,
+          faixa_compra:focus.targetBuy,
+          abordagem:focus.negotiation
+        }:null
       }
     })
     setBusy(false)
