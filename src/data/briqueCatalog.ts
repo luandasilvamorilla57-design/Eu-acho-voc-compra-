@@ -84,30 +84,30 @@ const tierLabel={
 
 const seeds=[
   [
-    "liq-100",
-    "Liquidificador Arno / Britânia / Mondial",
+    "micro-op-100",
+    "Micro-ondas 18–20 L em oportunidade",
     "ate100",
     "rapido",
-    60,
-    145,
-    40,
-    80,
-    "kitchenSmall",
+    100,
+    180,
+    70,
+    100,
+    "microwave",
     "muito-quente",
-    "Procura constante e fácil de testar quando o copo, tampa e lâmina estão completos."
+    "Mesmo anunciado acima do caixa, pode valer o garimpo quando o problema é apresentação ruim, sujeira ou detalhe estético simples."
   ],
   [
-    "ferro-100",
-    "Ferro de passar Black+Decker / Mondial",
+    "cooktop-op-100",
+    "Cooktop a gás 4 bocas em oportunidade",
     "ate100",
     "rapido",
-    50,
-    120,
-    35,
+    100,
+    200,
     70,
-    "kitchenSmall",
-    "quente",
-    "Baixo ticket, fácil limpeza e costuma vender melhor quando está bem apresentado."
+    100,
+    "cooktop",
+    "muito-quente",
+    "Gordura, fotos ruins e desapego podem derrubar a percepção de valor; funcionando e bem limpo, ganha apresentação para revenda."
   ],
   [
     "secador-100",
@@ -1369,4 +1369,4 @@ export function opportunitiesFor(capital:number,giro:GiroPreferido){
   return briqueCatalog.filter(item=>item.tier===tier&&item.giro===giro).slice(0,8)
 }
 
-export const marketResearchNote='Faixas de anúncio observadas em pesquisas de usados na OLX em São Paulo e região, revisadas em 01/10/2026. São referências de anúncio, não garantia de venda. O alvo de compra é uma faixa de garimpo do BRike Radar e deve ser validado no Analisar antes de fechar.'
+export const catalogGuideNote='Tabela estratégica do BRike Radar. As faixas servem para orientar o garimpo e a negociação; não significam que o sistema encontrou esses anúncios agora nem garantem lucro ou prazo de venda. Sempre valide o anúncio real no Analisar antes de pagar.'
