@@ -17,7 +17,7 @@ export function TopHeader({view,dark,setDark,email,ownerAccess=false,onManageSub
   const [eyebrow,title,desc]=meta[view]
   return <header className="app-top-header sticky top-0 z-30 border-b backdrop-blur-2xl">
     <div className="top-header-inner">
-      <div className="top-header-mobile-brand lg:hidden"><Brand compact/><span className="top-header-mobile-context">{title}</span></div>
+      <div className="top-header-mobile-brand lg:hidden"><Brand compact/></div>
       <div className="hidden min-w-0 lg:block">
         <div className="header-context-kicker"><span className="premium-eyebrow">{eyebrow}</span><i/></div>
         <h1 className="font-display app-heading header-page-title">{title}</h1>
