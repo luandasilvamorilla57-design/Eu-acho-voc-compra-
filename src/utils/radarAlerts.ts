@@ -61,15 +61,38 @@ export function buildRadarAlerts(analyses:AnaliseRow[],purchases:PurchaseRow[],c
       const floor=Math.max(Number(p.preco_minimo_venda||0),purchaseTotalCost(p))
       const suggested=current?Math.max(floor,Math.round(current*.95)):0
       alerts.push({
-        id:'stock-'+p.id,severity:'high',title:p.produto,detail:health.detail,
+        id:'stock-'+p.id,severity:'high',title:'Capital parado · '+p.produto,detail:health.detail,
         recommendation:suggested&&suggested<current?'Teste reduzir o anúncio de '+money(current)+' para perto de '+money(suggested)+' sem atravessar seu piso.':'Revise a foto principal, descrição e preço. Se não houver procura, reduza em pequenos passos sem passar do seu piso.',
         action:'Abrir item',view:'bought'
       })
+    }else if(health.key==='attention'){
+      alerts.push({
+        id:'stock-attention-'+p.id,severity:'medium',title:'Giro começando a desacelerar · '+p.produto,detail:health.detail,
+        recommendation:'Confira visualizações, propostas e preço agora. Uma correção pequena cedo costuma ser melhor do que esperar o item virar estoque parado.',
+        action:'Revisar item',view:'bought'
+      })
     }else if(health.key==='reserved'&&p.data_reserva&&daysSince(p.data_reserva)>=3){
-      alerts.push({id:'reserve-'+p.id,severity:'medium',title:'Reserva parada: '+p.produto,detail:health.detail,recommendation:'Confirme hoje se o comprador mantém interesse e defina um horário limite antes de segurar o item por mais tempo.',action:'Revisar reserva',view:'bought'})
+      alerts.push({
+        id:'reserve-'+p.id,severity:'medium',title:'Reserva parada · '+p.produto,detail:health.detail,
+        recommendation:'Confirme hoje se o comprador mantém interesse e defina um horário limite antes de segurar o item por mais tempo.',
+        action:'Revisar reserva',view:'bought'
+      })
     }
-    if((Array.isArray(p.fotos)?p.fotos:[]).length===0){
-      alerts.push({id:'photos-'+p.id,severity:'info',title:'Faltam fotos reais',detail:'Adicione fotos de '+p.produto+' para preparar a revenda e manter o histórico do item.',recommendation:'Faça 4–6 fotos em boa luz: frente, laterais, etiqueta/modelo, acessórios e qualquer marca de uso relevante.',action:'Adicionar fotos',view:'bought'})
+
+    const photos=Array.isArray(p.fotos)?p.fotos:[]
+    if(photos.length===0){
+      alerts.push({
+        id:'photos-'+p.id,severity:'info',title:'Faltam fotos reais',detail:'Adicione fotos de '+p.produto+' para preparar a revenda e manter o histórico do item.',
+        recommendation:'Faça 4–6 fotos em boa luz: frente, laterais, etiqueta/modelo, acessórios e qualquer marca de uso relevante.',
+        action:'Adicionar fotos',view:'bought'
+      })
+    }else if(!p.anuncio_revenda){
+      alerts.push({
+        id:'resale-'+p.id,severity:'info',title:'Revenda ainda não preparada · '+p.produto,
+        detail:'As fotos já estão no sistema, mas o anúncio de revenda ainda não foi preparado.',
+        recommendation:'Use Vender com IA para montar título, descrição e faixa de preço antes de publicar.',
+        action:'Preparar venda',view:'bought'
+      })
     }
   }
 
@@ -83,6 +106,18 @@ export function buildRadarAlerts(analyses:AnaliseRow[],purchases:PurchaseRow[],c
     })
   }
 
+  for(const a of analyses.filter(a=>a.pipeline_status==='analisado')){
+    const score=Number((a.analise_ia as any)?.calculado?.score_oportunidade??0)
+    const days=daysSince(a.data_atualizacao)
+    if(score>=80&&days>=1)alerts.push({
+      id:'hot-'+a.id,severity:'medium',title:'Oportunidade forte sem decisão',
+      detail:a.titulo_anuncio+' tem score '+score+' e está sem atualização há '+days+' dia(s).',
+      recommendation:'Reabra a análise, confirme se o anúncio ainda está ativo e decida entre negociar ou descartar para não deixar oportunidade esquecida.',
+      action:'Revisar análise',view:'history'
+    })
+  }
+
   return alerts.sort((a,b)=>rank(b.severity)-rank(a.severity))
 }
+
 function rank(s:RadarAlert['severity']){return s==='high'?3:s==='medium'?2:1}

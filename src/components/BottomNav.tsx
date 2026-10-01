@@ -1,4 +1,4 @@
-import { BarChart3, History, PackageCheck, Radar } from 'lucide-react'
+import { BarChart3, History, ListChecks, PackageCheck } from 'lucide-react'
 
 export type View='dashboard'|'radar'|'new'|'bought'|'history'|'subscription'|'admin'
 
@@ -43,7 +43,7 @@ function AnalyzeIcon({ size = 19 }: { size?: number }) {
 export function BottomNav({view,setView,radarCount=0}:{view:View;setView:(v:View)=>void;radarCount?:number}){
   const items=[
     ['dashboard','Painel',BarChart3],
-    ['radar','Radar',Radar],
+    ['radar','Ações',ListChecks],
     ['new','Analisar',AnalyzeIcon],
     ['bought','Comprei',PackageCheck],
     ['history','Histórico',History]

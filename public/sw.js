@@ -1,4 +1,4 @@
-const CACHE='brike-radar-v4'
+const CACHE='brike-radar-v5'
 const SHELL=['/','/manifest.webmanifest','/brike-icon.svg','/brike-maskable.svg']
 
 self.addEventListener('install',event=>{event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(SHELL)));self.skipWaiting()})
@@ -17,4 +17,15 @@ self.addEventListener('fetch',event=>{
     const network=fetch(request).then(response=>{if(response.ok&&url.pathname!=='/sw.js')caches.open(CACHE).then(cache=>cache.put(request,response.clone()));return response}).catch(()=>cached)
     return cached||network
   }))
+})
+
+self.addEventListener('notificationclick',event=>{
+  event.notification.close()
+  event.waitUntil(
+    clients.matchAll({type:'window',includeUncontrolled:true}).then(openClients=>{
+      const existing=openClients.find(client=>'focus' in client)
+      if(existing)return existing.focus()
+      return clients.openWindow('/')
+    })
+  )
 })

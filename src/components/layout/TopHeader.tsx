@@ -5,7 +5,7 @@ import { AccountMenu } from './AccountMenu'
 
 const meta={
   dashboard:['VISÃO DE MERCADO','Painel de oportunidades','Capital, margem, lucro e negócios ativos em uma única visão.'],
-  radar:['CENTRAL OPERACIONAL','Radar do dia','Prioridades, estoque parado e negociações que pedem sua atenção.'],
+  radar:['CENTRAL DE AÇÃO','Ações do dia','Pendências, estoque, negociações e próximos passos que pedem sua atenção.'],
   new:['ANÁLISE GUIADA','Nova análise inteligente','Cruze anúncio, mercado, risco e seu histórico antes de negociar.'],
   bought:['CARTEIRA DE COMPRAS','Itens comprados','Custo real, estoque, fotos, preço mínimo e preparação para revenda.'],
   history:['ACOMPANHAMENTO','Histórico do radar','Análises, negociações, anúncios com IA e resultados reais.'],

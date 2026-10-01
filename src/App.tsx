@@ -62,15 +62,25 @@ export default function App(){
 
   useEffect(()=>{
     if(!hasAccess||!config.notificacoes_ativas||typeof Notification==='undefined'||Notification.permission!=='granted')return
-    const alert=alerts.find(a=>a.severity==='high')
+    const alert=alerts.find(a=>a.severity==='high')||alerts.find(a=>a.severity==='medium')
     if(!alert)return
     const day=new Date().toISOString().slice(0,10)
     const key='brike-notification:'+day+':'+alert.id
     if(localStorage.getItem(key))return
-    try{
-      new Notification('BRIKE RADAR · atenção',{body:alert.title+' — '+alert.recommendation,icon:'/brike-icon.svg'})
-      localStorage.setItem(key,'1')
-    }catch{}
+
+    void (async()=>{
+      try{
+        const title=alert.severity==='high'?'BRIKE RADAR · ação importante':'BRIKE RADAR · atenção'
+        const options={body:alert.title+' — '+alert.recommendation,icon:'/brike-icon.svg',tag:'brike-alert-'+alert.id}
+        if('serviceWorker' in navigator){
+          const registration=await navigator.serviceWorker.ready
+          await registration.showNotification(title,options)
+        }else{
+          new Notification(title,options)
+        }
+        localStorage.setItem(key,'1')
+      }catch{}
+    })()
   },[alerts,config.notificacoes_ativas,hasAccess])
 
   if(!ready)return <div className="grid min-h-screen place-items-center bg-[#06101c] text-xs text-slate-600">Carregando radar...</div>
@@ -80,7 +90,7 @@ export default function App(){
 
   let page:React.ReactNode
   if(view==='dashboard')page=<DashboardPage items={items} purchases={purchases} drafts={drafts} config={config} access={access} onSaveConfig={saveConfig} onManagePlan={()=>setView('subscription')} onNew={()=>setView('new')} onOpen={setSelected}/>
-  else if(view==='radar')page=<RadarPage analyses={items} purchases={purchases} config={config} alerts={alerts} insights={intelligence.insights} onNavigate={setView} onOpen={setSelected}/>
+  else if(view==='radar')page=<RadarPage analyses={items} purchases={purchases} config={config} alerts={alerts} insights={intelligence.insights} onNavigate={setView} onOpen={setSelected} onSaveConfig={saveConfig}/>
   else if(view==='new')page=<NewAnalysisPage config={config} userProfile={intelligence.profile} purchases={purchases} onUsageChanged={()=>refreshAccess({silent:true})} onSaved={async destination=>{await load();await refreshAccess();setView(destination)}}/>
   else if(view==='bought')page=<BoughtPage analyses={items} purchases={purchases} drafts={drafts} config={config} onCreate={async input=>{await createPurchase(input);await load()}} onSold={async(id,salePrice)=>{await markSold(id,salePrice);await load()}} onUpdate={updatePurchase} onUploadPhotos={uploadPhotos} onRemovePhoto={removePhoto} onSaveDraft={async input=>{const row=await saveResaleDraft(input);void refreshAccess({silent:true});return row}} onUpdateDraftCopy={updateResaleDraftCopy} onDeleteDraft={removeResaleDraft}/>
   else if(view==='history')page=<HistoryPage items={items} drafts={drafts} config={config} onOpen={setSelected} onOpenAd={setSelectedDraft} onAdSold={async(ad,price)=>{await setResaleSaleOutcome(ad.id,'vendido',price);await loadPurchases();await load()}} onAdNotSold={async ad=>{await setResaleSaleOutcome(ad.id,'nao_vendido');await loadPurchases()}} onEdit={setEditing} onNegotiationBought={async(id,price)=>{await resolveNegotiation(id,'bought',price);await loadPurchases()}} onNegotiationFailed={async id=>{await resolveNegotiation(id,'failed')}} onNegotiationLog={addNegotiationLog} onReinspect={reinspect}/>
