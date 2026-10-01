@@ -5,6 +5,7 @@ import type { RadarConfigRow } from '../types/database'
 const base:RadarConfigRow={
   user_id:'u',
   capital_disponivel:1000,
+  giro_preferido:'rapido',
   lucro_minimo:150,
   lucro_minimo_modo:'valor',
   lucro_minimo_percentual:20,
