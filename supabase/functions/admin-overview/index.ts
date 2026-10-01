@@ -16,10 +16,9 @@ function corsHeaders(req:Request){
   }
 }
 
-const json=(body:unknown,status=200)=>new Response(JSON.stringify(body),{status,headers:{...cors,"content-type":"application/json; charset=utf-8"}});
-
 Deno.serve(async(req:Request)=>{
   const cors=corsHeaders(req)
+  const json=(body:unknown,status=200)=>new Response(JSON.stringify(body),{status,headers:{...cors,'content-type':'application/json; charset=utf-8'}})
   if(req.method==="OPTIONS")return new Response("ok",{headers:cors});
   if(req.method!=="POST")return json({error:"Método não permitido"},405);
 
