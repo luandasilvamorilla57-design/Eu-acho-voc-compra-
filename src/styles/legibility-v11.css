@@ -1,0 +1,217 @@
+/* BRIKE RADAR v11 — global microcopy legibility + market references overflow fix */
+
+/* ---------- Market reference cards: never overflow ---------- */
+.app-theme .market-ref-result{
+  position:relative;
+  display:grid;
+  grid-template-columns:minmax(0,1fr) auto;
+  gap:10px;
+  align-items:start;
+  min-width:0;
+  max-width:100%;
+  overflow:hidden;
+}
+.app-theme .market-ref-result__content{
+  display:grid;
+  min-width:0;
+  max-width:100%;
+}
+.app-theme .market-ref-result__title{
+  display:-webkit-box;
+  min-width:0;
+  max-width:100%;
+  overflow:hidden;
+  -webkit-box-orient:vertical;
+  -webkit-line-clamp:2;
+  overflow-wrap:anywhere;
+  word-break:break-word;
+  font-size:12.5px;
+  font-weight:750;
+  line-height:1.42;
+  color:#cbd5e1;
+}
+.app-theme .market-ref-result__observation{
+  display:-webkit-box;
+  min-width:0;
+  max-width:100%;
+  margin-top:5px;
+  overflow:hidden;
+  -webkit-box-orient:vertical;
+  -webkit-line-clamp:2;
+  overflow-wrap:anywhere;
+  font-size:10.75px;
+  line-height:1.5;
+  color:#64748b;
+}
+.app-theme .market-ref-result__price{
+  display:grid;
+  min-width:max-content;
+  justify-items:end;
+  text-align:right;
+}
+.app-theme .market-ref-result__price>strong{
+  font-size:13.5px;
+  font-weight:800;
+  line-height:1.3;
+  color:#6ee7b7;
+}
+.app-theme .market-ref-result__price>small{
+  margin-top:3px;
+  max-width:92px;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  font-size:9.75px!important;
+  text-transform:uppercase;
+  color:#526174;
+}
+.app-theme .market-ref-result__external{
+  position:absolute;
+  right:9px;
+  bottom:8px;
+  color:#60a5fa;
+  opacity:.72;
+}
+.app-theme .market-range-justification{
+  overflow-wrap:anywhere;
+  font-size:13.5px!important;
+  line-height:1.72!important;
+}
+.app-theme .market-refs-heading{
+  min-width:0;
+  overflow-wrap:anywhere;
+  font-size:11.5px!important;
+  line-height:1.45;
+}
+.app-theme .market-tiny>span{font-size:11px!important}
+.app-theme .market-tiny>strong{font-size:15px!important}
+
+/* ---------- Global small-text pass ----------
+   Intentionally only touches microcopy/supporting text. Large titles/metrics stay unchanged. */
+.app-theme [class*="text-[8px]"]{font-size:10px!important}
+.app-theme [class*="text-[8.5px]"]{font-size:10.5px!important}
+.app-theme [class*="text-[9px]"]{font-size:11px!important}
+.app-theme [class*="text-[9.5px]"]{font-size:11.5px!important}
+.app-theme [class*="text-[10px]"]{font-size:12px!important}
+.app-theme [class*="text-[10.5px]"]{font-size:12.25px!important}
+.app-theme [class*="text-[11px]"]{font-size:12.75px!important}
+.app-theme [class*="text-[11.5px]"]{font-size:13px!important}
+.app-theme [class*="text-[12px]"]{font-size:13.5px!important}
+.app-theme [class*="text-[12.5px]"]{font-size:13.75px!important}
+.app-theme [class*="text-[13px]"]{font-size:14px!important}
+
+.app-theme small{font-size:12px;line-height:1.52}
+.app-theme .premium-eyebrow{font-size:11.75px!important;line-height:1.4}
+
+/* Dashboard / strategy */
+.app-theme .metric-card-premium__hint{font-size:11.5px}
+.app-theme .strategy-description{font-size:13px}
+.app-theme .strategy-field__label,
+.app-theme .strategy-field__head>span{font-size:12px}
+.app-theme .strategy-field>small{font-size:10.75px}
+.app-theme .strategy-footer p{font-size:12px}
+.app-theme .operation-field>span{font-size:10px}
+.app-theme .operation-target>span,
+.app-theme .operation-target-result>span{font-size:11.5px}
+.app-theme .operation-target-result small{font-size:10.5px}
+
+/* Analysis */
+.app-theme .analysis-info{font-size:12px}
+.app-theme .analysis-upload small{font-size:11px}
+.app-theme .confidence-score small{font-size:9.5px}
+.app-theme .confidence-mini span{font-size:10.5px}
+.app-theme .confidence-missing{font-size:11px}
+.app-theme .confidence-why{font-size:12.5px;line-height:1.6}
+.app-theme .opportunity-thermometer__head p{font-size:13.75px}
+.app-theme .opportunity-thermometer__facts span{font-size:10.75px}
+.app-theme .heat-scale__labels{font-size:10.5px}
+
+/* Radar */
+.app-theme .radar-alert p{font-size:11.75px;line-height:1.6}
+.app-theme .radar-alert em{font-size:10.75px;line-height:1.55}
+.app-theme .radar-alert>span:last-child{font-size:10.75px}
+.app-theme .radar-insight>span{font-size:10.25px}
+.app-theme .radar-insight>p{font-size:11.5px;line-height:1.6}
+.app-theme .radar-quick span{font-size:10.5px}
+.app-theme .radar-opportunity small{font-size:10.5px}
+.app-theme .history-learning-chip{font-size:10.5px}
+
+/* Purchases / resale / history */
+.app-theme .purchase-item-meta{font-size:13px}
+.app-theme .purchase-status{font-size:10px}
+.app-theme .inventory-health{font-size:10.25px}
+.app-theme .purchase-pro-action__eyebrow{font-size:10px}
+.app-theme .purchase-pro-action__eyebrow b{font-size:9.25px}
+.app-theme .purchase-pro-action__copy>small{font-size:12px}
+.app-theme .purchase-secondary-actions .purchase-manage,
+.app-theme .purchase-secondary-actions .purchase-sell{font-size:12.5px}
+.app-theme .history-ai__heading p{font-size:12.5px}
+.app-theme .history-ai-card>p{font-size:12.25px}
+.app-theme .history-ai-card__metrics span{font-size:10.5px}
+.app-theme .history-ai-card__footer>span{font-size:10.5px}
+.app-theme .history-ai-card__footer>button{font-size:10.75px}
+.app-theme .history-ai-card__sold-note small,
+.app-theme .history-ai-card__not-sold-note small{font-size:10.5px}
+
+/* Subscription/admin */
+.app-theme .subscription-summary span{font-size:11px}
+.app-theme .subscription-summary small{font-size:10.25px}
+.app-theme .subscription-plan-grid article>p{font-size:10.5px}
+.app-theme .admin-metric>small{font-size:10.5px}
+.app-theme .admin-metric>p{font-size:10px}
+.app-theme .admin-user-row{font-size:10.25px}
+
+/* Mobile: a little more generous, still preserving density */
+@media(max-width:620px){
+  .app-theme [class*="text-[8px]"]{font-size:10.5px!important}
+  .app-theme [class*="text-[8.5px]"]{font-size:10.75px!important}
+  .app-theme [class*="text-[9px]"]{font-size:11.5px!important}
+  .app-theme [class*="text-[9.5px]"]{font-size:11.75px!important}
+  .app-theme [class*="text-[10px]"]{font-size:12.25px!important}
+  .app-theme [class*="text-[10.5px]"]{font-size:12.5px!important}
+  .app-theme [class*="text-[11px]"]{font-size:13px!important}
+  .app-theme [class*="text-[11.5px]"]{font-size:13.25px!important}
+  .app-theme [class*="text-[12px]"]{font-size:13.75px!important}
+  .app-theme [class*="text-[12.5px]"]{font-size:14px!important}
+  .app-theme [class*="text-[13px]"]{font-size:14.25px!important}
+
+  .app-theme small{font-size:12.25px;line-height:1.55}
+  .app-theme .premium-eyebrow{font-size:12px!important}
+
+  .app-theme .market-ref-result{
+    grid-template-columns:minmax(0,1fr) auto;
+    gap:9px;
+    padding:13px 12px 27px;
+  }
+  .app-theme .market-ref-result__title{
+    font-size:13px;
+    line-height:1.42;
+    -webkit-line-clamp:2;
+  }
+  .app-theme .market-ref-result__observation{
+    font-size:11.5px;
+    line-height:1.52;
+    -webkit-line-clamp:3;
+  }
+  .app-theme .market-ref-result__price>strong{font-size:14px}
+  .app-theme .market-ref-result__price>small{font-size:10.25px!important}
+  .app-theme .market-range-justification{font-size:14px!important;line-height:1.75!important}
+  .app-theme .market-refs-heading{font-size:12px!important}
+  .app-theme .market-tiny>span{font-size:11.5px!important}
+  .app-theme .market-tiny>strong{font-size:15.5px!important}
+
+  .app-theme .metric-card-premium__hint{font-size:12px}
+  .app-theme .strategy-description{font-size:13.5px}
+  .app-theme .strategy-field__label,
+  .app-theme .strategy-field__head>span{font-size:12.5px}
+  .app-theme .strategy-field>small{font-size:11.25px}
+  .app-theme .operation-field>span{font-size:10.5px}
+  .app-theme .analysis-info{font-size:12.5px}
+  .app-theme .confidence-missing{font-size:11.5px}
+  .app-theme .radar-alert p{font-size:12.25px}
+  .app-theme .radar-alert em{font-size:11.25px}
+  .app-theme .radar-insight>p{font-size:12px}
+  .app-theme .purchase-item-meta{font-size:13.25px}
+  .app-theme .purchase-pro-action__copy>small{font-size:12.25px}
+  .app-theme .mobile-nav-item{font-size:12.25px!important}
+}
