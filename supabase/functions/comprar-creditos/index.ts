@@ -2,7 +2,6 @@ import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "npm:@supabase/supabase-js@2.57.4";
 
 const APP_ORIGIN='https://radar-do-brique.vercel.app'
-const TEST_PAYER_EMAIL="test_payer_3728717908@testuser.com";
 function corsHeaders(req:Request){
   const origin=req.headers.get('origin')||''
   const local=/^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin)
@@ -41,7 +40,7 @@ Deno.serve(async(req:Request)=>{
     const {data:config}=await admin.from("radar_config").select("acesso_total").eq("user_id",user.id).maybeSingle();
     if(config?.acesso_total===true)return json({no_need:true,message:"Sua conta já possui acesso ilimitado."});
 
-    const {data:billing,error:billingError}=await admin.from("billing_config").select("ambiente").eq("id",1).single();
+    const {data:billing,error:billingError}=await admin.from("billing_config").select("ambiente,test_payer_email").eq("id",1).single();
     if(billingError)return json({error:"Ambiente de cobrança não configurado."},503);
     const environment=billing?.ambiente==="production"?"production":"test";
 
@@ -51,7 +50,8 @@ Deno.serve(async(req:Request)=>{
     if(packError||!pack)return json({error:"Pacote indisponível."},404);
 
     const externalReference=`radar-extra:${user.id}:${pack.quantidade}`;
-    const payerEmail=environment==="test"?TEST_PAYER_EMAIL:user.email;
+    const payerEmail=environment==="test"?String(billing?.test_payer_email||"").trim():user.email;
+    if(environment==="test"&&!payerEmail)return json({error:"Comprador de teste do Mercado Pago ainda não configurado."},503);
     const notificationUrl=`${supabaseUrl}/functions/v1/mercadopago-webhook`;
     const payload={
       items:[{
