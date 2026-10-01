@@ -1,0 +1,109 @@
+/* BRIKE RADAR v14 — Android-safe dashboard hero accent */
+
+.dashboard-hero-premium__title{
+  max-width:780px;
+  overflow:visible;
+  text-wrap:balance;
+}
+
+/* Safe baseline: never transparent. */
+.dashboard-hero-premium__title .dashboard-hero-premium__accent{
+  display:inline;
+  position:relative;
+  max-width:100%;
+  background:none!important;
+  color:#62e2c4!important;
+  -webkit-text-fill-color:currentColor!important;
+  -webkit-background-clip:border-box!important;
+  background-clip:border-box!important;
+  box-decoration-break:clone;
+  -webkit-box-decoration-break:clone;
+  text-shadow:0 0 26px rgba(52,211,153,.08);
+}
+
+/* Desktop enhancement only. Mobile deliberately stays on the safe solid treatment. */
+@media(min-width:768px){
+  @supports ((-webkit-background-clip:text) or (background-clip:text)){
+    .dashboard-hero-premium__title .dashboard-hero-premium__accent{
+      display:inline;
+      background:linear-gradient(100deg,#71e9cc 0%,#4dd7cf 54%,#65c5df 100%)!important;
+      -webkit-background-clip:text!important;
+      background-clip:text!important;
+      color:#62e2c4!important;
+      -webkit-text-fill-color:transparent!important;
+      text-shadow:none;
+    }
+  }
+}
+
+@media(max-width:767px){
+  .dashboard-hero-premium{
+    padding:29px 30px!important;
+  }
+
+  .dashboard-hero-premium__title{
+    max-width:100%;
+    margin-top:20px;
+    font-size:clamp(42px,11.2vw,58px)!important;
+    line-height:.99!important;
+    letter-spacing:-.06em!important;
+    overflow:visible!important;
+    text-wrap:pretty;
+  }
+
+  .dashboard-hero-premium__title .dashboard-hero-premium__accent{
+    display:inline!important;
+    background:none!important;
+    color:#61e3c5!important;
+    -webkit-text-fill-color:#61e3c5!important;
+    -webkit-background-clip:border-box!important;
+    background-clip:border-box!important;
+    white-space:normal;
+    overflow-wrap:normal;
+    word-break:normal;
+  }
+
+  .dashboard-hero-premium__copy{
+    max-width:560px;
+    margin-top:18px;
+    font-size:15px!important;
+    line-height:1.72!important;
+    color:#8194a5!important;
+  }
+
+  .dashboard-hero-premium__proof{
+    margin-top:19px;
+    gap:8px;
+  }
+
+  .dashboard-hero-premium__proof>span{
+    min-height:36px;
+    padding:8px 10px;
+    font-size:11px!important;
+  }
+
+  .dashboard-new-analysis{
+    min-height:74px!important;
+    border-radius:21px!important;
+  }
+
+  .dashboard-new-analysis__copy>strong{
+    font-size:15px!important;
+  }
+
+  .dashboard-new-analysis__copy>small{
+    margin-top:3px!important;
+    font-size:11.5px!important;
+  }
+}
+
+@media(max-width:390px){
+  .dashboard-hero-premium{
+    padding:26px 25px!important;
+  }
+
+  .dashboard-hero-premium__title{
+    font-size:clamp(38px,10.9vw,46px)!important;
+    line-height:1!important;
+  }
+}
