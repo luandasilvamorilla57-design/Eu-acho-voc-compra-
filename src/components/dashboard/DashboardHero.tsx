@@ -7,7 +7,7 @@ export function DashboardHero({onNew}:{onNew:()=>void}){
       <div className="max-w-3xl">
         <div className="dashboard-live"><span/> Inteligência de oportunidade ativa</div>
         <h2 className="font-display dashboard-hero-premium__title">Transforme anúncios em <span className="dashboard-hero-premium__accent">decisões lucrativas.</span></h2>
-        <p className="dashboard-hero-premium__copy">Entenda preço de mercado, risco, liquidez, teto de compra e saída provável antes de colocar dinheiro no produto.</p>
+        <p className="dashboard-hero-premium__copy">Leia preço de mercado, risco, liquidez e teto de compra antes de colocar dinheiro no produto.</p>
         <div className="dashboard-hero-premium__proof">
           <span><BarChart3 size={13}/> Mercado</span>
           <span><Target size={13}/> Teto de compra</span>
