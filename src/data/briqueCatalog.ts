@@ -1333,15 +1333,20 @@ const seeds=[
   ]
 ] as const
 
-export const briqueCatalog:BriqueOpportunity[]=seeds.map(([id,title,tier,giro,askMin,askMax,buyMin,buyMax,kind,heat,why])=>({
-  id,title,tier,giro,
-  marketAsk:[askMin,askMax],
-  targetBuy:[buyMin,buyMax],
-  heat,
-  why,
-  risk:riskByKind[kind],
-  signal:signalByKind[kind]
-}))
+function makeOpportunity(row:typeof seeds[number]):BriqueOpportunity{
+  const [id,title,tier,giro,askMin,askMax,buyMin,buyMax,kind,heat,why]=row
+  return {
+    id,title,tier,giro,
+    marketAsk:[askMin,askMax],
+    targetBuy:[buyMin,buyMax],
+    heat,
+    why,
+    risk:riskByKind[kind],
+    signal:signalByKind[kind]
+  }
+}
+
+export const briqueCatalog:BriqueOpportunity[]=seeds.map(makeOpportunity)
 
 export const briqueCapitalPresets=[100,150,250,400,700,1000] as const
 
