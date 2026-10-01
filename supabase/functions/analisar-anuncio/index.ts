@@ -1,12 +1,13 @@
 import 'jsr:@supabase/functions-js/edge-runtime.d.ts'
 import { createClient } from 'npm:@supabase/supabase-js@2.57.4'
 import { askGemini } from './gemini.ts'
-import { calculate,cors,num,sources } from './helpers.ts'
+import { calculate,corsHeaders,num,sources } from './helpers.ts'
 
 type InputImage={mime_type:string;data:string;name?:string}
 type MarketRef={url?:string;price?:number;note?:string}
 
 Deno.serve(async req=>{
+  const cors=corsHeaders(req)
   if(req.method==='OPTIONS')return new Response('ok',{headers:cors})
   if(req.method!=='POST')return Response.json({error:'Método não permitido'},{status:405,headers:cors})
   const requestId=crypto.randomUUID()
@@ -25,16 +26,17 @@ Deno.serve(async req=>{
     const {data:{user},error:userError}=await admin.auth.getUser(token)
     if(userError||!user)return Response.json({error:'Sessão inválida ou expirada.',code:'AUTH_REQUIRED',request_id:requestId},{status:401,headers:cors})
 
-    const b=await req.json()
+    const b=await req.json().catch(()=>null)
+    if(!b||typeof b!=='object')return Response.json({error:'Requisição inválida.',request_id:requestId},{status:400,headers:cors})
     const modo=b.modo==='inspecao'?'inspecao':'anuncio'
     const origem=['olx','facebook','manual'].includes(b.origem)?b.origem:'manual'
-    const link=typeof b.link==='string'?b.link.trim():''
-    const texto=typeof b.texto==='string'?b.texto.trim():''
+    const link=typeof b.link==='string'?b.link.trim().slice(0,2048):''
+    const texto=typeof b.texto==='string'?b.texto.trim().slice(0,20000):''
     const preco=num(b.preco)
     const imagens:Array<InputImage>=Array.isArray(b.imagens)?b.imagens.slice(0,6):[]
-    const inspecaoNotas=typeof b.inspecao_notas==='string'?b.inspecao_notas.trim():''
+    const inspecaoNotas=typeof b.inspecao_notas==='string'?b.inspecao_notas.trim().slice(0,6000):''
     const contextoAnterior=b.contexto_anterior??null
-    const perfilUsuario=typeof b.perfil_usuario==='string'?b.perfil_usuario.trim():''
+    const perfilUsuario=typeof b.perfil_usuario==='string'?b.perfil_usuario.trim().slice(0,6000):''
     const referencias:Array<MarketRef>=Array.isArray(b.referencias_mercado)?b.referencias_mercado.slice(0,5).map((r:any)=>({
       url:typeof r?.url==='string'?r.url.trim():'',
       price:Math.max(0,num(r?.price)),
@@ -51,6 +53,8 @@ Deno.serve(async req=>{
 
     const urls=[link,...referencias.map(r=>r.url||'')].filter(Boolean)
     if(urls.some(url=>!/^https?:\/\//i.test(url)))return Response.json({error:'Há um link inválido nas referências.',request_id:requestId},{status:400,headers:cors})
+    const totalImageBytes=imagens.reduce((sum,image)=>sum+(typeof image?.data==='string'?image.data.length:0),0)
+    if(totalImageBytes>12_000_000)return Response.json({error:'O conjunto de imagens ficou grande demais. Reduza a quantidade ou resolução.',request_id:requestId},{status:413,headers:cors})
     for(const image of imagens){
       if(!image?.data||typeof image.data!=='string'||image.data.length>3_000_000)return Response.json({error:'Uma imagem é inválida ou grande demais.',request_id:requestId},{status:400,headers:cors})
       if(!['image/jpeg','image/png','image/webp'].includes(image.mime_type))return Response.json({error:'Formato de imagem não suportado.',request_id:requestId},{status:400,headers:cors})
@@ -97,6 +101,6 @@ Deno.serve(async req=>{
     const lower=message.toLowerCase()
     if(lower.includes('quota')||lower.includes('rate limit')||lower.includes('resource_exhausted'))return Response.json({error:'A cota gratuita da Gemini foi atingida. Aguarde a renovação do limite e tente novamente.',request_id:requestId},{status:429,headers:cors})
     if(lower.includes('high demand')||lower.includes('service unavailable')||lower.includes('try again later'))return Response.json({error:'Os modelos gratuitos da Gemini estão temporariamente congestionados. Tente novamente em instantes.',request_id:requestId},{status:503,headers:cors})
-    return Response.json({error:message,request_id:requestId},{status:500,headers:cors})
+    return Response.json({error:'Não foi possível concluir a análise agora. Tente novamente.',request_id:requestId},{status:500,headers:cors})
   }
 })

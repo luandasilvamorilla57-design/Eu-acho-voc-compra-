@@ -1,4 +1,10 @@
-export const cors={'Access-Control-Allow-Origin':'*','Access-Control-Allow-Headers':'authorization, x-client-info, apikey, content-type'}
+const APP_ORIGIN='https://radar-do-brique.vercel.app'
+export function corsHeaders(req:Request){
+  const origin=req.headers.get('origin')||''
+  const local=/^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin)
+  const allowed=origin===APP_ORIGIN||local
+  return {'Access-Control-Allow-Origin':allowed?origin:APP_ORIGIN,'Access-Control-Allow-Headers':'authorization, x-client-info, apikey, content-type','Access-Control-Allow-Methods':'POST, OPTIONS','Access-Control-Max-Age':'86400','Vary':'Origin','Cache-Control':'no-store'}
+}
 export const clamp=(n:number,min=0,max=100)=>Math.min(max,Math.max(min,Number.isFinite(n)?n:0))
 export const num=(v:any,f=0)=>{const n=typeof v==='number'?v:Number(v);return Number.isFinite(n)?n:f}
 export const round=(n:number)=>Math.round(n*100)/100

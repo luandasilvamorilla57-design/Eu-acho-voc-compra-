@@ -97,11 +97,7 @@ Deno.serve(async (req: Request) => {
   const serviceRole = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
 
   if (req.method === "GET") {
-    return json({
-      ok: true,
-      service: "mercadopago-webhook",
-      secrets_ready: Boolean(webhookSecret && accessToken),
-    });
+    return json({ ok: true, service: "mercadopago-webhook" });
   }
 
   if (req.method !== "POST") return json({ error: "Método não permitido" }, 405);

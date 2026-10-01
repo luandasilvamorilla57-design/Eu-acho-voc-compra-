@@ -1,7 +1,21 @@
 import 'jsr:@supabase/functions-js/edge-runtime.d.ts'
 import { createClient } from '@supabase/supabase-js'
 
-const cors={'Access-Control-Allow-Origin':'*','Access-Control-Allow-Headers':'authorization, x-client-info, apikey, content-type'}
+const APP_ORIGIN='https://radar-do-brique.vercel.app'
+function corsHeaders(req:Request){
+  const origin=req.headers.get('origin')||''
+  const local=/^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin)
+  const allowed=origin===APP_ORIGIN||local
+  return {
+    'Access-Control-Allow-Origin':allowed?origin:APP_ORIGIN,
+    'Access-Control-Allow-Headers':'authorization, x-client-info, apikey, content-type',
+    'Access-Control-Allow-Methods':'POST, OPTIONS',
+    'Access-Control-Max-Age':'86400',
+    'Vary':'Origin',
+    'Cache-Control':'no-store'
+  }
+}
+
 
 const photoReview={type:'object',properties:{
   indice:{type:'number'},nota:{type:'number'},qualidade:{type:'string'},
@@ -46,6 +60,7 @@ function clip(v:any,max=300){return String(v||'').trim().slice(0,max)}
 function score(v:any){return Math.max(0,Math.min(100,n(v)))}
 
 Deno.serve(async req=>{
+  const cors=corsHeaders(req)
   if(req.method==='OPTIONS')return new Response('ok',{headers:cors})
   if(req.method!=='POST')return Response.json({error:'Método não permitido'},{status:405,headers:cors})
   const requestId=crypto.randomUUID()
@@ -78,13 +93,16 @@ Deno.serve(async req=>{
       return Response.json({error:'O Preparar venda com IA e a avaliação de fotos são recursos dos planos Pro e Max.',code:'FEATURE_REQUIRES_PRO',request_id:requestId},{status:403,headers:cors})
     }
 
-    const b=await req.json()
+    const b=await req.json().catch(()=>null)
+    if(!b||typeof b!=='object')return Response.json({error:'Requisição inválida.',request_id:requestId},{status:400,headers:cors})
     const origin=b.origem_item==='externo'?'externo':'radar'
     const product=clip(b.produto,300)
     if(!product)return Response.json({error:'Produto não informado.',request_id:requestId},{status:400,headers:cors})
 
     const images=Array.isArray(b.imagens)?b.imagens.slice(0,6):[]
     if(!images.length)return Response.json({error:'Envie pelo menos uma foto para o Anúncio Inteligente.',request_id:requestId},{status:400,headers:cors})
+    const totalImageBytes=images.reduce((sum:any,image:any)=>sum+(typeof image?.data==='string'?image.data.length:0),0)
+    if(totalImageBytes>12_000_000)return Response.json({error:'O conjunto de fotos ficou grande demais. Reduza a quantidade ou resolução.',request_id:requestId},{status:413,headers:cors})
     for(const image of images){
       if(!image?.data||typeof image.data!=='string'||image.data.length>3_000_000)return Response.json({error:'Uma das fotos é inválida ou grande demais.',request_id:requestId},{status:400,headers:cors})
       if(!['image/jpeg','image/png','image/webp'].includes(image.mime_type))return Response.json({error:'Formato de foto não suportado.',request_id:requestId},{status:400,headers:cors})
@@ -234,6 +252,6 @@ ${JSON.stringify(context).slice(0,28000)}`
     const message=e instanceof Error?e.message:'Erro interno'
     const lower=message.toLowerCase()
     const status=lower.includes('quota')||lower.includes('rate')||lower.includes('resource')?429:lower.includes('high demand')||lower.includes('temporarily')?503:500
-    return Response.json({error:status===503?'A IA está congestionada. Tente novamente em instantes.':message,request_id:requestId},{status,headers:cors})
+    return Response.json({error:status===503?'A IA está congestionada. Tente novamente em instantes.':status===429?'A cota da IA foi atingida. Tente novamente após a renovação.':'Não foi possível concluir a preparação da venda agora.',request_id:requestId},{status,headers:cors})
   }
 })

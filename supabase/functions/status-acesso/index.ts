@@ -1,11 +1,21 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "npm:@supabase/supabase-js@2.57.4";
 
-const cors={
-  "Access-Control-Allow-Origin":"*",
-  "Access-Control-Allow-Headers":"authorization, x-client-info, apikey, content-type",
-  "Access-Control-Allow-Methods":"POST, OPTIONS"
-};
+const APP_ORIGIN='https://radar-do-brique.vercel.app'
+function corsHeaders(req:Request){
+  const origin=req.headers.get('origin')||''
+  const local=/^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin)
+  const allowed=origin===APP_ORIGIN||local
+  return {
+    'Access-Control-Allow-Origin':allowed?origin:APP_ORIGIN,
+    'Access-Control-Allow-Headers':'authorization, x-client-info, apikey, content-type',
+    'Access-Control-Allow-Methods':'POST, OPTIONS',
+    'Access-Control-Max-Age':'86400',
+    'Vary':'Origin',
+    'Cache-Control':'no-store'
+  }
+}
+
 
 const json=(body:unknown,status=200)=>new Response(JSON.stringify(body),{
   status,
@@ -13,6 +23,7 @@ const json=(body:unknown,status=200)=>new Response(JSON.stringify(body),{
 });
 
 Deno.serve(async(req:Request)=>{
+  const cors=corsHeaders(req)
   if(req.method==="OPTIONS")return new Response("ok",{headers:cors});
   if(req.method!=="POST")return json({error:"Método não permitido"},405);
 
