@@ -74,6 +74,14 @@ Deno.serve(async (req: Request) => {
       .eq("user_id", user.id)
       .maybeSingle();
 
+    const { data: billing, error: billingError } = await admin
+      .from("billing_config")
+      .select("ambiente")
+      .eq("id", 1)
+      .single();
+    if (billingError) return json({ error: "Ambiente de cobrança não configurado." }, 503);
+    const environment = billing?.ambiente === "production" ? "production" : "test";
+
     if (config?.acesso_total === true) {
       return json({ already_active: true, plan: "pro", message: "Acesso total já está ativo nesta conta." });
     }
@@ -86,8 +94,6 @@ Deno.serve(async (req: Request) => {
       .single();
 
     if (catalogError || !catalog) return json({ error: "Plano indisponível." }, 404);
-
-    const environment = accessToken.startsWith("TEST-") ? "test" : "production";
 
     const { data: current } = await admin
       .from("assinaturas")
