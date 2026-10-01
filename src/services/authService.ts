@@ -1,12 +1,13 @@
 import { supabase } from '../lib/supabase'
 import type { AuthMode } from '../components/auth/authCopy'
+import { passwordError } from '../utils/password'
 
 const APP_URL =
   import.meta.env.VITE_SITE_URL ||
   (typeof window !== 'undefined' ? window.location.origin : 'https://radar-do-brique.vercel.app')
 
 export async function runAuthAction(mode:AuthMode,email:string,password:string,confirm:string){
- if((mode==='register'||mode==='reset')&&password.length<6)throw new Error('A senha precisa ter pelo menos 6 caracteres.')
+ if(mode==='register'||mode==='reset'){const issue=passwordError(password);if(issue)throw new Error(issue)}
  if((mode==='register'||mode==='reset')&&password!==confirm)throw new Error('As senhas não conferem.')
  if(mode==='register'){
    const {error}=await supabase.auth.signUp({

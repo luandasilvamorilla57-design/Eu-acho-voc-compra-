@@ -1,4 +1,4 @@
-const CACHE='brike-radar-v3'
+const CACHE='brike-radar-v4'
 const SHELL=['/','/manifest.webmanifest','/brike-icon.svg','/brike-maskable.svg']
 
 self.addEventListener('install',event=>{event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(SHELL)));self.skipWaiting()})
