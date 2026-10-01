@@ -158,8 +158,8 @@ export function StrategyPanel({
           <h5>{item.title}</h5>
 
           <div className="brique-product__prices">
-            <span><small>Faixa de anúncio que vale garimpar</small><b>{rangeMoney(item.marketAsk)}</b></span>
-            <span><small>Tente fechar a compra por</small><b>{rangeMoney(item.targetBuy)}</b></span>
+            <span><small>Procure anúncios nessa faixa</small><b>{rangeMoney(item.marketAsk)}</b></span>
+            <span><small>Tente fechar a compra por</small><b>{rangeMoney(cappedBuyRange(item.targetBuy,cash))}</b></span>
           </div>
 
           <p className="brique-product__why">{item.why}</p>
@@ -217,6 +217,12 @@ export function StrategyPanel({
 
 function FlowStep({n,title,text}:{n:string;title:string;text:string}){
   return <div className="brique-flow__step"><span>{n}</span><div><b>{title}</b><p>{text}</p></div></div>
+}
+
+function cappedBuyRange(range:[number,number],cash:number):[number,number]{
+  const high=Math.max(0,Math.min(range[1],cash))
+  const low=Math.min(range[0],high)
+  return [low,high]
 }
 
 function rangeMoney(range:[number,number]){
