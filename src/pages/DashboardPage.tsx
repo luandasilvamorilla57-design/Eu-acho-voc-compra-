@@ -13,8 +13,9 @@ import type { AccessStatus } from '../hooks/usePlanAccess'
 import type { AnaliseRow,PurchaseRow,RadarConfigRow,ResaleDraftRow } from '../types/database'
 import { money,pct } from '../utils/format'
 import type { RadarConfigPatch } from '../hooks/useRadarConfig'
+import type { BriqueOpportunity } from '../data/briqueCatalog'
 
-export function DashboardPage({items,purchases,drafts,config,access,onSaveConfig,onManagePlan,onNew,onOpen}:{items:AnaliseRow[];purchases:PurchaseRow[];drafts:ResaleDraftRow[];config:RadarConfigRow;access:AccessStatus;onSaveConfig:(patch:RadarConfigPatch)=>Promise<void>;onManagePlan:()=>void;onNew:()=>void;onOpen:(a:AnaliseRow)=>void}){
+export function DashboardPage({items,purchases,drafts,config,access,onSaveConfig,onManagePlan,onNew,onAnalyzeOpportunity,onOpen}:{items:AnaliseRow[];purchases:PurchaseRow[];drafts:ResaleDraftRow[];config:RadarConfigRow;access:AccessStatus;onSaveConfig:(patch:RadarConfigPatch)=>Promise<void>;onManagePlan:()=>void;onNew:()=>void;onAnalyzeOpportunity:(opportunity:BriqueOpportunity)=>void;onOpen:(a:AnaliseRow)=>void}){
   const s=useDashboardData(items,purchases,drafts)
   const available=config.capital_disponivel>0?Math.max(0,config.capital_disponivel+s.profit+s.externalSaleProceeds-s.invested):0
   const externalHint=s.externalSaleProceeds>0?' · desapegos '+money(s.externalSaleProceeds):''
@@ -27,7 +28,7 @@ export function DashboardPage({items,purchases,drafts,config,access,onSaveConfig
       <MetricCard icon={CircleDollarSign} label="Lucro realizado" value={money(s.profit)} hint={'capital em estoque '+money(s.invested)+externalHint}/>
       <MetricCard icon={TrendingUp} label="ROI médio" value={pct(s.roi)} hint={config.capital_disponivel>0?'caixa livre '+money(available):s.externalSaleProceeds>0?'entradas externas '+money(s.externalSaleProceeds):'vendas concluídas'} tone="amber"/>
     </div>
-    <StrategyPanel config={config} onSave={onSaveConfig} onAnalyze={onNew}/>
+    <StrategyPanel config={config} onSave={onSaveConfig} onAnalyze={onAnalyzeOpportunity}/>
     <FinancialPeriodPanel purchases={purchases}/>
     <OpportunityCompare items={items} config={config} onOpen={onOpen}/>
     <div className="grid gap-4 xl:grid-cols-[1.45fr_.75fr]"><PerformancePanel chart={s.chart}/><TopOpportunity row={s.top} onOpen={onOpen}/></div>
