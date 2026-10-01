@@ -2,7 +2,7 @@ import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "npm:@supabase/supabase-js@2.57.4";
 
 const APP_ORIGIN='https://radar-do-brique.vercel.app'
-const TEST_PAYER_EMAIL="testuser5178526503119783585@testuser.com"
+const TEST_PAYER_EMAIL="test@testuser.com"
 function corsHeaders(req:Request){
   const origin=req.headers.get('origin')||''
   const local=/^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin)
