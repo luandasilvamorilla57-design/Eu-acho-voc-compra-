@@ -97,9 +97,13 @@ button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-vis
 .mobile-nav-icon{position:relative;display:grid;width:34px;height:31px;place-items:center;border-radius:11px;transition:.2s}
 .mobile-nav-item.is-active .mobile-nav-icon{background:rgba(89,228,193,.065);color:#62e2c3}
 .mobile-nav-item.is-primary{transform:translateY(-8px)}
-.mobile-nav-item.is-primary .mobile-nav-icon{width:46px;height:46px;border:1px solid rgba(89,228,193,.25);border-radius:16px;background:linear-gradient(135deg,#4cdcb8,#35c9d7);color:#041a19;box-shadow:0 10px 24px rgba(49,205,183,.18),inset 0 1px 0 rgba(255,255,255,.30)}
+.mobile-nav-item.is-primary .mobile-nav-icon{width:46px;height:46px;border:1px solid rgba(89,228,193,.24);border-radius:16px;background:linear-gradient(145deg,rgba(11,30,42,.98),rgba(7,22,33,.98));color:#61e5c7;box-shadow:0 12px 28px rgba(38,203,181,.13),inset 0 1px 0 rgba(255,255,255,.055)}
 .mobile-nav-item.is-primary .mobile-nav-label{margin-top:1px;color:#6f8997}
 .mobile-nav-item.is-primary.is-active .mobile-nav-label{color:#b8e9dc}
+.mobile-nav-item.is-primary.is-active .mobile-nav-icon{border-color:rgba(102,235,204,.42);background:linear-gradient(145deg,rgba(12,34,45,.99),rgba(7,25,36,.99));box-shadow:0 13px 30px rgba(43,211,184,.16),0 0 0 1px rgba(89,228,193,.045),inset 0 1px 0 rgba(255,255,255,.07)}
+.analyze-nav-glyph{display:block;overflow:visible;filter:drop-shadow(0 2px 5px rgba(49,218,194,.16));transition:transform .2s ease,filter .2s ease}
+.mobile-nav-item.is-primary:active .analyze-nav-glyph{transform:scale(.94)}
+.mobile-nav-item.is-primary.is-active .analyze-nav-glyph{filter:drop-shadow(0 2px 7px rgba(67,224,198,.24))}
 .mobile-nav-active-dot{position:absolute;bottom:4px;width:4px;height:4px;border-radius:50%;background:#59e4c1}
 .mobile-nav-item.is-primary .mobile-nav-active-dot{bottom:-1px}
 .nav-alert-badge{position:absolute;right:-7px;top:-5px;display:grid;min-width:17px;height:17px;place-items:center;border:2px solid #07121e;border-radius:999px;background:#e77f8d;padding:0 3px;font-size:7px;font-weight:850;color:#fff}
