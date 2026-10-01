@@ -160,3 +160,89 @@
   .brique-discipline p,.brique-aftercare p{font-size:13.5px}
   .brique-market-note{font-size:12px}
 }
+
+
+/* Product intelligence refinement v24 */
+.brique-results__context{position:sticky;top:76px;z-index:12;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1px;margin-top:16px;overflow:hidden;border:1px solid rgba(89,228,193,.16);border-radius:16px;background:rgba(5,19,30,.88);box-shadow:0 12px 32px rgba(0,0,0,.18);backdrop-filter:blur(18px)}
+.brique-results__context>span{display:grid;gap:3px;padding:10px 13px;border-right:1px solid rgba(110,142,166,.08)}
+.brique-results__context>span:last-child{border-right:0}
+.brique-results__context small{font-size:8px;font-weight:850;letter-spacing:.12em;color:#5f788b}
+.brique-results__context b{font-size:11.5px;color:#d7e4e8}
+
+.brique-product{padding:17px}
+.brique-priority{display:inline-flex;align-items:center;gap:5px;border:1px solid;border-radius:999px;padding:6px 8px;font-size:9px;font-weight:850;letter-spacing:.075em}
+.brique-priority.is-hot{border-color:rgba(249,115,22,.18);background:rgba(249,115,22,.06);color:#f5a36e}
+.brique-priority.is-good{border-color:rgba(89,228,193,.17);background:rgba(89,228,193,.055);color:#79dfc6}
+.brique-priority.is-moderate{border-color:rgba(96,165,250,.16);background:rgba(96,165,250,.05);color:#8bbbea}
+
+.brique-product__why{color:#96a8b4}
+.brique-product__critical{display:grid;grid-template-columns:auto minmax(0,1fr);gap:9px;align-items:flex-start;margin-top:12px;border:1px solid rgba(244,162,97,.13);border-radius:14px;background:linear-gradient(145deg,rgba(244,162,97,.055),rgba(244,162,97,.025));padding:11px;color:#e0a276}
+.brique-product__critical p{display:grid;gap:3px}
+.brique-product__critical small{font-size:8px;font-weight:850;letter-spacing:.10em;color:#a87355}
+.brique-product__critical b{font-size:11.5px;line-height:1.45;color:#d7c2b4}
+
+.brique-product__intel-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:9px}
+.brique-product__intel-grid .brique-product__signal,
+.brique-product__intel-grid .brique-product__risk{margin-top:0;padding:11px}
+.brique-product__intel-grid .brique-product__signal p,
+.brique-product__intel-grid .brique-product__risk p{font-size:11.5px;line-height:1.52;color:#8498a6}
+.brique-product__intel-grid .brique-product__signal b,
+.brique-product__intel-grid .brique-product__risk b{font-size:10px;color:#c2d0d6}
+
+.brique-product__focus{margin-top:9px;border:1px solid rgba(84,218,194,.09);border-radius:13px;background:rgba(84,218,194,.025);padding:10px}
+.brique-product__focus>span{display:block;font-size:7.5px;font-weight:850;letter-spacing:.12em;color:#58bfa9}
+.brique-product__focus>div{display:flex;flex-wrap:wrap;gap:5px;margin-top:7px}
+.brique-product__focus b{border:1px solid rgba(88,220,196,.10);border-radius:999px;background:rgba(88,220,196,.035);padding:4px 7px;font-size:8px;font-weight:720;color:#86b8ae}
+
+.brique-product__deal{margin-top:9px;padding:11px;background:rgba(89,228,193,.032)}
+.brique-product__deal p{font-size:11.5px;line-height:1.55;color:#8aa0ad}
+.brique-product__deal b{font-size:10px;color:#c1d4d7}
+.brique-product__analyze{min-height:58px;margin-top:11px;background:linear-gradient(115deg,rgba(35,163,139,.32),rgba(31,130,143,.24));box-shadow:0 10px 24px rgba(27,121,108,.11),inset 0 1px rgba(255,255,255,.05)}
+.brique-product__analyze:hover{box-shadow:0 14px 30px rgba(27,121,108,.16),inset 0 1px rgba(255,255,255,.07)}
+.brique-product__analyze b{font-size:15.5px}
+.brique-product__analyze small{color:#79e4ca}
+
+.analysis-garimpo-context{margin-bottom:15px;border:1px solid rgba(89,228,193,.16);border-radius:19px;background:linear-gradient(145deg,rgba(25,117,105,.10),rgba(24,82,100,.06));padding:15px;box-shadow:inset 0 1px rgba(255,255,255,.025)}
+.analysis-garimpo-context__head{display:grid;grid-template-columns:42px minmax(0,1fr);gap:11px;align-items:center}
+.analysis-garimpo-context__icon{display:grid;width:42px;height:42px;place-items:center;border:1px solid rgba(89,228,193,.14);border-radius:13px;background:rgba(89,228,193,.07);color:#64dfc2}
+.analysis-garimpo-context__head div{display:grid;gap:3px}
+.analysis-garimpo-context__head small{font-size:8px;font-weight:850;letter-spacing:.13em;color:#5cccb3}
+.analysis-garimpo-context__head strong{font-size:14px;color:#e3eef0}
+.analysis-garimpo-context>p{margin-top:10px;font-size:11px;line-height:1.55;color:#7b91a0}
+.analysis-garimpo-context__risk{display:grid;grid-template-columns:auto minmax(0,1fr);gap:8px;margin-top:10px;border-top:1px solid rgba(106,141,164,.08);padding-top:10px}
+.analysis-garimpo-context__risk b{font-size:9px;color:#dfa174}
+.analysis-garimpo-context__risk span{font-size:10.5px;color:#98aab4}
+.analysis-garimpo-context__focus{display:flex;flex-wrap:wrap;gap:5px;margin-top:9px}
+.analysis-garimpo-context__focus span{border:1px solid rgba(89,228,193,.11);border-radius:999px;background:rgba(89,228,193,.035);padding:5px 8px;font-size:8.5px;font-weight:700;color:#84b8ad}
+
+.theme-light .brique-results__context{background:rgba(247,252,251,.92);border-color:rgba(15,118,110,.13)}
+.theme-light .brique-results__context b{color:#29434e}
+.theme-light .brique-product__critical b{color:#735744}
+.theme-light .brique-product__intel-grid .brique-product__signal p,
+.theme-light .brique-product__intel-grid .brique-product__risk p,
+.theme-light .brique-product__deal p{color:#5d7382}
+.theme-light .analysis-garimpo-context{background:linear-gradient(145deg,rgba(16,185,129,.06),rgba(6,182,212,.04))}
+.theme-light .analysis-garimpo-context__head strong{color:#18343f}
+
+@media(max-width:900px){
+  .brique-results__context{top:72px}
+  .brique-product__intel-grid{grid-template-columns:1fr}
+}
+
+@media(max-width:620px){
+  .brique-results__context{top:76px;grid-template-columns:1fr 1fr 1fr;border-radius:14px}
+  .brique-results__context>span{padding:9px 8px}
+  .brique-results__context small{font-size:7px}
+  .brique-results__context b{font-size:9.5px}
+  .brique-priority{font-size:9.5px}
+  .brique-product__critical b{font-size:12.5px}
+  .brique-product__intel-grid .brique-product__signal p,
+  .brique-product__intel-grid .brique-product__risk p,
+  .brique-product__deal p{font-size:13px}
+  .brique-product__intel-grid .brique-product__signal b,
+  .brique-product__intel-grid .brique-product__risk b,
+  .brique-product__deal b{font-size:11.5px}
+  .brique-product__focus b{font-size:9.5px}
+  .analysis-garimpo-context__head strong{font-size:15px}
+  .analysis-garimpo-context>p{font-size:12.5px}
+}
