@@ -6,7 +6,7 @@ export function DashboardHero({onNew}:{onNew:()=>void}){
     <div className="relative dashboard-hero-premium__layout">
       <div className="max-w-3xl">
         <div className="dashboard-live"><span/> Inteligência de oportunidade ativa</div>
-        <h2 className="font-display dashboard-hero-premium__title">Transforme anúncios em <span>decisões lucrativas.</span></h2>
+        <h2 className="font-display dashboard-hero-premium__title">Transforme anúncios em <span className="dashboard-hero-premium__accent">decisões lucrativas.</span></h2>
         <p className="dashboard-hero-premium__copy">Entenda preço de mercado, risco, liquidez, teto de compra e saída provável antes de colocar dinheiro no produto.</p>
         <div className="dashboard-hero-premium__proof">
           <span><BarChart3 size={13}/> Mercado</span>
