@@ -7,6 +7,7 @@ export type InventoryStatus = 'em_estoque'|'reservado'|'vendido'|'prejuizo'
 export type RadarDecision = 'compensa' | 'nao_compensa'
 export type PipelineStatus = 'analisado'|'aguardando_negociacao'|'descartado'|'negociacao_falhou'|'comprado'|'vendido'
 export type ProfitGoalMode='valor'|'percentual'
+export type GiroPreferido='rapido'|'medio'
 export type AccountPlan='start'|'pro'|'max'
 export type OperationProfile='revenda'|'garimpo'|'desapego'|'misto'
 export type ExperienceLevel='iniciante'|'intermediario'|'avancado'
@@ -28,9 +29,9 @@ compras: {
  Relationships:[]
 }
 radar_config:{
- Row:{user_id:string;capital_disponivel:number;lucro_minimo:number;lucro_minimo_modo:ProfitGoalMode;lucro_minimo_percentual:number;roi_minimo:number;dias_alerta_estoque:number;plano_atual:AccountPlan;acesso_total:boolean;onboarding_concluido:boolean;perfil_operacao:OperationProfile;experiencia:ExperienceLevel;categorias_preferidas:Json;objetivo_lucro_mensal:number;notificacoes_ativas:boolean;data_atualizacao:string}
- Insert:{user_id?:string;capital_disponivel?:number;lucro_minimo?:number;lucro_minimo_modo?:ProfitGoalMode;lucro_minimo_percentual?:number;roi_minimo?:number;dias_alerta_estoque?:number;plano_atual?:AccountPlan;onboarding_concluido?:boolean;perfil_operacao?:OperationProfile;experiencia?:ExperienceLevel;categorias_preferidas?:Json;objetivo_lucro_mensal?:number;notificacoes_ativas?:boolean;data_atualizacao?:string}
- Update:{capital_disponivel?:number;lucro_minimo?:number;lucro_minimo_modo?:ProfitGoalMode;lucro_minimo_percentual?:number;roi_minimo?:number;dias_alerta_estoque?:number;plano_atual?:AccountPlan;onboarding_concluido?:boolean;perfil_operacao?:OperationProfile;experiencia?:ExperienceLevel;categorias_preferidas?:Json;objetivo_lucro_mensal?:number;notificacoes_ativas?:boolean;data_atualizacao?:string}
+ Row:{user_id:string;capital_disponivel:number;giro_preferido:GiroPreferido;lucro_minimo:number;lucro_minimo_modo:ProfitGoalMode;lucro_minimo_percentual:number;roi_minimo:number;dias_alerta_estoque:number;plano_atual:AccountPlan;acesso_total:boolean;onboarding_concluido:boolean;perfil_operacao:OperationProfile;experiencia:ExperienceLevel;categorias_preferidas:Json;objetivo_lucro_mensal:number;notificacoes_ativas:boolean;data_atualizacao:string}
+ Insert:{user_id?:string;capital_disponivel?:number;giro_preferido?:GiroPreferido;lucro_minimo?:number;lucro_minimo_modo?:ProfitGoalMode;lucro_minimo_percentual?:number;roi_minimo?:number;dias_alerta_estoque?:number;plano_atual?:AccountPlan;onboarding_concluido?:boolean;perfil_operacao?:OperationProfile;experiencia?:ExperienceLevel;categorias_preferidas?:Json;objetivo_lucro_mensal?:number;notificacoes_ativas?:boolean;data_atualizacao?:string}
+ Update:{capital_disponivel?:number;giro_preferido?:GiroPreferido;lucro_minimo?:number;lucro_minimo_modo?:ProfitGoalMode;lucro_minimo_percentual?:number;roi_minimo?:number;dias_alerta_estoque?:number;plano_atual?:AccountPlan;onboarding_concluido?:boolean;perfil_operacao?:OperationProfile;experiencia?:ExperienceLevel;categorias_preferidas?:Json;objetivo_lucro_mensal?:number;notificacoes_ativas?:boolean;data_atualizacao?:string}
  Relationships:[]
 }
 anuncios_revenda:{

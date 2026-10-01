@@ -27,7 +27,7 @@ export function DashboardPage({items,purchases,drafts,config,access,onSaveConfig
       <MetricCard icon={CircleDollarSign} label="Lucro realizado" value={money(s.profit)} hint={'capital em estoque '+money(s.invested)+externalHint}/>
       <MetricCard icon={TrendingUp} label="ROI médio" value={pct(s.roi)} hint={config.capital_disponivel>0?'caixa livre '+money(available):s.externalSaleProceeds>0?'entradas externas '+money(s.externalSaleProceeds):'vendas concluídas'} tone="amber"/>
     </div>
-    <StrategyPanel config={config} onSave={onSaveConfig}/>
+    <StrategyPanel config={config} onSave={onSaveConfig} onAnalyze={onNew}/>
     <FinancialPeriodPanel purchases={purchases}/>
     <OpportunityCompare items={items} config={config} onOpen={onOpen}/>
     <div className="grid gap-4 xl:grid-cols-[1.45fr_.75fr]"><PerformancePanel chart={s.chart}/><TopOpportunity row={s.top} onOpen={onOpen}/></div>
