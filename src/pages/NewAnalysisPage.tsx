@@ -6,9 +6,10 @@ import { RadarLoader } from '../components/new-analysis/RadarLoader'
 import { useNewAnalysis } from '../hooks/useNewAnalysis'
 import { getRadarVerdict } from '../utils/radarVerdict'
 import type { PurchaseRow,RadarConfigRow } from '../types/database'
+import type { BriqueOpportunity } from '../data/briqueCatalog'
 
-export function NewAnalysisPage({onSaved,config,userProfile,purchases,onUsageChanged}:{onSaved:(destination:'dashboard'|'history')=>void;config:RadarConfigRow;userProfile:string;purchases:PurchaseRow[];onUsageChanged:()=>Promise<boolean>}){
-  const a=useNewAnalysis(onSaved,userProfile,onUsageChanged)
+export function NewAnalysisPage({onSaved,config,userProfile,purchases,onUsageChanged,focus}:{onSaved:(destination:'dashboard'|'history')=>void;config:RadarConfigRow;userProfile:string;purchases:PurchaseRow[];onUsageChanged:()=>Promise<boolean>;focus?:BriqueOpportunity|null}){
+  const a=useNewAnalysis(onSaved,userProfile,onUsageChanged,focus||null)
   const resultRef=useRef<HTMLDivElement|null>(null)
   useEffect(()=>{if(!a.result)return;const timer=window.setTimeout(()=>resultRef.current?.scrollIntoView({behavior:'smooth',block:'start'}),180);return()=>window.clearTimeout(timer)},[a.result])
 
@@ -22,7 +23,7 @@ export function NewAnalysisPage({onSaved,config,userProfile,purchases,onUsageCha
 
   return <div className="mx-auto max-w-5xl">
     <div className="page-intro"><div className="premium-eyebrow text-emerald-400">INTELIGÊNCIA COMERCIAL</div><h2 className="font-display mt-2 text-[32px] font-extrabold tracking-[-.05em] sm:text-4xl">Analise antes de negociar.</h2><p className="mt-2 max-w-2xl text-[13px] leading-6 text-slate-500">O Radar cruza o anúncio com referências concretas, sua meta e, quando já existir, o seu próprio histórico de compra e venda.</p>{userProfile&&<div className="history-learning-chip">● histórico real conectado a esta análise</div>}</div>
-    <AnalysisForm {...a}/>
+    <AnalysisForm {...a} focus={focus||null}/>
     {a.busy&&<RadarLoader origem={a.origem}/>}
     {a.result&&<div ref={resultRef} className="analysis-result-enter mt-5 scroll-mt-28"><div className="analysis-result-enter__line"><span/><strong>OPORTUNIDADE ANALISADA</strong><span/></div><AnalysisView a={a.result} onDecision={decide} decisionBusy={a.decisionBusy} config={config} purchases={purchases}/></div>}
   </div>
