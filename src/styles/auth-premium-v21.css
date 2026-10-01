@@ -143,3 +143,62 @@
   .auth-login-helper{align-items:flex-start;flex-direction:column;gap:8px}
   .auth-footer{align-items:flex-start;flex-direction:column}
 }
+
+
+/* Auth positioning refinement v22 */
+.auth-showcase--login,.auth-showcase--recover,.auth-showcase--reset{display:flex;align-items:center}
+.auth-showcase--login .auth-hero-copy,.auth-showcase--recover .auth-hero-copy,.auth-showcase--reset .auth-hero-copy{max-width:760px;margin-top:clamp(54px,8vh,100px)!important}
+.auth-hero-copy.is-simple h1{font-size:clamp(3rem,5.15vw,5.35rem);max-width:760px}
+.auth-hero-copy.is-simple>p{max-width:720px;font-size:16px;line-height:1.78;color:#899baa}
+.auth-marketplaces{display:flex;flex-wrap:wrap;gap:8px;margin-top:24px}
+.auth-marketplaces span{display:inline-flex;align-items:center;min-height:32px;border:1px solid rgba(89,228,193,.12);border-radius:999px;background:linear-gradient(145deg,rgba(44,160,146,.075),rgba(48,130,154,.04));padding:0 11px;font-size:9.5px;font-weight:760;letter-spacing:.025em;color:#86b9b0;box-shadow:inset 0 1px rgba(255,255,255,.02)}
+.auth-marketplaces span:before{content:"";width:5px;height:5px;margin-right:7px;border-radius:999px;background:#53d9bb;box-shadow:0 0 8px rgba(83,217,187,.45)}
+
+.auth-simple-flow{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr) auto minmax(0,1fr) auto minmax(0,1fr);align-items:center;gap:10px;max-width:760px;margin-top:34px;border:1px solid rgba(89,228,193,.105);border-radius:22px;background:linear-gradient(145deg,rgba(7,23,34,.66),rgba(4,16,26,.40));padding:15px 16px;backdrop-filter:blur(12px)}
+.auth-simple-flow>span{display:grid;gap:3px;min-width:0}
+.auth-simple-flow>span>b{font-size:8px;letter-spacing:.12em;color:#46c9af}
+.auth-simple-flow>span>strong{font-size:12.5px;color:#dce9ec}
+.auth-simple-flow>span>small{font-size:9px;line-height:1.4;color:#667e90}
+.auth-simple-flow>i{width:26px;height:1px;background:linear-gradient(90deg,rgba(77,216,192,.08),rgba(77,216,192,.30),rgba(77,216,192,.08))}
+
+.auth-showcase--login:after{background:
+  linear-gradient(90deg,transparent 0 63%,rgba(4,13,22,.32) 100%),
+  radial-gradient(circle at 30% 42%,rgba(40,198,185,.025),transparent 45%)}
+.auth-showcase--login .auth-rings{right:-115px;top:70px;width:570px;height:570px;opacity:.72}
+.auth-showcase--login .auth-scanline{opacity:.52}
+
+.auth-showcase--register .auth-hero-copy h1{font-size:clamp(2.55rem,4.45vw,4.55rem)}
+.auth-showcase--register .auth-hero-copy>p{font-size:14.5px}
+.auth-register-positioning{margin-top:14px;border:1px solid rgba(100,136,160,.095);border-radius:18px;background:rgba(2,13,22,.24);padding:13px 14px}
+.auth-register-positioning strong{font-size:11px;color:#c9dadd}
+.auth-register-positioning p{margin-top:4px;font-size:9.5px;line-height:1.55;color:#6d8495}
+
+.auth-recovery-note{display:grid;grid-template-columns:42px minmax(0,1fr);gap:12px;align-items:center;max-width:640px;margin-top:30px;border:1px solid rgba(89,228,193,.11);border-radius:18px;background:rgba(6,25,34,.42);padding:14px}
+.auth-recovery-note>svg{width:42px;height:42px;border-radius:13px;background:rgba(89,228,193,.075);padding:11px;color:#61dfc1}
+.auth-recovery-note div{display:grid;gap:4px}
+.auth-recovery-note strong{font-size:12px;color:#dbe8eb}
+.auth-recovery-note span{font-size:10.5px;line-height:1.5;color:#748a9a}
+
+.auth-showcase--recover .auth-marketplaces,.auth-showcase--reset .auth-marketplaces{display:none}
+
+@media(min-width:1024px){
+  .auth-showcase--login .auth-showcase__top,
+  .auth-showcase--recover .auth-showcase__top,
+  .auth-showcase--reset .auth-showcase__top{position:absolute;left:5.4vw;right:5.4vw;top:5.1vw}
+}
+
+@media(max-width:1023px){
+  .auth-showcase--login .auth-hero-copy,.auth-showcase--recover .auth-hero-copy,.auth-showcase--reset .auth-hero-copy{margin-top:28px!important}
+  .auth-simple-flow{margin-top:22px}
+}
+
+@media(max-width:620px){
+  .auth-hero-copy.is-simple h1{font-size:2.3rem!important}
+  .auth-hero-copy.is-simple>p{font-size:13.5px}
+  .auth-marketplaces{margin-top:17px}
+  .auth-marketplaces span{font-size:8.5px;min-height:29px}
+  .auth-simple-flow{grid-template-columns:1fr 1fr;gap:8px;padding:11px}
+  .auth-simple-flow>i{display:none}
+  .auth-simple-flow>span{border:1px solid rgba(96,131,156,.08);border-radius:12px;background:rgba(2,11,19,.16);padding:9px}
+  .auth-recovery-note{margin-top:20px}
+}
