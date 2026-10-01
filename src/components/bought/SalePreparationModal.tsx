@@ -1,4 +1,4 @@
-import { useEffect,useMemo,useState } from 'react'
+import { useEffect,useMemo,useRef,useState } from 'react'
 import { AlertTriangle,ArrowLeft,ArrowRight,Box,Camera,Check,CheckCircle2,ClipboardList,Copy,Home,ImagePlus,PackageCheck,RefreshCw,Save,Sparkles,Upload,X } from 'lucide-react'
 import type { AnaliseRow,PurchaseRow,ResaleDraftOrigin,ResaleDraftRow } from '../../types/database'
 import type { PhotoAudit,ResaleAd } from '../../types/resale'
@@ -49,11 +49,21 @@ export function SalePreparationModal({
   const [description,setDescription]=useState(initialDraft?.descricao??parseAd(initialDraft?.resultado_ia)?.descricao??'')
   const [preparing,setPreparing]=useState(false)
   const [busy,setBusy]=useState(false)
+  const [analysisSeconds,setAnalysisSeconds]=useState(0)
   const [savingText,setSavingText]=useState(false)
   const [copied,setCopied]=useState('')
   const [error,setError]=useState('')
+  const bodyRef=useRef<HTMLDivElement|null>(null)
 
   useEffect(()=>()=>revokePreviews(images),[])
+  useEffect(()=>{
+    if(!busy){setAnalysisSeconds(0);return}
+    const started=Date.now()
+    const timer=window.setInterval(()=>setAnalysisSeconds(Math.floor((Date.now()-started)/1000)),1000)
+    return()=>window.clearInterval(timer)
+  },[busy])
+
+  const scrollFlowTop=()=>window.requestAnimationFrame(()=>bodyRef.current?.scrollTo({top:0,behavior:'smooth'}))
 
   const selectedPurchase=useMemo(()=>purchases.find(p=>p.id===purchaseId)??initialPurchase??null,[purchases,purchaseId,initialPurchase])
   const selectedAnalysis=useMemo(()=>selectedPurchase?.analise_id?analyses.find(a=>a.id===selectedPurchase.analise_id)??null:null,[selectedPurchase,analyses])
@@ -95,6 +105,7 @@ export function SalePreparationModal({
   const generate=async()=>{
     if(!source)return
     if(images.length===0){setError('Envie pelo menos uma foto que você pretende usar no anúncio.');return}
+
     const p=source==='radar'?selectedPurchase:null
     const finalProduct=p?.produto??product.trim()
     const finalCategory=p?.categoria??(category.trim()||null)
@@ -106,50 +117,75 @@ export function SalePreparationModal({
     const finalIdeal=source==='externo'?Number(idealPrice||0)||0:0
 
     setBusy(true);setError('')
-    const {data,error:e}=await supabase.functions.invoke('gerar-anuncio',{body:{
-      origem_item:source,
-      produto:finalProduct,
-      categoria:finalCategory,
-      marca:finalBrand,
-      modelo:finalModel,
-      condicao:finalCondition,
-      tempo_uso:source==='externo'?usageTime.trim():'',
-      observacoes:finalNotes,
-      custo_total:p?purchaseTotalCost(p):0,
-      preco_minimo:finalMin,
-      preco_ideal:finalIdeal,
-      analise:selectedAnalysis?.analise_ia??null,
-      imagens:images.map(({mime_type,data,name})=>({mime_type,data,name}))
-    }})
-    if(e){reportClientError(e,'sale-preparation.generate',{source});setError(e.message);setBusy(false);return}
-    if(data?.error){setError(data.error);setBusy(false);return}
-
-    const next=data.ad as ResaleAd
-    setAd(next);setTitle(next.titulo);setDescription(next.descricao);setStep('result')
     try{
-      const saved=await onSaveDraft({
-        id:draftId||undefined,
-        origin:source,
-        purchaseId:p?.id??null,
-        analysisId:selectedAnalysis?.id??null,
-        product:finalProduct,
-        category:finalCategory,
-        brand:finalBrand||null,
-        model:finalModel||null,
-        condition:finalCondition||null,
-        usageTime:source==='externo'?usageTime.trim()||null:null,
-        notes:finalNotes||null,
-        minPrice:finalMin||null,
-        idealPrice:finalIdeal||null,
-        images,
-        ad:next
-      })
-      setDraftId(saved.id)
+      const {data,error:invokeError}=await supabase.functions.invoke('gerar-anuncio',{body:{
+        origem_item:source,
+        produto:finalProduct,
+        categoria:finalCategory,
+        marca:finalBrand,
+        modelo:finalModel,
+        condicao:finalCondition,
+        tempo_uso:source==='externo'?usageTime.trim():'',
+        observacoes:finalNotes,
+        custo_total:p?purchaseTotalCost(p):0,
+        preco_minimo:finalMin,
+        preco_ideal:finalIdeal,
+        analise:selectedAnalysis?.analise_ia??null,
+        imagens:images.map(({mime_type,data,name})=>({mime_type,data,name}))
+      }})
+
+      if(invokeError){
+        let message=invokeError.message||'Não foi possível analisar as fotos.'
+        const context=(invokeError as any)?.context
+        if(context&&typeof context.clone==='function'){
+          try{
+            const payload=await context.clone().json()
+            message=payload?.error||payload?.message||message
+          }catch{}
+        }
+        throw new Error(message)
+      }
+      if(data?.error)throw new Error(data.error)
+      if(!data?.ad?.foto_auditoria||!data?.ad?.titulo)throw new Error('A IA respondeu, mas o diagnóstico veio incompleto. Tente novamente.')
+
+      const next=data.ad as ResaleAd
+      setAd(next)
+      setTitle(next.titulo)
+      setDescription(next.descricao)
+      setBusy(false)
+      setStep('result')
+      scrollFlowTop()
+
+      try{
+        const saved=await onSaveDraft({
+          id:draftId||undefined,
+          origin:source,
+          purchaseId:p?.id??null,
+          analysisId:selectedAnalysis?.id??null,
+          product:finalProduct,
+          category:finalCategory,
+          brand:finalBrand||null,
+          model:finalModel||null,
+          condition:finalCondition||null,
+          usageTime:source==='externo'?usageTime.trim()||null:null,
+          notes:finalNotes||null,
+          minPrice:finalMin||null,
+          idealPrice:finalIdeal||null,
+          images,
+          ad:next
+        })
+        setDraftId(saved.id)
+      }catch(saveError){
+        reportClientError(saveError,'sale-preparation.save')
+        setError('O diagnóstico foi concluído e está na tela, mas o histórico não conseguiu salvar este anúncio. Tente salvar novamente antes de fechar.')
+      }
     }catch(err){
-      reportClientError(err,'sale-preparation.save')
-      setError('A análise foi gerada, mas houve um problema ao salvar o rascunho. Tente salvar novamente antes de fechar.')
+      reportClientError(err,'sale-preparation.generate',{source,imageCount:images.length})
+      setError(err instanceof Error?err.message:'Não foi possível concluir a análise das fotos.')
+      scrollFlowTop()
+    }finally{
+      setBusy(false)
     }
-    setBusy(false)
   }
 
   const saveCopy=async()=>{
@@ -184,13 +220,13 @@ export function SalePreparationModal({
 
       <Stepper step={step}/>
 
-      <div className="sale-flow__body">
+      <div ref={bodyRef} className="sale-flow__body">
         {step==='source'&&<SourceStep onChoose={chooseSource}/>}
 
         {step==='details'&&source==='radar'&&<RadarItemStep purchases={filteredPurchases} query={query} setQuery={setQuery} selectedId={purchaseId} setSelectedId={setPurchaseId} onContinue={continueDetails}/>}
         {step==='details'&&source==='externo'&&<ExternalItemStep product={product} setProduct={setProduct} category={category} setCategory={setCategory} brand={brand} setBrand={setBrand} model={model} setModel={setModel} condition={condition} setCondition={setCondition} usageTime={usageTime} setUsageTime={setUsageTime} notes={notes} setNotes={setNotes} minPrice={minPrice} setMinPrice={setMinPrice} idealPrice={idealPrice} setIdealPrice={setIdealPrice} onContinue={continueDetails}/>}
 
-        {step==='photos'&&<PhotosStep source={source!} product={selectedPurchase?.produto??product} images={images} preparing={preparing} addImages={addImages} removeImage={removeImage} onGenerate={generate} busy={busy}/>}
+        {step==='photos'&&<PhotosStep source={source!} product={selectedPurchase?.produto??product} images={images} preparing={preparing} addImages={addImages} removeImage={removeImage} onGenerate={generate} busy={busy} seconds={analysisSeconds}/>} 
 
         {step==='result'&&ad&&<ResultStep ad={ad} title={title} setTitle={setTitle} description={description} setDescription={setDescription} onSaveText={saveCopy} savingText={savingText} copied={copied} onCopy={copy} onRecheck={()=>{revokePreviews(images);setImages([]);setStep('photos')}}/>}
 
@@ -252,16 +288,46 @@ function Field({label,value,setValue,placeholder,prefix,numeric=false}:{label:st
   return <label className="sale-flow__label">{label}<div className="sale-flow__field">{prefix&&<span>{prefix}</span>}<input inputMode={numeric?'decimal':undefined} value={value} onChange={e=>setValue(numeric?e.target.value.replace(',','.'):e.target.value)} placeholder={placeholder}/></div></label>
 }
 
-function PhotosStep({source,product,images,preparing,addImages,removeImage,onGenerate,busy}:{source:ResaleDraftOrigin;product:string;images:PreparedImage[];preparing:boolean;addImages:(f:FileList|null)=>void;removeImage:(i:number)=>void;onGenerate:()=>void;busy:boolean}){
+function PhotosStep({source,product,images,preparing,addImages,removeImage,onGenerate,busy,seconds}:{source:ResaleDraftOrigin;product:string;images:PreparedImage[];preparing:boolean;addImages:(f:FileList|null)=>void;removeImage:(i:number)=>void;onGenerate:()=>void;busy:boolean;seconds:number}){
   return <section>
     <div className="sale-flow__intro"><span>ETAPA 3</span><h3>Agora mostre o produto.</h3><p><b>{product||'Seu item'}</b> · envie as fotos que você realmente pretende usar. O diagnóstico avalia o conjunto, não uma foto genérica.</p></div>
     <div className="sale-photo-guide"><span><Camera size={14}/> Luz natural</span><span><ImagePlus size={14}/> Produto inteiro</span><span><CheckCircle2 size={14}/> Defeitos visíveis</span><span><PackageCheck size={14}/> Etiqueta/acessórios</span></div>
-    {images.length>0&&<div className="sale-photo-grid">{images.map((img,i)=><div key={img.preview}><img src={img.preview} alt={'Foto '+(i+1)}/><b>Foto {i+1}</b><button onClick={()=>removeImage(i)}><X size={13}/></button></div>)}</div>}
-    {images.length<6&&<label className="sale-photo-drop"><input type="file" accept="image/*" multiple className="hidden" onChange={e=>{addImages(e.target.files);e.currentTarget.value=''}}/><Upload size={21}/><span><strong>{preparing?'Preparando imagens...':'Selecionar fotos'}</strong><small>1 a 6 fotos · JPG, PNG ou WEBP</small></span><em>{images.length}/6</em></label>}
-    <div className="sale-photo-note"><Sparkles size={14}/><p>O Radar não deve inventar sujeira ou defeitos. Quando houver dúvida visual, a recomendação será fotografar melhor em vez de afirmar algo.</p></div>
-    <button onClick={onGenerate} disabled={busy||preparing||images.length===0} className="sale-flow__primary">{busy?<RefreshCw size={16} className="animate-spin"/>:<Sparkles size={16}/>} {busy?'Analisando fotos e criando anúncio...':'Gerar diagnóstico + anúncio'}</button>
-    <small className="sale-flow__secure">{source==='radar'?'Os dados do item são cruzados com o que já existe no Radar.':'Este item fica separado da sua carteira de compras.'}</small>
+
+    {images.length>0&&<div className="sale-photo-grid">{images.map((img,i)=><div key={img.preview}><img src={img.preview} alt={'Foto '+(i+1)}/><b>Foto {i+1}</b><button disabled={busy} onClick={()=>removeImage(i)}><X size={13}/></button></div>)}</div>}
+
+    {!busy&&images.length<6&&<label className="sale-photo-drop"><input type="file" accept="image/*" multiple className="hidden" onChange={e=>{addImages(e.target.files);e.currentTarget.value=''}}/><Upload size={21}/><span><strong>{preparing?'Preparando imagens...':'Selecionar fotos'}</strong><small>1 a 6 fotos · JPG, PNG ou WEBP</small></span><em>{images.length}/6</em></label>}
+
+    {busy
+      ? <SaleAnalysisProgress seconds={seconds} imageCount={images.length}/>
+      : <>
+        <div className="sale-photo-note"><Sparkles size={14}/><p>O Radar não inventa sujeira ou defeitos. Quando houver dúvida visual, a recomendação é fotografar melhor em vez de afirmar algo sem segurança.</p></div>
+        <button onClick={onGenerate} disabled={preparing||images.length===0} className="sale-flow__primary"><Sparkles size={16}/> Gerar diagnóstico + anúncio</button>
+        <small className="sale-flow__secure">{source==='radar'?'Os dados do item são cruzados com o que já existe no Radar.':'Este item fica separado da sua carteira de compras.'}</small>
+      </>
+    }
   </section>
+}
+
+function SaleAnalysisProgress({seconds,imageCount}:{seconds:number;imageCount:number}){
+  const stage=seconds<8?0:seconds<24?1:seconds<42?2:3
+  const stages=[
+    ['Lendo o produto e o contexto','Conferindo o que você informou antes de avaliar as imagens.'],
+    ['Analisando as fotos','Nitidez, iluminação, enquadramento, fundo e confiança visual.'],
+    ['Montando o diagnóstico','Organizando nota, problemas, melhor foto e o que precisa ser refeito.'],
+    ['Criando o anúncio','Gerando título, descrição e estratégias de preço para publicar.']
+  ]
+  const progress=Math.min(94,12+stage*22+Math.min(20,Math.floor(seconds/3)))
+  return <div className="sale-ai-progress" aria-live="polite">
+    <div className="sale-ai-progress__radar"><span/><i/><b><Sparkles size={19}/></b></div>
+    <div className="sale-ai-progress__copy">
+      <span className="premium-eyebrow text-cyan-400">IA TRABALHANDO · {imageCount} {imageCount===1?'FOTO':'FOTOS'}</span>
+      <h4>{stages[stage][0]}</h4>
+      <p>{stages[stage][1]}</p>
+      <div className="sale-ai-progress__bar"><i style={{width:progress+'%'}}/></div>
+      <div className="sale-ai-progress__meta"><span>{seconds<12?'Iniciando análise...':seconds+'s processando'}</span><b>{progress}%</b></div>
+    </div>
+    <small>Algumas análises visuais podem levar cerca de um minuto. Assim que terminar, o Radar abre o diagnóstico automaticamente.</small>
+  </div>
 }
 
 function ResultStep({ad,title,setTitle,description,setDescription,onSaveText,savingText,copied,onCopy,onRecheck}:{ad:ResaleAd;title:string;setTitle:(v:string)=>void;description:string;setDescription:(v:string)=>void;onSaveText:()=>void;savingText:boolean;copied:string;onCopy:(k:string,t:string)=>void;onRecheck:()=>void}){

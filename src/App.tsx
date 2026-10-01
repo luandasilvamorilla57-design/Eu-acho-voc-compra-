@@ -17,9 +17,10 @@ import { AdminPage } from './pages/AdminPage'
 import { AppShell } from './components/AppShell'
 import { AnalysisModal } from './components/AnalysisModal'
 import { StatusEditor } from './components/StatusEditor'
+import { SalePreparationModal } from './components/bought/SalePreparationModal'
 import { OnboardingModal } from './components/onboarding/OnboardingModal'
 import type { View } from './components/BottomNav'
-import type { AnaliseRow } from './types/database'
+import type { AnaliseRow,ResaleDraftRow } from './types/database'
 import { buildRadarAlerts } from './utils/radarAlerts'
 import { buildUserIntelligence } from './utils/userIntelligence'
 
@@ -31,6 +32,7 @@ export default function App(){
   const [dark,setDark]=useState(initialDark)
   const [selected,setSelected]=useState<AnaliseRow|null>(null)
   const [editing,setEditing]=useState<AnaliseRow|null>(null)
+  const [selectedDraft,setSelectedDraft]=useState<ResaleDraftRow|null>(null)
 
   const {config,loading:configLoading,save:saveConfig}=useRadarConfig(!!session)
   const {loading:planLoading,checked:planChecked,hasAccess,status:access,refresh:refreshAccess}=usePlanAccess(!!session)
@@ -81,7 +83,7 @@ export default function App(){
   else if(view==='radar')page=<RadarPage analyses={items} purchases={purchases} config={config} alerts={alerts} insights={intelligence.insights} onNavigate={setView} onOpen={setSelected}/>
   else if(view==='new')page=<NewAnalysisPage config={config} userProfile={intelligence.profile} purchases={purchases} onUsageChanged={refreshAccess} onSaved={async destination=>{await load();await refreshAccess();setView(destination)}}/>
   else if(view==='bought')page=<BoughtPage analyses={items} purchases={purchases} drafts={drafts} config={config} onCreate={async input=>{await createPurchase(input);await load()}} onSold={async(id,salePrice)=>{await markSold(id,salePrice);await load()}} onUpdate={updatePurchase} onUploadPhotos={uploadPhotos} onRemovePhoto={removePhoto} onSaveDraft={async input=>{const row=await saveResaleDraft(input);await refreshAccess();return row}} onUpdateDraftCopy={updateResaleDraftCopy} onDeleteDraft={removeResaleDraft}/>
-  else if(view==='history')page=<HistoryPage items={items} config={config} onOpen={setSelected} onEdit={setEditing} onNegotiationBought={async(id,price)=>{await resolveNegotiation(id,'bought',price);await loadPurchases()}} onNegotiationFailed={async id=>{await resolveNegotiation(id,'failed')}} onNegotiationLog={addNegotiationLog} onReinspect={reinspect}/>
+  else if(view==='history')page=<HistoryPage items={items} drafts={drafts} config={config} onOpen={setSelected} onOpenAd={setSelectedDraft} onEdit={setEditing} onNegotiationBought={async(id,price)=>{await resolveNegotiation(id,'bought',price);await loadPurchases()}} onNegotiationFailed={async id=>{await resolveNegotiation(id,'failed')}} onNegotiationLog={addNegotiationLog} onReinspect={reinspect}/>
   else if(view==='subscription')page=<SubscriptionPage status={access} onBack={()=>setView('dashboard')} onRefresh={refreshAccess}/>
   else page=access.owner_access?<AdminPage onBack={()=>setView('dashboard')}/>:<DashboardPage items={items} purchases={purchases} config={config} access={access} onSaveConfig={saveConfig} onManagePlan={()=>setView('subscription')} onNew={()=>setView('new')} onOpen={setSelected}/>
 
@@ -89,6 +91,7 @@ export default function App(){
     {page}
     {!config.onboarding_concluido&&!access.owner_access&&<OnboardingModal config={config} onSave={saveConfig}/>}
     <AnalysisModal item={selected} onClose={()=>setSelected(null)} config={config}/>
+    {selectedDraft&&<SalePreparationModal purchases={purchases} analyses={items} initialDraft={selectedDraft} onClose={()=>setSelectedDraft(null)} onSaveDraft={async input=>{const row=await saveResaleDraft(input);await refreshAccess();setSelectedDraft(row);return row}} onUpdateCopy={async(id,title,description)=>{await updateResaleDraftCopy(id,title,description);const latest=drafts.find(d=>d.id===id);if(latest)setSelectedDraft({...latest,titulo:title,descricao:description} as ResaleDraftRow)}}/>}
     <StatusEditor item={editing} onClose={()=>setEditing(null)} onSave={async(s,b,v)=>{const err=await updateStatus(editing!.id,s,b,v);if(!err)await loadPurchases()}}/>
   </AppShell>
 }
