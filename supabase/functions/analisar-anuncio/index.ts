@@ -37,6 +37,7 @@ Deno.serve(async req=>{
     const inspecaoNotas=typeof b.inspecao_notas==='string'?b.inspecao_notas.trim().slice(0,6000):''
     const contextoAnterior=b.contexto_anterior??null
     const perfilUsuario=typeof b.perfil_usuario==='string'?b.perfil_usuario.trim().slice(0,6000):''
+    const contextoGarimpo=b.contexto_garimpo&&typeof b.contexto_garimpo==='object'?JSON.stringify(b.contexto_garimpo).slice(0,6000):''
     const referencias:Array<MarketRef>=Array.isArray(b.referencias_mercado)?b.referencias_mercado.slice(0,5).map((r:any)=>({
       url:typeof r?.url==='string'?r.url.trim():'',
       price:Math.max(0,num(r?.price)),
@@ -76,7 +77,7 @@ Deno.serve(async req=>{
     usageReserved=true
 
     console.log('ANALYSIS_START',JSON.stringify({requestId,modo,origem,imageCount:imagens.length,referenceCount:referencias.length}))
-    const {raw,ai,model,fallback}=await askGemini(key,origem,link,texto,preco,imagens,modo,contextoAnterior,inspecaoNotas,referencias,perfilUsuario)
+    const {raw,ai,model,fallback}=await askGemini(key,origem,link,texto,preco,imagens,modo,contextoAnterior,inspecaoNotas,referencias,perfilUsuario,contextoGarimpo)
     const c=calculate(ai,preco)
 
     if(modo==='anuncio'&&origem==='facebook'&&(!ai?.produto||String(ai.produto).toLowerCase().includes('não identificado'))){
