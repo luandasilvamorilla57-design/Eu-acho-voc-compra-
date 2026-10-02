@@ -434,8 +434,11 @@ export function PlansPage({email,onRefreshAccess}:{email?:string;onRefreshAccess
           </div>
 
           <div className="plan-reveal plans-hero__visual">
-            <div className="plans-product-cloud" aria-hidden="true">
-              <img src="/plans/file_00000000f400820eb01621d13f15fb10.png" alt="Produtos usados para compra e revenda"/>
+            <div className="plans-hero-market-stage" aria-hidden="true">
+              <span className="plans-hero-market-stage__halo"/>
+              <img className="plans-hero-market-stage__bundle" src="/plans/product-bundle.webp" alt=""/>
+              <img className="plans-hero-market-stage__phone plans-hero-market-stage__phone--white" src="/plans/hero-phone-white.webp" alt=""/>
+              <img className="plans-hero-market-stage__phone plans-hero-market-stage__phone--blue" src="/plans/hero-phone-blue.webp" alt=""/>
             </div>
             <DealSheet/>
           </div>
@@ -475,7 +478,7 @@ export function PlansPage({email,onRefreshAccess}:{email?:string;onRefreshAccess
           </div>
           <div className="plans-brique-showcase">
             <div className="plans-brique-showcase__copy"><span>O BRIQUE ACONTECE AQUI</span><strong>Produto na mão. Dinheiro na mesa. Decisão antes do PIX.</strong><p>O Radar foi desenhado para a realidade de quem compra usado, negocia rápido e precisa preservar margem para a saída.</p></div>
-            <div className="plans-brique-showcase__image"><img src="/plans/file_00000000f400820eb01621d13f15fb10.png" alt="Negociação de produto usado"/></div>
+            <div className="plans-brique-showcase__image plans-brique-showcase__image--deal"><img src="/plans/deal-phone-cash.webp" alt="Negociação de produto usado"/></div>
           </div>
           <div className="brike-story">
             <div className="brike-story__phone"><Smartphone size={22}/><span>MARKETPLACE</span><strong>iPhone 13 · R$ 1.900</strong><small>“Aceita proposta?”</small></div>
@@ -506,7 +509,8 @@ export function PlansPage({email,onRefreshAccess}:{email?:string;onRefreshAccess
           </div>
 
           <div className="plans-risk-visual plans-risk-visual--premium">
-            <img src="/plans/tools-clean.webp" alt="Ferramentas para compra e revenda"/>
+            <img className="plans-risk-visual__tools" src="/plans/tools-clean.webp" alt="Ferramentas para compra e revenda"/>
+            <img className="plans-risk-visual__cash" src="/plans/cash-clean.webp" alt="" aria-hidden="true"/>
             <div className="plans-risk-visual__shade"/>
             <div><span>GARIMPO DE FERRAMENTAS</span><strong>Marca boa não corrige preço de entrada ruim.</strong><small>O Radar cruza valor pedido, risco e espaço de negociação antes de você imobilizar o capital.</small></div>
           </div>
@@ -589,7 +593,12 @@ export function PlansPage({email,onRefreshAccess}:{email?:string;onRefreshAccess
 
       <section id="planos" className="plans-section plans-section--plans">
         <div className="plans-shell">
-          <div className="plans-plans-collage" aria-hidden="true"><img src="/plans/file_00000000f400820eb01621d13f15fb10.png" alt=""/></div>
+          <div className="plans-plans-collage" aria-hidden="true">
+            <span className="plans-plans-collage__halo"/>
+            <img className="plans-plans-collage__bundle" src="/plans/product-bundle.webp" alt=""/>
+            <img className="plans-plans-collage__phone plans-plans-collage__phone--white" src="/plans/hero-phone-white.webp" alt=""/>
+            <img className="plans-plans-collage__phone plans-plans-collage__phone--blue" src="/plans/hero-phone-blue.webp" alt=""/>
+          </div>
           <div className="plans-section__intro plans-section__intro--center">
             <span className="plans-section__number">04</span>
             <div>
