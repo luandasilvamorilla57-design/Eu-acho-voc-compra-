@@ -4,25 +4,27 @@ import {
   ImagePlus,MessageCircle,RefreshCw,Send,ShieldCheck,Sparkles,
   Target,Upload,X,XCircle
 } from 'lucide-react'
-import { useNegotiationAssistant,type NegotiationAssistantOutput } from '../hooks/useNegotiationAssistant'
+import { useNegotiationAssistant,type NegotiationAssistantOutput,type NegotiationPrefill } from '../hooks/useNegotiationAssistant'
 import type { AssistedNegotiationRow } from '../types/database'
 import { money,pct } from '../utils/format'
 import { prepareScreenshots,revokePreviews,type PreparedImage } from '../utils/imageInput'
 
-type Props={onBack:()=>void;onUsageChanged?:()=>void|Promise<void>}
+type Props={onBack:()=>void;onUsageChanged?:()=>void|Promise<void>;prefill?:NegotiationPrefill|null;onPrefillConsumed?:()=>void}
 
 function asArray(value:any){return Array.isArray(value)?value:[]}
 function strategyOf(session:AssistedNegotiationRow|null){return (session?.estrategia_atual||{}) as unknown as NegotiationAssistantOutput}
 function resultOf(session:AssistedNegotiationRow|null){return (session?.resultado||{}) as any}
 
-export function NegotiationAssistantPage({onBack,onUsageChanged}:Props){
+export function NegotiationAssistantPage({onBack,onUsageChanged,prefill,onPrefillConsumed}:Props){
   const {sessions,loading,busy,error,setError,start,reply,noReply,finish}=useNegotiationAssistant(true)
   const [selected,setSelected]=useState<AssistedNegotiationRow|null>(null)
   const [startImages,setStartImages]=useState<PreparedImage[]>([])
   const [replyImages,setReplyImages]=useState<PreparedImage[]>([])
   const startImagesRef=useRef<PreparedImage[]>([])
   const replyImagesRef=useRef<PreparedImage[]>([])
+  const handledPrefillRef=useRef<string>('')
   const [askingPrice,setAskingPrice]=useState('')
+  const [sourceAnalysisId,setSourceAnalysisId]=useState('')
   const [startNote,setStartNote]=useState('')
   const [sellerText,setSellerText]=useState('')
   const [replyNote,setReplyNote]=useState('')
@@ -34,6 +36,37 @@ export function NegotiationAssistantPage({onBack,onUsageChanged}:Props){
   useEffect(()=>{startImagesRef.current=startImages},[startImages])
   useEffect(()=>{replyImagesRef.current=replyImages},[replyImages])
   useEffect(()=>()=>{revokePreviews(startImagesRef.current);revokePreviews(replyImagesRef.current)},[])
+
+  useEffect(()=>{
+    if(!prefill||handledPrefillRef.current===prefill.analysisId)return
+    handledPrefillRef.current=prefill.analysisId
+    const restored:PreparedImage[]=prefill.images.map(image=>({
+      ...image,
+      preview:`data:${image.mime_type};base64,${image.data}`,
+      size:Math.round(image.data.length*.75)
+    }))
+    revokePreviews(startImagesRef.current)
+    setStartImages(restored)
+    setAskingPrice(prefill.askingPrice>0?String(prefill.askingPrice):'')
+    setStartNote(prefill.note)
+    setSourceAnalysisId(prefill.analysisId)
+
+    void (async()=>{
+      try{
+        const data=await start({
+          askingPrice:prefill.askingPrice,
+          note:prefill.note,
+          images:prefill.images,
+          sourceAnalysisId:prefill.analysisId
+        })
+        revokePreviews(restored)
+        setStartImages([])
+        setSelected(data.session)
+        onPrefillConsumed?.()
+        void onUsageChanged?.()
+      }catch{}
+    })()
+  },[prefill?.analysisId])
 
   useEffect(()=>{
     if(!selected)return
@@ -68,18 +101,20 @@ export function NegotiationAssistantPage({onBack,onUsageChanged}:Props){
   }
 
   const begin=async()=>{
-    if(!startImages.length){setError('Envie um print do anúncio ou uma foto do produto.');return}
+    if(!startImages.length&&!sourceAnalysisId){setError('Envie um print do anúncio ou uma foto do produto.');return}
     const value=Number(askingPrice.replace(',','.'))||0
     try{
       const data=await start({
         askingPrice:value,
         note:startNote,
-        images:startImages.map(({mime_type,data,name})=>({mime_type,data,name}))
+        images:startImages.map(({mime_type,data,name})=>({mime_type,data,name})),
+        sourceAnalysisId:sourceAnalysisId||undefined
       })
       revokePreviews(startImagesRef.current)
       setStartImages([])
       setAskingPrice('')
       setStartNote('')
+      setSourceAnalysisId('')
       setSelected(data.session)
       void onUsageChanged?.()
     }catch{}
@@ -134,6 +169,8 @@ export function NegotiationAssistantPage({onBack,onUsageChanged}:Props){
   const newNegotiation=()=>{
     setSelected(null)
     setFinishMode(null)
+    setSourceAnalysisId('')
+    onPrefillConsumed?.()
     setError('')
   }
 
@@ -303,6 +340,8 @@ export function NegotiationAssistantPage({onBack,onUsageChanged}:Props){
           <div><span>COMECE POR AQUI</span><h2>Mostre o produto para o Radar.</h2><p>Se o preço estiver visível no print, pode deixar o campo de valor vazio. Se for só uma foto do produto, informe quanto o vendedor está pedindo.</p></div>
           <span className="negotiation-step">01</span>
         </div>
+
+        {sourceAnalysisId&&<div className="negotiation-principle"><CheckCircle2 size={17}/><p><strong>Análise carregada.</strong> Produto, preço e contexto do Radar já foram trazidos para cá. A primeira abordagem está sendo preparada automaticamente.</p></div>}
 
         <label className="negotiation-dropzone">
           <input type="file" accept="image/*" multiple onChange={e=>void replaceStartImages(e.target.files)}/>
