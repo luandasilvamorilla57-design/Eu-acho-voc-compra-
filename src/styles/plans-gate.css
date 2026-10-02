@@ -846,3 +846,35 @@ linear-gradient(180deg,#06111a 0%,#050b10 100%)}
  .plans-operation-visuals{grid-template-columns:1fr 1fr;gap:9px}.plans-operation-visual{height:165px}.plans-operation-visual--cash{grid-column:1/-1;height:145px}
  .plans-plans-collage{width:90%;right:-38%;top:80px;opacity:.09}
 }
+
+
+/* v5 — readable mobile + marketplace identity */
+.plans-marketplaces--logos{display:flex;align-items:stretch;gap:10px;margin:28px 0 8px;flex-wrap:wrap}
+.plans-marketplaces--logos>i{display:none}
+.market-brand{min-height:58px;display:flex;align-items:center;gap:10px;padding:10px 14px;border:1px solid rgba(142,179,202,.16);border-radius:14px;background:linear-gradient(145deg,rgba(16,31,42,.88),rgba(8,17,25,.8));box-shadow:inset 0 1px rgba(255,255,255,.025),0 12px 30px rgba(0,0,0,.16)}
+.market-brand strong{display:block;color:#eaf2f5;font-size:11px;line-height:1;font-weight:800;letter-spacing:-.02em}.market-brand small{display:block;margin-top:4px;color:#718b9d;font-size:7px;font-weight:800;letter-spacing:.1em;text-transform:uppercase}
+.market-brand__fb{display:grid;place-items:center;width:31px;height:31px;border-radius:9px;background:#1877f2;color:#fff;font:900 25px/1 Arial;box-shadow:0 0 24px rgba(24,119,242,.2)}
+.market-brand--olx{gap:1px;padding-inline:18px;font:900 21px/1 Arial;letter-spacing:-.08em}.market-brand__o{color:#7a16df}.market-brand__l{color:#8ee35e}.market-brand__x{color:#ff8a00}
+.market-brand__awning{display:grid;place-items:center;width:32px;height:32px;border-radius:9px;background:#4267a9;color:#fff;font-size:19px;transform:none}
+.brike-asset-fallback{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;z-index:0;color:#6e91a8}.brike-asset-fallback svg{width:70px;height:70px;stroke-width:1;filter:drop-shadow(0 0 24px rgba(98,217,209,.16))}
+.brike-asset-fallback--mix{position:relative;inset:auto;display:flex;gap:12px;justify-content:flex-end;opacity:.4}.brike-asset-fallback--mix svg{width:54px;height:54px}
+.brike-asset-fallback--deal{gap:22px;color:#86c9c4}.brike-asset-fallback--deal svg{width:58px;height:58px}
+.plans-brique-showcase__image img,.plans-risk-visual img,.plans-operation-visual img{z-index:1}
+@media(max-width:640px){
+ .plans-gate{font-size:16px}
+ .plans-hero__copy>p{font-size:17px!important;line-height:1.7!important;color:#94a4af!important}
+ .plans-eyebrow{font-size:10px!important}.plans-live-pill{font-size:9px!important}
+ .plans-marketplaces--logos{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:24px}
+ .market-brand{min-height:62px;padding:10px 12px}.market-brand--market{grid-column:1/-1}
+ .market-brand strong{font-size:12px}.market-brand small{font-size:8px}
+ .plans-hero__facts strong{font-size:13px!important}.plans-hero__facts small{font-size:11px!important;line-height:1.4!important}
+ .plans-account-line{font-size:11px!important}
+ .plans-section__intro p{font-size:16px!important;line-height:1.72!important;color:#8d9ca7!important}
+ .plans-section__intro h2{font-size:36px!important;line-height:1.06!important}
+ .plans-kicker{font-size:10px!important}.plans-section__number{font-size:48px!important}
+ .plans-operation-row strong{font-size:12px!important}.plans-operation-row p{font-size:14px!important;line-height:1.55!important}
+ .operator-card h3{font-size:20px!important}.operator-card p{font-size:14px!important;line-height:1.6!important}
+ .plans-benefit-grid h3{font-size:20px!important}.plans-benefit-grid p{font-size:14px!important;line-height:1.6!important}
+ .operator-plan__description{font-size:14px!important;line-height:1.55!important}.operator-plan__features li{font-size:13px!important;line-height:1.45!important}
+ .plans-compare-row{font-size:11px!important}.plans-faq summary{font-size:14px!important}.plans-faq p{font-size:13px!important;line-height:1.6!important}
+}
