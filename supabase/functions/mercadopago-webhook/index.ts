@@ -186,13 +186,89 @@ Deno.serve(async (req: Request) => {
     const refInfo = parseExternalReference(rawReference);
     const extraInfo = parseExtraReference(rawReference);
 
-    const subscriptionId = String(
+    let subscriptionId = String(
       subscription?.id ?? resource?.preapproval_id ?? "",
     ).trim();
 
     const isApprovedPayment =
       (type === "subscription_authorized_payment" && resource?.payment?.status === "approved")
       || (type === "payment" && resource?.status === "approved");
+
+    if (refInfo && isApprovedPayment && !subscriptionId) {
+      const { data: existingSub } = await admin
+        .from("assinaturas")
+        .select("id,mercadopago_subscription_id,status,dados_gateway")
+        .eq("user_id", refInfo.userId)
+        .eq("plano", refInfo.plan)
+        .eq("ambiente", configuredEnvironment)
+        .in("status", ["pending","authorized","active"])
+        .order("updated_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      if (existingSub?.mercadopago_subscription_id) {
+        subscriptionId = String(existingSub.mercadopago_subscription_id);
+        const gotSub = await mpGet(
+          `/preapproval/${encodeURIComponent(subscriptionId)}`,
+          accessToken,
+        );
+        if (gotSub.response.ok) subscription = gotSub.raw;
+
+        const paidAt = resource?.date_approved
+          ?? resource?.date_last_updated
+          ?? resource?.date_created
+          ?? new Date().toISOString();
+        const nextPayment = subscription?.next_payment_date ?? null;
+        const nextStatus = String(subscription?.status ?? "authorized");
+
+        const { error: directUpdateError } = await admin
+          .from("assinaturas")
+          .update({
+            status: nextStatus,
+            ultimo_pagamento_em: paidAt,
+            proxima_cobranca: nextPayment,
+            valido_ate: nextPayment,
+            payer_email: subscription?.payer_email ?? resource?.payer?.email ?? null,
+            valor: Number(
+              subscription?.auto_recurring?.transaction_amount
+              ?? resource?.transaction_amount
+              ?? 0
+            ) || null,
+            currency_id: String(
+              subscription?.auto_recurring?.currency_id
+              ?? resource?.currency_id
+              ?? "BRL"
+            ),
+            dados_gateway: {
+              ...(existingSub.dados_gateway || {}),
+              type,
+              action,
+              payment_status: resource?.status ?? null,
+              subscription_status: subscription?.status ?? null,
+              payment_id: String(resource?.id ?? dataId ?? ""),
+              activated_from: "payment_webhook",
+            },
+          })
+          .eq("id", existingSub.id);
+
+        if (directUpdateError) throw directUpdateError;
+
+        const { error: planError } = await admin
+          .from("radar_config")
+          .upsert(
+            { user_id: refInfo.userId, plano_atual: refInfo.plan },
+            { onConflict: "user_id" },
+          );
+        if (planError) throw planError;
+
+        console.log("MP_PAYMENT_MATCHED_SUBSCRIPTION", JSON.stringify({
+          userId: refInfo.userId,
+          plan: refInfo.plan,
+          subscriptionId,
+          paymentId: String(resource?.id ?? dataId ?? ""),
+        }));
+      }
+    }
 
     if (extraInfo && isApprovedPayment) {
       const environment = configuredEnvironment;
