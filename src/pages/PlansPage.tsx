@@ -107,7 +107,7 @@ function DealSheet(){
 
     <div className="deal-sheet__listing">
       <div className="deal-sheet__thumb" aria-hidden="true">
-        <img className="deal-sheet__phone-photo" src="/plans/arquivo_00000000913c820e84a8fc2ed0e360d3.jpg" alt="iPhone usado em análise"/>
+        <img className="deal-sheet__phone-photo" src="/plans/file_00000000913c820e84a8fc2ed0e360d3.jpg" alt="iPhone usado em análise"/>
       </div>
       <div className="deal-sheet__asking">
         <span>PREÇO DO ANÚNCIO</span>
@@ -405,9 +405,9 @@ export function PlansPage({email,onRefreshAccess}:{email?:string;onRefreshAccess
             </h1>
             <p>Para quem garimpa no Facebook Marketplace e na OLX, compra usado abaixo do preço e revende mais caro. O Radar entra antes do PIX: analisa o anúncio, calcula a oferta e mostra até onde vale negociar.</p>
             <div className="plans-marketplaces plans-marketplaces--logos">
-  <div className="market-brand market-brand--facebook market-brand--image"><img src="/plans/arquivo_000000004a0c820eada99353c7fdab1a.jpg" alt="Facebook Marketplace"/></div>
+  <div className="market-brand market-brand--facebook market-brand--image"><img src="/plans/file_000000004a0c820eada99353c7fdab1a.jpg" alt="Facebook Marketplace"/></div>
   <div className="market-brand market-brand--olx" aria-label="OLX"><span className="market-brand__o">O</span><span className="market-brand__l">L</span><span className="market-brand__x">X</span></div>
-  <div className="market-brand market-brand--market market-brand--image"><img src="/plans/arquivo_00000000af84820e91dfbb09a6971065.jpg" alt="Marketplace"/></div>
+  <div className="market-brand market-brand--market market-brand--image"><img src="/plans/file_00000000af84820e91dfbb09a6971065.jpg" alt="Marketplace"/></div>
 </div>
 
             <div className="plans-hero__facts">
@@ -426,7 +426,7 @@ export function PlansPage({email,onRefreshAccess}:{email?:string;onRefreshAccess
 
           <div className="plan-reveal plans-hero__visual">
             <div className="plans-product-cloud" aria-hidden="true">
-              <img src="/plans/arquivo_00000000f400820eb01621d13f15fb10.png" alt="Produtos usados para compra e revenda"/>
+              <img src="/plans/file_00000000f400820eb01621d13f15fb10.png" alt="Produtos usados para compra e revenda"/>
             </div>
             <DealSheet/>
           </div>
@@ -466,7 +466,7 @@ export function PlansPage({email,onRefreshAccess}:{email?:string;onRefreshAccess
           </div>
           <div className="plans-brique-showcase">
             <div className="plans-brique-showcase__copy"><span>O BRIQUE ACONTECE AQUI</span><strong>Produto na mão. Dinheiro na mesa. Decisão antes do PIX.</strong><p>O Radar foi desenhado para a realidade de quem compra usado, negocia rápido e precisa preservar margem para a saída.</p></div>
-            <div className="plans-brique-showcase__image"><img src="/plans/arquivo_000000000f4e4820ebd9586175f11012c.png" alt="Negociação de produto usado" onError={(e)=>{e.currentTarget.style.display='none'}}/><div className="brike-asset-fallback brike-asset-fallback--deal"><Smartphone/><ArrowRight/><Banknote/></div></div>
+            <div className="plans-brique-showcase__image"><img src="/plans/file_000000000f4e4820ebd9586175f11012c.png" alt="Negociação de produto usado" onError={(e)=>{e.currentTarget.style.display='none'}}/><div className="brike-asset-fallback brike-asset-fallback--deal"><Smartphone/><ArrowRight/><Banknote/></div></div>
           </div>
           <div className="brike-story">
             <div className="brike-story__phone"><Smartphone size={22}/><span>MARKETPLACE</span><strong>iPhone 13 · R$ 1.900</strong><small>“Aceita proposta?”</small></div>
@@ -497,7 +497,7 @@ export function PlansPage({email,onRefreshAccess}:{email?:string;onRefreshAccess
           </div>
 
           <div className="plans-risk-visual">
-            <img src="/plans/arquivo_00000000564c820e899fd37302fcf535.png" alt="Ferramentas e produtos usados para revenda" onError={(e)=>{e.currentTarget.style.display='none'}}/><div className="brike-asset-fallback"><Wrench/></div>
+            <img src="/plans/file_00000000564c820e899fd37302fcf535.png" alt="Ferramentas e produtos usados para revenda" onError={(e)=>{e.currentTarget.style.display='none'}}/><div className="brike-asset-fallback"><Wrench/></div>
             <div><span>EXEMPLO DE GARIMPO</span><strong>Ferramenta boa também pode ser compra ruim.</strong><small>Preço, estado e espaço de negociação importam mais que a marca.</small></div>
           </div>
 
@@ -531,9 +531,9 @@ export function PlansPage({email,onRefreshAccess}:{email?:string;onRefreshAccess
           </div>
 
           <div className="plans-operation-visuals">
-            <div className="plans-operation-visual plans-operation-visual--console"><img src="/plans/arquivo_00000000640c820ea197a673db47b11a.png" alt="Console para análise de oportunidade" onError={(e)=>{e.currentTarget.style.display='none'}}/><div className="brike-asset-fallback"><Gamepad2/></div><span>ELETRÔNICOS</span></div>
-            <div className="plans-operation-visual plans-operation-visual--notebook"><img src="/plans/arquivo_00000000974820ea15fa517ebca13ea.png" alt="Notebook para análise de oportunidade" onError={(e)=>{e.currentTarget.style.display='none'}}/><div className="brike-asset-fallback"><Laptop/></div><span>INFORMÁTICA</span></div>
-            <div className="plans-operation-visual plans-operation-visual--cash"><img src="/plans/arquivo_000000009ec0820eb08fc6d7896f9e9a.png" alt="Capital para compra e revenda" onError={(e)=>{e.currentTarget.style.display='none'}}/><div className="brike-asset-fallback"><Banknote/></div><span>CAPITAL DE GIRO</span></div>
+            <div className="plans-operation-visual plans-operation-visual--console"><img src="/plans/file_00000000640c820ea197a673db47b11a.png" alt="Console para análise de oportunidade" onError={(e)=>{e.currentTarget.style.display='none'}}/><div className="brike-asset-fallback"><Gamepad2/></div><span>ELETRÔNICOS</span></div>
+            <div className="plans-operation-visual plans-operation-visual--notebook"><img src="/plans/file_00000000974820ea15fa517ebca13ea.png" alt="Notebook para análise de oportunidade" onError={(e)=>{e.currentTarget.style.display='none'}}/><div className="brike-asset-fallback"><Laptop/></div><span>INFORMÁTICA</span></div>
+            <div className="plans-operation-visual plans-operation-visual--cash"><img src="/plans/file_000000009ec0820eb08fc6d7896f9e9a.png" alt="Capital para compra e revenda" onError={(e)=>{e.currentTarget.style.display='none'}}/><div className="brike-asset-fallback"><Banknote/></div><span>CAPITAL DE GIRO</span></div>
           </div>
 
           <div className="plans-operation-list">
@@ -562,7 +562,7 @@ export function PlansPage({email,onRefreshAccess}:{email?:string;onRefreshAccess
 
       <section id="planos" className="plans-section plans-section--plans">
         <div className="plans-shell">
-          <div className="plans-plans-collage" aria-hidden="true"><img src="/plans/arquivo_00000000cec4820ea7e3ed4c166e50cb.jpg" alt=""/><div className="brike-asset-fallback brike-asset-fallback--mix"><Smartphone/><Gamepad2/><Wrench/><Laptop/></div></div>
+          <div className="plans-plans-collage" aria-hidden="true"><img src="/plans/file_00000000cec4820ea7e3ed4c166e50cb.jpg" alt=""/><div className="brike-asset-fallback brike-asset-fallback--mix"><Smartphone/><Gamepad2/><Wrench/><Laptop/></div></div>
           <div className="plans-section__intro plans-section__intro--center">
             <span className="plans-section__number">04</span>
             <div>
