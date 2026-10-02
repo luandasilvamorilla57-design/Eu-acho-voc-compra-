@@ -8,6 +8,7 @@ import {
 import { Brand } from '../components/Brand'
 import { supabase } from '../lib/supabase'
 import type { AccountPlan } from '../types/database'
+import { signOutFast } from '../services/sessionService'
 
 type PlanRow={
   slug:AccountPlan
@@ -335,7 +336,7 @@ export function PlansPage({email,onRefreshAccess}:{email?:string;onRefreshAccess
     <header className="plans-header">
       <div className="plans-shell plans-header__inner">
         <Brand/>
-        <button onClick={()=>supabase.auth.signOut()} className="plans-exit"><LogOut size={15}/> Sair</button>
+        <button onClick={()=>void signOutFast()} className="plans-exit"><LogOut size={15}/> Sair</button>
       </div>
     </header>
 
