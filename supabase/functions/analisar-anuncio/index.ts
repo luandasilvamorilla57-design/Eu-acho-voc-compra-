@@ -25,7 +25,16 @@ function providerFailed(provider:Provider,error:any){
   state.failures+=1
   const status=Number(error?.status||0)
   const retryable=error?.retryable!==false||status===408||status===429||status>=500
-  if(retryable&&state.failures>=2){
+
+  // Chave inválida/configuração quebrada não deve ser chamada a cada análise.
+  if(!retryable||status===401||status===403){
+    state.blockedUntil=Date.now()+5*60_000
+    state.failures=0
+    return
+  }
+
+  // Dois erros transitórios seguidos abrem um pequeno circuit breaker.
+  if(state.failures>=2){
     state.blockedUntil=Date.now()+60_000
     state.failures=0
   }
