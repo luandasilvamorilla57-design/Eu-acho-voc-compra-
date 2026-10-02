@@ -3,7 +3,7 @@ import {
   ArrowRight,Banknote,BarChart3,Camera,Check,ChevronDown,Crown,CreditCard,Copy,QrCode,X,
   LockKeyhole,LogOut,MessageCircle,PackageOpen,RefreshCw,SearchCheck,Smartphone,
   ShieldAlert,ShieldCheck,ShoppingBag,Tag,Target,TrendingDown,TrendingUp,
-  WalletCards,Zap,Sparkles
+  WalletCards,Zap,Sparkles,Gamepad2,Wrench,Laptop
 } from 'lucide-react'
 import { Brand } from '../components/Brand'
 import { supabase } from '../lib/supabase'
