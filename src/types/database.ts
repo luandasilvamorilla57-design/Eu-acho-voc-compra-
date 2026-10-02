@@ -14,6 +14,7 @@ export type ExperienceLevel='iniciante'|'intermediario'|'avancado'
 export type ResaleDraftOrigin='radar'|'externo'
 export type ResaleDraftStatus='rascunho'|'pronto'
 export type ResaleSaleOutcome='pendente'|'vendido'|'nao_vendido'
+export type AssistedNegotiationStatus='ativa'|'comprado'|'nao_fechou'|'pausada'
 
 export type Database = { public: { Tables: {
 analises: {
@@ -40,6 +41,12 @@ anuncios_revenda:{
  Update:{origem_item?:ResaleDraftOrigin;compra_id?:string|null;analise_id?:string|null;produto?:string;categoria?:string|null;marca?:string|null;modelo?:string|null;condicao?:string|null;tempo_uso?:string|null;observacoes?:string|null;preco_minimo?:number|null;preco_ideal?:number|null;fotos?:Json;resultado_ia?:Json|null;titulo?:string|null;descricao?:string|null;preco_venda_rapida?:number|null;preco_equilibrado?:number|null;preco_premium?:number|null;status?:ResaleDraftStatus;resultado_venda?:ResaleSaleOutcome;preco_venda_real?:number|null;data_venda?:string|null;data_atualizacao?:string}
  Relationships:[]
 }
+negociacoes_assistidas:{
+ Row:{id:string;user_id:string;produto:string;categoria:string|null;marca:string|null;modelo:string|null;preco_pedido:number;preco_final:number|null;status:AssistedNegotiationStatus;resumo_produto:string|null;estrategia_atual:Json;conversa:Json;resultado:Json;turn_count:number;data_criacao:string;data_atualizacao:string}
+ Insert:{id?:string;user_id?:string;produto?:string;categoria?:string|null;marca?:string|null;modelo?:string|null;preco_pedido?:number;preco_final?:number|null;status?:AssistedNegotiationStatus;resumo_produto?:string|null;estrategia_atual?:Json;conversa?:Json;resultado?:Json;turn_count?:number;data_criacao?:string;data_atualizacao?:string}
+ Update:{produto?:string;categoria?:string|null;marca?:string|null;modelo?:string|null;preco_pedido?:number;preco_final?:number|null;status?:AssistedNegotiationStatus;resumo_produto?:string|null;estrategia_atual?:Json;conversa?:Json;resultado?:Json;turn_count?:number;data_atualizacao?:string}
+ Relationships:[]
+}
 assinaturas:{
  Row:{id:string;user_id:string;plano:AccountPlan;gateway:string;ambiente:'test'|'production';mercadopago_subscription_id:string|null;mercadopago_plan_id:string|null;external_reference:string|null;payer_email:string|null;status:string;valor:number|null;currency_id:string;proxima_cobranca:string|null;ultimo_pagamento_em:string|null;valido_ate:string|null;cancelada_em:string|null;dados_gateway:Json;created_at:string;updated_at:string}
  Insert:{id?:string;user_id:string;plano:AccountPlan;gateway?:string;ambiente?:'test'|'production';mercadopago_subscription_id?:string|null;mercadopago_plan_id?:string|null;external_reference?:string|null;payer_email?:string|null;status?:string;valor?:number|null;currency_id?:string;proxima_cobranca?:string|null;ultimo_pagamento_em?:string|null;valido_ate?:string|null;cancelada_em?:string|null;dados_gateway?:Json;created_at?:string;updated_at?:string}
@@ -64,3 +71,4 @@ export type AnaliseRow=Database['public']['Tables']['analises']['Row']
 export type PurchaseRow=Database['public']['Tables']['compras']['Row']
 export type RadarConfigRow=Database['public']['Tables']['radar_config']['Row']
 export type ResaleDraftRow=Database['public']['Tables']['anuncios_revenda']['Row']
+export type AssistedNegotiationRow=Database['public']['Tables']['negociacoes_assistidas']['Row']
