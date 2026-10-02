@@ -246,13 +246,20 @@ export function PlansPage({email,onRefreshAccess}:{email?:string;onRefreshAccess
     }
 
     try{
-      let {data:{session}}=await supabase.auth.getSession()
-      const now=Math.floor(Date.now()/1000)
-      if(session?.expires_at&&session.expires_at-now<90){
-        const refreshed=await supabase.auth.refreshSession()
-        session=refreshed.data.session
+      const refreshed=await supabase.auth.refreshSession()
+      const session=refreshed.data.session
+      if(refreshed.error||!session?.access_token){
+        try{checkoutWindow?.close()}catch{}
+        await supabase.auth.signOut({scope:'local'})
+        throw new Error('Sua sessão expirou. Entre novamente para continuar.')
       }
-      if(!session?.access_token)throw new Error('Sua sessão expirou. Entre novamente para continuar.')
+
+      const verified=await supabase.auth.getUser(session.access_token)
+      if(verified.error||!verified.data.user){
+        try{checkoutWindow?.close()}catch{}
+        await supabase.auth.signOut({scope:'local'})
+        throw new Error('Não foi possível validar sua sessão. Entre novamente.')
+      }
 
       const {data,error:fnError}=await supabase.functions.invoke('criar-assinatura-mercadopago',{
         body:{plano:plan},
