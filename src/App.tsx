@@ -9,6 +9,7 @@ import { AuthPage } from './pages/AuthPage'
 import { DashboardPage } from './pages/DashboardPage'
 import { RadarPage } from './pages/RadarPage'
 import { NegotiationAssistantPage } from './pages/NegotiationAssistantPage'
+import type { NegotiationPrefill } from './hooks/useNegotiationAssistant'
 import { NewAnalysisPage } from './pages/NewAnalysisPage'
 import { BoughtPage } from './pages/BoughtPage'
 import { HistoryPage } from './pages/HistoryPage'
@@ -36,6 +37,7 @@ export default function App(){
   const [editing,setEditing]=useState<AnaliseRow|null>(null)
   const [selectedDraft,setSelectedDraft]=useState<ResaleDraftRow|null>(null)
   const [analysisFocus,setAnalysisFocus]=useState<BriqueOpportunity|null>(null)
+  const [negotiationPrefill,setNegotiationPrefill]=useState<NegotiationPrefill|null>(null)
 
   const {config,loading:configLoading,checked:configChecked,error:configError,save:saveConfig,load:reloadConfig}=useRadarConfig(!!session)
   const {loading:planLoading,checked:planChecked,hasAccess,status:access,refresh:refreshAccess}=usePlanAccess(!!session)
@@ -104,8 +106,8 @@ export default function App(){
   let page:React.ReactNode
   if(view==='dashboard')page=<DashboardPage items={items} purchases={purchases} drafts={drafts} config={config} access={access} onSaveConfig={saveConfig} onManagePlan={()=>setView('subscription')} onNew={()=>{setAnalysisFocus(null);setView('new')}} onAnalyzeOpportunity={opportunity=>{setAnalysisFocus(opportunity);setView('new')}} onOpen={setSelected}/>
   else if(view==='radar')page=<RadarPage analyses={items} purchases={purchases} config={config} alerts={alerts} insights={intelligence.insights} onNavigate={setView} onOpen={setSelected} onSaveConfig={saveConfig}/>
-  else if(view==='negotiate')page=<NegotiationAssistantPage onBack={()=>setView('radar')} onUsageChanged={async()=>{await refreshAccess({silent:true})}}/>
-  else if(view==='new')page=<NewAnalysisPage focus={analysisFocus} config={config} userProfile={intelligence.profile} purchases={purchases} onUsageChanged={()=>refreshAccess({silent:true})} onSaved={async destination=>{await load();await refreshAccess();setAnalysisFocus(null);setView(destination)}}/>
+  else if(view==='negotiate')page=<NegotiationAssistantPage prefill={negotiationPrefill} onPrefillConsumed={()=>setNegotiationPrefill(null)} onBack={()=>setView('radar')} onUsageChanged={async()=>{await refreshAccess({silent:true})}}/>
+  else if(view==='new')page=<NewAnalysisPage focus={analysisFocus} config={config} userProfile={intelligence.profile} purchases={purchases} onUsageChanged={()=>refreshAccess({silent:true})} onNegotiate={prefill=>{setNegotiationPrefill(prefill);setAnalysisFocus(null);setView('negotiate')}} onSaved={async destination=>{await load();await refreshAccess();setAnalysisFocus(null);setView(destination)}}/>
   else if(view==='bought')page=<BoughtPage analyses={items} purchases={purchases} drafts={drafts} config={config} onCreate={async input=>{await createPurchase(input);await load()}} onSold={async(id,salePrice)=>{await markSold(id,salePrice);await load()}} onUpdate={updatePurchase} onUploadPhotos={uploadPhotos} onRemovePhoto={removePhoto} onSaveDraft={async input=>{const row=await saveResaleDraft(input);void refreshAccess({silent:true});return row}} onUpdateDraftCopy={updateResaleDraftCopy} onDeleteDraft={removeResaleDraft} onUpgradePlan={()=>setView('subscription')}/>
   else if(view==='history')page=<HistoryPage items={items} drafts={drafts} config={config} onOpen={setSelected} onOpenAd={setSelectedDraft} onAdSold={async(ad,price)=>{await setResaleSaleOutcome(ad.id,'vendido',price);await loadPurchases();await load()}} onAdNotSold={async ad=>{await setResaleSaleOutcome(ad.id,'nao_vendido');await loadPurchases()}} onEdit={setEditing} onNegotiationBought={async(id,price)=>{await resolveNegotiation(id,'bought',price);await loadPurchases()}} onNegotiationFailed={async id=>{await resolveNegotiation(id,'failed')}} onNegotiationLog={addNegotiationLog} onReinspect={reinspect}/>
   else if(view==='subscription')page=<SubscriptionPage status={access} onBack={()=>setView('dashboard')} onRefresh={refreshAccess}/>
