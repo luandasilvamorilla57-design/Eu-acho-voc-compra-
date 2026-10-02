@@ -124,6 +124,9 @@ async function runAI(args:{
       const result=provider==='gemini'
         ?await askGemini(args.geminiKey,args.prompt,args.images)
         :await askGroq(args.groqKey,args.prompt,args.images)
+      if(!cleanText(result.ai?.mensagem_para_enviar,500)){
+        throw Object.assign(new Error(provider+' retornou uma mensagem vazia.'),{status:502,retryable:true,provider})
+      }
       providerOk(provider)
       console.log('NEGOTIATION_PROVIDER_OK',JSON.stringify({requestId:args.requestId,provider,model:result.model}))
       return {...result,chain}
