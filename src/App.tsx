@@ -57,7 +57,8 @@ export default function App(){
   useEffect(()=>{
     if(!session||!hasAccess)return
     const params=new URLSearchParams(window.location.search)
-    if(params.get('checkout')==='extra'){
+    const checkout=params.get('checkout')
+    if(checkout==='extra'||checkout==='upgrade'){
       setView('subscription')
       void refreshAccess()
       window.history.replaceState({},'',window.location.pathname)
