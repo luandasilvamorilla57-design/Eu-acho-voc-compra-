@@ -28,7 +28,7 @@ export type NegotiationAssistantOutput={
   preco_base:number
 }
 
-export type NegotiationImage={mime_type:string;data:string;name:string}
+export type NegotiationImage={mime_type:'image/jpeg';data:string;name:string}
 export type NegotiationPrefill={
   analysisId:string
   askingPrice:number
