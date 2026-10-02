@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { supabase } from '../lib/supabase'
 import type { AnalysisResult } from '../types/analysis'
 import type { PipelineStatus,RadarDecision } from '../types/database'
@@ -32,8 +32,10 @@ export function useNewAnalysis(onSaved:(destination:'dashboard'|'history')=>void
   const [decisionBusy,setDecisionBusy]=useState<'negotiate'|'discard'|'save'|null>(null)
   const [error,setError]=useState('')
   const [result,setResult]=useState<AnalysisResult|null>(null)
+  const imagesRef=useRef<PreparedImage[]>([])
 
-  useEffect(()=>()=>revokePreviews(images),[])
+  useEffect(()=>{imagesRef.current=images},[images])
+  useEffect(()=>()=>revokePreviews(imagesRef.current),[])
 
   const setOrigem=(next:AdOrigin)=>{
     setError('')
@@ -78,35 +80,41 @@ export function useNewAnalysis(onSaved:(destination:'dashboard'|'history')=>void
       .filter(r=>r.url||r.price>0||r.note)
 
     setBusy(true)
-    const {data,error:e}=await supabase.functions.invoke('analisar-anuncio',{
-      body:{
-        origem,
-        link:origem==='olx'?link:'',
-        texto,
-        preco:Number(preco||0),
-        imagens:origem==='facebook'?images.map(({mime_type,data,name})=>({mime_type,data,name})):[],
-        referencias_mercado:refs,
-        perfil_usuario:userProfile,
-        contexto_garimpo:focus?{
-          produto:focus.title,
-          categoria:focus.kind,
-          maior_risco:focus.critical,
-          foco_analise:focus.analysisFocus,
-          faixa_anuncio:focus.marketAsk,
-          faixa_compra:focus.targetBuy,
-          abordagem:focus.negotiation
-        }:null
+    try{
+      const {data,error:e}=await supabase.functions.invoke('analisar-anuncio',{
+        body:{
+          origem,
+          link:origem==='olx'?link:'',
+          texto,
+          preco:Number(preco||0),
+          imagens:origem==='facebook'?images.map(({mime_type,data,name})=>({mime_type,data,name})):[],
+          referencias_mercado:refs,
+          perfil_usuario:userProfile,
+          contexto_garimpo:focus?{
+            produto:focus.title,
+            categoria:focus.kind,
+            maior_risco:focus.critical,
+            foco_analise:focus.analysisFocus,
+            faixa_anuncio:focus.marketAsk,
+            faixa_compra:focus.targetBuy,
+            abordagem:focus.negotiation
+          }:null
+        }
+      })
+      if(e){
+        const msg=await readFunctionError(e)
+        reportClientError(e,'analysis.invoke',{origem})
+        setError(msg);return
       }
-    })
-    setBusy(false)
-    if(e){
-      const msg=await readFunctionError(e)
-      reportClientError(e,'analysis.invoke',{origem})
-      setError(msg);return
+      if(data?.error){setError(data?.details||data.error);return}
+      setResult(data.analysis as AnalysisResult)
+      void onUsageChanged?.()
+    }catch(e){
+      reportClientError(e,'analysis.invoke.unexpected',{origem})
+      setError(e instanceof Error?e.message:'A conexão foi interrompida durante a análise. Tente novamente.')
+    }finally{
+      setBusy(false)
     }
-    if(data?.error){setError(data?.details||data.error);return}
-    setResult(data.analysis as AnalysisResult)
-    void onUsageChanged?.()
   }
 
   const save=async(pipeline_status:PipelineStatus,veredito_radar:RadarDecision|null,destination:'dashboard'|'history',action:'negotiate'|'discard'|'save')=>{
