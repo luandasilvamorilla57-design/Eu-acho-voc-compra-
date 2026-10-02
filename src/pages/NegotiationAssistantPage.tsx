@@ -9,13 +9,13 @@ import type { AssistedNegotiationRow } from '../types/database'
 import { money,pct } from '../utils/format'
 import { prepareScreenshots,revokePreviews,type PreparedImage } from '../utils/imageInput'
 
-type Props={onBack:()=>void;onUsageChanged?:()=>void|Promise<void>;prefill?:NegotiationPrefill|null;onPrefillConsumed?:()=>void}
+type Props={onBack:()=>void;onUsageChanged?:()=>void|Promise<void>;prefill?:NegotiationPrefill|null;onPrefillConsumed?:()=>void;initialSessionId?:string|null;onInitialSessionConsumed?:()=>void}
 
 function asArray(value:any){return Array.isArray(value)?value:[]}
 function strategyOf(session:AssistedNegotiationRow|null){return (session?.estrategia_atual||{}) as unknown as NegotiationAssistantOutput}
 function resultOf(session:AssistedNegotiationRow|null){return (session?.resultado||{}) as any}
 
-export function NegotiationAssistantPage({onBack,onUsageChanged,prefill,onPrefillConsumed}:Props){
+export function NegotiationAssistantPage({onBack,onUsageChanged,prefill,onPrefillConsumed,initialSessionId,onInitialSessionConsumed}:Props){
   const {sessions,loading,busy,error,setError,start,reply,noReply,finish}=useNegotiationAssistant(true)
   const [selected,setSelected]=useState<AssistedNegotiationRow|null>(null)
   const [startImages,setStartImages]=useState<PreparedImage[]>([])
@@ -73,6 +73,14 @@ export function NegotiationAssistantPage({onBack,onUsageChanged,prefill,onPrefil
     const fresh=sessions.find(item=>item.id===selected.id)
     if(fresh)setSelected(fresh)
   },[sessions,selected?.id])
+
+  useEffect(()=>{
+    if(!initialSessionId)return
+    const target=sessions.find(item=>item.id===initialSessionId)
+    if(!target)return
+    setSelected(target)
+    onInitialSessionConsumed?.()
+  },[initialSessionId,sessions])
 
   const activeSessions=useMemo(()=>sessions.filter(item=>item.status==='ativa'),[sessions])
   const recentClosed=useMemo(()=>sessions.filter(item=>item.status!=='ativa').slice(0,5),[sessions])

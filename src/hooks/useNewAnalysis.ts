@@ -19,6 +19,33 @@ async function readFunctionError(error:any){
   return error?.message||'Não foi possível analisar.'
 }
 
+function decodeBase64(data:string){
+  const binary=atob(data)
+  const bytes=new Uint8Array(binary.length)
+  for(let i=0;i<binary.length;i++)bytes[i]=binary.charCodeAt(i)
+  return bytes
+}
+
+async function uploadAnalysisImages(analysisId:string,images:PreparedImage[]){
+  if(!images.length)return [] as string[]
+  const {data:userData,error:userError}=await supabase.auth.getUser()
+  if(userError||!userData.user)throw new Error('Sua sessão expirou. Entre novamente para salvar as fotos da análise.')
+
+  const uploaded:string[]=[]
+  try{
+    for(const image of images){
+      const path=`${userData.user.id}/${analysisId}/${crypto.randomUUID()}.jpg`
+      const {error}=await supabase.storage.from('analysis-photos').upload(path,decodeBase64(image.data),{contentType:'image/jpeg',upsert:false,cacheControl:'3600'})
+      if(error)throw error
+      uploaded.push(path)
+    }
+    return uploaded
+  }catch(error){
+    if(uploaded.length)await supabase.storage.from('analysis-photos').remove(uploaded)
+    throw error
+  }
+}
+
 export function useNewAnalysis(onSaved:(destination:'dashboard'|'history')=>void,userProfile='',onUsageChanged?:()=>void|Promise<unknown>,focus:BriqueOpportunity|null=null){
   const [origem,setOrigemState]=useState<AdOrigin>('olx')
   const [link,setLink]=useState('')
@@ -122,25 +149,45 @@ export function useNewAnalysis(onSaved:(destination:'dashboard'|'history')=>void
     setSaving(true);setDecisionBusy(action);setError('')
     const textoPersistido=texto.trim() || (origem==='facebook'? `Análise por ${images.length} print(s) do Facebook Marketplace` : '')
     const refs=marketRefs.map(r=>({url:r.url.trim(),price:Number(r.price||0),note:r.note.trim()})).filter(r=>r.url||r.price>0||r.note)
-    const {data:saved,error:e}=await supabase.from('analises').insert({
-      origem,
-      titulo_anuncio:result.produto,
-      preco_anunciado:result.precos.preco_anunciado,
-      categoria:result.categoria,
-      link_anuncio:origem==='olx'&&link?link:null,
-      texto_anuncio:textoPersistido,
-      analise_ia:result as any,
-      referencias_usuario:refs as any,
-      margem_lucro_potencial:result.calculado.margem_percentual,
-      oferta_recomendada:result.precos.oferta_equilibrada,
-      status:'analisado',
-      pipeline_status,
-      veredito_radar
-    }).select('id').single()
-    setSaving(false);setDecisionBusy(null)
-    if(e||!saved?.id){const message=e?.message||'Não foi possível salvar a análise.';setError(message);if(e)reportClientError(e,'analysis.save');return null}
-    if(navigate)onSaved(destination)
-    return saved.id as string
+    const analysisId=crypto.randomUUID()
+    let photoPaths:string[]=[]
+
+    try{
+      photoPaths=await uploadAnalysisImages(analysisId,images)
+      const {data:saved,error:e}=await supabase.from('analises').insert({
+        id:analysisId,
+        origem,
+        titulo_anuncio:result.produto,
+        preco_anunciado:result.precos.preco_anunciado,
+        categoria:result.categoria,
+        link_anuncio:origem==='olx'&&link?link:null,
+        texto_anuncio:textoPersistido,
+        analise_ia:result as any,
+        referencias_usuario:refs as any,
+        fotos:photoPaths as any,
+        margem_lucro_potencial:result.calculado.margem_percentual,
+        oferta_recomendada:result.precos.oferta_equilibrada,
+        status:'analisado',
+        pipeline_status,
+        veredito_radar
+      }).select('id').single()
+
+      if(e||!saved?.id){
+        if(photoPaths.length)await supabase.storage.from('analysis-photos').remove(photoPaths)
+        throw e||new Error('Não foi possível salvar a análise.')
+      }
+
+      if(navigate)onSaved(destination)
+      return saved.id as string
+    }catch(e){
+      const message=e instanceof Error?e.message:'Não foi possível salvar a análise e suas fotos.'
+      setError(message)
+      reportClientError(e,'analysis.save',{origin:origem,imageCount:images.length})
+      return null
+    }finally{
+      setSaving(false)
+      setDecisionBusy(null)
+    }
   }
 
   return{origem,link,texto,preco,marketRefs,images,imageBusy,busy,saving,decisionBusy,error,result,setOrigem,setLink,setTexto,setPreco,addMarketRef,updateMarketRef,removeMarketRef,addImages,removeImage,analyze,save}
