@@ -475,7 +475,7 @@ export function PlansPage({email,onRefreshAccess}:{email?:string;onRefreshAccess
           </div>
           <div className="plans-brique-showcase">
             <div className="plans-brique-showcase__copy"><span>O BRIQUE ACONTECE AQUI</span><strong>Produto na mão. Dinheiro na mesa. Decisão antes do PIX.</strong><p>O Radar foi desenhado para a realidade de quem compra usado, negocia rápido e precisa preservar margem para a saída.</p></div>
-            <div className="plans-brique-showcase__image"><img src="/plans/file_000000000f4e4820ebd9586175f11012c.png" alt="Negociação de produto usado" onError={(e)=>{e.currentTarget.style.display='none'}}/><div className="brike-asset-fallback brike-asset-fallback--deal"><Smartphone/><ArrowRight/><Banknote/></div></div>
+            <div className="plans-brique-showcase__image"><img src="/plans/file_00000000f400820eb01621d13f15fb10.png" alt="Negociação de produto usado"/></div>
           </div>
           <div className="brike-story">
             <div className="brike-story__phone"><Smartphone size={22}/><span>MARKETPLACE</span><strong>iPhone 13 · R$ 1.900</strong><small>“Aceita proposta?”</small></div>
@@ -506,7 +506,7 @@ export function PlansPage({email,onRefreshAccess}:{email?:string;onRefreshAccess
           </div>
 
           <div className="plans-risk-visual plans-risk-visual--premium">
-            <img src="/plans/file_00000000564c820e899fd37302fcf535.png" alt="Ferramentas para compra e revenda"/>
+            <img src="/plans/tools-clean.webp" alt="Ferramentas para compra e revenda"/>
             <div className="plans-risk-visual__shade"/>
             <div><span>GARIMPO DE FERRAMENTAS</span><strong>Marca boa não corrige preço de entrada ruim.</strong><small>O Radar cruza valor pedido, risco e espaço de negociação antes de você imobilizar o capital.</small></div>
           </div>
@@ -542,22 +542,22 @@ export function PlansPage({email,onRefreshAccess}:{email?:string;onRefreshAccess
 
           <div className="plans-operation-visuals plans-operation-visuals--premium">
             <article className="plans-operation-visual plans-operation-visual--console">
-              <img src="/plans/file_00000000640c820ea197a673db47b11a.png" alt="PlayStation para oportunidade de revenda"/>
+              <img src="/plans/ps5-clean.webp" alt="PlayStation para oportunidade de revenda"/>
               <div className="plans-operation-visual__veil"/>
               <div className="plans-operation-visual__copy"><span>ELETRÔNICOS</span><strong>Game com saída rápida</strong><small>Preço de entrada + estado + giro.</small></div>
             </article>
             <article className="plans-operation-visual plans-operation-visual--notebook">
-              <img src="/plans/file_000000000974820ea15fa517ebca13ea.png" alt="Notebook para oportunidade de revenda"/>
+              <img src="/plans/laptop-clean.webp" alt="Notebook para oportunidade de revenda"/>
               <div className="plans-operation-visual__veil"/>
               <div className="plans-operation-visual__copy"><span>INFORMÁTICA</span><strong>Notebook abaixo do mercado</strong><small>Compare antes de fechar.</small></div>
             </article>
             <article className="plans-operation-visual plans-operation-visual--cash">
-              <img src="/plans/file_000000009ec0820eb08fc6d7896f9e9a.png" alt="Capital para compra e revenda"/>
+              <img src="/plans/cash-clean.webp" alt="Capital para compra e revenda"/>
               <div className="plans-operation-visual__veil"/>
               <div className="plans-operation-visual__copy"><span>CAPITAL DE GIRO</span><strong>Dinheiro parado custa margem</strong><small>Compre com teto, não no impulso.</small></div>
             </article>
             <article className="plans-operation-visual plans-operation-visual--tools">
-              <img src="/plans/file_00000000564c820e899fd37302fcf535.png" alt="Ferramentas para oportunidade de revenda"/>
+              <img src="/plans/tools-clean.webp" alt="Ferramentas para oportunidade de revenda"/>
               <div className="plans-operation-visual__veil"/>
               <div className="plans-operation-visual__copy"><span>FERRAMENTAS</span><strong>Outro mercado. Mesma lógica.</strong><small>Entrada, risco e saída.</small></div>
             </article>
