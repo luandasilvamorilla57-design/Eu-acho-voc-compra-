@@ -1,6 +1,6 @@
 import { useEffect,useMemo,useRef,useState } from 'react'
 import {
-  ArrowLeft,ArrowRight,Check,CheckCircle2,Clipboard,Clock3,Copy,
+  ArrowLeft,ArrowRight,Check,CheckCircle2,Clock3,Copy,
   ImagePlus,MessageCircle,RefreshCw,Send,ShieldCheck,Sparkles,
   Target,Upload,X,XCircle
 } from 'lucide-react'
