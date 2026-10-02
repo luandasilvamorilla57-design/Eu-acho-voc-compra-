@@ -85,6 +85,58 @@ Deno.serve(async(req:Request)=>{
     console.warn("MP_ACCESS_RECONCILE_FAILED",syncError instanceof Error?syncError.message:String(syncError));
   }
 
+  try{
+    const {data:billing}=await admin.from("billing_config").select("ambiente").eq("id",1).maybeSingle();
+    const env=billing?.ambiente==="production"?"production":"test";
+    const {data:allSubs}=await admin.from("assinaturas")
+      .select("id,plano,status,mercadopago_subscription_id,ultimo_pagamento_em,valido_ate,proxima_cobranca,dados_gateway,created_at,updated_at")
+      .eq("user_id",user.id)
+      .eq("ambiente",env)
+      .order("updated_at",{ascending:false});
+
+    const canonical=(allSubs||[]).find((s:any)=>
+      s?.ultimo_pagamento_em&&["authorized","active"].includes(String(s?.status||"").toLowerCase())
+    );
+
+    if(mpToken&&canonical?.mercadopago_subscription_id){
+      for(const older of (allSubs||[])){
+        if(!older?.mercadopago_subscription_id||older.id===canonical.id)continue;
+        const remoteRes=await fetch(`https://api.mercadopago.com/preapproval/${encodeURIComponent(String(older.mercadopago_subscription_id))}`,{
+          headers:{Authorization:`Bearer ${mpToken}`,"Content-Type":"application/json"}
+        });
+        const remote=await remoteRes.json().catch(()=>({}));
+        const remoteStatus=String(remote?.status||older.status||"").toLowerCase();
+
+        if(remoteRes.ok&&["pending","authorized","active"].includes(remoteStatus)){
+          const cancelRes=await fetch(`https://api.mercadopago.com/preapproval/${encodeURIComponent(String(older.mercadopago_subscription_id))}`,{
+            method:"PUT",
+            headers:{Authorization:`Bearer ${mpToken}`,"Content-Type":"application/json"},
+            body:JSON.stringify({status:"cancelled"})
+          });
+          const cancelled=await cancelRes.json().catch(()=>({}));
+          if(cancelRes.ok){
+            const validUntil=remote?.next_payment_date||older.valido_ate||older.proxima_cobranca||new Date().toISOString();
+            await admin.from("assinaturas").update({
+              status:"cancelled",
+              cancelada_em:new Date().toISOString(),
+              valido_ate:validUntil,
+              dados_gateway:{...(older.dados_gateway||{}),duplicate_cancelled_by:"status-acesso",canonical_subscription_id:canonical.mercadopago_subscription_id}
+            }).eq("id",older.id);
+            console.log("MP_DUPLICATE_SUB_CANCELLED",JSON.stringify({
+              userId:user.id,
+              cancelledSubscriptionId:older.mercadopago_subscription_id,
+              canonicalSubscriptionId:canonical.mercadopago_subscription_id,
+              previousStatus:remoteStatus,
+              responseStatus:cancelled?.status??null
+            }));
+          }
+        }
+      }
+    }
+  }catch(dedupeError){
+    console.warn("MP_DUPLICATE_SUB_CLEANUP_FAILED",dedupeError instanceof Error?dedupeError.message:String(dedupeError));
+  }
+
   const {data,error}=await admin.rpc("status_acesso_radar",{p_user_id:user.id});
   if(error){
     console.error("ACCESS_STATUS_ERROR",error);
