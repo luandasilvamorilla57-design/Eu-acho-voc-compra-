@@ -79,12 +79,32 @@ function parseExtraReference(value: unknown) {
   return { userId: match[1].toLowerCase(), quantity };
 }
 
+function parseUpgradeReference(value: unknown) {
+  const ref = String(value ?? "").trim();
+  const match = /^radar-upgrade:([0-9a-f-]{36}):(start|pro|max)$/i.exec(ref);
+  if (!match) return null;
+  return { userId: match[1].toLowerCase(), plan: match[2].toLowerCase() };
+}
+
 async function mpGet(path: string, token: string) {
   const response = await fetch(`https://api.mercadopago.com${path}`, {
     headers: {
       Authorization: `Bearer ${token}`,
       "Content-Type": "application/json",
     },
+  });
+  const raw = await response.json().catch(() => ({}));
+  return { response, raw };
+}
+
+async function mpPut(path: string, token: string, body: Record<string, unknown>) {
+  const response = await fetch(`https://api.mercadopago.com${path}`, {
+    method: "PUT",
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(body),
   });
   const raw = await response.json().catch(() => ({}));
   return { response, raw };
@@ -185,6 +205,7 @@ Deno.serve(async (req: Request) => {
     const rawReference = resource?.external_reference ?? subscription?.external_reference;
     const refInfo = parseExternalReference(rawReference);
     const extraInfo = parseExtraReference(rawReference);
+    const upgradeInfo = parseUpgradeReference(rawReference);
 
     let subscriptionId = String(
       subscription?.id ?? resource?.preapproval_id ?? "",
@@ -266,6 +287,116 @@ Deno.serve(async (req: Request) => {
           plan: refInfo.plan,
           subscriptionId,
           paymentId: String(resource?.id ?? dataId ?? ""),
+        }));
+      }
+    }
+
+    if (upgradeInfo && isApprovedPayment) {
+      const paymentId = String(resource?.id ?? dataId ?? "").trim();
+      const { data: upgradeRow, error: upgradeLookupError } = await admin
+        .from("pagamentos_upgrade")
+        .select("*")
+        .eq("user_id", upgradeInfo.userId)
+        .eq("ambiente", configuredEnvironment)
+        .eq("external_reference", String(rawReference ?? ""))
+        .in("status", ["pending","approved"])
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      if (upgradeLookupError) throw upgradeLookupError;
+
+      if (upgradeRow && upgradeRow.status !== "approved") {
+        const { data: targetPlan, error: planLookupError } = await admin
+          .from("planos_catalogo")
+          .select("slug,nome,preco_mensal")
+          .eq("slug", upgradeInfo.plan)
+          .eq("ativo", true)
+          .single();
+        if (planLookupError || !targetPlan) throw planLookupError ?? new Error("upgrade_plan_not_found");
+
+        const subscriptionId = String(upgradeRow.current_subscription_id ?? "").trim();
+        if (!subscriptionId) throw new Error("upgrade_subscription_missing");
+
+        const newReference = `radar:${upgradeInfo.userId}:${upgradeInfo.plan}`;
+        const changed = await mpPut(
+          `/preapproval/${encodeURIComponent(subscriptionId)}`,
+          accessToken,
+          {
+            reason: `Radar do Brique - Plano ${targetPlan.nome}`,
+            external_reference: newReference,
+            auto_recurring: {
+              transaction_amount: Number(targetPlan.preco_mensal),
+              currency_id: "BRL",
+            },
+          },
+        );
+
+        if (!changed.response.ok) {
+          console.error("MP_UPGRADE_SUBSCRIPTION_UPDATE_ERROR", changed.response.status, JSON.stringify(changed.raw));
+          throw new Error(changed.raw?.message || "upgrade_subscription_update_failed");
+        }
+
+        const { data: currentSub } = await admin
+          .from("assinaturas")
+          .select("id,dados_gateway")
+          .eq("user_id", upgradeInfo.userId)
+          .eq("ambiente", configuredEnvironment)
+          .eq("mercadopago_subscription_id", subscriptionId)
+          .maybeSingle();
+
+        if (!currentSub?.id) throw new Error("upgrade_subscription_row_not_found");
+
+        const { error: subUpdateError } = await admin
+          .from("assinaturas")
+          .update({
+            plano: upgradeInfo.plan,
+            external_reference: newReference,
+            valor: Number(targetPlan.preco_mensal),
+            status: String(changed.raw?.status ?? "authorized"),
+            proxima_cobranca: changed.raw?.next_payment_date ?? null,
+            valido_ate: changed.raw?.next_payment_date ?? null,
+            dados_gateway: {
+              ...(currentSub.dados_gateway || {}),
+              upgraded_from: upgradeRow.from_plan,
+              upgraded_to: upgradeInfo.plan,
+              upgrade_payment_id: paymentId,
+              upgrade_paid_amount: Number(resource?.transaction_amount ?? upgradeRow.valor ?? 0),
+              upgrade_approved_at: new Date().toISOString(),
+            },
+          })
+          .eq("id", currentSub.id);
+        if (subUpdateError) throw subUpdateError;
+
+        const { error: radarUpdateError } = await admin
+          .from("radar_config")
+          .upsert(
+            { user_id: upgradeInfo.userId, plano_atual: upgradeInfo.plan },
+            { onConflict: "user_id" },
+          );
+        if (radarUpdateError) throw radarUpdateError;
+
+        const { error: upgradeUpdateError } = await admin
+          .from("pagamentos_upgrade")
+          .update({
+            status: "approved",
+            gateway_payment_id: paymentId || null,
+            payload: {
+              ...(upgradeRow.payload || {}),
+              approved_at: new Date().toISOString(),
+              payment_status: resource?.status ?? null,
+              subscription_status: changed.raw?.status ?? null,
+            },
+          })
+          .eq("id", upgradeRow.id);
+        if (upgradeUpdateError) throw upgradeUpdateError;
+
+        console.log("MP_UPGRADE_ACTIVATED", JSON.stringify({
+          userId: upgradeInfo.userId,
+          fromPlan: upgradeRow.from_plan,
+          toPlan: upgradeInfo.plan,
+          subscriptionId,
+          paymentId,
         }));
       }
     }
