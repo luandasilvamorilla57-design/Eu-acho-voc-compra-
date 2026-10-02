@@ -37,7 +37,27 @@ export function usePlanAccess(active:boolean){
     if(!active){setStatus(empty);setChecked(false);setLoading(false);return false}
     if(!silent)setLoading(true)
     try{
-      const {data,error}=await supabase.functions.invoke('status-acesso',{body:{}})
+      const invokeStatus=async(token?:string)=>{
+        return supabase.functions.invoke('status-acesso',{
+          body:{},
+          ...(token?{headers:{Authorization:`Bearer ${token}`}}:{})
+        })
+      }
+
+      let {data:{session}}=await supabase.auth.getSession()
+      let response=await invokeStatus(session?.access_token)
+
+      if(response.error){
+        const refreshed=await supabase.auth.refreshSession()
+        session=refreshed.data.session
+        if(!session?.access_token){
+          await supabase.auth.signOut({scope:'local'})
+          throw new Error('Sua sessão expirou. Entre novamente.')
+        }
+        response=await invokeStatus(session.access_token)
+      }
+
+      const {data,error}=response
       if(error)throw error
       const next:AccessStatus={
         liberado:Boolean(data?.liberado),
