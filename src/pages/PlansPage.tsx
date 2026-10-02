@@ -95,98 +95,67 @@ const faqs=[
   ['Posso entrar no painel sem pagar?','Não. Sem assinatura confirmada, o painel e as funções protegidas continuam bloqueados no servidor.'],
 ]
 
-function DealSheet(){
-  return <div className="deal-sheet">
-    <div className="deal-sheet__header">
-      <div>
-        <span>OPERAÇÃO EM ANÁLISE</span>
-        <strong>iPhone 13 · 128 GB</strong>
-      </div>
-      <div className="deal-sheet__source">Marketplace</div>
-    </div>
+function AnimatedNumber({value}:{value:number}){
+  const [display,setDisplay]=useState(0)
 
-    <div className="deal-sheet__listing">
-      <div className="deal-sheet__thumb" aria-hidden="true">
-        <img className="deal-sheet__phone-photo" src="/plans/hero-phone-blue.webp?v=plans-clean-v11" alt="iPhone usado em análise"/>
-      </div>
-      <div className="deal-sheet__asking">
-        <span>PREÇO DO ANÚNCIO</span>
-        <strong>R$ 1.900</strong>
-        <small>Usado · retirada em mãos</small>
-      </div>
-      <div className="deal-sheet__status">
-        <span/>
-        NEGOCIÁVEL
-      </div>
-    </div>
+  useEffect(()=>{
+    const reduce=window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    if(reduce){setDisplay(value);return}
 
-    <div className="deal-sheet__ledger">
-      <div>
-        <span>OFERTA DE ENTRADA</span>
-        <strong>R$ 1.650</strong>
-      </div>
-      <div>
-        <span>TETO DE COMPRA</span>
-        <strong>R$ 1.780</strong>
-      </div>
-      <div>
-        <span>FAIXA DE SAÍDA*</span>
-        <strong>R$ 2.250–2.350</strong>
-      </div>
-    </div>
+    let raf=0
+    const started=performance.now()
+    const duration=720
+    const tick=(now:number)=>{
+      const progress=Math.min(1,(now-started)/duration)
+      const eased=1-Math.pow(1-progress,3)
+      setDisplay(Math.round(value*eased))
+      if(progress<1)raf=requestAnimationFrame(tick)
+    }
+    raf=requestAnimationFrame(tick)
+    return()=>cancelAnimationFrame(raf)
+  },[value])
 
-    <div className="deal-sheet__decision">
-      <div>
-        <span>LEITURA DA OPORTUNIDADE</span>
-        <strong>Boa para negociar</strong>
-      </div>
-      <div className="deal-sheet__checks">
-        <span><Check size={12}/> bateria</span>
-        <span><Check size={12}/> Face ID</span>
-        <span><Check size={12}/> IMEI</span>
-      </div>
-    </div>
-
-    <p className="deal-sheet__footnote">*Exemplo ilustrativo. O Radar organiza informações para decisão; não garante preço de revenda ou lucro.</p>
-  </div>
+  return <>{display}</>
 }
 
 function PlanCard({plan,busy,onChoose}:{plan:PlanRow;busy:AccountPlan|null;onChoose:(plan:AccountPlan)=>void}){
   const featured=plan.slug==='pro'
-  const Icon=plan.slug==='max'?Crown:Zap
   const cta=featured?'Escolher Pro':plan.slug==='max'?'Escolher Max':'Escolher Start'
+  const label=featured?'MAIS INDICADO PARA REVENDA':plan.slug==='max'?'MAIOR VOLUME':'PARA COMEÇAR'
 
-  return <article id={featured?'plano-pro':undefined} className={`operator-plan ${featured?'operator-plan--featured':''}`}>
-    <div className="operator-plan__head">
+  return <article id={featured?'plano-pro':undefined} className={`plans-v2-card ${featured?'plans-v2-card--featured':''}`}>
+    {featured&&<div className="plans-v2-card__crown"><Sparkles size={13}/> MAIS ESCOLHIDO</div>}
+
+    <div className="plans-v2-card__top">
       <div>
-        <span className="operator-plan__index">0{plan.ordem}</span>
-        <span className="operator-plan__name">{plan.nome}</span>
+        <span className="plans-v2-card__index">0{plan.ordem}</span>
+        <strong className="plans-v2-card__name">{plan.nome}</strong>
       </div>
-      {featured?<span className="operator-plan__recommended">RECOMENDADO PARA REVENDA</span>:<Icon size={18}/>}
+      <span className="plans-v2-card__label">{label}</span>
     </div>
 
-    <p className="operator-plan__description">{plan.descricao}</p>
+    <p className="plans-v2-card__description">{plan.descricao}</p>
 
-    <div className="operator-plan__price">
+    <div className="plans-v2-card__price">
       <strong>{money(plan.preco_mensal)}</strong>
-      <span>/ mês</span>
+      <span>/mês</span>
     </div>
-    <div className="operator-plan__daily">aprox. {perDay(plan.preco_mensal)} por dia</div>
+    <div className="plans-v2-card__daily">aprox. {perDay(plan.preco_mensal)} por dia</div>
 
-    <div className="operator-plan__volume">
-      <div><strong>{plan.analises_mes}</strong><span>análises / mês</span></div>
-      <div><strong>{plan.analises_dia}</strong><span>por dia</span></div>
+    <div className="plans-v2-card__metrics">
+      <div><strong><AnimatedNumber value={plan.analises_mes}/></strong><span>análises / mês</span></div>
+      <div><strong><AnimatedNumber value={plan.analises_dia}/></strong><span>por dia</span></div>
     </div>
 
-    <ul className="operator-plan__features">
-      {plan.recursos.map(item=><li key={item}><Check size={13}/><span>{item}</span></li>)}
+    <ul className="plans-v2-card__features">
+      {plan.recursos.map(item=><li key={item}><span className="plans-v2-check"><Check size={12}/></span><span>{item}</span></li>)}
     </ul>
 
-    <button onClick={()=>onChoose(plan.slug)} disabled={busy!==null} className="operator-plan__cta">
+    <button onClick={()=>onChoose(plan.slug)} disabled={busy!==null} className="plans-v2-card__cta">
       {busy===plan.slug?'Abrindo pagamento...':<>{cta}<ArrowRight size={16}/></>}
     </button>
 
-    {featured&&<p className="operator-plan__micro">Compra + diagnóstico premium + preparação da revenda.</p>}
+    {featured&&<p className="plans-v2-card__micro">Compra + diagnóstico premium + preparação da revenda.</p>}
   </article>
 }
 
@@ -385,7 +354,15 @@ export function PlansPage({email,onRefreshAccess}:{email?:string;onRefreshAccess
 
   const pro=plans.find(p=>p.slug==='pro')??fallback[1]
 
-  return <div className="plans-gate">
+  return <div
+    className="plans-gate plans-gate--v2"
+    onPointerMove={(event)=>{
+      if(!window.matchMedia('(pointer:fine)').matches)return
+      const rect=event.currentTarget.getBoundingClientRect()
+      event.currentTarget.style.setProperty('--spot-x',`${event.clientX-rect.left}px`)
+      event.currentTarget.style.setProperty('--spot-y',`${event.clientY-rect.top}px`)
+    }}
+  >
     <header className="plans-header">
       <div className="plans-shell plans-header__inner">
         <Brand/>
@@ -393,54 +370,58 @@ export function PlansPage({email,onRefreshAccess}:{email?:string;onRefreshAccess
       </div>
     </header>
 
-    <main>
-      <section className="plans-hero">
-        <div className="plans-shell plans-hero__grid">
-          <div className="plans-hero__copy plan-reveal">
-            <div className="plans-eyebrow"><span/> ANÁLISE DE OPORTUNIDADE · MARKETPLACE · OLX</div>
-            <div className="plans-live-pill"><span/> FEITO PARA QUEM FAZ BRIQUE</div>
-            <h1>
-              Achou barato.<br/>
-              <em>Descubra se dá brique.</em>
-            </h1>
-            <p>Para quem garimpa no Facebook Marketplace e na OLX, compra usado abaixo do preço e revende mais caro. O Radar entra antes do PIX: analisa o anúncio, calcula a oferta e mostra até onde vale negociar.</p>
-            <div className="plans-marketplaces plans-marketplaces--logos">
-  <div className="market-brand market-brand--facebook">
-    <span className="market-brand__fb">f</span>
-    <span><strong>Facebook</strong><small>Marketplace</small></span>
-  </div>
-  <div className="market-brand market-brand--olx" aria-label="OLX">
-    <span className="market-brand__o">O</span><span className="market-brand__l">L</span><span className="market-brand__x">X</span>
-    <small>GARIMPO DE USADOS</small>
-  </div>
-  <div className="market-brand market-brand--market">
-    <ShoppingBag size={22}/>
-    <span><strong>Marketplace</strong><small>COMPRA · NEGOCIA · REVENDE</small></span>
-  </div>
-</div>
+    <main className="plans-v2-main">
+      <section className="plans-v2-hero">
+        <div className="plans-v2-aurora" aria-hidden="true"><i/><i/><i/></div>
+        <div className="plans-v2-grid-bg" aria-hidden="true"/>
 
-            <div className="plans-hero__facts">
-              <div><span>01</span><strong>PREÇO</strong><small>se está interessante</small></div>
-              <div><span>02</span><strong>OFERTA</strong><small>quanto propor</small></div>
-              <div><span>03</span><strong>RISCO</strong><small>o que conferir</small></div>
+        <div className="plans-shell plans-v2-hero__grid">
+          <div className="plans-v2-hero__copy">
+            <div className="plans-v2-eyebrow"><span/> RADAR DO BRIQUE · MARKETPLACE · OLX</div>
+            <h1>Compra boa começa <em>antes do PIX.</em></h1>
+            <p>Analise preço, risco, oferta e teto antes de fechar. O Radar foi feito para quem garimpa usado, negocia rápido e precisa preservar margem para revender.</p>
+
+            <div className="plans-v2-hero__actions">
+              <a href="#planos" className="plans-v2-primary">Ver planos e liberar acesso <ArrowRight size={17}/></a>
+              <a href="#como-funciona" className="plans-v2-ghost">Como funciona <ChevronDown size={15}/></a>
             </div>
 
-            <div className="plans-hero__actions">
-              <a href="#planos" className="plans-primary-cta">Ver planos e liberar acesso <ArrowRight size={16}/></a>
-              <a href="#como-funciona" className="plans-text-link">Ver como funciona</a>
+            <div className="plans-v2-hero__trust">
+              <span><ShieldCheck size={14}/> pagamento validado no servidor</span>
+              <span><Target size={14}/> decisão antes da compra</span>
             </div>
 
-            {email&&<div className="plans-account-line"><LockKeyhole size={12}/> Conta conectada: {email}</div>}
+            {email&&<div className="plans-v2-account"><LockKeyhole size={13}/> Conta conectada: {email}</div>}
           </div>
 
-          <div className="plan-reveal plans-hero__visual">
-            <div className="plans-hero-market-stage" aria-hidden="true">
-              <span className="plans-hero-market-stage__halo"/>
-              <img className="plans-hero-market-stage__bundle" src="/plans/product-bundle.webp?v=plans-clean-v11" alt=""/>
-              <img className="plans-hero-market-stage__phone plans-hero-market-stage__phone--white" src="/plans/hero-phone-white.webp?v=plans-clean-v11" alt=""/>
-              <img className="plans-hero-market-stage__phone plans-hero-market-stage__phone--blue" src="/plans/hero-phone-blue.webp?v=plans-clean-v11" alt=""/>
+          <div className="plans-v2-console" aria-label="Exemplo visual de análise do Radar">
+            <div className="plans-v2-console__glow"/>
+            <div className="plans-v2-console__top">
+              <div><span className="plans-v2-live-dot"/> ANÁLISE AO VIVO</div>
+              <small>MARKETPLACE</small>
             </div>
-            <DealSheet/>
+
+            <div className="plans-v2-radar">
+              <span className="plans-v2-radar__ring plans-v2-radar__ring--1"/>
+              <span className="plans-v2-radar__ring plans-v2-radar__ring--2"/>
+              <span className="plans-v2-radar__ring plans-v2-radar__ring--3"/>
+              <span className="plans-v2-radar__sweep"/>
+              <div className="plans-v2-radar__core"><Target size={25}/><strong>RADAR</strong><small>analisando</small></div>
+              <i className="plans-v2-signal plans-v2-signal--1"/>
+              <i className="plans-v2-signal plans-v2-signal--2"/>
+              <i className="plans-v2-signal plans-v2-signal--3"/>
+            </div>
+
+            <div className="plans-v2-console__decision">
+              <div><span>PREÇO PEDIDO</span><strong>R$ 1.900</strong></div>
+              <div className="is-accent"><span>OFERTA INICIAL</span><strong>R$ 1.650</strong></div>
+              <div><span>TETO</span><strong>R$ 1.780</strong></div>
+            </div>
+
+            <div className="plans-v2-console__verdict">
+              <span><Check size={13}/> OPORTUNIDADE NEGOCIÁVEL</span>
+              <strong>Entre sabendo onde parar.</strong>
+            </div>
           </div>
         </div>
       </section>
@@ -455,43 +436,48 @@ export function PlansPage({email,onRefreshAccess}:{email?:string;onRefreshAccess
         </div>
       </section>}
 
-      <section className="plans-context-strip">
-        <div className="plans-shell">
-          <span>FACEBOOK MARKETPLACE</span>
-          <span>OLX</span>
-          <span>USADOS</span>
-          <span>OFERTA</span>
-          <span>MARGEM</span>
-          <span>GIRO</span>
-        </div>
+      <section className="plans-shell plans-v2-proof plans-v2-reveal">
+        <article><span>01</span><Target size={21}/><strong>Oferta com referência</strong><p>Chegue na conversa sabendo quanto propor e qual limite não vale ultrapassar.</p></article>
+        <article><span>02</span><ShieldAlert size={21}/><strong>Risco antes da compra</strong><p>Veja o que precisa ser conferido antes do dinheiro sair da sua mão.</p></article>
+        <article><span>03</span><TrendingUp size={21}/><strong>Saída pensada na entrada</strong><p>Compre considerando margem, giro e espaço para a próxima revenda.</p></article>
       </section>
 
-      <section className="plans-section">
+      <section id="como-funciona" className="plans-v2-section plans-v2-section--flow">
         <div className="plans-shell">
-          <div className="plans-section__intro">
-            <span className="plans-section__number">01</span>
-            <div>
-              <div className="plans-kicker">SE VOCÊ FAZ ISSO, É PRA VOCÊ</div>
-              <h2>Você abre o Marketplace procurando preço errado.</h2>
-              <p>Acha um celular, ferramenta, eletrônico ou peça abaixo do mercado. Chama o vendedor, aperta o preço e tenta deixar margem para revender. O BRIKE RADAR foi construído exatamente para essa operação.</p>
-            </div>
-          </div>
-          <div className="plans-brique-showcase">
-            <div className="plans-brique-showcase__copy"><span>O BRIQUE ACONTECE AQUI</span><strong>Produto na mão. Dinheiro na mesa. Decisão antes do PIX.</strong><p>O Radar foi desenhado para a realidade de quem compra usado, negocia rápido e precisa preservar margem para a saída.</p></div>
-            <div className="plans-brique-showcase__image plans-brique-showcase__image--deal"><img src="/plans/deal-phone-cash.webp?v=plans-clean-v11" alt="Negociação de produto usado"/></div>
-          </div>
-          <div className="brike-story">
-            <div className="brike-story__phone"><Smartphone size={22}/><span>MARKETPLACE</span><strong>iPhone 13 · R$ 1.900</strong><small>“Aceita proposta?”</small></div>
-            <ArrowRight size={18}/>
-            <div className="brike-story__radar"><Target size={22}/><span>RADAR ANALISA</span><strong>Oferta: R$ 1.650</strong><small>Teto: R$ 1.780 · riscos antes de fechar</small></div>
-            <ArrowRight size={18}/>
-            <div className="brike-story__sale"><Banknote size={22}/><span>SAÍDA</span><strong>Revenda preparada</strong><small>Preço, anúncio e negociação com contexto</small></div>
+          <div className="plans-v2-heading plans-v2-reveal">
+            <span className="plans-v2-number">01</span>
+            <div><small>DO ANÚNCIO À DECISÃO</small><h2>Menos feeling. Mais contexto para negociar.</h2><p>O Radar organiza os pontos que mais pesam numa compra de oportunidade sem transformar sua operação em planilha.</p></div>
           </div>
 
-          <div className="operator-grid">
-            {profiles.map(({icon:Icon,code,label,title,text})=><article className="operator-card" key={code}>
-              <div className="operator-card__meta"><span>{code}</span><b>{label}</b></div>
-              <Icon size={22}/>
+          <div className="plans-v2-flow">
+            <article className="plans-v2-flow__item plans-v2-reveal">
+              <div><SearchCheck size={22}/><span>01</span></div>
+              <strong>Garimpe</strong>
+              <p>Encontrou um anúncio que parece barato? Traga para o Radar.</p>
+            </article>
+            <div className="plans-v2-flow__line" aria-hidden="true"/>
+            <article className="plans-v2-flow__item plans-v2-reveal">
+              <div><BarChart3 size={22}/><span>02</span></div>
+              <strong>Analise</strong>
+              <p>Preço, risco, oferta sugerida e teto aparecem em uma leitura objetiva.</p>
+            </article>
+            <div className="plans-v2-flow__line" aria-hidden="true"/>
+            <article className="plans-v2-flow__item plans-v2-reveal">
+              <div><MessageCircle size={22}/><span>03</span></div>
+              <strong>Negocie</strong>
+              <p>Entre com proposta e saiba até onde ainda vale subir.</p>
+            </article>
+            <div className="plans-v2-flow__line" aria-hidden="true"/>
+            <article className="plans-v2-flow__item plans-v2-reveal">
+              <div><PackageOpen size={22}/><span>04</span></div>
+              <strong>Revenda</strong>
+              <p>No Pro e Max, prepare também a saída com IA.</p>
+            </article>
+          </div>
+
+          <div className="plans-v2-benefits">
+            {benefits.map(({icon:Icon,title,text})=><article className="plans-v2-benefit plans-v2-reveal" key={title}>
+              <div className="plans-v2-benefit__icon"><Icon size={19}/></div>
               <h3>{title}</h3>
               <p>{text}</p>
             </article>)}
@@ -499,185 +485,72 @@ export function PlansPage({email,onRefreshAccess}:{email?:string;onRefreshAccess
         </div>
       </section>
 
-      <section className="plans-section plans-section--contrast">
-        <div className="plans-shell plans-problem-grid">
-          <div>
-            <span className="plans-section__number">02</span>
-            <div className="plans-kicker plans-kicker--risk">ONDE O LUCRO SOME</div>
-            <h2>O prejuízo quase nunca começa na revenda. Começa na compra errada.</h2>
-            <p>Oferta alta demais, problema ignorado e saída superestimada corroem a margem antes do produto chegar na sua mão.</p>
-          </div>
-
-          <div className="plans-risk-visual plans-risk-visual--premium">
-            <img className="plans-risk-visual__tools" src="/plans/tools-clean.webp?v=plans-clean-v11" alt="Ferramentas para compra e revenda"/>
-            <img className="plans-risk-visual__cash" src="/plans/cash-clean.webp?v=plans-clean-v11" alt="" aria-hidden="true"/>
-            <div className="plans-risk-visual__shade"/>
-            <div><span>GARIMPO DE FERRAMENTAS</span><strong>Marca boa não corrige preço de entrada ruim.</strong><small>O Radar cruza valor pedido, risco e espaço de negociação antes de você imobilizar o capital.</small></div>
-          </div>
-
-          <div className="plans-ledger-compare">
-            <div className="plans-ledger-compare__head">
-              <span>SEM REFERÊNCIA</span>
-              <span>COM BRIKE RADAR</span>
-            </div>
-            {[
-              ['“Parece barato”','Preço analisado no contexto'],
-              ['Oferta no impulso','Oferta sugerida + teto'],
-              ['Risco visto depois','Checklist antes de fechar'],
-              ['“Acho que vendo por mais”','Saída considerada na compra'],
-            ].map(([before,after])=><div className="plans-ledger-compare__row" key={before}>
-              <span><TrendingDown size={13}/>{before}</span>
-              <span><TrendingUp size={13}/>{after}</span>
-            </div>)}
-          </div>
-        </div>
-      </section>
-
-      <section id="como-funciona" className="plans-section">
+      <section id="planos" className="plans-v2-section plans-v2-section--pricing">
         <div className="plans-shell">
-          <div className="plans-section__intro">
-            <span className="plans-section__number">03</span>
-            <div>
-              <div className="plans-kicker">A OPERAÇÃO</div>
-              <h2>Da busca no anúncio até a revenda.</h2>
-              <p>O Radar entra onde a decisão pesa: na entrada, na negociação e, nos planos Pro e Max, também na preparação da saída.</p>
-            </div>
-          </div>
-
-          <div className="plans-operation-visuals plans-operation-visuals--premium">
-            <article className="plans-operation-visual plans-operation-visual--console">
-              <img src="/plans/ps5-clean.webp?v=plans-clean-v11" alt="PlayStation para oportunidade de revenda"/>
-              <div className="plans-operation-visual__veil"/>
-              <div className="plans-operation-visual__copy"><span>ELETRÔNICOS</span><strong>Game com saída rápida</strong><small>Preço de entrada + estado + giro.</small></div>
-            </article>
-            <article className="plans-operation-visual plans-operation-visual--notebook">
-              <img src="/plans/laptop-clean.webp?v=plans-clean-v11" alt="Notebook para oportunidade de revenda"/>
-              <div className="plans-operation-visual__veil"/>
-              <div className="plans-operation-visual__copy"><span>INFORMÁTICA</span><strong>Notebook abaixo do mercado</strong><small>Compare antes de fechar.</small></div>
-            </article>
-            <article className="plans-operation-visual plans-operation-visual--cash">
-              <img src="/plans/cash-clean.webp?v=plans-clean-v11" alt="Capital para compra e revenda"/>
-              <div className="plans-operation-visual__veil"/>
-              <div className="plans-operation-visual__copy"><span>CAPITAL DE GIRO</span><strong>Dinheiro parado custa margem</strong><small>Compre com teto, não no impulso.</small></div>
-            </article>
-            <article className="plans-operation-visual plans-operation-visual--tools">
-              <img src="/plans/tools-clean.webp?v=plans-clean-v11" alt="Ferramentas para oportunidade de revenda"/>
-              <div className="plans-operation-visual__veil"/>
-              <div className="plans-operation-visual__copy"><span>FERRAMENTAS</span><strong>Outro mercado. Mesma lógica.</strong><small>Entrada, risco e saída.</small></div>
-            </article>
-          </div>
-
-          <div className="plans-operation-list">
-            {[
-              ['01',SearchCheck,'GARIMPE','Encontre um anúncio que pareça abaixo do mercado.'],
-              ['02',BarChart3,'ANALISE','Organize preço, risco, oferta e teto antes de fechar.'],
-              ['03',MessageCircle,'NEGOCIE','Entre com proposta e saiba até onde ainda vale subir.'],
-              ['04',PackageOpen,'REVENDA','No Pro e Max, prepare fotos, texto e estratégia de preço.'],
-            ].map(([n,Icon,label,text]:any)=><div className="plans-operation-row" key={n}>
-              <span>{n}</span>
-              <Icon size={19}/>
-              <strong>{label}</strong>
-              <p>{text}</p>
-            </div>)}
-          </div>
-
-          <div className="plans-benefit-grid">
-            {benefits.map(({icon:Icon,title,text})=><article key={title}>
-              <Icon size={18}/>
-              <h3>{title}</h3>
-              <p>{text}</p>
-            </article>)}
-          </div>
-        </div>
-      </section>
-
-      <section id="planos" className="plans-section plans-section--plans">
-        <div className="plans-shell">
-          <div className="plans-plans-collage" aria-hidden="true">
-            <span className="plans-plans-collage__halo"/>
-            <img className="plans-plans-collage__bundle" src="/plans/product-bundle.webp?v=plans-clean-v11" alt=""/>
-            <img className="plans-plans-collage__phone plans-plans-collage__phone--white" src="/plans/hero-phone-white.webp?v=plans-clean-v11" alt=""/>
-            <img className="plans-plans-collage__phone plans-plans-collage__phone--blue" src="/plans/hero-phone-blue.webp?v=plans-clean-v11" alt=""/>
-          </div>
-          <div className="plans-section__intro plans-section__intro--center">
-            <span className="plans-section__number">04</span>
-            <div>
-              <div className="plans-kicker">ESCOLHA SEU RITMO DE BRIQUE</div>
-              <h2>Quanto custa evitar uma compra ruim?</h2>
-              <p>Uma negociação melhor pode valer mais que a mensalidade. O Pro é o plano central para quem compra e também prepara a revenda.</p>
-            </div>
+          <div className="plans-v2-heading plans-v2-heading--center plans-v2-reveal">
+            <span className="plans-v2-number">02</span>
+            <div><small>ESCOLHA SEU RITMO DE BRIQUE</small><h2>Um plano para cada volume. O Pro é o ponto certo para revenda.</h2><p>Comece enxuto, opere com profundidade ou escale o volume. Em todos os planos, a compra vem antes do impulso.</p></div>
           </div>
 
           {error&&<div className="plans-error">{error}</div>}
 
-          <div className="operator-plans">
+          <div className="plans-v2-pricing">
             {plans.map(plan=><PlanCard key={plan.slug} plan={plan} busy={busy} onChoose={setPaymentPlan}/>)}
           </div>
 
-          <div className="pro-spotlight"><div className="pro-spotlight__beam"/><div><Sparkles size={18}/><span>O PONTO CERTO PARA QUEM REVENDE</span><strong>Pro: da oferta no anúncio até o produto voltar à venda.</strong><p>120 análises por mês + diagnóstico premium + preparação da revenda com IA.</p></div><button onClick={()=>setPaymentPlan('pro')}>Quero o Pro <ArrowRight size={15}/></button></div>
-
-          <div className="plans-pro-note">
-            <div><Banknote size={20}/></div>
-            <div>
-              <span>POR QUE O PRO É O CENTRO DA OPERAÇÃO</span>
-              <strong>Você usa o Radar na entrada e a IA na saída.</strong>
-              <p>Analise a compra, negocie com teto e depois prepare o item para voltar ao mercado com uma apresentação melhor.</p>
-            </div>
-            <a href="#plano-pro">Ver Pro <ArrowRight size={14}/></a>
+          <div className="plans-v2-pro-strip plans-v2-reveal">
+            <div className="plans-v2-pro-strip__icon"><Sparkles size={22}/></div>
+            <div><span>POR QUE O PRO É O CENTRO DA OPERAÇÃO</span><strong>Você usa o Radar na entrada e a IA na saída.</strong><p>120 análises por mês, Diagnóstico Premium e preparação da revenda com IA.</p></div>
+            <button onClick={()=>setPaymentPlan('pro')} disabled={busy!==null}>{busy==='pro'?'Abrindo...':'Quero o Pro'}<ArrowRight size={15}/></button>
           </div>
         </div>
       </section>
 
-      <section className="plans-section plans-section--contrast">
+      <section className="plans-v2-section plans-v2-section--compare">
         <div className="plans-shell">
-          <div className="plans-section__intro plans-section__intro--center">
-            <span className="plans-section__number">05</span>
-            <div>
-              <div className="plans-kicker">COMPARAÇÃO</div>
-              <h2>Sem letra miúda. Veja o que muda.</h2>
-            </div>
+          <div className="plans-v2-heading plans-v2-heading--center plans-v2-reveal">
+            <span className="plans-v2-number">03</span>
+            <div><small>SEM LETRA MIÚDA</small><h2>Veja exatamente o que muda.</h2></div>
           </div>
 
-          <div className="plans-compare-table">
+          <div className="plans-v2-compare plans-v2-reveal">
             <div className="plans-compare-row plans-compare-row--head"><span>RECURSO</span><b>START</b><b className="is-pro">PRO</b><b>MAX</b></div>
             {compareRows.map(row=><div className="plans-compare-row" key={row.label}><span>{row.label}</span><b>{row.start}</b><b className="is-pro">{row.pro}</b><b>{row.max}</b></div>)}
           </div>
         </div>
       </section>
 
-      <section className="plans-section">
-        <div className="plans-shell plans-trust-grid">
-          <div className="plans-trust">
-            <ShieldCheck size={22}/>
-            <div className="plans-kicker">ACESSO PROTEGIDO</div>
+      <section className="plans-v2-section plans-v2-section--security">
+        <div className="plans-shell plans-v2-security-grid">
+          <div className="plans-v2-security plans-v2-reveal">
+            <div className="plans-v2-security__icon"><ShieldCheck size={25}/></div>
+            <span>ACESSO PROTEGIDO</span>
             <h2>Pagamento confirmado no servidor. Sem atalho pelo navegador.</h2>
             <p>O gateway processa a cobrança e o backend valida a assinatura antes de liberar o painel e os recursos do seu plano.</p>
-            <ul>
-              <li><Check size={13}/> checkout seguro</li>
-              <li><Check size={13}/> webhook validado</li>
-              <li><Check size={13}/> plano conferido no backend</li>
-              <li><Check size={13}/> recursos premium protegidos no servidor</li>
-            </ul>
+            <div className="plans-v2-security__list">
+              <span><Check size={13}/> checkout seguro</span>
+              <span><Check size={13}/> webhook validado</span>
+              <span><Check size={13}/> plano conferido no backend</span>
+            </div>
           </div>
 
-          <div className="plans-pro-box">
-            <span>PLANO PARA REVENDA</span>
+          <div className="plans-v2-pro-mini plans-v2-reveal">
+            <span>RECOMENDADO PARA REVENDA</span>
             <strong>BRIKE Pro</strong>
             <b>{money(pro.preco_mensal)}<small>/mês</small></b>
-            <p>Mais análises na compra + Diagnóstico Premium + Preparar venda com IA.</p>
+            <p>Mais análise na compra. Mais contexto na negociação. IA para preparar a saída.</p>
             <button onClick={()=>setPaymentPlan('pro')} disabled={busy!==null}>{busy==='pro'?'Abrindo...':'Escolher Pro'}<ArrowRight size={15}/></button>
           </div>
         </div>
       </section>
 
-      <section className="plans-section plans-faq-section">
-        <div className="plans-shell plans-faq-shell">
-          <div>
-            <span className="plans-section__number">06</span>
-            <div className="plans-kicker">DÚVIDAS</div>
-            <h2>Antes de colocar o próximo anúncio no Radar.</h2>
+      <section className="plans-v2-section plans-v2-faq-section">
+        <div className="plans-shell plans-v2-faq">
+          <div className="plans-v2-heading plans-v2-reveal">
+            <span className="plans-v2-number">04</span>
+            <div><small>DÚVIDAS</small><h2>Antes de destravar seu acesso.</h2></div>
           </div>
-          <div className="plans-faq-list">
+          <div className="plans-faq-list plans-v2-reveal">
             {faqs.map(([q,a])=><details key={q} className="plans-faq">
               <summary><span>{q}</span><ChevronDown size={16}/></summary>
               <p>{a}</p>
@@ -686,22 +559,21 @@ export function PlansPage({email,onRefreshAccess}:{email?:string;onRefreshAccess
         </div>
       </section>
 
-      <section className="plans-final">
-        <div className="plans-shell">
-          <div className="plans-final__inner">
-            <span>PRÓXIMA OPORTUNIDADE</span>
-            <h2>Quando aparecer o anúncio certo, entre sabendo quanto oferecer e onde parar.</h2>
-            <p>Escolha o plano que combina com seu ritmo de garimpo e revenda.</p>
-            <a href="#planos">Escolher meu plano <ArrowRight size={16}/></a>
-          </div>
-          <div className="plans-final__security"><ShieldCheck size={13}/> Pagamento processado pelo gateway · acesso validado no servidor.</div>
+      <section className="plans-v2-final">
+        <div className="plans-v2-final__aurora" aria-hidden="true"/>
+        <div className="plans-shell plans-v2-final__inner plans-v2-reveal">
+          <span>PRÓXIMA OPORTUNIDADE</span>
+          <h2>Quando o anúncio certo aparecer, entre sabendo quanto oferecer e onde parar.</h2>
+          <p>Escolha seu plano e libere o Radar para a próxima negociação.</p>
+          <a href="#planos">Escolher meu plano <ArrowRight size={16}/></a>
+          <small><ShieldCheck size={13}/> pagamento processado pelo gateway · acesso validado no servidor</small>
         </div>
       </section>
     </main>
 
-    <div className="plans-mobile-sticky">
-      <div><span>RECOMENDADO PARA REVENDA</span><strong>Pro · {money(pro.preco_mensal)}/mês</strong></div>
-      <button onClick={()=>setPaymentPlan('pro')} disabled={busy!==null}>{busy==='pro'?'Abrindo...':'Escolher Pro'}<ArrowRight size={14}/></button>
+    <div className="plans-mobile-sticky plans-v2-sticky">
+      <div><span>PRO · RECOMENDADO</span><strong>{money(pro.preco_mensal)}<small>/mês</small></strong></div>
+      <button onClick={()=>setPaymentPlan('pro')} disabled={busy!==null}>{busy==='pro'?'Abrindo...':'Liberar Pro'}<ArrowRight size={14}/></button>
     </div>
     {paymentPlan&&<div className="payment-method-backdrop" role="dialog" aria-modal="true" aria-label="Escolha a forma de pagamento">
       <div className="payment-method-modal">
