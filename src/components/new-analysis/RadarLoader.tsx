@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { CheckCircle2, Radar, ScanSearch, ShieldCheck, Sparkles, TrendingUp } from 'lucide-react'
 import type { AdOrigin } from './AnalysisForm'
 
@@ -28,19 +29,33 @@ export function RadarLoader({origem}:{origem:AdOrigin}){
   const stages=useMemo(()=>stageMap[origem],[origem])
 
   useEffect(()=>{
-    const oldOverflow=document.body.style.overflow
-    document.body.style.overflow='hidden'
-    const timer=window.setInterval(()=>setStage(current=>Math.min(current+1,stages.length-1)),1550)
+    setStage(0)
+
+    const body=document.body
+    const root=document.documentElement
+    const oldBodyOverflow=body.style.overflow
+    const oldRootOverflow=root.style.overflow
+    const active=document.activeElement
+    if(active instanceof HTMLElement)active.blur()
+
+    body.style.overflow='hidden'
+    root.style.overflow='hidden'
+
+    const timers=stages.slice(1).map((_,index)=>
+      window.setTimeout(()=>setStage(index+1),1450*(index+1))
+    )
+
     return ()=>{
-      window.clearInterval(timer)
-      document.body.style.overflow=oldOverflow
+      timers.forEach(timer=>window.clearTimeout(timer))
+      body.style.overflow=oldBodyOverflow
+      root.style.overflow=oldRootOverflow
     }
   },[stages])
 
   const current=stages[stage]
   const CurrentIcon=current[2]
 
-  return <div className="radar-loader" role="status" aria-live="polite" aria-label="Análise em andamento">
+  const loader=<div className="radar-loader" role="status" aria-live="polite" aria-label="Análise em andamento">
     <div className="radar-loader__backdrop"/>
     <div className="radar-loader__panel">
       <div className="radar-loader__brand">
@@ -87,4 +102,6 @@ export function RadarLoader({origem}:{origem:AdOrigin}){
       </div>
     </div>
   </div>
+
+  return createPortal(loader,document.body)
 }
