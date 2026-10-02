@@ -405,9 +405,18 @@ export function PlansPage({email,onRefreshAccess}:{email?:string;onRefreshAccess
             </h1>
             <p>Para quem garimpa no Facebook Marketplace e na OLX, compra usado abaixo do preço e revende mais caro. O Radar entra antes do PIX: analisa o anúncio, calcula a oferta e mostra até onde vale negociar.</p>
             <div className="plans-marketplaces plans-marketplaces--logos">
-  <div className="market-brand market-brand--facebook market-brand--image"><img src="/plans/file_000000004a0c820eada99353c7fdab1a.jpg" alt="Facebook Marketplace"/></div>
-  <div className="market-brand market-brand--olx" aria-label="OLX"><span className="market-brand__o">O</span><span className="market-brand__l">L</span><span className="market-brand__x">X</span></div>
-  <div className="market-brand market-brand--market market-brand--image"><img src="/plans/file_00000000af84820e91dfbb09a6971065.jpg" alt="Marketplace"/></div>
+  <div className="market-brand market-brand--facebook">
+    <span className="market-brand__fb">f</span>
+    <span><strong>Facebook</strong><small>Marketplace</small></span>
+  </div>
+  <div className="market-brand market-brand--olx" aria-label="OLX">
+    <span className="market-brand__o">O</span><span className="market-brand__l">L</span><span className="market-brand__x">X</span>
+    <small>GARIMPO DE USADOS</small>
+  </div>
+  <div className="market-brand market-brand--market">
+    <ShoppingBag size={22}/>
+    <span><strong>Marketplace</strong><small>COMPRA · NEGOCIA · REVENDE</small></span>
+  </div>
 </div>
 
             <div className="plans-hero__facts">
@@ -496,9 +505,10 @@ export function PlansPage({email,onRefreshAccess}:{email?:string;onRefreshAccess
             <p>Oferta alta demais, problema ignorado e saída superestimada corroem a margem antes do produto chegar na sua mão.</p>
           </div>
 
-          <div className="plans-risk-visual">
-            <img src="/plans/file_00000000564c820e899fd37302fcf535.png" alt="Ferramentas e produtos usados para revenda" onError={(e)=>{e.currentTarget.style.display='none'}}/><div className="brike-asset-fallback"><Wrench/></div>
-            <div><span>EXEMPLO DE GARIMPO</span><strong>Ferramenta boa também pode ser compra ruim.</strong><small>Preço, estado e espaço de negociação importam mais que a marca.</small></div>
+          <div className="plans-risk-visual plans-risk-visual--premium">
+            <img src="/plans/file_00000000564c820e899fd37302fcf535.png" alt="Ferramentas para compra e revenda"/>
+            <div className="plans-risk-visual__shade"/>
+            <div><span>GARIMPO DE FERRAMENTAS</span><strong>Marca boa não corrige preço de entrada ruim.</strong><small>O Radar cruza valor pedido, risco e espaço de negociação antes de você imobilizar o capital.</small></div>
           </div>
 
           <div className="plans-ledger-compare">
@@ -530,10 +540,27 @@ export function PlansPage({email,onRefreshAccess}:{email?:string;onRefreshAccess
             </div>
           </div>
 
-          <div className="plans-operation-visuals">
-            <div className="plans-operation-visual plans-operation-visual--console"><img src="/plans/file_00000000640c820ea197a673db47b11a.png" alt="Console para análise de oportunidade" onError={(e)=>{e.currentTarget.style.display='none'}}/><div className="brike-asset-fallback"><Gamepad2/></div><span>ELETRÔNICOS</span></div>
-            <div className="plans-operation-visual plans-operation-visual--notebook"><img src="/plans/file_00000000974820ea15fa517ebca13ea.png" alt="Notebook para análise de oportunidade" onError={(e)=>{e.currentTarget.style.display='none'}}/><div className="brike-asset-fallback"><Laptop/></div><span>INFORMÁTICA</span></div>
-            <div className="plans-operation-visual plans-operation-visual--cash"><img src="/plans/file_000000009ec0820eb08fc6d7896f9e9a.png" alt="Capital para compra e revenda" onError={(e)=>{e.currentTarget.style.display='none'}}/><div className="brike-asset-fallback"><Banknote/></div><span>CAPITAL DE GIRO</span></div>
+          <div className="plans-operation-visuals plans-operation-visuals--premium">
+            <article className="plans-operation-visual plans-operation-visual--console">
+              <img src="/plans/file_00000000640c820ea197a673db47b11a.png" alt="PlayStation para oportunidade de revenda"/>
+              <div className="plans-operation-visual__veil"/>
+              <div className="plans-operation-visual__copy"><span>ELETRÔNICOS</span><strong>Game com saída rápida</strong><small>Preço de entrada + estado + giro.</small></div>
+            </article>
+            <article className="plans-operation-visual plans-operation-visual--notebook">
+              <img src="/plans/file_000000000974820ea15fa517ebca13ea.png" alt="Notebook para oportunidade de revenda"/>
+              <div className="plans-operation-visual__veil"/>
+              <div className="plans-operation-visual__copy"><span>INFORMÁTICA</span><strong>Notebook abaixo do mercado</strong><small>Compare antes de fechar.</small></div>
+            </article>
+            <article className="plans-operation-visual plans-operation-visual--cash">
+              <img src="/plans/file_000000009ec0820eb08fc6d7896f9e9a.png" alt="Capital para compra e revenda"/>
+              <div className="plans-operation-visual__veil"/>
+              <div className="plans-operation-visual__copy"><span>CAPITAL DE GIRO</span><strong>Dinheiro parado custa margem</strong><small>Compre com teto, não no impulso.</small></div>
+            </article>
+            <article className="plans-operation-visual plans-operation-visual--tools">
+              <img src="/plans/file_00000000564c820e899fd37302fcf535.png" alt="Ferramentas para oportunidade de revenda"/>
+              <div className="plans-operation-visual__veil"/>
+              <div className="plans-operation-visual__copy"><span>FERRAMENTAS</span><strong>Outro mercado. Mesma lógica.</strong><small>Entrada, risco e saída.</small></div>
+            </article>
           </div>
 
           <div className="plans-operation-list">
@@ -562,7 +589,7 @@ export function PlansPage({email,onRefreshAccess}:{email?:string;onRefreshAccess
 
       <section id="planos" className="plans-section plans-section--plans">
         <div className="plans-shell">
-          <div className="plans-plans-collage" aria-hidden="true"><img src="/plans/file_00000000cec4820ea7e3ed4c166e50cb.jpg" alt=""/><div className="brike-asset-fallback brike-asset-fallback--mix"><Smartphone/><Gamepad2/><Wrench/><Laptop/></div></div>
+          <div className="plans-plans-collage" aria-hidden="true"><img src="/plans/file_00000000f400820eb01621d13f15fb10.png" alt=""/></div>
           <div className="plans-section__intro plans-section__intro--center">
             <span className="plans-section__number">04</span>
             <div>
