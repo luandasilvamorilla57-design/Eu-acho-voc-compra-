@@ -33,3 +33,5 @@ Aplicação web para analisar oportunidades de compra e revenda com Supabase + G
 <!-- vercel-retry-20261002-1226 -->
 
 <!-- vercel retry after negotiation handoff -->
+
+<!-- vercel retry verified build 3 -->
