@@ -36,7 +36,7 @@ export default function App(){
   const [selectedDraft,setSelectedDraft]=useState<ResaleDraftRow|null>(null)
   const [analysisFocus,setAnalysisFocus]=useState<BriqueOpportunity|null>(null)
 
-  const {config,loading:configLoading,save:saveConfig}=useRadarConfig(!!session)
+  const {config,loading:configLoading,checked:configChecked,error:configError,save:saveConfig,load:reloadConfig}=useRadarConfig(!!session)
   const {loading:planLoading,checked:planChecked,hasAccess,status:access,refresh:refreshAccess}=usePlanAccess(!!session)
   const appDataActive=!!session&&hasAccess
   const {items,load,updateStatus,resolveNegotiation,addNegotiationLog,reinspect}=useAnalyses(appDataActive)
@@ -90,7 +90,14 @@ export default function App(){
 
   if(!ready)return <div className="grid min-h-screen place-items-center bg-[#06101c] text-xs text-slate-600">Carregando radar...</div>
   if(!session||reset)return <AuthPage initialMode={reset?'reset':'login'}/>
-  if(configLoading||!config.user_id||!planChecked)return <div className="grid min-h-screen place-items-center bg-[#06101c] text-xs text-slate-500">Validando seu acesso com segurança...</div>
+  if(configLoading||!configChecked||!planChecked)return <div className="grid min-h-screen place-items-center bg-[#06101c] text-xs text-slate-500">Validando seu acesso com segurança...</div>
+  if(configError||!config.user_id)return <div className="grid min-h-screen place-items-center bg-[#06101c] px-5 text-slate-300">
+    <div className="w-full max-w-sm rounded-2xl border border-slate-800 bg-slate-950/70 p-5 text-center">
+      <strong className="block text-sm text-white">Não conseguimos carregar sua conta agora.</strong>
+      <p className="mt-2 text-xs leading-5 text-slate-500">Sua sessão continua protegida. Tente novamente em alguns segundos.</p>
+      <button onClick={()=>void reloadConfig()} className="mt-4 rounded-xl bg-emerald-400 px-4 py-2.5 text-xs font-bold text-slate-950">Tentar novamente</button>
+    </div>
+  </div>
   if(!hasAccess)return <PlansPage email={session.user.email} onRefreshAccess={refreshAccess}/>
 
   let page:React.ReactNode
