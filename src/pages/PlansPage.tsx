@@ -41,6 +41,7 @@ const fallback:PlanRow[]=[
 
 const money=(value:number)=>value.toLocaleString('pt-BR',{style:'currency',currency:'BRL'})
 const perDay=(value:number)=>(value/30).toLocaleString('pt-BR',{style:'currency',currency:'BRL',minimumFractionDigits:2})
+const wait=(ms:number)=>new Promise(resolve=>window.setTimeout(resolve,ms))
 
 const profiles=[
   {
@@ -233,21 +234,64 @@ export function PlansPage({email,onRefreshAccess}:{email?:string;onRefreshAccess
   const subscribe=async(plan:AccountPlan)=>{
     setBusy(plan)
     setError('')
+
+    // Abre a aba no mesmo gesto do clique para evitar bloqueadores de popup.
+    // Assim o BRIKE continua aberto e consegue liberar o acesso assim que o webhook confirmar.
+    const checkoutWindow=window.open('about:blank','brike-mercadopago')
+    if(checkoutWindow){
+      try{
+        checkoutWindow.document.title='Abrindo Mercado Pago…'
+        checkoutWindow.document.body.innerHTML='<div style="font-family:system-ui;padding:32px;color:#111">Abrindo pagamento seguro…</div>'
+      }catch{}
+    }
+
     try{
       const {data,error:fnError}=await supabase.functions.invoke('criar-assinatura-mercadopago',{body:{plano:plan}})
       if(fnError)throw fnError
       if(data?.already_active){
+        try{checkoutWindow?.close()}catch{}
         const ok=await onRefreshAccess()
         if(!ok)throw new Error('A assinatura existe, mas o pagamento ainda não foi confirmado.')
         return
       }
       if(!data?.checkout_url)throw new Error(data?.error||'Não foi possível abrir o pagamento.')
-      window.location.assign(data.checkout_url)
+
+      if(checkoutWindow&&!checkoutWindow.closed){
+        checkoutWindow.location.href=data.checkout_url
+      }else{
+        window.location.assign(data.checkout_url)
+        return
+      }
+
+      // A API de Assinaturas do Mercado Pago usa back_url, mas o checkout pode
+      // manter a tela final aberta. O BRIKE não depende disso: ele acompanha
+      // a confirmação no servidor e fecha a aba do checkout quando o plano ativar.
+      for(let attempt=0;attempt<72;attempt+=1){
+        await wait(attempt===0?1800:2500)
+        const ok=await onRefreshAccess()
+        if(ok){
+          try{checkoutWindow.close()}catch{}
+          try{window.focus()}catch{}
+          return
+        }
+      }
+
+      setError('O pagamento continua aberto no Mercado Pago. Depois de concluir, volte a esta aba; o acesso será validado pelo servidor.')
+      setBusy(null)
     }catch(e){
+      try{checkoutWindow?.close()}catch{}
       setError(e instanceof Error?e.message:'Não foi possível iniciar a assinatura.')
       setBusy(null)
     }
   }
+
+  useEffect(()=>{
+    const onVisible=()=>{
+      if(document.visibilityState==='visible'&&busy)void onRefreshAccess()
+    }
+    document.addEventListener('visibilitychange',onVisible)
+    return()=>document.removeEventListener('visibilitychange',onVisible)
+  },[busy,onRefreshAccess])
 
   const manualRefresh=async()=>{
     setChecking(true)
