@@ -9,13 +9,13 @@ import type { AssistedNegotiationRow } from '../types/database'
 import { money,pct } from '../utils/format'
 import { prepareScreenshots,revokePreviews,type PreparedImage } from '../utils/imageInput'
 
-type Props={onBack:()=>void}
+type Props={onBack:()=>void;onUsageChanged?:()=>void|Promise<void>}
 
 function asArray(value:any){return Array.isArray(value)?value:[]}
 function strategyOf(session:AssistedNegotiationRow|null){return (session?.estrategia_atual||{}) as unknown as NegotiationAssistantOutput}
 function resultOf(session:AssistedNegotiationRow|null){return (session?.resultado||{}) as any}
 
-export function NegotiationAssistantPage({onBack}:Props){
+export function NegotiationAssistantPage({onBack,onUsageChanged}:Props){
   const {sessions,loading,busy,error,setError,start,reply,noReply,finish}=useNegotiationAssistant(true)
   const [selected,setSelected]=useState<AssistedNegotiationRow|null>(null)
   const [startImages,setStartImages]=useState<PreparedImage[]>([])
@@ -81,6 +81,7 @@ export function NegotiationAssistantPage({onBack}:Props){
       setAskingPrice('')
       setStartNote('')
       setSelected(data.session)
+      void onUsageChanged?.()
     }catch{}
   }
 
