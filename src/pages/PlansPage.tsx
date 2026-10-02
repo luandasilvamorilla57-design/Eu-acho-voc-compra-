@@ -1,6 +1,6 @@
 import { useEffect,useMemo,useState } from 'react'
 import {
-  ArrowRight,Banknote,BarChart3,Camera,Check,ChevronDown,Crown,
+  ArrowRight,Banknote,BarChart3,Camera,Check,ChevronDown,Crown,CreditCard,Copy,QrCode,X,
   LockKeyhole,LogOut,MessageCircle,PackageOpen,RefreshCw,SearchCheck,
   ShieldAlert,ShieldCheck,ShoppingBag,Tag,Target,TrendingDown,TrendingUp,
   WalletCards,Zap
@@ -195,6 +195,9 @@ export function PlansPage({email,onRefreshAccess}:{email?:string;onRefreshAccess
   const [busy,setBusy]=useState<AccountPlan|null>(null)
   const [checking,setChecking]=useState(false)
   const [error,setError]=useState('')
+  const [paymentPlan,setPaymentPlan]=useState<AccountPlan|null>(null)
+  const [pixData,setPixData]=useState<{plan:AccountPlan;amount:number;qr_code:string|null;qr_code_base64:string|null;ticket_url:string|null}|null>(null)
+  const [copied,setCopied]=useState(false)
   const returned=useMemo(()=>new URLSearchParams(window.location.search).get('checkout')==='retorno',[])
 
   useEffect(()=>{
@@ -231,6 +234,56 @@ export function PlansPage({email,onRefreshAccess}:{email?:string;onRefreshAccess
     void check()
     return()=>{alive=false}
   },[returned,onRefreshAccess])
+
+  const startPix=async(plan:AccountPlan)=>{
+    setBusy(plan)
+    setError('')
+    setCopied(false)
+    try{
+      const refreshed=await supabase.auth.refreshSession()
+      const session=refreshed.data.session
+      if(refreshed.error||!session?.access_token){
+        await supabase.auth.signOut({scope:'local'})
+        throw new Error('Sua sessão expirou. Entre novamente para continuar.')
+      }
+      const {data,error:fnError}=await supabase.functions.invoke('criar-pix-plano',{
+        body:{plano:plan},
+        headers:{Authorization:`Bearer ${session.access_token}`}
+      })
+      if(fnError)throw fnError
+      if(!data?.qr_code&&!data?.ticket_url)throw new Error(data?.error||'Não foi possível gerar o Pix.')
+      setPixData({
+        plan,
+        amount:Number(data.amount||0),
+        qr_code:data.qr_code||null,
+        qr_code_base64:data.qr_code_base64||null,
+        ticket_url:data.ticket_url||null
+      })
+      setPaymentPlan(null)
+
+      for(let attempt=0;attempt<120;attempt+=1){
+        await wait(attempt===0?1800:2500)
+        const ok=await onRefreshAccess()
+        if(ok){ setPixData(null); setBusy(null); return }
+      }
+      setError('O Pix ainda não foi confirmado. Depois de pagar, toque em “Já paguei” para validar.')
+      setBusy(null)
+    }catch(e){
+      setError(e instanceof Error?e.message:'Não foi possível gerar o Pix.')
+      setBusy(null)
+    }
+  }
+
+  const copyPix=async()=>{
+    if(!pixData?.qr_code)return
+    try{
+      await navigator.clipboard.writeText(pixData.qr_code)
+      setCopied(true)
+      window.setTimeout(()=>setCopied(false),1800)
+    }catch{
+      setError('Não foi possível copiar automaticamente. Selecione o código Pix manualmente.')
+    }
+  }
 
   const subscribe=async(plan:AccountPlan)=>{
     setBusy(plan)
@@ -490,7 +543,7 @@ export function PlansPage({email,onRefreshAccess}:{email?:string;onRefreshAccess
           {error&&<div className="plans-error">{error}</div>}
 
           <div className="operator-plans">
-            {plans.map(plan=><PlanCard key={plan.slug} plan={plan} busy={busy} onChoose={subscribe}/>)}
+            {plans.map(plan=><PlanCard key={plan.slug} plan={plan} busy={busy} onChoose={setPaymentPlan}/>)}
           </div>
 
           <div className="plans-pro-note">
@@ -542,7 +595,7 @@ export function PlansPage({email,onRefreshAccess}:{email?:string;onRefreshAccess
             <strong>BRIKE Pro</strong>
             <b>{money(pro.preco_mensal)}<small>/mês</small></b>
             <p>Mais análises na compra + Diagnóstico Premium + Preparar venda com IA.</p>
-            <button onClick={()=>subscribe('pro')} disabled={busy!==null}>{busy==='pro'?'Abrindo...':'Escolher Pro'}<ArrowRight size={15}/></button>
+            <button onClick={()=>setPaymentPlan('pro')} disabled={busy!==null}>{busy==='pro'?'Abrindo...':'Escolher Pro'}<ArrowRight size={15}/></button>
           </div>
         </div>
       </section>
@@ -578,7 +631,43 @@ export function PlansPage({email,onRefreshAccess}:{email?:string;onRefreshAccess
 
     <div className="plans-mobile-sticky">
       <div><span>RECOMENDADO PARA REVENDA</span><strong>Pro · {money(pro.preco_mensal)}/mês</strong></div>
-      <button onClick={()=>subscribe('pro')} disabled={busy!==null}>{busy==='pro'?'Abrindo...':'Escolher Pro'}<ArrowRight size={14}/></button>
+      <button onClick={()=>setPaymentPlan('pro')} disabled={busy!==null}>{busy==='pro'?'Abrindo...':'Escolher Pro'}<ArrowRight size={14}/></button>
     </div>
+    {paymentPlan&&<div className="payment-method-backdrop" role="dialog" aria-modal="true" aria-label="Escolha a forma de pagamento">
+      <div className="payment-method-modal">
+        <button className="payment-method-close" onClick={()=>setPaymentPlan(null)} aria-label="Fechar"><X size={18}/></button>
+        <span className="payment-method-kicker">PAGAMENTO SEGURO</span>
+        <h3>Como você quer pagar?</h3>
+        <p>Plano {plans.find(p=>p.slug===paymentPlan)?.nome||paymentPlan} · {money(plans.find(p=>p.slug===paymentPlan)?.preco_mensal||0)}</p>
+        <div className="payment-method-options">
+          <button onClick={()=>{const p=paymentPlan;setPaymentPlan(null);void subscribe(p)}} disabled={busy!==null}>
+            <span className="payment-method-icon"><CreditCard size={21}/></span>
+            <span><strong>Cartão</strong><small>Assinatura com renovação automática mensal</small></span>
+            <ArrowRight size={17}/>
+          </button>
+          <button onClick={()=>void startPix(paymentPlan)} disabled={busy!==null}>
+            <span className="payment-method-icon"><QrCode size={21}/></span>
+            <span><strong>Pix</strong><small>Pagamento único · libera 30 dias de acesso</small></span>
+            <ArrowRight size={17}/>
+          </button>
+        </div>
+        <div className="payment-method-security"><ShieldCheck size={14}/> O acesso só é liberado após confirmação do Mercado Pago.</div>
+      </div>
+    </div>}
+
+    {pixData&&<div className="payment-method-backdrop" role="dialog" aria-modal="true" aria-label="Pagamento por Pix">
+      <div className="payment-method-modal pix-payment-modal">
+        <button className="payment-method-close" onClick={()=>{setPixData(null);setBusy(null)}} aria-label="Fechar"><X size={18}/></button>
+        <span className="payment-method-kicker">PIX · 30 DIAS DE ACESSO</span>
+        <h3>Escaneie ou copie o Pix</h3>
+        <p>Assim que o Mercado Pago confirmar o pagamento, seu plano é liberado automaticamente.</p>
+        {pixData.qr_code_base64&&<div className="pix-qr"><img src={`data:image/png;base64,${pixData.qr_code_base64}`} alt="QR Code Pix"/></div>}
+        <div className="pix-amount"><span>VALOR</span><strong>{money(pixData.amount)}</strong></div>
+        {pixData.qr_code&&<button className="pix-copy" onClick={()=>void copyPix()}><Copy size={16}/>{copied?'Pix copiado':'Copiar código Pix'}</button>}
+        {!pixData.qr_code&&pixData.ticket_url&&<button className="pix-copy" onClick={()=>window.open(pixData.ticket_url!,'_blank','noopener,noreferrer')}><QrCode size={16}/>Abrir Pix no Mercado Pago</button>}
+        <button className="pix-check" onClick={()=>void manualRefresh()} disabled={checking}><RefreshCw size={15} className={checking?'animate-spin':''}/>{checking?'Validando...':'Já paguei · validar acesso'}</button>
+        <small className="pix-note">O Pix não renova sozinho. Ao final dos 30 dias, você poderá pagar novamente.</small>
+      </div>
+    </div>}
   </div>
 }
