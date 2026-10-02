@@ -70,6 +70,13 @@ function parseExternalReference(value: unknown) {
   return { userId: match[1].toLowerCase(), plan: match[2].toLowerCase() };
 }
 
+function parsePixPlanReference(value: unknown) {
+  const ref = String(value ?? "").trim();
+  const match = /^radar-pix:([0-9a-f-]{36}):(start|pro|max):([0-9a-f-]{36})$/i.exec(ref);
+  if (!match) return null;
+  return { userId: match[1].toLowerCase(), plan: match[2].toLowerCase(), checkoutId: match[3].toLowerCase() };
+}
+
 function parseExtraReference(value: unknown) {
   const ref = String(value ?? "").trim();
   const match = /^radar-extra:([0-9a-f-]{36}):(\d+)$/i.exec(ref);
@@ -204,6 +211,7 @@ Deno.serve(async (req: Request) => {
 
     const rawReference = resource?.external_reference ?? subscription?.external_reference;
     const refInfo = parseExternalReference(rawReference);
+    const pixInfo = parsePixPlanReference(rawReference);
     const extraInfo = parseExtraReference(rawReference);
     const upgradeInfo = parseUpgradeReference(rawReference);
 
@@ -289,6 +297,73 @@ Deno.serve(async (req: Request) => {
           paymentId: String(resource?.id ?? dataId ?? ""),
         }));
       }
+    }
+
+    if (pixInfo && isApprovedPayment) {
+      const paymentId = String(resource?.id ?? dataId ?? "").trim();
+      if (!paymentId) throw new Error("pix_payment_id_missing");
+
+      const approvedAt = resource?.date_approved
+        ?? resource?.date_last_updated
+        ?? resource?.date_created
+        ?? new Date().toISOString();
+
+      const { data: previousPix } = await admin
+        .from("assinaturas")
+        .select("valido_ate")
+        .eq("user_id", pixInfo.userId)
+        .eq("ambiente", configuredEnvironment)
+        .like("mercadopago_subscription_id", "pix:%")
+        .gt("valido_ate", new Date().toISOString())
+        .order("valido_ate", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      const nowMs = Date.now();
+      const previousMs = previousPix?.valido_ate ? new Date(previousPix.valido_ate).getTime() : 0;
+      const baseMs = Math.max(nowMs, Number.isFinite(previousMs) ? previousMs : 0);
+      const validUntil = new Date(baseMs + 30 * 24 * 60 * 60 * 1000).toISOString();
+
+      const { error: pixUpsertError } = await admin.from("assinaturas").upsert({
+        user_id: pixInfo.userId,
+        plano: pixInfo.plan,
+        gateway: "mercado_pago_pix",
+        ambiente: configuredEnvironment,
+        mercadopago_subscription_id: `pix:${paymentId}`,
+        mercadopago_plan_id: null,
+        external_reference: String(rawReference ?? ""),
+        payer_email: resource?.payer?.email ?? null,
+        status: "cancelled",
+        valor: Number(resource?.transaction_amount ?? resource?.transaction_details?.total_paid_amount ?? 0) || null,
+        currency_id: String(resource?.currency_id ?? "BRL"),
+        proxima_cobranca: null,
+        ultimo_pagamento_em: approvedAt,
+        valido_ate: validUntil,
+        cancelada_em: approvedAt,
+        dados_gateway: {
+          type,
+          action,
+          payment_status: resource?.status ?? null,
+          payment_id: paymentId,
+          payment_method_id: resource?.payment_method_id ?? "pix",
+          access_model: "manual_pix_30_days",
+          checkout_id: pixInfo.checkoutId,
+        },
+      }, { onConflict: "ambiente,mercadopago_subscription_id" });
+      if (pixUpsertError) throw pixUpsertError;
+
+      const { error: pixPlanError } = await admin.from("radar_config").upsert(
+        { user_id: pixInfo.userId, plano_atual: pixInfo.plan },
+        { onConflict: "user_id" },
+      );
+      if (pixPlanError) throw pixPlanError;
+
+      console.log("MP_PIX_PLAN_ACTIVATED", JSON.stringify({
+        userId: pixInfo.userId,
+        plan: pixInfo.plan,
+        paymentId,
+        validUntil,
+      }));
     }
 
     if (upgradeInfo && isApprovedPayment) {
