@@ -1,0 +1,79 @@
+/* BRIKE RADAR v22 — mobile performance guardrails
+   Mantém o visual premium, mas reduz efeitos caros em telas touch/Android. */
+
+@media (max-width:760px), (pointer:coarse){
+  /* A animação de entrada usava blur + transform no ancestral da página.
+     Além do custo de GPU, isso pode interferir com overlays position:fixed. */
+  .app-page-stage{
+    animation:none!important;
+    transform:none!important;
+    filter:none!important;
+  }
+
+  /* Grandes filtros de blur em tela cheia custam caro em GPUs móveis. */
+  .app-atmosphere__orb{
+    filter:none!important;
+    opacity:.48!important;
+  }
+  .app-atmosphere__mesh{opacity:.20!important}
+
+  .app-mobile-nav{
+    backdrop-filter:blur(10px) saturate(112%)!important;
+    -webkit-backdrop-filter:blur(10px) saturate(112%)!important;
+    box-shadow:0 14px 44px rgba(0,0,0,.28),inset 0 1px 0 rgba(255,255,255,.02)!important;
+  }
+
+  .analysis-modal{
+    backdrop-filter:none!important;
+    -webkit-backdrop-filter:none!important;
+    background:rgba(1,6,12,.92)!important;
+  }
+  .analysis-modal__bar{
+    backdrop-filter:blur(8px)!important;
+    -webkit-backdrop-filter:blur(8px)!important;
+  }
+
+  .plans-gate--v2 .plans-v2-sticky{
+    backdrop-filter:blur(10px) saturate(108%)!important;
+    -webkit-backdrop-filter:blur(10px) saturate(108%)!important;
+  }
+
+  /* Touch não precisa de transições de hover. */
+  .metric-card-premium,
+  .purchase-card,
+  .analysis-origin-card,
+  .dashboard-new-analysis,
+  .theme-toggle,
+  .mobile-nav-item,
+  .radar-opportunity{
+    transition-duration:.01ms!important;
+  }
+
+  /* Sombras menores reduzem repaint em rolagens longas sem achatar o layout. */
+  .theme-dark .glass{
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.02),0 10px 30px rgba(0,0,0,.14)!important;
+  }
+}
+
+@supports (content-visibility:auto){
+  @media (max-width:760px){
+    .purchase-card,
+    .history-ai-card,
+    .radar-opportunity{
+      content-visibility:auto;
+      contain-intrinsic-size:auto 240px;
+    }
+  }
+}
+
+@media (max-width:430px){
+  .app-atmosphere__orb--one{width:300px!important;height:300px!important}
+  .app-atmosphere__orb--two{width:280px!important;height:280px!important}
+}
+
+/* Só elementos pequenos e realmente animados recebem camada própria. */
+.radar-loader__sweep,
+.radar-loader__ping,
+.radar-loader__signal span{
+  will-change:transform,opacity;
+}
