@@ -38,10 +38,24 @@ export function SubscriptionPage({status,onBack,onRefresh}:{status:AccessStatus;
 
   const changePlan=async(plan:AccountPlan)=>{
     if(plan===status.plano)return
-    if(!confirm('Trocar para o plano '+plan.toUpperCase()+'? A nova franquia passa a valer após a atualização da assinatura.'))return
+    const target=plans.find(p=>p.id===plan)
+    const source=current
+    const isUpgrade=Boolean(source&&target&&target.price>source.price)
+    const difference=source&&target?Math.max(0,target.price-source.price):0
+    const prompt=isUpgrade
+      ? 'Fazer upgrade para '+plan.toUpperCase()+'? Você pagará '+money(difference)+' agora. A próxima renovação será de '+money(target!.price)+'.'
+      : 'Trocar para o plano '+plan.toUpperCase()+'?'
+    if(!confirm(prompt))return
+
     try{
       const data=await invoke('gerenciar-assinatura',{action:'change_plan',plano:plan})
-      setMessage('Plano alterado para BRIKE '+String(data?.plano||plan).toUpperCase()+'.')
+      if(data?.requires_payment&&data?.checkout_url){
+        window.location.assign(data.checkout_url)
+        return
+      }
+      setMessage(data?.downgrade
+        ? 'Plano alterado para BRIKE '+String(data?.plano||plan).toUpperCase()+'.'
+        : 'Alteração processada.')
       await onRefresh()
     }catch(e){setError(e instanceof Error?e.message:'Não foi possível trocar o plano.')}
   }
@@ -90,7 +104,7 @@ export function SubscriptionPage({status,onBack,onRefresh}:{status:AccessStatus;
         <strong>{money(p.price)}<small>/mês</small></strong>
         <p>{p.month} análises/mês · {p.day}/dia</p>
         <p>{p.sales?p.sales+' preparações de venda IA/mês':'Anúncio Inteligente bloqueado'}</p>
-        <button disabled={p.id===status.plano||!!busy} onClick={()=>changePlan(p.id)}>{p.id===status.plano?'Seu plano':'Mudar para '+p.name}</button>
+        <button disabled={p.id===status.plano||!!busy} onClick={()=>changePlan(p.id)}>{p.id===status.plano?'Seu plano':current&&p.price>current.price?'Fazer upgrade para '+p.name:'Mudar para '+p.name}</button>
       </article>)}</div>
     </section>
 
