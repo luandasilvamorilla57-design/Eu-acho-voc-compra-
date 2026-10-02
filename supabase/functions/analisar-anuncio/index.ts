@@ -1,10 +1,47 @@
 import 'jsr:@supabase/functions-js/edge-runtime.d.ts'
 import { createClient } from 'npm:@supabase/supabase-js@2.57.4'
 import { askGemini } from './gemini.ts'
+import { askGroq } from './groq.ts'
 import { calculate,corsHeaders,num,sources } from './helpers.ts'
 
 type InputImage={mime_type:string;data:string;name?:string}
 type MarketRef={url?:string;price?:number;note?:string}
+type Provider='gemini'|'groq'
+
+const providerState:Record<Provider,{failures:number;blockedUntil:number}>={
+  gemini:{failures:0,blockedUntil:0},
+  groq:{failures:0,blockedUntil:0},
+}
+
+function providerReady(provider:Provider,key:string){
+  return Boolean(key)&&Date.now()>=providerState[provider].blockedUntil
+}
+function providerOk(provider:Provider){
+  providerState[provider].failures=0
+  providerState[provider].blockedUntil=0
+}
+function providerFailed(provider:Provider,error:any){
+  const state=providerState[provider]
+  state.failures+=1
+  const status=Number(error?.status||0)
+  const retryable=error?.retryable!==false||status===408||status===429||status>=500
+  if(retryable&&state.failures>=2){
+    state.blockedUntil=Date.now()+60_000
+    state.failures=0
+  }
+}
+function trafficBucket(requestId:string){
+  const hex=requestId.replace(/-/g,'').slice(0,8)
+  const value=parseInt(hex,16)
+  return Number.isFinite(value)?value%100:0
+}
+function choosePrimary(requestId:string,origem:string,imageCount:number,geminiReady:boolean,groqReady:boolean):Provider{
+  if(geminiReady&&!groqReady)return 'gemini'
+  if(groqReady&&!geminiReady)return 'groq'
+  if(origem==='olx')return 'gemini'
+  if(imageCount>3)return 'gemini'
+  return trafficBucket(requestId)<25?'groq':'gemini'
+}
 
 Deno.serve(async req=>{
   const cors=corsHeaders(req)
@@ -14,13 +51,14 @@ Deno.serve(async req=>{
   let admin:any=null
   let usageReserved=false
   try{
-    const key=Deno.env.get('GEMINI_API_KEY')
+    const geminiKey=Deno.env.get('GEMINI_API_KEY')||''
+    const groqKey=Deno.env.get('GROQ_API_KEY')||''
     const supabaseUrl=Deno.env.get('SUPABASE_URL')
     const serviceKey=Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
     const auth=req.headers.get('authorization')||''
     const token=auth.replace(/^Bearer\s+/i,'')
     if(!token)return Response.json({error:'Sessão ausente.',code:'AUTH_REQUIRED',request_id:requestId},{status:401,headers:cors})
-    if(!key||!supabaseUrl||!serviceKey)return Response.json({error:'Serviço temporariamente indisponível.',request_id:requestId},{status:503,headers:cors})
+    if((!geminiKey&&!groqKey)||!supabaseUrl||!serviceKey)return Response.json({error:'Serviço temporariamente indisponível.',request_id:requestId},{status:503,headers:cors})
 
     admin=createClient(supabaseUrl,serviceKey,{auth:{persistSession:false,autoRefreshToken:false}})
     const {data:{user},error:userError}=await admin.auth.getUser(token)
@@ -76,8 +114,54 @@ Deno.serve(async req=>{
     }
     usageReserved=true
 
-    console.log('ANALYSIS_START',JSON.stringify({requestId,modo,origem,imageCount:imagens.length,referenceCount:referencias.length}))
-    const {raw,ai,model,fallback}=await askGemini(key,origem,link,texto,preco,imagens,modo,contextoAnterior,inspecaoNotas,referencias,perfilUsuario,contextoGarimpo)
+    const geminiAvailable=providerReady('gemini',geminiKey)
+    const groqAvailable=providerReady('groq',groqKey)
+    if(!geminiAvailable&&!groqAvailable){
+      throw Object.assign(new Error('Nenhum provedor de IA está disponível no momento.'),{status:503,retryable:true})
+    }
+
+    const primary=choosePrimary(requestId,origem,imagens.length,geminiAvailable,groqAvailable)
+    const secondary:Provider=primary==='gemini'?'groq':'gemini'
+    const order=[primary,secondary].filter((provider,index,list)=>{
+      if(list.indexOf(provider)!==index)return false
+      return provider==='gemini'?geminiAvailable:groqAvailable
+    })
+
+    console.log('ANALYSIS_START',JSON.stringify({
+      requestId,modo,origem,imageCount:imagens.length,referenceCount:referencias.length,
+      providerOrder:order
+    }))
+
+    let aiResult:any=null
+    let firstProviderError:any=null
+    const providerChain:string[]=[]
+
+    for(const provider of order){
+      try{
+        providerChain.push(provider)
+        console.log('AI_PROVIDER_ATTEMPT',JSON.stringify({requestId,provider}))
+        aiResult=provider==='gemini'
+          ? await askGemini(geminiKey,origem,link,texto,preco,imagens,modo,contextoAnterior,inspecaoNotas,referencias,perfilUsuario,contextoGarimpo)
+          : await askGroq(groqKey,origem,link,texto,preco,imagens,modo,contextoAnterior,inspecaoNotas,referencias,perfilUsuario,contextoGarimpo)
+        providerOk(provider)
+        console.log('AI_PROVIDER_OK',JSON.stringify({requestId,provider,model:aiResult.model}))
+        break
+      }catch(providerError){
+        providerFailed(provider,providerError)
+        if(!firstProviderError)firstProviderError=providerError
+        console.warn('AI_PROVIDER_FAILED',JSON.stringify({
+          requestId,provider,
+          status:Number((providerError as any)?.status||0)||null,
+          message:providerError instanceof Error?providerError.message:'provider_failed'
+        }))
+      }
+    }
+
+    if(!aiResult)throw firstProviderError||new Error('Nenhum provedor conseguiu concluir a análise.')
+
+    const {raw,ai,model}=aiResult
+    const provider:Provider=aiResult.provider==='groq'?'groq':'gemini'
+    const fallback=providerChain.length>1
     const c=calculate(ai,preco)
 
     if(modo==='anuncio'&&origem==='facebook'&&(!ai?.produto||String(ai.produto).toLowerCase().includes('não identificado'))){
@@ -86,12 +170,12 @@ Deno.serve(async req=>{
       return Response.json({error:'Não consegui identificar o produto com segurança nesses prints. Envie prints mais completos.',request_id:requestId},{status:422,headers:cors})
     }
 
-    const analysis={...ai,precos:{...ai.precos,preco_anunciado:c.asking},calculado:{...c.calculated,classificacao:c.classification},fontes_verificadas:sources(raw),meta:{modelo:model,fallback_automatico:fallback,origem,analisado_em:new Date().toISOString(),aviso:modo==='inspecao'?'Reavaliação baseada nas informações pós-visita.':'Confirme funcionamento, procedência e valores antes de comprar.'}}
+    const analysis={...ai,precos:{...ai.precos,preco_anunciado:c.asking},calculado:{...c.calculated,classificacao:c.classification},fontes_verificadas:provider==='gemini'?sources(raw):[],meta:{modelo:model,provedor:provider,cadeia_provedores:providerChain,fallback_automatico:fallback,origem,analisado_em:new Date().toISOString(),aviso:modo==='inspecao'?'Reavaliação baseada nas informações pós-visita.':'Confirme funcionamento, procedência e valores antes de comprar.'}}
     if(usageReserved){
       await admin.rpc('finalizar_uso_radar',{p_request_id:requestId,p_success:true,p_error:null})
       usageReserved=false
     }
-    console.log('ANALYSIS_OK',JSON.stringify({requestId,model,fallback,score:c.score}))
+    console.log('ANALYSIS_OK',JSON.stringify({requestId,provider,model,fallback,providerChain,score:c.score}))
     return Response.json({analysis,request_id:requestId,quota:{restantes_mes:Number(quota?.restantes_mes||0),restantes_dia:Number(quota?.restantes_dia||0),creditos_extras:Number(quota?.creditos_extras||0),usou_credito_extra:Boolean(quota?.usou_credito_extra)}},{headers:cors})
   }catch(e){
     if(usageReserved&&admin){
@@ -100,8 +184,9 @@ Deno.serve(async req=>{
     console.error('ANALYSIS_ERROR',requestId,e)
     const message=e instanceof Error?e.message:'Erro interno'
     const lower=message.toLowerCase()
-    if(lower.includes('quota')||lower.includes('rate limit')||lower.includes('resource_exhausted'))return Response.json({error:'A cota gratuita da Gemini foi atingida. Aguarde a renovação do limite e tente novamente.',request_id:requestId},{status:429,headers:cors})
-    if(lower.includes('high demand')||lower.includes('service unavailable')||lower.includes('try again later'))return Response.json({error:'Os modelos gratuitos da Gemini estão temporariamente congestionados. Tente novamente em instantes.',request_id:requestId},{status:503,headers:cors})
+    const status=Number((e as any)?.status||0)
+    if(status===429||lower.includes('quota')||lower.includes('rate limit')||lower.includes('resource_exhausted'))return Response.json({error:'Os provedores de IA atingiram o limite temporário. Tente novamente em instantes.',request_id:requestId},{status:429,headers:cors})
+    if(status===408||status===503||lower.includes('high demand')||lower.includes('service unavailable')||lower.includes('try again later')||lower.includes('timeout'))return Response.json({error:'Os provedores de IA estão temporariamente ocupados. Tente novamente em instantes.',request_id:requestId},{status:503,headers:cors})
     return Response.json({error:'Não foi possível concluir a análise agora. Tente novamente.',request_id:requestId},{status:500,headers:cors})
   }
 })
