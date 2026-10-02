@@ -426,7 +426,7 @@ export function PlansPage({email,onRefreshAccess}:{email?:string;onRefreshAccess
 
           <div className="plan-reveal plans-hero__visual">
             <div className="plans-product-cloud" aria-hidden="true">
-              <div className="brike-asset-fallback brike-asset-fallback--mix"><Smartphone/><Gamepad2/><Wrench/><Laptop/></div>
+              <img src="/plans/brike-produtos.webp" alt="Produtos usados para compra e revenda"/>
             </div>
             <DealSheet/>
           </div>
