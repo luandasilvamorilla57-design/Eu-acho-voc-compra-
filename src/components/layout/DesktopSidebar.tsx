@@ -1,7 +1,7 @@
 import { Activity,BarChart3,History,ListChecks,LogOut,PackageCheck,Sparkles } from 'lucide-react'
 import { Brand } from '../Brand'
 import type { View } from '../BottomNav'
-import { supabase } from '../../lib/supabase'
+import { signOutFast } from '../../services/sessionService'
 
 export function DesktopSidebar({view,setView,radarCount=0}:{view:View;setView:(v:View)=>void;radarCount?:number}){
   const nav=[['dashboard','Painel',BarChart3],['radar','Ações',ListChecks],['new','Nova análise',Sparkles],['bought','Comprei',PackageCheck],['history','Histórico',History]] as const
@@ -28,7 +28,7 @@ export function DesktopSidebar({view,setView,radarCount=0}:{view:View;setView:(v
         <p>Pendências, estoque, negociações e próximos passos acompanhados em um único lugar.</p>
         <div className="sidebar-radar-card__line"><span/><b>{radarCount?radarCount+' alerta(s) ativo(s)':'Nenhuma pendência crítica'}</b></div>
       </div>
-      <button onClick={()=>supabase.auth.signOut()} className="sidebar-logout"><LogOut size={16}/><span>Sair da conta</span></button>
+      <button onClick={()=>void signOutFast()} className="sidebar-logout"><LogOut size={16}/><span>Sair da conta</span></button>
     </div>
   </aside>
 }
