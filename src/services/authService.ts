@@ -52,6 +52,6 @@ export async function runAuthAction(mode:AuthMode,email:string,password:string,c
 
   const {error}=await supabase.auth.updateUser({password})
   if(error)throw friendlyAuthError(mode,error)
-  await supabase.auth.signOut()
+  await supabase.auth.signOut({scope:'local'}).catch(()=>{})
   return 'Senha atualizada. Entre novamente com a nova senha.'
 }
