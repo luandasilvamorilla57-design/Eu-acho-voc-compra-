@@ -1,10 +1,10 @@
-import { Activity,BarChart3,History,ListChecks,LogOut,PackageCheck,Sparkles } from 'lucide-react'
+import { Activity,BarChart3,Handshake,History,ListChecks,LogOut,PackageCheck,Sparkles } from 'lucide-react'
 import { Brand } from '../Brand'
 import type { View } from '../BottomNav'
 import { signOutFast } from '../../services/sessionService'
 
 export function DesktopSidebar({view,setView,radarCount=0}:{view:View;setView:(v:View)=>void;radarCount?:number}){
-  const nav=[['dashboard','Painel',BarChart3],['radar','Ações',ListChecks],['new','Nova análise',Sparkles],['bought','Comprei',PackageCheck],['history','Histórico',History]] as const
+  const nav=[['dashboard','Painel',BarChart3],['radar','Ações',ListChecks],['negotiate','Negociar',Handshake],['new','Nova análise',Sparkles],['bought','Comprei',PackageCheck],['history','Histórico',History]] as const
   return <aside className="app-sidebar fixed inset-y-0 left-0 z-40 hidden w-[276px] border-r lg:flex lg:flex-col">
     <div className="sidebar-brand-zone"><Brand/></div>
 
