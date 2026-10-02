@@ -117,12 +117,12 @@ export function useNewAnalysis(onSaved:(destination:'dashboard'|'history')=>void
     }
   }
 
-  const save=async(pipeline_status:PipelineStatus,veredito_radar:RadarDecision|null,destination:'dashboard'|'history',action:'negotiate'|'discard'|'save')=>{
-    if(!result)return
+  const save=async(pipeline_status:PipelineStatus,veredito_radar:RadarDecision|null,destination:'dashboard'|'history',action:'negotiate'|'discard'|'save',navigate=true)=>{
+    if(!result)return null
     setSaving(true);setDecisionBusy(action);setError('')
     const textoPersistido=texto.trim() || (origem==='facebook'? `Análise por ${images.length} print(s) do Facebook Marketplace` : '')
     const refs=marketRefs.map(r=>({url:r.url.trim(),price:Number(r.price||0),note:r.note.trim()})).filter(r=>r.url||r.price>0||r.note)
-    const {error:e}=await supabase.from('analises').insert({
+    const {data:saved,error:e}=await supabase.from('analises').insert({
       origem,
       titulo_anuncio:result.produto,
       preco_anunciado:result.precos.preco_anunciado,
@@ -136,10 +136,11 @@ export function useNewAnalysis(onSaved:(destination:'dashboard'|'history')=>void
       status:'analisado',
       pipeline_status,
       veredito_radar
-    })
+    }).select('id').single()
     setSaving(false);setDecisionBusy(null)
-    if(e){setError(e.message);reportClientError(e,'analysis.save');return}
-    onSaved(destination)
+    if(e||!saved?.id){const message=e?.message||'Não foi possível salvar a análise.';setError(message);if(e)reportClientError(e,'analysis.save');return null}
+    if(navigate)onSaved(destination)
+    return saved.id as string
   }
 
   return{origem,link,texto,preco,marketRefs,images,imageBusy,busy,saving,decisionBusy,error,result,setOrigem,setLink,setTexto,setPreco,addMarketRef,updateMarketRef,removeMarketRef,addImages,removeImage,analyze,save}
