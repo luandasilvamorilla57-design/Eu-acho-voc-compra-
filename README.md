@@ -27,3 +27,5 @@ Aplicação web para analisar oportunidades de compra e revenda com Supabase + G
 - Dark mode e interface mobile-first
 
 <!-- vercel redeploy retry 2 -->
+
+<!-- production redeploy after verified build -->
