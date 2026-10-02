@@ -1,4 +1,4 @@
-const CACHE='brike-radar-v6'
+const CACHE='brike-radar-v7'
 const SHELL=['/','/manifest.webmanifest','/brike-icon.svg','/brike-maskable.svg']
 
 self.addEventListener('install',event=>{
@@ -20,6 +20,19 @@ self.addEventListener('fetch',event=>{
 
   const url=new URL(request.url)
   if(url.origin!==self.location.origin)return
+
+  // Plan images change frequently during visual iteration. Never serve a stale
+  // cached/corrupted version before trying the network.
+  if(url.pathname.startsWith('/plans/')){
+    event.respondWith(
+      fetch(new Request(request,{cache:'reload'}))
+        .catch(async()=>{
+          const cached=await caches.match(request)
+          return cached||Response.error()
+        })
+    )
+    return
+  }
 
   if(request.mode==='navigate'){
     event.respondWith(
