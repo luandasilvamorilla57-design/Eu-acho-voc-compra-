@@ -420,7 +420,10 @@ export function PlansPage({email,onRefreshAccess}:{email?:string;onRefreshAccess
             {email&&<div className="plans-account-line"><LockKeyhole size={12}/> Conta conectada: {email}</div>}
           </div>
 
-          <div className="plan-reveal">
+          <div className="plan-reveal plans-hero__visual">
+            <div className="plans-product-cloud" aria-hidden="true">
+              <img src="/plans/brike-produtos.png" alt=""/>
+            </div>
             <DealSheet/>
           </div>
         </div>
@@ -457,6 +460,10 @@ export function PlansPage({email,onRefreshAccess}:{email?:string;onRefreshAccess
               <p>Acha um celular, ferramenta, eletrônico ou peça abaixo do mercado. Chama o vendedor, aperta o preço e tenta deixar margem para revender. O BRIKE RADAR foi construído exatamente para essa operação.</p>
             </div>
           </div>
+          <div className="plans-brique-showcase">
+            <div className="plans-brique-showcase__copy"><span>O BRIQUE ACONTECE AQUI</span><strong>Produto na mão. Dinheiro na mesa. Decisão antes do PIX.</strong><p>O Radar foi desenhado para a realidade de quem compra usado, negocia rápido e precisa preservar margem para a saída.</p></div>
+            <div className="plans-brique-showcase__image"><img src="/plans/brike-negociacao.png" alt="Negociação de produto usado"/></div>
+          </div>
           <div className="brike-story">
             <div className="brike-story__phone"><Smartphone size={22}/><span>MARKETPLACE</span><strong>iPhone 13 · R$ 1.900</strong><small>“Aceita proposta?”</small></div>
             <ArrowRight size={18}/>
@@ -483,6 +490,11 @@ export function PlansPage({email,onRefreshAccess}:{email?:string;onRefreshAccess
             <div className="plans-kicker plans-kicker--risk">ONDE O LUCRO SOME</div>
             <h2>O prejuízo quase nunca começa na revenda. Começa na compra errada.</h2>
             <p>Oferta alta demais, problema ignorado e saída superestimada corroem a margem antes do produto chegar na sua mão.</p>
+          </div>
+
+          <div className="plans-risk-visual">
+            <img src="/plans/brike-ferramentas.png" alt="Ferramentas e produtos usados para revenda"/>
+            <div><span>EXEMPLO DE GARIMPO</span><strong>Ferramenta boa também pode ser compra ruim.</strong><small>Preço, estado e espaço de negociação importam mais que a marca.</small></div>
           </div>
 
           <div className="plans-ledger-compare">
@@ -514,6 +526,12 @@ export function PlansPage({email,onRefreshAccess}:{email?:string;onRefreshAccess
             </div>
           </div>
 
+          <div className="plans-operation-visuals">
+            <div className="plans-operation-visual plans-operation-visual--console"><img src="/plans/brike-console.png" alt="Console para análise de oportunidade"/><span>ELETRÔNICOS</span></div>
+            <div className="plans-operation-visual plans-operation-visual--notebook"><img src="/plans/brike-notebook.png" alt="Notebook para análise de oportunidade"/><span>INFORMÁTICA</span></div>
+            <div className="plans-operation-visual plans-operation-visual--cash"><img src="/plans/brike-dinheiro.png" alt="Capital para compra e revenda"/><span>CAPITAL DE GIRO</span></div>
+          </div>
+
           <div className="plans-operation-list">
             {[
               ['01',SearchCheck,'GARIMPE','Encontre um anúncio que pareça abaixo do mercado.'],
@@ -540,6 +558,7 @@ export function PlansPage({email,onRefreshAccess}:{email?:string;onRefreshAccess
 
       <section id="planos" className="plans-section plans-section--plans">
         <div className="plans-shell">
+          <div className="plans-plans-collage" aria-hidden="true"><img src="/plans/brike-produtos.png" alt=""/></div>
           <div className="plans-section__intro plans-section__intro--center">
             <span className="plans-section__number">04</span>
             <div>
