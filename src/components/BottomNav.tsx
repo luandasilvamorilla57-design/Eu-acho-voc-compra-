@@ -1,6 +1,6 @@
 import { BarChart3, History, ListChecks, PackageCheck } from 'lucide-react'
 
-export type View='dashboard'|'radar'|'new'|'bought'|'history'|'subscription'|'admin'
+export type View='dashboard'|'radar'|'negotiate'|'new'|'bought'|'history'|'subscription'|'admin'
 
 function AnalyzeIcon({ size = 19 }: { size?: number }) {
   return (
@@ -51,7 +51,7 @@ export function BottomNav({view,setView,radarCount=0}:{view:View;setView:(v:View
 
   return <nav className="mobile-nav app-mobile-nav fixed inset-x-3 bottom-3 z-50 grid grid-cols-5 lg:hidden">
     {items.map(([k,label,Icon])=>{
-      const active=view===k
+      const active=view===k||(k==='radar'&&view==='negotiate')
       const primary=k==='new'
       return <button key={k} onClick={()=>setView(k)} className={'mobile-nav-item '+(active?'is-active ':'')+(primary?'is-primary':'')}>
         <span className="mobile-nav-icon">
