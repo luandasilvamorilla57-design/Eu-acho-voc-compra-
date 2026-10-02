@@ -45,7 +45,7 @@ async function callGroq(key:string,messages:any[]){
           type:'json_schema',
           json_schema:{
             name:'brique_radar_analysis',
-            strict:true,
+            strict:false,
             schema
           }
         }
