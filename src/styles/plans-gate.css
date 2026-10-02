@@ -800,3 +800,49 @@ linear-gradient(180deg,#06111a 0%,#050b10 100%)}
  .plans-operation-row:hover{padding-left:0}
 }
 @media(prefers-reduced-motion:reduce){.deal-sheet,.deal-sheet__thumb:after,.plans-final__inner>a:after{animation:none!important;transition:none!important}}
+
+
+/* v4 — product storytelling / maximum visual pass */
+.plans-hero__visual{position:relative;min-height:520px;display:flex;align-items:center}
+.plans-hero__visual .deal-sheet{position:relative;z-index:3;width:100%}
+.plans-product-cloud{position:absolute;z-index:1;right:-16%;top:-10%;width:88%;opacity:.28;filter:saturate(.82) contrast(1.08) drop-shadow(0 35px 45px rgba(0,0,0,.48));transform:rotate(2deg);pointer-events:none;mask-image:linear-gradient(to bottom,#000 20%,rgba(0,0,0,.75) 55%,transparent 95%)}
+.plans-product-cloud img{display:block;width:100%;height:auto;mix-blend-mode:screen}
+.plans-brique-showcase{position:relative;overflow:hidden;display:grid;grid-template-columns:.88fr 1.12fr;min-height:330px;margin:0 0 30px;border:1px solid rgba(98,217,209,.16);border-radius:22px;background:radial-gradient(circle at 76% 44%,rgba(98,217,209,.08),transparent 34%),linear-gradient(120deg,#0b1822,#071019);box-shadow:0 28px 85px rgba(0,0,0,.25)}
+.plans-brique-showcase:before{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(98,217,209,.03),transparent 44%);pointer-events:none}
+.plans-brique-showcase__copy{position:relative;z-index:2;display:flex;flex-direction:column;justify-content:center;padding:38px 10px 38px 38px}
+.plans-brique-showcase__copy>span{color:#68cfc8;font-size:7.5px;font-weight:900;letter-spacing:.16em}
+.plans-brique-showcase__copy>strong{display:block;max-width:460px;margin-top:11px;color:#edf5f7;font-size:clamp(22px,2.5vw,34px);line-height:1.08;letter-spacing:-.045em}
+.plans-brique-showcase__copy>p{max-width:450px;margin:14px 0 0;color:#7f929f;font-size:11px;line-height:1.75}
+.plans-brique-showcase__image{position:relative;min-height:330px}
+.plans-brique-showcase__image:after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,#0a1620 0%,transparent 30%,transparent 78%,rgba(7,16,25,.3) 100%)}
+.plans-brique-showcase__image img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;object-position:center;filter:drop-shadow(0 30px 40px rgba(0,0,0,.4));transform:scale(1.03)}
+.plans-problem-grid{grid-template-columns:.74fr .58fr .68fr;gap:22px}
+.plans-risk-visual{position:relative;overflow:hidden;align-self:stretch;min-height:355px;border:1px solid rgba(215,185,120,.14);border-radius:18px;background:radial-gradient(circle at 50% 30%,rgba(215,185,120,.07),transparent 38%),#09121a}
+.plans-risk-visual img{position:absolute;left:-8%;top:-1%;width:116%;height:68%;object-fit:contain;filter:saturate(.82) contrast(1.08) drop-shadow(0 28px 34px rgba(0,0,0,.38));mix-blend-mode:screen}
+.plans-risk-visual:after{content:"";position:absolute;inset:0;background:linear-gradient(to bottom,transparent 28%,#09121a 69%)}
+.plans-risk-visual>div{position:absolute;z-index:2;left:20px;right:20px;bottom:20px}
+.plans-risk-visual span,.plans-operation-visual span{display:block;color:#c8ab6d;font-size:7px;font-weight:900;letter-spacing:.14em}
+.plans-risk-visual strong{display:block;margin-top:6px;color:#e6ecef;font-size:14px;line-height:1.25}
+.plans-risk-visual small{display:block;margin-top:7px;color:#71838f;font-size:8.5px;line-height:1.5}
+.plans-operation-visuals{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin:0 0 26px}
+.plans-operation-visual{position:relative;overflow:hidden;height:210px;border:1px solid rgba(136,180,208,.12);border-radius:17px;background:radial-gradient(circle at 50% 38%,rgba(91,159,194,.09),transparent 42%),linear-gradient(145deg,#0c1721,#081018)}
+.plans-operation-visual:after{content:"";position:absolute;inset:0;background:linear-gradient(to bottom,transparent 48%,rgba(5,11,16,.92) 100%)}
+.plans-operation-visual img{position:absolute;inset:8px 8px 18px;width:calc(100% - 16px);height:calc(100% - 26px);object-fit:contain;filter:drop-shadow(0 25px 32px rgba(0,0,0,.42));transition:transform .45s cubic-bezier(.2,.8,.2,1),filter .45s ease}
+.plans-operation-visual:hover img{transform:translateY(-5px) scale(1.035);filter:drop-shadow(0 32px 40px rgba(0,0,0,.55))}
+.plans-operation-visual span{position:absolute;z-index:2;left:16px;bottom:14px;color:#7398af}
+.plans-operation-visual--cash span{color:#c7a96b}
+.plans-section--plans>.plans-shell{position:relative}
+.plans-plans-collage{position:absolute;z-index:0;right:-11%;top:-34px;width:38%;opacity:.14;pointer-events:none;filter:saturate(.75) contrast(1.1) drop-shadow(0 25px 45px rgba(0,0,0,.4));mask-image:linear-gradient(90deg,transparent,#000 34%,#000 72%,transparent)}
+.plans-plans-collage img{width:100%;height:auto;mix-blend-mode:screen}
+.plans-section--plans .plans-section__intro,.plans-section--plans .operator-plans,.plans-section--plans .pro-spotlight,.plans-section--plans .plans-pro-note,.plans-section--plans .plans-error{position:relative;z-index:2}
+@media(max-width:1100px){.plans-problem-grid{grid-template-columns:1fr 1fr}.plans-problem-grid>div:first-child{grid-column:1/-1}.plans-risk-visual{min-height:320px}}
+@media(max-width:960px){.plans-hero__visual{min-height:auto}.plans-product-cloud{right:-8%;top:-22%;width:70%;opacity:.2}.plans-brique-showcase{grid-template-columns:1fr}.plans-brique-showcase__copy{padding:30px 28px 6px}.plans-brique-showcase__image{min-height:300px}.plans-problem-grid{grid-template-columns:1fr}.plans-operation-visuals{grid-template-columns:1fr 1fr 1fr}.plans-plans-collage{width:55%;right:-18%;top:10px}}
+@media(max-width:640px){
+ .plans-product-cloud{width:92%;right:-26%;top:-17%;opacity:.17}
+ .plans-brique-showcase{border-radius:18px;min-height:0}
+ .plans-brique-showcase__copy{padding:25px 20px 0}.plans-brique-showcase__copy>strong{font-size:25px}
+ .plans-brique-showcase__image{min-height:250px}.plans-brique-showcase__image:after{background:linear-gradient(to bottom,#0a1620 0%,transparent 24%,transparent 75%,rgba(7,16,25,.45) 100%)}
+ .plans-risk-visual{min-height:310px}
+ .plans-operation-visuals{grid-template-columns:1fr 1fr;gap:9px}.plans-operation-visual{height:165px}.plans-operation-visual--cash{grid-column:1/-1;height:145px}
+ .plans-plans-collage{width:90%;right:-38%;top:80px;opacity:.09}
+}
