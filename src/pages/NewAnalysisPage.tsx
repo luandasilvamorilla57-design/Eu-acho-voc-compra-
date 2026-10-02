@@ -4,21 +4,30 @@ import type { VerdictAction } from '../components/analysis/RadarVerdictCard'
 import { AnalysisForm } from '../components/new-analysis/AnalysisForm'
 import { RadarLoader } from '../components/new-analysis/RadarLoader'
 import { useNewAnalysis } from '../hooks/useNewAnalysis'
+import type { NegotiationPrefill } from '../hooks/useNegotiationAssistant'
 import { getRadarVerdict } from '../utils/radarVerdict'
 import type { PurchaseRow,RadarConfigRow } from '../types/database'
 import type { BriqueOpportunity } from '../data/briqueCatalog'
 
-export function NewAnalysisPage({onSaved,config,userProfile,purchases,onUsageChanged,focus}:{onSaved:(destination:'dashboard'|'history')=>void;config:RadarConfigRow;userProfile:string;purchases:PurchaseRow[];onUsageChanged:()=>Promise<boolean>;focus?:BriqueOpportunity|null}){
+export function NewAnalysisPage({onSaved,onNegotiate,config,userProfile,purchases,onUsageChanged,focus}:{onSaved:(destination:'dashboard'|'history')=>void;onNegotiate:(prefill:NegotiationPrefill)=>void;config:RadarConfigRow;userProfile:string;purchases:PurchaseRow[];onUsageChanged:()=>Promise<boolean>;focus?:BriqueOpportunity|null}){
   const a=useNewAnalysis(onSaved,userProfile,onUsageChanged,focus||null)
   const resultRef=useRef<HTMLDivElement|null>(null)
   useEffect(()=>{if(!a.result)return;const timer=window.setTimeout(()=>resultRef.current?.scrollIntoView({behavior:'smooth',block:'start'}),180);return()=>window.clearTimeout(timer)},[a.result])
 
-  const decide=(action:VerdictAction)=>{
+  const decide=async(action:VerdictAction)=>{
     if(!a.result)return
     const verdict=getRadarVerdict(a.result,config)
-    if(action==='negotiate')a.save('aguardando_negociacao','compensa','history','negotiate')
-    else if(action==='discard')a.save('descartado','nao_compensa','history','discard')
-    else a.save('analisado',verdict.kind,'dashboard','save')
+    if(action==='negotiate'){
+      const analysisId=await a.save('aguardando_negociacao','compensa','history','negotiate',false)
+      if(!analysisId)return
+      onNegotiate({
+        analysisId,
+        askingPrice:Number(a.result.precos.preco_anunciado||0),
+        note:`Análise do Radar concluída para ${a.result.produto}. Use o contexto já analisado e conduza a negociação a partir dele.`,
+        images:a.images.slice(0,3).map(({mime_type,data,name})=>({mime_type,data,name}))
+      })
+    }else if(action==='discard')await a.save('descartado','nao_compensa','history','discard')
+    else await a.save('analisado',verdict.kind,'dashboard','save')
   }
 
   return <div className="mx-auto max-w-5xl">
