@@ -1209,7 +1209,7 @@ linear-gradient(160deg,#102430,#091822 70%);box-shadow:0 32px 90px rgba(0,0,0,.3
   transform:none!important;
   mix-blend-mode:screen;
   filter:saturate(.92) contrast(1.08) drop-shadow(0 30px 38px rgba(0,0,0,.46))!important;
-  animation:plansAssetIn .85s cubic-bezier(.2,.8,.2,1) both;
+  animation:plansAssetFade .85s cubic-bezier(.2,.8,.2,1) both;
 }
 
 /* ---------- section 02 tools ---------- */
@@ -1571,6 +1571,10 @@ linear-gradient(160deg,#102430,#091822 70%);box-shadow:0 32px 90px rgba(0,0,0,.3
 @keyframes plansFadeUp{
   from{opacity:0;transform:translateY(18px)}
   to{opacity:1;transform:translateY(0)}
+}
+@keyframes plansAssetFade{
+  from{opacity:0;transform:translateY(12px) scale(.97)}
+  to{opacity:.92;transform:translateY(0) scale(1)}
 }
 @keyframes plansAssetIn{
   from{opacity:0;transform:translateX(-50%) translateY(12px) scale(.97)}
