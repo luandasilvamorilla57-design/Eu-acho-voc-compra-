@@ -1,0 +1,32 @@
+export const negotiationSchema={
+  type:'object',
+  properties:{
+    produto:{type:'string'},
+    categoria:{type:'string'},
+    marca:{type:'string'},
+    modelo:{type:'string'},
+    condicao_resumida:{type:'string'},
+    preco_detectado:{type:'number'},
+    confianca_identificacao:{type:'number'},
+    leitura_vendedor:{type:'string'},
+    mensagem_para_enviar:{type:'string'},
+    objetivo_atual:{type:'string'},
+    justificativa_estrategia:{type:'string'},
+    nao_ofertar_ainda:{type:'boolean'},
+    oferta_sugerida:{type:'number'},
+    motivo_oferta:{type:'string'},
+    proximo_passo:{type:'string'},
+    sinais_vendedor:{type:'array',items:{type:'string'}},
+    objecoes:{type:'array',items:{type:'string'}},
+    perguntas_produto:{type:'array',items:{type:'string'}},
+    alertas_negociacao:{type:'array',items:{type:'string'}},
+    encerrar_negociacao:{type:'boolean'},
+    motivo_encerrar:{type:'string'}
+  },
+  required:[
+    'produto','categoria','marca','modelo','condicao_resumida','preco_detectado','confianca_identificacao',
+    'leitura_vendedor','mensagem_para_enviar','objetivo_atual','justificativa_estrategia','nao_ofertar_ainda',
+    'oferta_sugerida','motivo_oferta','proximo_passo','sinais_vendedor','objecoes','perguntas_produto',
+    'alertas_negociacao','encerrar_negociacao','motivo_encerrar'
+  ]
+}
