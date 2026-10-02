@@ -42,10 +42,16 @@ export async function prepareScreenshot(file: File): Promise<PreparedImage> {
     canvas.toBlob(b=>b?resolve(b):reject(new Error('Não foi possível comprimir a imagem.')),'image/jpeg',0.86)
   })
 
+  // Libera o backing store do canvas imediatamente. Em celulares, vários prints
+  // de alta resolução mantidos ao mesmo tempo podem causar picos grandes de RAM.
+  canvas.width=1
+  canvas.height=1
+
+  const data=await toBase64(blob)
   return {
     name:file.name,
     mime_type:'image/jpeg',
-    data:await toBase64(blob),
+    data,
     preview:URL.createObjectURL(blob),
     size:blob.size
   }
@@ -53,7 +59,16 @@ export async function prepareScreenshot(file: File): Promise<PreparedImage> {
 
 export async function prepareScreenshots(files: FileList | File[]) {
   const selected=Array.from(files).slice(0,MAX_IMAGES)
-  return Promise.all(selected.map(prepareScreenshot))
+  const prepared:PreparedImage[]=[]
+
+  // Processa em série para evitar 4–6 bitmaps/canvases grandes concorrendo
+  // pela memória do navegador e travando aparelhos Android intermediários.
+  for(const file of selected){
+    prepared.push(await prepareScreenshot(file))
+    await new Promise<void>(resolve=>window.setTimeout(resolve,0))
+  }
+
+  return prepared
 }
 
 export function revokePreviews(images: PreparedImage[]) {
