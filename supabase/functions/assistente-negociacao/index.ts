@@ -95,6 +95,27 @@ function conversationContext(conversation:any){
   }))).slice(0,15000)
 }
 
+function sourceAnalysisContext(row:any){
+  if(!row)return''
+  const ai=row?.analise_ia&&typeof row.analise_ia==='object'?row.analise_ia:{}
+  return JSON.stringify({
+    produto:cleanText(ai?.produto||row?.titulo_anuncio,180),
+    categoria:cleanText(ai?.categoria||row?.categoria,100),
+    marca:cleanText(ai?.marca,100),
+    modelo:cleanText(ai?.modelo,140),
+    resumo:cleanText(ai?.resumo,1200),
+    condicao_estimada:cleanText(ai?.condicao_estimada,500),
+    preco_anunciado:num(ai?.precos?.preco_anunciado||row?.preco_anunciado),
+    oferta_equilibrada:num(ai?.precos?.oferta_equilibrada||row?.oferta_recomendada),
+    teto_compra:num(ai?.precos?.teto_compra),
+    revenda_provavel:num(ai?.precos?.revenda_provavel),
+    risco_score:num(ai?.risco_score),
+    negociabilidade_score:num(ai?.negociabilidade_score),
+    riscos:Array.isArray(ai?.riscos)?ai.riscos.slice(0,6):[],
+    checklist:Array.isArray(ai?.checklist_antes_compra)?ai.checklist_antes_compra.slice(0,8):[]
+  }).slice(0,10000)
+}
+
 async function runAI(args:{
   requestId:string
   geminiKey:string
@@ -238,20 +259,48 @@ Deno.serve(async req=>{
     if(!geminiKey&&!groqKey)return Response.json({error:'Os provedores de IA estão indisponíveis.',request_id:requestId},{status:503,headers:cors})
 
     if(action==='start'){
-      const images=validateImages(body.images)
-      const askingPrice=Math.max(0,num(body.asking_price))
-      const note=cleanText(body.note,2500)
-      if(!images.length)return Response.json({error:'Envie um print do anúncio ou uma foto do produto.',request_id:requestId},{status:400,headers:cors})
+      const analysisId=cleanText(body.analysis_id,80)
+      let sourceAnalysis:any=null
+      if(analysisId){
+        const {data,error}=await admin.from('analises').select('id,user_id,titulo_anuncio,preco_anunciado,categoria,oferta_recomendada,analise_ia').eq('id',analysisId).eq('user_id',user.id).single()
+        if(error||!data)return Response.json({error:'A análise de origem não foi encontrada.',code:'ANALYSIS_NOT_FOUND',request_id:requestId},{status:404,headers:cors})
+        sourceAnalysis=data
 
-      const {data:quotaData,error:quotaError}=await admin.rpc('reservar_uso_radar',{p_user_id:user.id,p_tipo:'analise',p_request_id:requestId})
-      if(quotaError)throw quotaError
-      const quota=Array.isArray(quotaData)?quotaData[0]:quotaData
-      if(!quota?.permitido){
-        const code=String(quota?.motivo||'assinatura_inativa')
-        const status=code==='assinatura_inativa'?402:code.startsWith('limite_')?429:403
-        return Response.json({error:code==='limite_diario'?'Você atingiu o limite de análises de hoje.':code==='limite_mensal'?'Você usou todas as análises do mês.':'Seu plano não está disponível para iniciar uma negociação agora.',code:code.toUpperCase(),request_id:requestId},{status,headers:cors})
+        const {data:existing}=await admin.from('negociacoes_assistidas').select('*').eq('user_id',user.id).eq('analise_id',analysisId).maybeSingle()
+        if(existing){
+          return Response.json({
+            session:existing,
+            assistant:existing.estrategia_atual,
+            meta:{reused:true,source_analysis:true},
+            quota:null,
+            request_id:requestId
+          },{headers:cors})
+        }
       }
-      usageReserved=true
+
+      const images=validateImages(body.images)
+      const bodyPrice=Math.max(0,num(body.asking_price))
+      const askingPrice=bodyPrice>0?bodyPrice:Math.max(0,num(sourceAnalysis?.preco_anunciado))
+      const note=cleanText(body.note,2500)
+      if(!images.length&&!sourceAnalysis)return Response.json({error:'Envie um print do anúncio ou uma foto do produto.',request_id:requestId},{status:400,headers:cors})
+
+      let quota:any=null
+      if(sourceAnalysis){
+        const {data:accessData,error:accessError}=await admin.rpc('status_acesso_radar',{p_user_id:user.id})
+        if(accessError)throw accessError
+        const access=Array.isArray(accessData)?accessData[0]:accessData
+        if(!access?.liberado)return Response.json({error:'Seu acesso ao Radar não está ativo.',code:'SUBSCRIPTION_REQUIRED',request_id:requestId},{status:402,headers:cors})
+      }else{
+        const {data:quotaData,error:quotaError}=await admin.rpc('reservar_uso_radar',{p_user_id:user.id,p_tipo:'analise',p_request_id:requestId})
+        if(quotaError)throw quotaError
+        quota=Array.isArray(quotaData)?quotaData[0]:quotaData
+        if(!quota?.permitido){
+          const code=String(quota?.motivo||'assinatura_inativa')
+          const status=code==='assinatura_inativa'?402:code.startsWith('limite_')?429:403
+          return Response.json({error:code==='limite_diario'?'Você atingiu o limite de análises de hoje.':code==='limite_mensal'?'Você usou todas as análises do mês.':'Seu plano não está disponível para iniciar uma negociação agora.',code:code.toUpperCase(),request_id:requestId},{status,headers:cors})
+        }
+        usageReserved=true
+      }
 
       const prompt=buildNegotiationPrompt({
         mode:'start',
@@ -259,15 +308,18 @@ Deno.serve(async req=>{
         note,
         sellerText:'',
         imageCount:images.length,
-        sessionContext:''
+        sessionContext:'',
+        sourceContext:sourceAnalysisContext(sourceAnalysis)
       })
       const result=await runAI({requestId,geminiKey,groqKey,prompt,images})
       const assistant=normalizeAI(result.ai,askingPrice)
       const effectivePrice=askingPrice>0?askingPrice:assistant.preco_detectado
 
       if(effectivePrice<=0){
-        await admin.rpc('finalizar_uso_radar',{p_request_id:requestId,p_success:false,p_error:'preco_nao_identificado'})
-        usageReserved=false
+        if(usageReserved){
+          await admin.rpc('finalizar_uso_radar',{p_request_id:requestId,p_success:false,p_error:'preco_nao_identificado'})
+          usageReserved=false
+        }
         return Response.json({
           error:'Não consegui confirmar o valor pedido. Informe o preço do vendedor e tente novamente.',
           code:'PRICE_REQUIRED',
@@ -287,6 +339,7 @@ Deno.serve(async req=>{
       }]
       const {data:session,error:insertError}=await admin.from('negociacoes_assistidas').insert({
         user_id:user.id,
+        analise_id:sourceAnalysis?.id||null,
         produto:assistant.produto,
         categoria:assistant.categoria||null,
         marca:assistant.marca||null,
@@ -299,15 +352,17 @@ Deno.serve(async req=>{
       }).select('*').single()
       if(insertError)throw insertError
 
-      await admin.rpc('finalizar_uso_radar',{p_request_id:requestId,p_success:true,p_error:null})
-      usageReserved=false
+      if(usageReserved){
+        await admin.rpc('finalizar_uso_radar',{p_request_id:requestId,p_success:true,p_error:null})
+        usageReserved=false
+      }
 
-      console.log('NEGOTIATION_STARTED',JSON.stringify({requestId,sessionId:session.id,provider:result.provider,model:result.model,chain:result.chain,product:assistant.produto,askingPrice:effectivePrice}))
+      console.log('NEGOTIATION_STARTED',JSON.stringify({requestId,sessionId:session.id,sourceAnalysisId:sourceAnalysis?.id||null,provider:result.provider,model:result.model,chain:result.chain,product:assistant.produto,askingPrice:effectivePrice}))
       return Response.json({
         session,
         assistant,
-        meta:{provider:result.provider,model:result.model,provider_chain:result.chain},
-        quota:{restantes_mes:Number(quota?.restantes_mes||0),restantes_dia:Number(quota?.restantes_dia||0)},
+        meta:{provider:result.provider,model:result.model,provider_chain:result.chain,source_analysis:Boolean(sourceAnalysis)},
+        quota:quota?{restantes_mes:Number(quota?.restantes_mes||0),restantes_dia:Number(quota?.restantes_dia||0)}:null,
         request_id:requestId
       },{headers:cors})
     }
@@ -335,7 +390,8 @@ Deno.serve(async req=>{
       note:cleanText(body.note,1600),
       sellerText,
       imageCount:images.length,
-      sessionContext:conversationContext(session.conversa)
+      sessionContext:conversationContext(session.conversa),
+      sourceContext:''
     })
     const result=await runAI({requestId,geminiKey,groqKey,prompt,images})
     const assistant=normalizeAI(result.ai,Math.max(0,num(session.preco_pedido)))
