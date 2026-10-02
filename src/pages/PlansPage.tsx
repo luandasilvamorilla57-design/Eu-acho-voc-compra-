@@ -438,7 +438,7 @@ export function PlansPage({email,onRefreshAccess}:{email?:string;onRefreshAccess
               <span className="plans-hero-market-stage__halo"/>
               <img className="plans-hero-market-stage__bundle" src="/plans/product-bundle.webp?v=plans-clean-v11" alt=""/>
               <img className="plans-hero-market-stage__phone plans-hero-market-stage__phone--white" src="/plans/hero-phone-white.webp?v=plans-clean-v11" alt=""/>
-              <img className="plans-hero-market-stage__phone plans-hero-market-stage__phone--blue" src="/plans/hero-phone-blue.webp?v=plans-clean-v11?v=plans-fix-20261002" alt=""/>
+              <img className="plans-hero-market-stage__phone plans-hero-market-stage__phone--blue" src="/plans/hero-phone-blue.webp?v=plans-clean-v11" alt=""/>
             </div>
             <DealSheet/>
           </div>
@@ -597,7 +597,7 @@ export function PlansPage({email,onRefreshAccess}:{email?:string;onRefreshAccess
             <span className="plans-plans-collage__halo"/>
             <img className="plans-plans-collage__bundle" src="/plans/product-bundle.webp?v=plans-clean-v11" alt=""/>
             <img className="plans-plans-collage__phone plans-plans-collage__phone--white" src="/plans/hero-phone-white.webp?v=plans-clean-v11" alt=""/>
-            <img className="plans-plans-collage__phone plans-plans-collage__phone--blue" src="/plans/hero-phone-blue.webp?v=plans-clean-v11?v=plans-fix-20261002" alt=""/>
+            <img className="plans-plans-collage__phone plans-plans-collage__phone--blue" src="/plans/hero-phone-blue.webp?v=plans-clean-v11" alt=""/>
           </div>
           <div className="plans-section__intro plans-section__intro--center">
             <span className="plans-section__number">04</span>
