@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { AlertTriangle,ArrowRight,BellOff,BellRing,CheckCircle2,Clock3,Lightbulb,ListChecks,PackageOpen,ShieldCheck,Sparkles,WalletCards } from 'lucide-react'
+import { AlertTriangle,ArrowRight,BellOff,BellRing,CheckCircle2,Clock3,Handshake,Lightbulb,ListChecks,PackageOpen,ShieldCheck,Sparkles,WalletCards } from 'lucide-react'
 import type { AnaliseRow,PurchaseRow,RadarConfigRow } from '../types/database'
 import type { RadarConfigPatch } from '../hooks/useRadarConfig'
 import type { View } from '../components/BottomNav'
@@ -89,6 +89,20 @@ export function RadarPage({
       <Quick icon={PackageOpen} label="Capital no estoque" value={money(capital)}/>
       <Quick icon={Clock3} label="Negociações abertas" value={String(waiting)} tone="blue"/>
     </div>
+
+    <section className="action-negotiation-launch">
+      <div className="action-negotiation-launch__copy">
+        <span>NÃO SABE NEGOCIAR?</span>
+        <h3>Deixe o Radar conduzir a conversa <em>sem parecer IA.</em></h3>
+        <p>Envie um print ou foto do produto. O Radar identifica o item, faz as perguntas certas, espera o momento de ofertar e continua respondendo conforme o vendedor reage.</p>
+        <div>
+          <span>Produto identificado pela imagem</span>
+          <span>Respostas por print ou texto</span>
+          <span>Desconto baseado em fatos</span>
+        </div>
+      </div>
+      <button type="button" onClick={()=>onNavigate('negotiate')}><Handshake size={17}/> Abrir negociação <ArrowRight size={15}/></button>
+    </section>
 
     <section className="action-notify">
       <div className="action-notify__main">
