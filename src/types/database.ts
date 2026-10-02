@@ -42,9 +42,9 @@ anuncios_revenda:{
  Relationships:[]
 }
 negociacoes_assistidas:{
- Row:{id:string;user_id:string;produto:string;categoria:string|null;marca:string|null;modelo:string|null;preco_pedido:number;preco_final:number|null;status:AssistedNegotiationStatus;resumo_produto:string|null;estrategia_atual:Json;conversa:Json;resultado:Json;turn_count:number;data_criacao:string;data_atualizacao:string}
- Insert:{id?:string;user_id?:string;produto?:string;categoria?:string|null;marca?:string|null;modelo?:string|null;preco_pedido?:number;preco_final?:number|null;status?:AssistedNegotiationStatus;resumo_produto?:string|null;estrategia_atual?:Json;conversa?:Json;resultado?:Json;turn_count?:number;data_criacao?:string;data_atualizacao?:string}
- Update:{produto?:string;categoria?:string|null;marca?:string|null;modelo?:string|null;preco_pedido?:number;preco_final?:number|null;status?:AssistedNegotiationStatus;resumo_produto?:string|null;estrategia_atual?:Json;conversa?:Json;resultado?:Json;turn_count?:number;data_atualizacao?:string}
+ Row:{id:string;user_id:string;analise_id:string|null;produto:string;categoria:string|null;marca:string|null;modelo:string|null;preco_pedido:number;preco_final:number|null;status:AssistedNegotiationStatus;resumo_produto:string|null;estrategia_atual:Json;conversa:Json;resultado:Json;turn_count:number;data_criacao:string;data_atualizacao:string}
+ Insert:{id?:string;user_id?:string;analise_id?:string|null;produto?:string;categoria?:string|null;marca?:string|null;modelo?:string|null;preco_pedido?:number;preco_final?:number|null;status?:AssistedNegotiationStatus;resumo_produto?:string|null;estrategia_atual?:Json;conversa?:Json;resultado?:Json;turn_count?:number;data_criacao?:string;data_atualizacao?:string}
+ Update:{analise_id?:string|null;produto?:string;categoria?:string|null;marca?:string|null;modelo?:string|null;preco_pedido?:number;preco_final?:number|null;status?:AssistedNegotiationStatus;resumo_produto?:string|null;estrategia_atual?:Json;conversa?:Json;resultado?:Json;turn_count?:number;data_atualizacao?:string}
  Relationships:[]
 }
 assinaturas:{
