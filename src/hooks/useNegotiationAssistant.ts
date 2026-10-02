@@ -29,6 +29,12 @@ export type NegotiationAssistantOutput={
 }
 
 export type NegotiationImage={mime_type:string;data:string;name:string}
+export type NegotiationPrefill={
+  analysisId:string
+  askingPrice:number
+  note:string
+  images:NegotiationImage[]
+}
 
 async function readFunctionError(error:any){
   try{
@@ -87,13 +93,14 @@ export function useNegotiationAssistant(active=true){
     setSessions(current=>[row,...current.filter(item=>item.id!==row.id)].sort((a,b)=>new Date(b.data_atualizacao).getTime()-new Date(a.data_atualizacao).getTime()))
   }
 
-  const start=async(input:{askingPrice:number;note:string;images:NegotiationImage[]})=>{
+  const start=async(input:{askingPrice:number;note:string;images:NegotiationImage[];sourceAnalysisId?:string})=>{
     try{
       const data=await invoke({
         action:'start',
         asking_price:input.askingPrice,
         note:input.note,
-        images:input.images
+        images:input.images,
+        analysis_id:input.sourceAnalysisId||null
       },'negotiation.start')
       upsertLocal(data.session)
       return data as {session:AssistedNegotiationRow;assistant:NegotiationAssistantOutput;meta:any}
