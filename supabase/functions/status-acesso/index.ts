@@ -27,6 +27,7 @@ Deno.serve(async(req:Request)=>{
   const token=auth.replace(/^Bearer\s+/i,"");
   const supabaseUrl=Deno.env.get("SUPABASE_URL")||"";
   const serviceKey=Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")||"";
+  const mpToken=Deno.env.get("MERCADOPAGO_ACCESS_TOKEN")||"";
 
   if(!token)return json({error:"Sessão ausente"},401);
   if(!supabaseUrl||!serviceKey)return json({error:"Serviço indisponível"},503);
@@ -34,6 +35,55 @@ Deno.serve(async(req:Request)=>{
   const admin=createClient(supabaseUrl,serviceKey,{auth:{persistSession:false,autoRefreshToken:false}});
   const {data:{user},error:userError}=await admin.auth.getUser(token);
   if(userError||!user)return json({error:"Sessão inválida ou expirada"},401);
+
+  try{
+    const {data:billing}=await admin.from("billing_config").select("ambiente").eq("id",1).maybeSingle();
+    const env=billing?.ambiente==="production"?"production":"test";
+    const {data:sub}=await admin.from("assinaturas")
+      .select("id,plano,status,mercadopago_subscription_id,ultimo_pagamento_em,dados_gateway")
+      .eq("user_id",user.id)
+      .eq("ambiente",env)
+      .order("updated_at",{ascending:false})
+      .limit(1)
+      .maybeSingle();
+
+    if(mpToken&&sub?.mercadopago_subscription_id&&(!sub.ultimo_pagamento_em||String(sub.status)==="pending")){
+      const subId=encodeURIComponent(String(sub.mercadopago_subscription_id));
+      const [subRes,invoiceRes]=await Promise.all([
+        fetch(`https://api.mercadopago.com/preapproval/${subId}`,{
+          headers:{Authorization:`Bearer ${mpToken}`,"Content-Type":"application/json"}
+        }),
+        fetch(`https://api.mercadopago.com/authorized_payments/search?preapproval_id=${subId}&limit=20&offset=0`,{
+          headers:{Authorization:`Bearer ${mpToken}`,"Content-Type":"application/json"}
+        })
+      ]);
+      const remoteSub=await subRes.json().catch(()=>({}));
+      const invoices=await invoiceRes.json().catch(()=>({}));
+      const approved=(Array.isArray(invoices?.results)?invoices.results:[])
+        .filter((x:any)=>x?.payment?.status==="approved")
+        .sort((a:any,b:any)=>new Date(b?.last_modified||b?.date_created||b?.debit_date||0).getTime()-new Date(a?.last_modified||a?.date_created||a?.debit_date||0).getTime())[0];
+
+      if(subRes.ok&&invoiceRes.ok&&approved){
+        const paidAt=approved?.last_modified||approved?.date_created||approved?.debit_date||new Date().toISOString();
+        const nextPayment=remoteSub?.next_payment_date??null;
+        const status=String(remoteSub?.status||sub.status||"authorized");
+        await admin.from("assinaturas").update({
+          status,
+          ultimo_pagamento_em:paidAt,
+          proxima_cobranca:nextPayment,
+          valido_ate:nextPayment,
+          payer_email:remoteSub?.payer_email??null,
+          valor:Number(remoteSub?.auto_recurring?.transaction_amount||0)||null,
+          currency_id:String(remoteSub?.auto_recurring?.currency_id||"BRL"),
+          dados_gateway:{...(sub.dados_gateway||{}),reconciled_from:"status-acesso",last_reconciled_at:new Date().toISOString()}
+        }).eq("id",sub.id);
+        await admin.from("radar_config").upsert({user_id:user.id,plano_atual:sub.plano},{onConflict:"user_id"});
+        console.log("MP_ACCESS_RECONCILE_OK",JSON.stringify({userId:user.id,plan:sub.plano,subscriptionId:sub.mercadopago_subscription_id}));
+      }
+    }
+  }catch(syncError){
+    console.warn("MP_ACCESS_RECONCILE_FAILED",syncError instanceof Error?syncError.message:String(syncError));
+  }
 
   const {data,error}=await admin.rpc("status_acesso_radar",{p_user_id:user.id});
   if(error){
