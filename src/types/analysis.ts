@@ -17,5 +17,5 @@ export interface AnalysisResult {
   checklist_antes_compra:string[]; alertas_fraude:string[]; observacoes:string;
   calculado:{score_oportunidade:number;classificacao:Classification;lucro_potencial:number;roi_percentual:number;margem_percentual:number;vantagem_preco_percentual:number;desconto_oferta_percentual:number};
   fontes_verificadas:{title:string;url:string}[];
-  meta?:{modelo:string;analisado_em:string;aviso:string;origem?:string;fallback_automatico?:boolean};
+  meta?:{modelo:string;analisado_em:string;aviso:string;origem?:string;fallback_automatico?:boolean;provedor?:'gemini'|'groq';cadeia_provedores?:string[]};
 }
