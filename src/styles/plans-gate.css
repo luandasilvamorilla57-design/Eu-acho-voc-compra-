@@ -2312,3 +2312,279 @@ linear-gradient(160deg,#102430,#091822 70%);box-shadow:0 32px 90px rgba(0,0,0,.3
   .plans-hero-market-stage img,
   .plans-brique-showcase__image--deal img{animation:none!important}
 }
+
+
+/* PLANS CLEAN CUTOUTS V11 — 2026-10-02 */
+/*
+  Escopo estrito: somente .plans-gate.
+  Objetivo: usar os WebPs transparentes sem “tabuleiro”/retângulo,
+  melhorar o recorte visual dos produtos e reduzir a obstrução do CTA
+  fixo no mobile. Nenhum fluxo, texto ou outra tela é alterado.
+*/
+.plans-gate .plans-hero-market-stage img,
+.plans-gate .plans-brique-showcase__image--deal img,
+.plans-gate .plans-risk-visual--premium img,
+.plans-gate .plans-operation-visual img,
+.plans-gate .plans-plans-collage img,
+.plans-gate .deal-sheet__phone-photo{
+  background:transparent!important;
+  border:0!important;
+  box-shadow:none!important;
+  object-fit:contain!important;
+  mix-blend-mode:normal!important;
+}
+
+/* Hero: produtos realmente “soltos”, sem blocos escuros ao redor. */
+.plans-gate .plans-hero-market-stage{
+  overflow:visible!important;
+}
+.plans-gate .plans-hero-market-stage__bundle{
+  width:76%!important;
+  right:-1%!important;
+  top:58px!important;
+  opacity:.98!important;
+  filter:drop-shadow(0 34px 40px rgba(0,0,0,.58))!important;
+}
+.plans-gate .plans-hero-market-stage__phone--white{
+  width:22%!important;
+  right:1%!important;
+  top:10px!important;
+  opacity:.94!important;
+  filter:drop-shadow(0 26px 32px rgba(0,0,0,.58))!important;
+}
+.plans-gate .plans-hero-market-stage__phone--blue{
+  width:25%!important;
+  left:2%!important;
+  top:32px!important;
+  opacity:.96!important;
+  filter:drop-shadow(0 26px 32px rgba(0,0,0,.58))!important;
+}
+
+/* Miniatura da análise: o aparelho fica recortado e não como foto quadrada. */
+.plans-gate .deal-sheet__thumb{
+  background:
+    radial-gradient(circle at 50% 42%,rgba(91,211,204,.12),transparent 64%),
+    rgba(255,255,255,.014)!important;
+  overflow:hidden!important;
+}
+.plans-gate .deal-sheet__phone-photo{
+  width:76px!important;
+  height:106px!important;
+  padding:0!important;
+  border-radius:0!important;
+  filter:drop-shadow(0 14px 18px rgba(0,0,0,.52))!important;
+}
+
+/* Troca em mãos: imagem transparente integrada ao painel, sem retângulo/checkerboard. */
+.plans-gate .plans-brique-showcase__image--deal{
+  background:
+    radial-gradient(circle at 54% 46%,rgba(94,224,214,.14),transparent 48%),
+    linear-gradient(145deg,rgba(11,29,39,.88),rgba(5,14,21,.96))!important;
+}
+.plans-gate .plans-brique-showcase__image--deal::after{
+  background:
+    linear-gradient(90deg,#0b1b25 0%,rgba(11,27,37,.22) 16%,transparent 43%),
+    linear-gradient(to top,rgba(6,15,22,.54),transparent 45%)!important;
+}
+.plans-gate .plans-brique-showcase__image--deal img{
+  width:106%!important;
+  max-width:780px!important;
+  height:auto!important;
+  opacity:1!important;
+  filter:drop-shadow(0 34px 42px rgba(0,0,0,.50)) saturate(1.02) contrast(1.03)!important;
+}
+
+/* Ferramentas + dinheiro: dois recortes independentes e sem fundo embutido. */
+.plans-gate .plans-risk-visual--premium{
+  overflow:hidden!important;
+}
+.plans-gate .plans-risk-visual--premium .plans-risk-visual__tools{
+  top:14px!important;
+  width:94%!important;
+  height:270px!important;
+  opacity:1!important;
+  filter:drop-shadow(0 28px 32px rgba(0,0,0,.50)) saturate(1.02)!important;
+}
+.plans-gate .plans-risk-visual--premium .plans-risk-visual__cash{
+  right:-2%!important;
+  top:184px!important;
+  width:48%!important;
+  opacity:.98!important;
+  filter:drop-shadow(0 22px 28px rgba(0,0,0,.52))!important;
+}
+
+/* Cards de categorias: produto flutuando, texto com área própria e sem “imagem quadrada”. */
+.plans-gate .plans-operation-visuals--premium .plans-operation-visual{
+  overflow:hidden!important;
+}
+.plans-gate .plans-operation-visuals--premium .plans-operation-visual img{
+  left:50%!important;
+  right:auto!important;
+  top:18px!important;
+  width:86%!important;
+  height:248px!important;
+  transform:translateX(-50%)!important;
+  opacity:1!important;
+  object-position:center!important;
+  filter:drop-shadow(0 28px 34px rgba(0,0,0,.52)) saturate(1.02) contrast(1.02)!important;
+}
+.plans-gate .plans-operation-visuals--premium .plans-operation-visual::after{
+  background:linear-gradient(
+    to bottom,
+    transparent 44%,
+    rgba(7,16,23,.12) 55%,
+    rgba(7,16,23,.90) 75%,
+    #071017 100%
+  )!important;
+}
+
+/* Colagem que abre os planos: sem placas/retângulos atrás dos produtos. */
+.plans-gate .plans-plans-collage{
+  overflow:visible!important;
+}
+.plans-gate .plans-plans-collage__bundle{
+  width:76%!important;
+  right:2%!important;
+  top:72px!important;
+  opacity:.64!important;
+  filter:drop-shadow(0 30px 38px rgba(0,0,0,.50))!important;
+}
+.plans-gate .plans-plans-collage__phone--white{
+  width:21%!important;
+  right:1%!important;
+  top:7px!important;
+  opacity:.82!important;
+}
+.plans-gate .plans-plans-collage__phone--blue{
+  width:24%!important;
+  left:15%!important;
+  top:22px!important;
+  opacity:.84!important;
+}
+
+/* Mobile: mantém impacto visual, mas o CTA fixo deixa de cobrir títulos e cartões. */
+@media(max-width:760px){
+  .plans-gate{
+    padding-bottom:104px!important;
+  }
+  .plans-gate .plans-hero-market-stage{
+    left:-5%!important;
+    right:-5%!important;
+    height:305px!important;
+  }
+  .plans-gate .plans-hero-market-stage__bundle{
+    width:82%!important;
+    right:-1%!important;
+    top:62px!important;
+  }
+  .plans-gate .plans-hero-market-stage__phone--white{
+    width:21%!important;
+    right:1%!important;
+    top:16px!important;
+  }
+  .plans-gate .plans-hero-market-stage__phone--blue{
+    width:24%!important;
+    left:2%!important;
+    top:34px!important;
+  }
+
+  .plans-gate .plans-brique-showcase__image--deal{
+    min-height:315px!important;
+  }
+  .plans-gate .plans-brique-showcase__image--deal img{
+    width:112%!important;
+    max-width:680px!important;
+  }
+
+  .plans-gate .plans-risk-visual--premium .plans-risk-visual__tools{
+    top:14px!important;
+    width:92%!important;
+    height:235px!important;
+  }
+  .plans-gate .plans-risk-visual--premium .plans-risk-visual__cash{
+    top:166px!important;
+    right:-4%!important;
+    width:47%!important;
+  }
+
+  .plans-gate .plans-operation-visuals--premium .plans-operation-visual{
+    min-height:370px!important;
+  }
+  .plans-gate .plans-operation-visuals--premium .plans-operation-visual img{
+    top:18px!important;
+    width:84%!important;
+    height:225px!important;
+  }
+  .plans-gate .plans-operation-visual__copy{
+    padding-top:242px!important;
+  }
+
+  .plans-gate .plans-plans-collage{
+    height:275px!important;
+    margin-bottom:22px!important;
+  }
+  .plans-gate .plans-plans-collage__bundle{
+    width:82%!important;
+    right:0!important;
+    top:55px!important;
+    opacity:.78!important;
+  }
+  .plans-gate .plans-plans-collage__phone--white{
+    width:20%!important;
+    top:4px!important;
+    right:1%!important;
+    opacity:.90!important;
+  }
+  .plans-gate .plans-plans-collage__phone--blue{
+    width:23%!important;
+    top:18px!important;
+    left:2%!important;
+    opacity:.92!important;
+  }
+
+  .plans-gate .plans-mobile-sticky{
+    bottom:max(10px,env(safe-area-inset-bottom))!important;
+    left:12px!important;
+    right:12px!important;
+    min-height:76px!important;
+    padding:10px 10px 10px 14px!important;
+    border-radius:22px!important;
+    gap:10px!important;
+    backdrop-filter:blur(18px) saturate(1.08)!important;
+    -webkit-backdrop-filter:blur(18px) saturate(1.08)!important;
+  }
+  .plans-gate .plans-mobile-sticky span{
+    font-size:8.5px!important;
+    letter-spacing:.11em!important;
+  }
+  .plans-gate .plans-mobile-sticky strong{
+    margin-top:4px!important;
+    font-size:15px!important;
+    line-height:1.15!important;
+    white-space:nowrap!important;
+  }
+  .plans-gate .plans-mobile-sticky button{
+    min-width:154px!important;
+    min-height:50px!important;
+    padding:0 16px!important;
+    font-size:12.5px!important;
+    border-radius:15px!important;
+  }
+}
+
+@media(max-width:430px){
+  .plans-gate .plans-operation-visuals--premium .plans-operation-visual img{
+    width:88%!important;
+  }
+  .plans-gate .plans-mobile-sticky{
+    left:10px!important;
+    right:10px!important;
+  }
+  .plans-gate .plans-mobile-sticky strong{
+    font-size:14px!important;
+  }
+  .plans-gate .plans-mobile-sticky button{
+    min-width:142px!important;
+    padding-inline:13px!important;
+  }
+}
