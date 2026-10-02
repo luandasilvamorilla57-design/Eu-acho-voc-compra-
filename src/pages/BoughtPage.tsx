@@ -18,7 +18,7 @@ import { hasPhotoAssistant } from '../utils/plan'
 type SaleFlow={purchase?:PurchaseRow|null;draft?:ResaleDraftRow|null}|null
 
 export function BoughtPage({
-  analyses,purchases,drafts,config,onCreate,onSold,onUpdate,onUploadPhotos,onRemovePhoto,onSaveDraft,onUpdateDraftCopy,onDeleteDraft
+  analyses,purchases,drafts,config,onCreate,onSold,onUpdate,onUploadPhotos,onRemovePhoto,onSaveDraft,onUpdateDraftCopy,onDeleteDraft,onUpgradePlan
 }:{
   analyses:AnaliseRow[]
   purchases:PurchaseRow[]
@@ -32,6 +32,7 @@ export function BoughtPage({
   onSaveDraft:(input:SaveResaleDraftInput)=>Promise<ResaleDraftRow>
   onUpdateDraftCopy:(id:string,title:string,description:string)=>Promise<void>
   onDeleteDraft:(id:string)=>Promise<void>
+  onUpgradePlan:()=>void
 }){
   const [adding,setAdding]=useState(false)
   const [selling,setSelling]=useState<PurchaseRow|null>(null)
@@ -79,7 +80,7 @@ export function BoughtPage({
     {selling&&<SellModal item={selling} onClose={()=>setSelling(null)} onSold={onSold}/>}
     {managing&&<PurchaseManageModal item={managing} onClose={()=>setManaging(null)} onSave={onUpdate} onUploadPhotos={onUploadPhotos} onRemovePhoto={onRemovePhoto}/>}
     {saleFlow&&photoAssistantUnlocked&&<SalePreparationModal purchases={purchases} analyses={analyses} initialPurchase={saleFlow.purchase} initialDraft={saleFlow.draft} onClose={()=>setSaleFlow(null)} onSaveDraft={onSaveDraft} onUpdateCopy={onUpdateDraftCopy}/>}
-    {featureLocked&&<FeatureLockedModal onClose={()=>setFeatureLocked(false)}/>}
+    {featureLocked&&<FeatureLockedModal onClose={()=>setFeatureLocked(false)} onUpgrade={()=>{setFeatureLocked(false);onUpgradePlan()}}/>}
   </div>
 }
 
