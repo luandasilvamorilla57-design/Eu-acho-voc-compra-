@@ -25,3 +25,5 @@ Aplicação web para analisar oportunidades de compra e revenda com Supabase + G
 - Histórico de análises
 - Registro de compra e venda
 - Dark mode e interface mobile-first
+
+<!-- vercel redeploy retry -->
