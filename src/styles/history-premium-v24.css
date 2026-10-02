@@ -1,0 +1,425 @@
+/* BRIKE RADAR v24 — premium history/mobile overflow hardening */
+
+.history-page{
+  width:100%;
+  min-width:0;
+  max-width:100%;
+  overflow-x:clip;
+}
+.history-page>*{min-width:0;max-width:100%}
+.history-page-intro{min-width:0}
+
+.history-negotiation-grid{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:14px;
+  min-width:0;
+}
+.history-negotiation-card{
+  position:relative;
+  min-width:0;
+  overflow:hidden;
+  border:1px solid rgba(89,228,193,.15);
+  border-radius:26px;
+  background:
+    radial-gradient(circle at 100% 0,rgba(69,205,228,.08),transparent 34%),
+    linear-gradient(145deg,rgba(11,29,44,.98),rgba(6,18,30,.97));
+  padding:18px;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.025),0 20px 55px rgba(0,0,0,.16);
+}
+.history-negotiation-card:before{
+  content:"";
+  position:absolute;
+  left:22px;
+  right:22px;
+  top:0;
+  height:1px;
+  background:linear-gradient(90deg,transparent,rgba(89,228,193,.72),rgba(69,205,228,.28),transparent);
+}
+.history-negotiation-head{
+  display:grid;
+  grid-template-columns:48px minmax(0,1fr);
+  gap:13px;
+  align-items:start;
+  min-width:0;
+}
+.history-negotiation-icon{
+  width:48px;
+  height:48px;
+  border-radius:16px;
+  background:linear-gradient(145deg,rgba(56,211,174,.15),rgba(34,211,238,.07));
+  border:1px solid rgba(89,228,193,.08);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.025);
+}
+.history-negotiation-main{min-width:0}
+.history-negotiation-statusline{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  min-width:0;
+}
+.history-negotiation-status{
+  min-width:0;
+  font-size:10.5px;
+  font-weight:850;
+  line-height:1.25;
+  letter-spacing:.14em;
+  color:#45ddb9;
+}
+.history-score{
+  display:flex;
+  flex:0 0 auto;
+  align-items:center;
+  gap:5px;
+  min-height:28px;
+  border:1px solid rgba(89,228,193,.10);
+  border-radius:999px;
+  background:rgba(89,228,193,.045);
+  padding:0 8px;
+  color:#6ee7c7;
+}
+.history-score>span{font-size:9.5px;color:#6d8396}
+.history-score>strong{font:800 12px/1 Manrope,sans-serif;color:#72e7c9}
+.history-negotiation-title{
+  display:-webkit-box;
+  min-width:0;
+  max-width:100%;
+  margin-top:7px;
+  overflow:hidden;
+  -webkit-box-orient:vertical;
+  -webkit-line-clamp:2;
+  overflow-wrap:anywhere;
+  font:800 17px/1.32 Manrope,sans-serif;
+  letter-spacing:-.02em;
+  color:#f2f7f9;
+}
+.history-negotiation-meta{
+  display:flex;
+  flex-wrap:wrap;
+  align-items:center;
+  gap:7px;
+  margin-top:6px;
+  min-width:0;
+  font-size:11.5px;
+  line-height:1.4;
+  color:#64798b;
+}
+.history-negotiation-meta i{
+  width:3px;
+  height:3px;
+  flex:0 0 auto;
+  border-radius:50%;
+  background:#496072;
+}
+.history-negotiation-metrics{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:9px;
+  margin-top:17px;
+  min-width:0;
+}
+.history-price-box{
+  display:grid;
+  grid-template-columns:34px minmax(0,1fr);
+  gap:9px;
+  align-items:center;
+  min-width:0;
+  border:1px solid rgba(120,151,177,.09);
+  border-radius:17px;
+  background:rgba(1,9,17,.29);
+  padding:12px;
+}
+.history-price-box--offer{
+  border-color:rgba(89,228,193,.11);
+  background:linear-gradient(145deg,rgba(45,167,140,.055),rgba(1,9,17,.29));
+}
+.history-price-box__icon{
+  display:grid;
+  width:34px;
+  height:34px;
+  place-items:center;
+  border-radius:11px;
+  background:rgba(107,135,158,.07);
+  color:#6f879a;
+}
+.history-price-box--offer .history-price-box__icon{
+  background:rgba(89,228,193,.07);
+  color:#5eead4;
+}
+.history-price-box>div{min-width:0}
+.history-price-box span{
+  display:block;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  font-size:10.5px;
+  color:#708395;
+}
+.history-price-box strong{
+  display:block;
+  min-width:0;
+  margin-top:3px;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  font:800 18px/1.2 Manrope,sans-serif;
+  color:#eaf2f6;
+}
+.history-price-box--offer strong{color:#8ce9d2}
+
+.history-negotiation-actions{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:9px;
+  margin-top:14px;
+  min-width:0;
+}
+.history-action-primary,
+.history-action-secondary{
+  display:flex;
+  min-width:0;
+  min-height:46px;
+  align-items:center;
+  justify-content:center;
+  gap:7px;
+  border-radius:14px;
+  padding:0 12px;
+  text-align:center;
+  font-size:11.5px;
+  font-weight:800;
+  line-height:1.2;
+}
+.history-action-primary{
+  border:1px solid rgba(89,228,193,.10);
+  background:linear-gradient(100deg,#42d8ae,#35cfc2 55%,#35c6df);
+  color:#04231d;
+  box-shadow:0 12px 30px rgba(40,208,181,.11);
+}
+.history-action-secondary{
+  border:1px solid rgba(126,158,183,.14);
+  background:rgba(7,19,31,.58);
+  color:#a3b2bf;
+}
+.history-analysis-link{
+  display:flex;
+  width:100%;
+  min-width:0;
+  align-items:center;
+  justify-content:center;
+  gap:4px;
+  margin-top:10px;
+  padding:4px;
+  font-size:10.75px;
+  font-weight:650;
+  color:#607589;
+}
+.history-analysis-link svg{transition:transform .2s ease}
+.history-analysis-link:hover svg{transform:translateX(2px)}
+
+.history-toolbar{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) auto;
+  gap:10px;
+  min-width:0;
+  border-radius:24px!important;
+  padding:14px!important;
+}
+.history-search{
+  display:flex;
+  min-width:0;
+  min-height:48px;
+  align-items:center;
+  gap:10px;
+  border:1px solid rgba(119,151,178,.14);
+  border-radius:15px;
+  background:rgba(2,9,17,.30);
+  padding:0 14px;
+  color:#5f768a;
+}
+.history-search:focus-within{
+  border-color:rgba(89,228,193,.26);
+  box-shadow:0 0 0 4px rgba(89,228,193,.035);
+}
+.history-search input{
+  width:100%;
+  min-width:0;
+  background:transparent;
+  outline:0;
+  font-size:13px;
+  color:#dce7ed;
+}
+.history-search input::placeholder{color:#607184;opacity:.85}
+.history-export{
+  display:flex;
+  min-height:48px;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+  border:1px solid rgba(119,151,178,.14);
+  border-radius:15px;
+  background:rgba(7,19,31,.56);
+  padding:0 16px;
+  font-size:12px;
+  font-weight:750;
+  color:#93a5b5;
+}
+
+.history-page .pipeline-tabs--history{
+  display:grid;
+  grid-template-columns:repeat(5,minmax(0,1fr));
+  gap:8px;
+  min-width:0;
+}
+.history-page .pipeline-tabs--history .pipeline-tab{
+  min-width:0;
+  min-height:56px;
+  border-radius:17px;
+  padding:9px 8px;
+  font-size:10px;
+  line-height:1.15;
+}
+.history-page .pipeline-tabs--history .pipeline-tab span{
+  min-width:0;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+.history-page .pipeline-tabs--history .pipeline-tab b{flex:0 0 auto}
+
+.theme-light .history-negotiation-card{
+  background:
+    radial-gradient(circle at 100% 0,rgba(34,211,238,.07),transparent 34%),
+    linear-gradient(145deg,#fff,#f3f9f8);
+  border-color:rgba(16,185,129,.16);
+  box-shadow:0 18px 50px rgba(15,23,42,.06);
+}
+.theme-light .history-negotiation-title,
+.theme-light .history-price-box strong{color:#18303e}
+.theme-light .history-price-box{background:#edf5f4;border-color:rgba(148,163,184,.18)}
+.theme-light .history-action-secondary,
+.theme-light .history-search,
+.theme-light .history-export{background:rgba(255,255,255,.66);border-color:rgba(148,163,184,.24)}
+.theme-light .history-search input{color:#18303e}
+
+@media(max-width:900px){
+  .history-negotiation-grid{grid-template-columns:1fr}
+}
+
+@media(max-width:700px){
+  .history-page{overflow-x:hidden}
+  .history-page .pipeline-tabs--history{
+    grid-template-columns:repeat(6,minmax(0,1fr));
+    gap:7px;
+  }
+  .history-page .pipeline-tabs--history .pipeline-tab{
+    grid-column:span 2;
+    min-height:52px;
+    justify-content:center;
+    padding:8px 7px;
+    font-size:10px;
+  }
+  .history-page .pipeline-tabs--history .pipeline-tab:nth-child(4),
+  .history-page .pipeline-tabs--history .pipeline-tab:nth-child(5){grid-column:span 3}
+  .history-page .pipeline-tabs--history .pipeline-tab:nth-child(3){
+    grid-column:span 2;
+    border-color:rgba(100,116,139,.16);
+    background:rgba(15,23,42,.32);
+  }
+  .history-page .pipeline-tabs--history .pipeline-tab:nth-child(3).is-active{
+    border-color:rgba(52,211,153,.26);
+    background:rgba(52,211,153,.07);
+  }
+
+  .history-toolbar{
+    grid-template-columns:minmax(0,1fr);
+    padding:13px!important;
+  }
+  .history-search,.history-export{width:100%}
+  .history-export{min-height:46px}
+
+  .history-negotiation-card{
+    width:100%;
+    max-width:100%;
+    border-radius:24px;
+    padding:16px;
+  }
+  .history-negotiation-head{
+    grid-template-columns:44px minmax(0,1fr);
+    gap:11px;
+  }
+  .history-negotiation-icon{
+    width:44px;
+    height:44px;
+    border-radius:14px;
+  }
+  .history-negotiation-statusline{
+    align-items:flex-start;
+    gap:7px;
+  }
+  .history-negotiation-status{
+    padding-top:2px;
+    font-size:9.75px;
+    letter-spacing:.12em;
+  }
+  .history-score{
+    min-height:25px;
+    padding:0 7px;
+  }
+  .history-score>span{display:none}
+  .history-score>strong{font-size:11.5px}
+  .history-negotiation-title{
+    margin-top:6px;
+    font-size:16px;
+    line-height:1.34;
+  }
+  .history-negotiation-meta{font-size:11px}
+  .history-negotiation-metrics{
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:8px;
+    margin-top:15px;
+  }
+  .history-price-box{
+    grid-template-columns:30px minmax(0,1fr);
+    gap:8px;
+    border-radius:15px;
+    padding:10px;
+  }
+  .history-price-box__icon{width:30px;height:30px;border-radius:10px}
+  .history-price-box span{font-size:9.75px}
+  .history-price-box strong{font-size:16px}
+
+  .history-negotiation-actions{
+    grid-template-columns:1fr;
+    gap:8px;
+    margin-top:12px;
+  }
+  .history-action-primary,.history-action-secondary{
+    width:100%;
+    min-width:0;
+    min-height:47px;
+    white-space:normal;
+    overflow-wrap:anywhere;
+    font-size:12px;
+  }
+  .history-analysis-link{
+    min-height:34px;
+    margin-top:6px;
+    font-size:11px;
+  }
+}
+
+@media(max-width:390px){
+  .history-negotiation-card{padding:14px}
+  .history-negotiation-head{grid-template-columns:40px minmax(0,1fr);gap:10px}
+  .history-negotiation-icon{width:40px;height:40px}
+  .history-negotiation-status{font-size:9px;letter-spacing:.105em}
+  .history-score{padding:0 6px}
+  .history-negotiation-title{font-size:15.5px}
+  .history-negotiation-metrics{grid-template-columns:1fr}
+  .history-price-box{grid-template-columns:32px minmax(0,1fr)}
+  .history-page .pipeline-tabs--history .pipeline-tab{font-size:9.5px}
+}
+
+@media(prefers-reduced-motion:reduce){
+  .history-analysis-link svg{transition:none}
+}

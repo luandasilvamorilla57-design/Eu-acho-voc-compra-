@@ -44,8 +44,8 @@ export function HistoryPage({items,drafts,config,onOpen,onOpenAd,onAdSold,onAdNo
     ['finished','Finalizados',CheckCircle2,items.filter(i=>['negociacao_falhou','comprado','vendido'].includes(i.pipeline_status)).length]
   ] as const
 
-  return <div className="space-y-4">
-    <div className="page-intro"><div className="premium-eyebrow text-emerald-400">HISTÓRICO COMPLETO</div><h2 className="font-display mt-2 text-[32px] font-extrabold tracking-[-.05em] sm:text-4xl">Da análise até o anúncio e a compra.</h2><p className="mt-2 max-w-2xl text-[13px] leading-6 text-slate-500">Acompanhe análises, negociações, resultados e todos os anúncios preparados com IA em um único histórico.</p></div>
+  return <div className="history-page space-y-4">
+    <div className="page-intro history-page-intro"><div className="premium-eyebrow text-emerald-400">HISTÓRICO COMPLETO</div><h2 className="font-display mt-2 text-[32px] font-extrabold tracking-[-.05em] sm:text-4xl">Da análise até o anúncio e a compra.</h2><p className="mt-2 max-w-2xl text-[13px] leading-6 text-slate-500">Acompanhe análises, negociações, resultados e todos os anúncios preparados com IA em um único histórico.</p></div>
 
     <div className="pipeline-tabs pipeline-tabs--history">{tabs.map(([id,label,Icon,count])=><button key={id} onClick={()=>setTab(id)} className={'pipeline-tab '+(tab===id?'is-active':'')}><Icon size={15}/><span>{label}</span><b>{count}</b></button>)}</div>
 
@@ -54,7 +54,7 @@ export function HistoryPage({items,drafts,config,onOpen,onOpenAd,onAdSold,onAdNo
     {tab==='ads'
       ? <ResaleHistoryList items={filteredDrafts} onOpen={onOpenAd} onSold={onAdSold} onNotSold={onAdNotSold}/>
       : tab==='waiting'
-        ? (filtered.length?<div className="grid gap-3 xl:grid-cols-2">{filtered.map(item=><NegotiationCard key={item.id} item={item} onOpen={onOpen} onUpdate={setUpdating} onLog={setLogging}/>)}</div>:<div className="glass rounded-[24px] p-8 text-center"><Clock3 className="mx-auto text-emerald-400" size={24}/><h3 className="font-display mt-3 text-lg font-bold pipeline-title">Nenhuma negociação aguardando</h3><p className="mt-2 text-xs text-slate-500">Quando o Radar disser que compensa negociar, a oportunidade aparecerá aqui.</p></div>)
+        ? (filtered.length?<div className="history-negotiation-grid">{filtered.map(item=><NegotiationCard key={item.id} item={item} onOpen={onOpen} onUpdate={setUpdating} onLog={setLogging}/>)}</div>:<div className="glass rounded-[24px] p-8 text-center"><Clock3 className="mx-auto text-emerald-400" size={24}/><h3 className="font-display mt-3 text-lg font-bold pipeline-title">Nenhuma negociação aguardando</h3><p className="mt-2 text-xs text-slate-500">Quando o Radar disser que compensa negociar, a oportunidade aparecerá aqui.</p></div>)
         : <div className="space-y-4"><HistoryList items={filtered} onOpen={onOpen} onEdit={onEdit} onInspect={setInspecting}/>{tab==='all'&&filteredDrafts.length>0&&<ResaleHistoryList items={filteredDrafts} onOpen={onOpenAd} onSold={onAdSold} onNotSold={onAdNotSold}/>}</div>
     }
 
