@@ -127,6 +127,13 @@ Deno.serve(async (req: Request) => {
     auth: { persistSession: false, autoRefreshToken: false },
   });
 
+  const { data: billing } = await admin
+    .from("billing_config")
+    .select("ambiente")
+    .eq("id", 1)
+    .maybeSingle();
+  const configuredEnvironment = billing?.ambiente === "production" ? "production" : "test";
+
   if (!signatureValid) {
     console.warn("MP_WEBHOOK_BAD_SIGNATURE", JSON.stringify({ type, dataId, xRequestId }));
     await admin.from("mercadopago_webhook_eventos").insert({
@@ -188,7 +195,7 @@ Deno.serve(async (req: Request) => {
       || (type === "payment" && resource?.status === "approved");
 
     if (extraInfo && isApprovedPayment) {
-      const environment = body?.live_mode === true ? "production" : "test";
+      const environment = configuredEnvironment;
       const paymentId = String(resource?.id ?? dataId ?? "").trim();
       const paidValue = Number(
         resource?.transaction_amount
@@ -226,7 +233,7 @@ Deno.serve(async (req: Request) => {
         user_id: refInfo.userId,
         plano: refInfo.plan,
         gateway: "mercado_pago",
-        ambiente: body?.live_mode === true ? "production" : "test",
+        ambiente: configuredEnvironment,
         mercadopago_subscription_id: subscriptionId,
         mercadopago_plan_id: subscription?.preapproval_plan_id ?? null,
         external_reference: String(
