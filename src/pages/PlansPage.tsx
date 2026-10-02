@@ -1,9 +1,9 @@
 import { useEffect,useMemo,useState } from 'react'
 import {
   ArrowRight,Banknote,BarChart3,Camera,Check,ChevronDown,Crown,CreditCard,Copy,QrCode,X,
-  LockKeyhole,LogOut,MessageCircle,PackageOpen,RefreshCw,SearchCheck,
+  LockKeyhole,LogOut,MessageCircle,PackageOpen,RefreshCw,SearchCheck,Smartphone,
   ShieldAlert,ShieldCheck,ShoppingBag,Tag,Target,TrendingDown,TrendingUp,
-  WalletCards,Zap
+  WalletCards,Zap,Sparkles
 } from 'lucide-react'
 import { Brand } from '../components/Brand'
 import { supabase } from '../lib/supabase'
@@ -398,11 +398,13 @@ export function PlansPage({email,onRefreshAccess}:{email?:string;onRefreshAccess
         <div className="plans-shell plans-hero__grid">
           <div className="plans-hero__copy plan-reveal">
             <div className="plans-eyebrow"><span/> ANÁLISE DE OPORTUNIDADE · MARKETPLACE · OLX</div>
+            <div className="plans-live-pill"><span/> FEITO PARA QUEM FAZ BRIQUE</div>
             <h1>
-              Compre melhor no Marketplace e na OLX.<br/>
-              <em>Revenda com margem.</em>
+              Achou barato.<br/>
+              <em>Descubra se dá brique.</em>
             </h1>
-            <p>O BRIKE RADAR foi criado para quem encontra usados abaixo do preço, negocia a entrada e precisa saber se a operação ainda faz sentido antes de imobilizar dinheiro.</p>
+            <p>Para quem garimpa no Facebook Marketplace e na OLX, compra usado abaixo do preço e revende mais caro. O Radar entra antes do PIX: analisa o anúncio, calcula a oferta e mostra até onde vale negociar.</p>
+            <div className="plans-marketplaces"><span>facebook <b>Marketplace</b></span><i/> <span className="plans-olx">OLX</span><i/> <span>COMPRA → NEGOCIA → REVENDE</span></div>
 
             <div className="plans-hero__facts">
               <div><span>01</span><strong>PREÇO</strong><small>se está interessante</small></div>
@@ -450,10 +452,17 @@ export function PlansPage({email,onRefreshAccess}:{email?:string;onRefreshAccess
           <div className="plans-section__intro">
             <span className="plans-section__number">01</span>
             <div>
-              <div className="plans-kicker">PARA QUEM É</div>
-              <h2>Feito para quem vive de garimpo e revenda.</h2>
-              <p>Não é uma ferramenta genérica de IA. O fluxo foi pensado em cima de quem encontra anúncio, negocia a entrada e precisa preservar margem na saída.</p>
+              <div className="plans-kicker">SE VOCÊ FAZ ISSO, É PRA VOCÊ</div>
+              <h2>Você abre o Marketplace procurando preço errado.</h2>
+              <p>Acha um celular, ferramenta, eletrônico ou peça abaixo do mercado. Chama o vendedor, aperta o preço e tenta deixar margem para revender. O BRIKE RADAR foi construído exatamente para essa operação.</p>
             </div>
+          </div>
+          <div className="brike-story">
+            <div className="brike-story__phone"><Smartphone size={22}/><span>MARKETPLACE</span><strong>iPhone 13 · R$ 1.900</strong><small>“Aceita proposta?”</small></div>
+            <ArrowRight size={18}/>
+            <div className="brike-story__radar"><Target size={22}/><span>RADAR ANALISA</span><strong>Oferta: R$ 1.650</strong><small>Teto: R$ 1.780 · riscos antes de fechar</small></div>
+            <ArrowRight size={18}/>
+            <div className="brike-story__sale"><Banknote size={22}/><span>SAÍDA</span><strong>Revenda preparada</strong><small>Preço, anúncio e negociação com contexto</small></div>
           </div>
 
           <div className="operator-grid">
@@ -534,9 +543,9 @@ export function PlansPage({email,onRefreshAccess}:{email?:string;onRefreshAccess
           <div className="plans-section__intro plans-section__intro--center">
             <span className="plans-section__number">04</span>
             <div>
-              <div className="plans-kicker">PLANOS</div>
-              <h2>Escolha pelo seu volume de operação.</h2>
-              <p>Start para analisar compras. Pro para comprar e preparar a revenda. Max para quem usa o Radar com frequência maior.</p>
+              <div className="plans-kicker">ESCOLHA SEU RITMO DE BRIQUE</div>
+              <h2>Quanto custa evitar uma compra ruim?</h2>
+              <p>Uma negociação melhor pode valer mais que a mensalidade. O Pro é o plano central para quem compra e também prepara a revenda.</p>
             </div>
           </div>
 
@@ -545,6 +554,8 @@ export function PlansPage({email,onRefreshAccess}:{email?:string;onRefreshAccess
           <div className="operator-plans">
             {plans.map(plan=><PlanCard key={plan.slug} plan={plan} busy={busy} onChoose={setPaymentPlan}/>)}
           </div>
+
+          <div className="pro-spotlight"><div className="pro-spotlight__beam"/><div><Sparkles size={18}/><span>O PONTO CERTO PARA QUEM REVENDE</span><strong>Pro: da oferta no anúncio até o produto voltar à venda.</strong><p>120 análises por mês + diagnóstico premium + preparação da revenda com IA.</p></div><button onClick={()=>setPaymentPlan('pro')}>Quero o Pro <ArrowRight size={15}/></button></div>
 
           <div className="plans-pro-note">
             <div><Banknote size={20}/></div>
