@@ -270,8 +270,17 @@ export function PlansPage({email,onRefreshAccess}:{email?:string;onRefreshAccess
         await wait(attempt===0?1800:2500)
         const ok=await onRefreshAccess()
         if(ok){
-          try{checkoutWindow.close()}catch{}
-          try{window.focus()}catch{}
+          const returnUrl=window.location.origin+'/?checkout=retorno'
+          try{
+            if(checkoutWindow&&!checkoutWindow.closed){
+              checkoutWindow.location.href=returnUrl
+            }else{
+              window.focus()
+            }
+          }catch{
+            try{checkoutWindow?.close()}catch{}
+            try{window.focus()}catch{}
+          }
           return
         }
       }
