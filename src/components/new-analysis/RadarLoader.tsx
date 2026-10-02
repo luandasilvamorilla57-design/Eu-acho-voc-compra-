@@ -24,12 +24,16 @@ const stageMap={
   ],
 } as const
 
+const stageTargets=[24,49,74,94] as const
+
 export function RadarLoader({origem}:{origem:AdOrigin}){
   const [stage,setStage]=useState(0)
+  const [progress,setProgress]=useState(8)
   const stages=useMemo(()=>stageMap[origem],[origem])
 
   useEffect(()=>{
     setStage(0)
+    setProgress(8)
 
     const body=document.body
     const root=document.documentElement
@@ -42,7 +46,7 @@ export function RadarLoader({origem}:{origem:AdOrigin}){
     root.style.overflow='hidden'
 
     const timers=stages.slice(1).map((_,index)=>
-      window.setTimeout(()=>setStage(index+1),1450*(index+1))
+      window.setTimeout(()=>setStage(index+1),1500*(index+1))
     )
 
     return ()=>{
@@ -52,37 +56,74 @@ export function RadarLoader({origem}:{origem:AdOrigin}){
     }
   },[stages])
 
+  useEffect(()=>{
+    const target=stageTargets[stage]??94
+    const timer=window.setInterval(()=>{
+      setProgress(current=>{
+        if(current>=target)return current
+        const distance=target-current
+        return Math.min(target,current+(distance>12?2:1))
+      })
+    },85)
+    return ()=>window.clearInterval(timer)
+  },[stage])
+
   const current=stages[stage]
   const CurrentIcon=current[2]
 
-  const loader=<div className="radar-loader" role="status" aria-live="polite" aria-label="Análise em andamento">
-    <div className="radar-loader__backdrop"/>
+  const loader=<div className="radar-loader radar-loader--v3" role="status" aria-live="polite" aria-label="Análise em andamento">
+    <div className="radar-loader__backdrop" aria-hidden="true"/>
+    <div className="radar-loader__mesh" aria-hidden="true"/>
+    <div className="radar-loader__orb radar-loader__orb--one" aria-hidden="true"/>
+    <div className="radar-loader__orb radar-loader__orb--two" aria-hidden="true"/>
+
     <div className="radar-loader__panel">
-      <div className="radar-loader__brand">
-        <span className="radar-loader__brand-dot"/>
-        <span>BRIKE RADAR</span>
-        <small>ANÁLISE EM TEMPO REAL</small>
+      <header className="radar-loader__brand">
+        <div className="radar-loader__brand-mark"><Radar size={15}/></div>
+        <div className="radar-loader__brand-copy">
+          <strong>BRIKE RADAR</strong>
+          <span>ANÁLISE EM TEMPO REAL</span>
+        </div>
+        <div className="radar-loader__online"><i/> ONLINE</div>
+      </header>
+
+      <div className="radar-loader__hero">
+        <div className="radar-loader__visual" aria-hidden="true">
+          <div className="radar-loader__glow"/>
+          <div className="radar-loader__circle radar-loader__circle--1"/>
+          <div className="radar-loader__circle radar-loader__circle--2"/>
+          <div className="radar-loader__circle radar-loader__circle--3"/>
+          <div className="radar-loader__cross radar-loader__cross--h"/>
+          <div className="radar-loader__cross radar-loader__cross--v"/>
+          <div className="radar-loader__sweep"/>
+          <span className="radar-loader__ping radar-loader__ping--1"/>
+          <span className="radar-loader__ping radar-loader__ping--2"/>
+          <span className="radar-loader__ping radar-loader__ping--3"/>
+          <div className="radar-loader__core"><CurrentIcon size={28}/><i/></div>
+        </div>
+
+        <div className="radar-loader__copy">
+          <div className="radar-loader__eyebrow"><Sparkles size={13}/> RADAR TRABALHANDO</div>
+          <h3>{current[0]}</h3>
+          <p>{current[1]}</p>
+        </div>
       </div>
 
-      <div className="radar-loader__visual" aria-hidden="true">
-        <div className="radar-loader__glow"/>
-        <div className="radar-loader__circle radar-loader__circle--1"/>
-        <div className="radar-loader__circle radar-loader__circle--2"/>
-        <div className="radar-loader__circle radar-loader__circle--3"/>
-        <div className="radar-loader__cross radar-loader__cross--h"/>
-        <div className="radar-loader__cross radar-loader__cross--v"/>
-        <div className="radar-loader__sweep"/>
-        <span className="radar-loader__ping radar-loader__ping--1"/>
-        <span className="radar-loader__ping radar-loader__ping--2"/>
-        <span className="radar-loader__ping radar-loader__ping--3"/>
-        <div className="radar-loader__core"><Radar size={26}/></div>
-      </div>
-
-      <div className="radar-loader__copy">
-        <div className="radar-loader__eyebrow"><Sparkles size={13}/> RADAR TRABALHANDO</div>
-        <h3>{current[0]}</h3>
-        <p>{current[1]}</p>
-      </div>
+      <section className="radar-loader__progress" aria-label="Progresso estimado da análise">
+        <div className="radar-loader__progress-head">
+          <span>PROGRESSO DA ANÁLISE</span>
+          <strong>{progress}<small>%</small></strong>
+        </div>
+        <div className="radar-loader__track" role="progressbar" aria-valuemin={0} aria-valuemax={100} aria-valuenow={progress}>
+          <div className="radar-loader__fill" style={{width:`${progress}%`}}>
+            <i/>
+          </div>
+        </div>
+        <div className="radar-loader__progress-foot">
+          <span>Processando dados do anúncio</span>
+          <span>{stage+1} de {stages.length} etapas</span>
+        </div>
+      </section>
 
       <div className="radar-loader__stages">
         {stages.map(([title,,Icon],index)=>{
@@ -90,16 +131,21 @@ export function RadarLoader({origem}:{origem:AdOrigin}){
           const active=index===stage
           return <div key={title} className={`radar-loader__stage ${done?'is-done':''} ${active?'is-active':''}`}>
             <span className="radar-loader__stage-icon">
-              {done?<CheckCircle2 size={14}/>:<Icon size={14}/>}
+              {done?<CheckCircle2 size={15}/>:<Icon size={15}/>}
             </span>
-            <span>{title}</span>
+            <span className="radar-loader__stage-copy">
+              <small>{String(index+1).padStart(2,'0')}</small>
+              <b>{title}</b>
+            </span>
+            <span className="radar-loader__stage-state">{done?'CONCLUÍDO':active?'AGORA':'AGUARDANDO'}</span>
           </div>
         })}
       </div>
 
-      <div className="radar-loader__signal">
-        <span/><span/><span/><span/><span/>
-      </div>
+      <footer className="radar-loader__footer">
+        <div className="radar-loader__signal" aria-hidden="true"><span/><span/><span/><span/><span/></div>
+        <p>O Radar está cruzando as informações para montar uma leitura mais segura da oportunidade.</p>
+      </footer>
     </div>
   </div>
 
