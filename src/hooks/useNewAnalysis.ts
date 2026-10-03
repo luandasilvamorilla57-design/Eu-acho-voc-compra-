@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { supabase } from '../lib/supabase'
 import type { AnalysisResult } from '../types/analysis'
-import type { PipelineStatus,RadarDecision } from '../types/database'
+import type { PipelineStatus,RadarConfigRow,RadarDecision } from '../types/database'
 import type { AdOrigin } from '../components/new-analysis/AnalysisForm'
 import type { MarketReferenceInput } from '../types/market'
 import { prepareScreenshots, revokePreviews, type PreparedImage, MAX_IMAGES } from '../utils/imageInput'
@@ -46,7 +46,7 @@ async function uploadAnalysisImages(analysisId:string,images:PreparedImage[]){
   }
 }
 
-export function useNewAnalysis(onSaved:(destination:'dashboard'|'history')=>void,userProfile='',onUsageChanged?:()=>void|Promise<unknown>,focus:BriqueOpportunity|null=null){
+export function useNewAnalysis(onSaved:(destination:'dashboard'|'history')=>void,userProfile='',onUsageChanged?:()=>void|Promise<unknown>,focus:BriqueOpportunity|null=null,config?:RadarConfigRow){
   const [origem,setOrigemState]=useState<AdOrigin>('olx')
   const [link,setLink]=useState('')
   const [texto,setTexto]=useState('')
@@ -117,6 +117,14 @@ export function useNewAnalysis(onSaved:(destination:'dashboard'|'history')=>void
           imagens:origem==='facebook'?images.map(({mime_type,data,name})=>({mime_type,data,name})):[],
           referencias_mercado:refs,
           perfil_usuario:userProfile,
+          criterios_usuario:config?{
+            capital_disponivel:config.capital_disponivel,
+            lucro_minimo_modo:config.lucro_minimo_modo,
+            lucro_minimo:config.lucro_minimo,
+            lucro_minimo_percentual:config.lucro_minimo_percentual,
+            roi_minimo:config.roi_minimo,
+            giro_preferido:config.giro_preferido
+          }:null,
           contexto_garimpo:focus?{
             produto:focus.title,
             categoria:focus.kind,

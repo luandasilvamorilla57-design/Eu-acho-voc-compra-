@@ -3,8 +3,10 @@ import type { PurchaseRow,RadarConfigRow } from '../types/database'
 import { AnalysisHero } from './analysis/AnalysisHero'
 import { OpportunityThermometer } from './analysis/OpportunityThermometer'
 import { AnalysisMetrics } from './analysis/AnalysisMetrics'
+import { ProductForensics } from './analysis/ProductForensics'
 import { RadarVerdictCard,type VerdictAction } from './analysis/RadarVerdictCard'
 import { ProfitTargetCard } from './analysis/ProfitTargetCard'
+import { ResaleBlueprint } from './analysis/ResaleBlueprint'
 import { ConfidencePanel } from './analysis/ConfidencePanel'
 import { HistoricalBenchmark } from './analysis/HistoricalBenchmark'
 import { MarketPanel } from './analysis/MarketPanel'
@@ -16,11 +18,13 @@ export function AnalysisView({a,onDecision,decisionBusy,config,purchases=[]}:{a:
     <AnalysisHero a={a}/>
     <OpportunityThermometer a={a}/>
     <AnalysisMetrics a={a}/>
+    <ProductForensics a={a}/>
     <RadarVerdictCard a={a} onAction={onDecision} busy={decisionBusy} config={config}/>
     <ProfitTargetCard a={a}/>
+    <ResaleBlueprint a={a}/>
+    <MarketPanel a={a}/>
     <ConfidencePanel a={a}/>
     <HistoricalBenchmark a={a} purchases={purchases}/>
-    <MarketPanel a={a}/>
     <RiskNegotiation a={a}/>
     <ChecklistSources a={a}/>
   </div>
