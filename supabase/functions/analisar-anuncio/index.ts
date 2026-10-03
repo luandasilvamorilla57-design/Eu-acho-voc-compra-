@@ -44,6 +44,61 @@ function trafficBucket(requestId:string){
   const value=parseInt(hex,16)
   return Number.isFinite(value)?value%100:0
 }
+function normalizeAnalysis(ai:any){
+  const market=ai?.mercado||{}
+  const prices=ai?.precos||{}
+  const risks=Array.isArray(ai?.riscos)?ai.riscos:[]
+  const strategies=Array.isArray(ai?.estrategias_negociacao)?ai.estrategias_negociacao:[]
+  const checklist=Array.isArray(ai?.checklist_antes_compra)?ai.checklist_antes_compra:[]
+  const fraud=Array.isArray(ai?.alertas_fraude)?ai.alertas_fraude:[]
+  const missing=Array.isArray(ai?.dados_faltantes)?ai.dados_faltantes:[]
+  return {
+    ...ai,
+    produto:String(ai?.produto||'Produto não identificado'),
+    marca:String(ai?.marca||''),
+    modelo:String(ai?.modelo||''),
+    categoria:String(ai?.categoria||'Outros'),
+    condicao_estimada:String(ai?.condicao_estimada||'Não confirmada'),
+    resumo:String(ai?.resumo||'Análise baseada nas informações disponíveis.'),
+    pontos_fortes:Array.isArray(ai?.pontos_fortes)?ai.pontos_fortes:[],
+    pontos_fracos:Array.isArray(ai?.pontos_fracos)?ai.pontos_fracos:[],
+    confianca_geral:num(ai?.confianca_geral),
+    confianca_identificacao:num(ai?.confianca_identificacao),
+    confianca_preco:num(ai?.confianca_preco),
+    dados_faltantes:missing,
+    mercado:{
+      preco_min:num(market.preco_min),
+      preco_mediano:num(market.preco_mediano),
+      preco_max:num(market.preco_max),
+      demanda:String(market.demanda||'media'),
+      liquidez_score:num(market.liquidez_score),
+      justificativa:String(market.justificativa||'Faixa estimada com os dados disponíveis.'),
+      base_preco:market.base_preco,
+      amostra_util:market.amostra_util,
+      observacao_amostra:market.observacao_amostra,
+      referencias:Array.isArray(market.referencias)?market.referencias:[]
+    },
+    precos:{
+      preco_anunciado:num(prices.preco_anunciado),
+      oferta_agressiva:num(prices.oferta_agressiva),
+      oferta_equilibrada:num(prices.oferta_equilibrada),
+      teto_compra:num(prices.teto_compra),
+      revenda_conservadora:num(prices.revenda_conservadora),
+      revenda_provavel:num(prices.revenda_provavel),
+      revenda_otimista:num(prices.revenda_otimista),
+      custos_estimados:num(prices.custos_estimados)
+    },
+    risco_score:num(ai?.risco_score),
+    negociabilidade_score:num(ai?.negociabilidade_score),
+    riscos:risks,
+    estrategias_negociacao:strategies,
+    mensagens_prontas:ai?.mensagens_prontas||{primeiro_contato:'',contraproposta:'',fechamento:'',pos_visita:''},
+    checklist_antes_compra:checklist,
+    alertas_fraude:fraud,
+    observacoes:String(ai?.observacoes||'')
+  }
+}
+
 function choosePrimary(_requestId:string,_origem:string,_imageCount:number,geminiReady:boolean,groqReady:boolean):Provider{
   if(geminiReady)return 'gemini'
   if(groqReady)return 'groq'
@@ -168,11 +223,12 @@ Deno.serve(async req=>{
 
     const {raw,ai,model}=aiResult
     const provider:Provider=aiResult.provider==='groq'?'groq':'gemini'
+    const normalizedBase=normalizeAnalysis(ai)
     const fallback=providerChain.length>1
     const grounding=provider==='gemini'?searchGrounding(raw):{queries:[],count:0}
-    const concreteRefs=Array.isArray(ai?.mercado?.referencias)?ai.mercado.referencias.filter((r:any)=>['google_search','url_context','usuario'].includes(String(r?.fonte))&&num(r?.preco)>0).length:0
+    const concreteRefs=Array.isArray(normalizedBase?.mercado?.referencias)?normalizedBase.mercado.referencias.filter((r:any)=>['google_search','url_context','usuario'].includes(String(r?.fonte))&&num(r?.preco)>0).length:0
     const confidenceCap=(grounding.count>0||concreteRefs>=3)?100:60
-    const normalizedAi={...ai,confianca_preco:Math.min(confidenceCap,Math.max(0,num(ai?.confianca_preco)))}
+    const normalizedAi={...normalizedBase,confianca_preco:Math.min(confidenceCap,Math.max(0,num(normalizedBase?.confianca_preco)))}
     const c=calculate(normalizedAi,preco)
 
     if(modo==='anuncio'&&origem==='facebook'&&(!ai?.produto||String(ai.produto).toLowerCase().includes('não identificado'))){

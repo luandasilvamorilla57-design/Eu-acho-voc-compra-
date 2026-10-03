@@ -9,6 +9,33 @@ const MODEL='qwen/qwen3.8-27b'
 const MAX_GROQ_IMAGES=3
 const TIMEOUT_MS=22000
 
+const fallbackSchema={
+  type:'object',
+  properties:{
+    produto:{type:'string'},marca:{type:'string'},modelo:{type:'string'},categoria:{type:'string'},condicao_estimada:{type:'string'},resumo:{type:'string'},
+    confianca_geral:{type:'number'},confianca_identificacao:{type:'number'},confianca_preco:{type:'number'},
+    dados_faltantes:{type:'array',maxItems:2,items:{type:'string'}},
+    mercado:{type:'object',properties:{
+      preco_min:{type:'number'},preco_mediano:{type:'number'},preco_max:{type:'number'},demanda:{type:'string'},liquidez_score:{type:'number'},justificativa:{type:'string'}
+    },required:['preco_min','preco_mediano','preco_max','demanda','liquidez_score','justificativa']},
+    precos:{type:'object',properties:{
+      preco_anunciado:{type:'number'},oferta_agressiva:{type:'number'},oferta_equilibrada:{type:'number'},teto_compra:{type:'number'},
+      revenda_conservadora:{type:'number'},revenda_provavel:{type:'number'},revenda_otimista:{type:'number'},custos_estimados:{type:'number'}
+    },required:['preco_anunciado','oferta_agressiva','oferta_equilibrada','teto_compra','revenda_conservadora','revenda_provavel','revenda_otimista','custos_estimados']},
+    risco_score:{type:'number'},negociabilidade_score:{type:'number'},
+    riscos:{type:'array',maxItems:2,items:{type:'object',properties:{
+      titulo:{type:'string'},nivel:{type:'string'},detalhe:{type:'string'},como_verificar:{type:'string'},impacto_financeiro_estimado:{type:'number'}
+    },required:['titulo','nivel','detalhe','como_verificar','impacto_financeiro_estimado']}},
+    estrategias_negociacao:{type:'array',maxItems:2,items:{type:'object',properties:{
+      nome:{type:'string'},quando_usar:{type:'string'},valor_sugerido:{type:'number'},mensagem:{type:'string'}
+    },required:['nome','quando_usar','valor_sugerido','mensagem']}},
+    checklist_antes_compra:{type:'array',maxItems:3,items:{type:'string'}},
+    alertas_fraude:{type:'array',maxItems:2,items:{type:'string'}}
+  },
+  required:['produto','marca','modelo','categoria','condicao_estimada','resumo','confianca_geral','confianca_identificacao','confianca_preco','dados_faltantes','mercado','precos','risco_score','negociabilidade_score','riscos','estrategias_negociacao','checklist_antes_compra','alertas_fraude']
+}
+
+
 function makeProviderError(message:string,status=500,retryable=true){
   const error:any=new Error(message)
   error.status=status
@@ -40,13 +67,13 @@ async function callGroq(key:string,messages:any[]){
         temperature:0.2,
         top_p:0.8,
         reasoning_effort:'none',
-        max_completion_tokens:5200,
+        max_completion_tokens:900,
         response_format:{
           type:'json_schema',
           json_schema:{
             name:'brique_radar_analysis',
             strict:false,
-            schema
+            schema:fallbackSchema
           }
         }
       })
@@ -84,6 +111,7 @@ REGRAS DESTE PROVEDOR:
 - Para OLX, trate o link apenas como referência textual quando o conteúdo não estiver presente no texto.
 - Para Facebook, use somente os prints anexados e o texto fornecido.
 - Se faltarem dados por limitação da fonte, reduza a confiança e preencha dados_faltantes. Sem pelo menos 3 referências concretas fornecidas pelo usuário, limite confianca_preco a 60.
+- MODO CONTINGÊNCIA: seja extremamente conciso. No máximo 2 riscos, 2 estratégias, 3 itens de checklist e 2 dados faltantes. Não repita explicações.
 - Responda somente no JSON exigido pelo schema.`
 
   const content:any[]=[{type:'text',text:prompt}]
