@@ -47,6 +47,14 @@ export default function App(){
   const {items,load,updateStatus,resolveNegotiation,addNegotiationLog,reinspect}=useAnalyses(appDataActive)
   const {items:purchases,load:loadPurchases,createPurchase,markSold,updatePurchase,uploadPhotos,removePhoto}=usePurchases(appDataActive)
   const {items:drafts,saveGenerated:saveResaleDraft,updateCopy:updateResaleDraftCopy,setSaleOutcome:setResaleSaleOutcome,remove:removeResaleDraft}=useResaleDrafts(appDataActive)
+  const [bootStalled,setBootStalled]=useState(false)
+
+  useEffect(()=>{
+    const waiting=!ready || (!!session&&!reset&&(configLoading||!configChecked||!planChecked))
+    if(!waiting){setBootStalled(false);return}
+    const timer=window.setTimeout(()=>setBootStalled(true),10000)
+    return()=>window.clearTimeout(timer)
+  },[ready,session,reset,configLoading,configChecked,planChecked])
 
   const alerts=useMemo(()=>buildRadarAlerts(items,purchases,config),[items,purchases,config])
   const intelligence=useMemo(()=>buildUserIntelligence(purchases,items),[purchases,items])
@@ -93,9 +101,9 @@ export default function App(){
     })()
   },[alerts,config.notificacoes_ativas,hasAccess])
 
-  if(!ready)return <div className="grid min-h-screen place-items-center bg-[#06101c] text-xs text-slate-600">Carregando radar...</div>
+  if(!ready)return bootStalled?<BootRecovery/>:<div className="grid min-h-screen place-items-center bg-[#06101c] text-xs text-slate-600">Carregando radar...</div>
   if(!session||reset)return <AuthPage initialMode={reset?'reset':'login'}/>
-  if(configLoading||!configChecked||!planChecked)return <div className="grid min-h-screen place-items-center bg-[#06101c] text-xs text-slate-500">Validando seu acesso com segurança...</div>
+  if(configLoading||!configChecked||!planChecked)return bootStalled?<BootRecovery/>:<div className="grid min-h-screen place-items-center bg-[#06101c] text-xs text-slate-500">Validando seu acesso com segurança...</div>
   if(configError||!config.user_id)return <div className="grid min-h-screen place-items-center bg-[#06101c] px-5 text-slate-300">
     <div className="w-full max-w-sm rounded-2xl border border-slate-800 bg-slate-950/70 p-5 text-center">
       <strong className="block text-sm text-white">Não conseguimos carregar sua conta agora.</strong>
@@ -122,4 +130,29 @@ export default function App(){
     {selectedDraft&&<SalePreparationModal purchases={purchases} analyses={items} initialDraft={selectedDraft} onClose={()=>setSelectedDraft(null)} onSaveDraft={async input=>{const row=await saveResaleDraft(input);setSelectedDraft(row);void refreshAccess({silent:true});return row}} onUpdateCopy={async(id,title,description)=>{await updateResaleDraftCopy(id,title,description);const latest=drafts.find(d=>d.id===id);if(latest)setSelectedDraft({...latest,titulo:title,descricao:description} as ResaleDraftRow)}}/>}
     <StatusEditor item={editing} onClose={()=>setEditing(null)} onSave={async(s,b,v)=>{const err=await updateStatus(editing!.id,s,b,v);if(!err)await loadPurchases()}}/>
   </AppShell>
+}
+
+
+function BootRecovery(){
+  const repair=async()=>{
+    try{
+      if('serviceWorker' in navigator){
+        const registrations=await navigator.serviceWorker.getRegistrations()
+        await Promise.all(registrations.map(registration=>registration.unregister()))
+      }
+      if('caches' in window){
+        const keys=await caches.keys()
+        await Promise.all(keys.filter(key=>key.startsWith('brike-radar-')).map(key=>caches.delete(key)))
+      }
+    }catch{}
+    window.location.reload()
+  }
+
+  return <div className="grid min-h-screen place-items-center bg-[#06101c] px-5 text-slate-300">
+    <div className="w-full max-w-sm rounded-2xl border border-slate-800 bg-slate-950/70 p-5 text-center">
+      <strong className="block text-sm text-white">O Radar demorou mais que o normal para iniciar.</strong>
+      <p className="mt-2 text-xs leading-5 text-slate-500">Seus dados estão no servidor. Este reparo limpa apenas o cache local do aplicativo e tenta carregar a versão atual novamente.</p>
+      <button onClick={()=>void repair()} className="mt-4 rounded-xl bg-emerald-400 px-4 py-2.5 text-xs font-bold text-slate-950">Reparar carregamento</button>
+    </div>
+  </div>
 }

@@ -1,4 +1,4 @@
-const CACHE='brike-radar-v7'
+const CACHE='brike-radar-v8'
 const SHELL=['/','/manifest.webmanifest','/brike-icon.svg','/brike-maskable.svg']
 
 self.addEventListener('install',event=>{
@@ -46,6 +46,27 @@ self.addEventListener('fetch',event=>{
         })
         .catch(async()=>{
           const cached=await caches.match('/')
+          return cached||Response.error()
+        })
+    )
+    return
+  }
+
+  // Vite generates versioned JS/CSS files. Prefer the current deployment and
+  // only use the cached copy as an offline fallback so an older worker cannot
+  // keep the app on stale startup code.
+  if(url.pathname.startsWith('/assets/')){
+    event.respondWith(
+      fetch(new Request(request,{cache:'no-store'}))
+        .then(response=>{
+          if(response.ok){
+            const copy=response.clone()
+            void caches.open(CACHE).then(cache=>cache.put(request,copy)).catch(()=>{})
+          }
+          return response
+        })
+        .catch(async()=>{
+          const cached=await caches.match(request)
           return cached||Response.error()
         })
     )
