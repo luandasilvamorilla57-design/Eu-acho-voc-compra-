@@ -2,7 +2,7 @@ import 'jsr:@supabase/functions-js/edge-runtime.d.ts'
 import { createClient } from 'npm:@supabase/supabase-js@2.57.4'
 import { askGemini } from './gemini.ts'
 import { askGroq } from './groq.ts'
-import { calculate,corsHeaders,num,sources } from './helpers.ts'
+import { calculate,corsHeaders,num,searchGrounding,sources } from './helpers.ts'
 
 type InputImage={mime_type:string;data:string;name?:string}
 type MarketRef={url?:string;price?:number;note?:string}
@@ -44,12 +44,10 @@ function trafficBucket(requestId:string){
   const value=parseInt(hex,16)
   return Number.isFinite(value)?value%100:0
 }
-function choosePrimary(requestId:string,origem:string,imageCount:number,geminiReady:boolean,groqReady:boolean):Provider{
-  if(geminiReady&&!groqReady)return 'gemini'
-  if(groqReady&&!geminiReady)return 'groq'
-  if(origem==='olx')return 'gemini'
-  if(imageCount>3)return 'gemini'
-  return trafficBucket(requestId)<25?'groq':'gemini'
+function choosePrimary(_requestId:string,_origem:string,_imageCount:number,geminiReady:boolean,groqReady:boolean):Provider{
+  if(geminiReady)return 'gemini'
+  if(groqReady)return 'groq'
+  return 'gemini'
 }
 
 Deno.serve(async req=>{
@@ -85,6 +83,7 @@ Deno.serve(async req=>{
     const contextoAnterior=b.contexto_anterior??null
     const perfilUsuario=typeof b.perfil_usuario==='string'?b.perfil_usuario.trim().slice(0,6000):''
     const contextoGarimpo=b.contexto_garimpo&&typeof b.contexto_garimpo==='object'?JSON.stringify(b.contexto_garimpo).slice(0,6000):''
+    const criteriosUsuario=b.criterios_usuario&&typeof b.criterios_usuario==='object'?JSON.stringify(b.criterios_usuario).slice(0,3000):''
     const referencias:Array<MarketRef>=Array.isArray(b.referencias_mercado)?b.referencias_mercado.slice(0,5).map((r:any)=>({
       url:typeof r?.url==='string'?r.url.trim():'',
       price:Math.max(0,num(r?.price)),
@@ -150,8 +149,8 @@ Deno.serve(async req=>{
         providerChain.push(provider)
         console.log('AI_PROVIDER_ATTEMPT',JSON.stringify({requestId,provider}))
         aiResult=provider==='gemini'
-          ? await askGemini(geminiKey,origem,link,texto,preco,imagens,modo,contextoAnterior,inspecaoNotas,referencias,perfilUsuario,contextoGarimpo)
-          : await askGroq(groqKey,origem,link,texto,preco,imagens,modo,contextoAnterior,inspecaoNotas,referencias,perfilUsuario,contextoGarimpo)
+          ? await askGemini(geminiKey,origem,link,texto,preco,imagens,modo,contextoAnterior,inspecaoNotas,referencias,perfilUsuario,contextoGarimpo,criteriosUsuario)
+          : await askGroq(groqKey,origem,link,texto,preco,imagens,modo,contextoAnterior,inspecaoNotas,referencias,perfilUsuario,contextoGarimpo,criteriosUsuario)
         providerOk(provider)
         console.log('AI_PROVIDER_OK',JSON.stringify({requestId,provider,model:aiResult.model}))
         break
@@ -171,7 +170,11 @@ Deno.serve(async req=>{
     const {raw,ai,model}=aiResult
     const provider:Provider=aiResult.provider==='groq'?'groq':'gemini'
     const fallback=providerChain.length>1
-    const c=calculate(ai,preco)
+    const grounding=provider==='gemini'?searchGrounding(raw):{queries:[],count:0}
+    const concreteRefs=Array.isArray(ai?.mercado?.referencias)?ai.mercado.referencias.filter((r:any)=>['google_search','url_context','usuario'].includes(String(r?.fonte))&&num(r?.preco)>0).length:0
+    const confidenceCap=(grounding.count>0||concreteRefs>=3)?100:60
+    const normalizedAi={...ai,confianca_preco:Math.min(confidenceCap,Math.max(0,num(ai?.confianca_preco)))}
+    const c=calculate(normalizedAi,preco)
 
     if(modo==='anuncio'&&origem==='facebook'&&(!ai?.produto||String(ai.produto).toLowerCase().includes('não identificado'))){
       if(usageReserved)await admin.rpc('finalizar_uso_radar',{p_request_id:requestId,p_success:false,p_error:'produto_nao_identificado'})
@@ -179,7 +182,7 @@ Deno.serve(async req=>{
       return Response.json({error:'Não consegui identificar o produto com segurança nesses prints. Envie prints mais completos.',request_id:requestId},{status:422,headers:cors})
     }
 
-    const analysis={...ai,precos:{...ai.precos,preco_anunciado:c.asking},calculado:{...c.calculated,classificacao:c.classification},fontes_verificadas:provider==='gemini'?sources(raw):[],meta:{modelo:model,provedor:provider,cadeia_provedores:providerChain,fallback_automatico:fallback,origem,analisado_em:new Date().toISOString(),aviso:modo==='inspecao'?'Reavaliação baseada nas informações pós-visita.':'Confirme funcionamento, procedência e valores antes de comprar.'}}
+    const analysis={...normalizedAi,precos:{...normalizedAi.precos,preco_anunciado:c.asking},calculado:{...c.calculated,classificacao:c.classification},fontes_verificadas:provider==='gemini'?sources(raw):[],meta:{modelo:model,provedor:provider,cadeia_provedores:providerChain,fallback_automatico:fallback,origem,pesquisa_web:grounding.count>0,consultas_mercado:grounding.count,consultas_web:grounding.queries,analisado_em:new Date().toISOString(),aviso:modo==='inspecao'?'Reavaliação baseada nas informações pós-visita e no mercado atual.':'Preços são estimativas baseadas em anúncios comparáveis de usados; confirme produto e funcionamento antes de comprar.'}}
     if(usageReserved){
       await admin.rpc('finalizar_uso_radar',{p_request_id:requestId,p_success:true,p_error:null})
       usageReserved=false

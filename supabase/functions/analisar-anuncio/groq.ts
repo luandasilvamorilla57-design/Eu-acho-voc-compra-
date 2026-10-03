@@ -68,22 +68,22 @@ async function callGroq(key:string,messages:any[]){
 
 export async function askGroq(
   key:string,origem:string,link:string,texto:string,preco:number,imagens:InputImage[],
-  modo='anuncio',contextoAnterior:any=null,inspecaoNotas='',referencias:MarketRef[]=[],perfilUsuario='',contextoGarimpo=''
+  modo='anuncio',contextoAnterior:any=null,inspecaoNotas='',referencias:MarketRef[]=[],perfilUsuario='',contextoGarimpo='',criteriosUsuario=''
 ):Promise<GroqResult>{
   const selectedImages=sampleImages(imagens)
   const context=contextoAnterior?JSON.stringify(contextoAnterior).slice(0,24000):''
   const refs=JSON.stringify(referencias.slice(0,5)).slice(0,8000)
   const prompt=buildPrompt(
     origem,link,texto,preco,selectedImages.length,modo,context,inspecaoNotas,refs,
-    perfilUsuario.slice(0,5000),contextoGarimpo.slice(0,5000)
+    perfilUsuario.slice(0,5000),contextoGarimpo.slice(0,5000),criteriosUsuario.slice(0,3000)
   )+`
 
 REGRAS DESTE PROVEDOR:
-- Você NÃO possui URL Context nem navegador nesta execução.
+- Você NÃO possui URL Context, Google Search nem navegador nesta execução.
 - Não diga que abriu, leu ou verificou qualquer URL.
 - Para OLX, trate o link apenas como referência textual quando o conteúdo não estiver presente no texto.
 - Para Facebook, use somente os prints anexados e o texto fornecido.
-- Se faltarem dados por limitação da fonte, reduza a confiança e preencha dados_faltantes.
+- Se faltarem dados por limitação da fonte, reduza a confiança e preencha dados_faltantes. Sem pelo menos 3 referências concretas fornecidas pelo usuário, limite confianca_preco a 60.
 - Responda somente no JSON exigido pelo schema.`
 
   const content:any[]=[{type:'text',text:prompt}]

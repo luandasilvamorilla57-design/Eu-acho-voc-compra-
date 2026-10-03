@@ -1,9 +1,10 @@
-import { market,negotiation,prices,risks } from './schemaParts.ts'
+import { market,negotiation,prices,productDiagnosis,resalePlan,risks } from './schemaParts.ts'
 const textArray={type:'array',items:{type:'string'}}
 const messages={type:'object',properties:{primeiro_contato:{type:'string'},contraproposta:{type:'string'},fechamento:{type:'string'},pos_visita:{type:'string'}},required:['primeiro_contato','contraproposta','fechamento','pos_visita']}
 export const schema={type:'object',properties:{
   produto:{type:'string'},marca:{type:'string'},modelo:{type:'string'},categoria:{type:'string'},condicao_estimada:{type:'string'},resumo:{type:'string'},
   pontos_fortes:textArray,pontos_fracos:textArray,confianca_geral:{type:'number'},confianca_identificacao:{type:'number'},confianca_preco:{type:'number'},dados_faltantes:textArray,
-  mercado:market,precos:prices,risco_score:{type:'number'},negociabilidade_score:{type:'number'},riscos:risks,estrategias_negociacao:negotiation,mensagens_prontas:messages,
+  diagnostico_produto:productDiagnosis,mercado:market,precos:prices,revenda:resalePlan,
+  risco_score:{type:'number'},negociabilidade_score:{type:'number'},riscos:risks,estrategias_negociacao:negotiation,mensagens_prontas:messages,
   checklist_antes_compra:textArray,alertas_fraude:textArray,observacoes:{type:'string'}
-},required:['produto','marca','modelo','categoria','condicao_estimada','resumo','pontos_fortes','pontos_fracos','confianca_geral','confianca_identificacao','confianca_preco','dados_faltantes','mercado','precos','risco_score','negociabilidade_score','riscos','estrategias_negociacao','mensagens_prontas','checklist_antes_compra','alertas_fraude','observacoes']}
+},required:['produto','marca','modelo','categoria','condicao_estimada','resumo','pontos_fortes','pontos_fracos','confianca_geral','confianca_identificacao','confianca_preco','dados_faltantes','diagnostico_produto','mercado','precos','revenda','risco_score','negociabilidade_score','riscos','estrategias_negociacao','mensagens_prontas','checklist_antes_compra','alertas_fraude','observacoes']}
