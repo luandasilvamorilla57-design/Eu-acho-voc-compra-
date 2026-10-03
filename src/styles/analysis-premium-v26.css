@@ -17,3 +17,75 @@
 .theme-light .product-forensics,.theme-light .resale-blueprint{background:linear-gradient(145deg,#fff,#f2f8f7);border-color:rgba(16,185,129,.16)}.theme-light .product-forensics__head h3,.theme-light .resale-blueprint__head h3,.theme-light .resale-blueprint__money-card strong{color:#17313f}.theme-light .product-forensics__list,.theme-light .resale-blueprint__block,.theme-light .resale-blueprint__money-card{background:#eef5f4}.theme-light .product-forensics__condition{background:#eef4f8}
 @media(max-width:700px){.product-forensics,.resale-blueprint{border-radius:23px;padding:16px}.product-forensics__head h3,.resale-blueprint__head h3{font-size:19px}.product-forensics__confidence{padding:9px 10px}.product-forensics__grid{grid-template-columns:1fr}.resale-blueprint__money{grid-template-columns:1fr}.resale-blueprint__arrow{justify-self:center}.resale-blueprint__money-card{grid-template-columns:34px minmax(0,1fr)}.resale-blueprint__money-card>span{width:34px;height:34px}.resale-blueprint__columns{grid-template-columns:1fr}.resale-blueprint__listing>div{grid-template-columns:1fr}.market-panel-premium__head{align-items:flex-start}.market-grounding{font-size:8px}.operation-target-result{min-width:0}}
 @media(max-width:390px){.product-forensics__head,.resale-blueprint__head{gap:9px}.product-forensics__confidence{grid-template-columns:auto}.product-forensics__confidence span{grid-column:1}.resale-blueprint__spark{width:40px;height:40px}.market-grounding{max-width:110px;text-align:center;white-space:normal}}
+
+/* Persistent negotiation entry — keep the assistant visible from Analyze */
+.analysis-negotiation-entry{
+  display:grid;
+  grid-template-columns:44px minmax(0,1fr) auto;
+  gap:12px;
+  align-items:center;
+  margin:14px 0;
+  min-width:0;
+  border:1px solid rgba(89,228,193,.14);
+  border-radius:20px;
+  background:linear-gradient(135deg,rgba(17,48,56,.72),rgba(7,23,35,.82));
+  padding:13px 14px;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.025);
+}
+.analysis-negotiation-entry__icon{
+  display:grid;
+  width:44px;height:44px;
+  place-items:center;
+  border-radius:14px;
+  background:rgba(89,228,193,.09);
+  color:#5eead4;
+}
+.analysis-negotiation-entry__copy{display:grid;min-width:0}
+.analysis-negotiation-entry__copy>span{
+  font:850 8.5px/1.2 Manrope,sans-serif;
+  letter-spacing:.14em;
+  color:#58dcb9;
+}
+.analysis-negotiation-entry__copy>strong{
+  margin-top:4px;
+  font:800 13px/1.3 Manrope,sans-serif;
+  color:#e6f0f4;
+}
+.analysis-negotiation-entry__copy>p{
+  margin-top:4px;
+  font-size:10px;
+  line-height:1.5;
+  color:#657b8d;
+}
+.analysis-negotiation-entry>button{
+  display:flex;
+  min-height:42px;
+  align-items:center;
+  justify-content:center;
+  gap:6px;
+  border:1px solid rgba(89,228,193,.14);
+  border-radius:13px;
+  background:linear-gradient(105deg,#47d8b3,#3dc8d7);
+  padding:0 13px;
+  font-size:10.5px;
+  font-weight:850;
+  color:#05231e;
+  white-space:nowrap;
+}
+.theme-light .analysis-negotiation-entry{background:#fff;border-color:rgba(16,185,129,.16)}
+.theme-light .analysis-negotiation-entry__copy>strong{color:#17313f}
+@media(max-width:700px){
+  .analysis-negotiation-entry{
+    grid-template-columns:40px minmax(0,1fr);
+    gap:10px;
+    border-radius:18px;
+    padding:12px;
+  }
+  .analysis-negotiation-entry__icon{width:40px;height:40px;border-radius:12px}
+  .analysis-negotiation-entry>button{
+    grid-column:1/-1;
+    width:100%;
+    min-height:46px;
+    font-size:11.5px;
+  }
+}
