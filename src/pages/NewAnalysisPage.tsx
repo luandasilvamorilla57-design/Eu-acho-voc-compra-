@@ -10,13 +10,13 @@ import type { PurchaseRow,RadarConfigRow } from '../types/database'
 import type { BriqueOpportunity } from '../data/briqueCatalog'
 
 export function NewAnalysisPage({onSaved,onNegotiate,config,userProfile,purchases,onUsageChanged,focus}:{onSaved:(destination:'dashboard'|'history')=>void;onNegotiate:(prefill:NegotiationPrefill)=>void;config:RadarConfigRow;userProfile:string;purchases:PurchaseRow[];onUsageChanged:()=>Promise<boolean>;focus?:BriqueOpportunity|null}){
-  const a=useNewAnalysis(onSaved,userProfile,onUsageChanged,focus||null,config)
+  const a=useNewAnalysis(onSaved,userProfile,onUsageChanged,focus||null)
   const resultRef=useRef<HTMLDivElement|null>(null)
   useEffect(()=>{if(!a.result)return;const timer=window.setTimeout(()=>resultRef.current?.scrollIntoView({behavior:'smooth',block:'start'}),180);return()=>window.clearTimeout(timer)},[a.result])
 
   const decide=async(action:VerdictAction)=>{
     if(!a.result)return
-    const verdict=getRadarVerdict(a.result,config)
+    const verdict=getRadarVerdict(a.result)
     if(action==='negotiate'){
       const analysisId=await a.save('aguardando_negociacao','compensa','history','negotiate',false)
       if(!analysisId)return

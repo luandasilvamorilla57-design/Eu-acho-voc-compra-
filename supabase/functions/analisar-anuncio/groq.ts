@@ -68,14 +68,14 @@ async function callGroq(key:string,messages:any[]){
 
 export async function askGroq(
   key:string,origem:string,link:string,texto:string,preco:number,imagens:InputImage[],
-  modo='anuncio',contextoAnterior:any=null,inspecaoNotas='',referencias:MarketRef[]=[],perfilUsuario='',contextoGarimpo='',criteriosUsuario=''
+  modo='anuncio',contextoAnterior:any=null,inspecaoNotas='',referencias:MarketRef[]=[],perfilUsuario='',contextoGarimpo=''
 ):Promise<GroqResult>{
   const selectedImages=sampleImages(imagens)
   const context=contextoAnterior?JSON.stringify(contextoAnterior).slice(0,24000):''
   const refs=JSON.stringify(referencias.slice(0,5)).slice(0,8000)
   const prompt=buildPrompt(
     origem,link,texto,preco,selectedImages.length,modo,context,inspecaoNotas,refs,
-    perfilUsuario.slice(0,5000),contextoGarimpo.slice(0,5000),criteriosUsuario.slice(0,3000)
+    perfilUsuario.slice(0,5000),contextoGarimpo.slice(0,5000)
   )+`
 
 REGRAS DESTE PROVEDOR:

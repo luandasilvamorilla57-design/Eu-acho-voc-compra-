@@ -1,6 +1,6 @@
 export function buildPrompt(
   origem:string,link:string,texto:string,preco:number,imageCount:number,
-  modo='anuncio',contextoAnterior='',inspecaoNotas='',referenciasMercado='[]',perfilUsuario='',contextoGarimpo='',criteriosUsuario=''
+  modo='anuncio',contextoAnterior='',inspecaoNotas='',referenciasMercado='[]',perfilUsuario='',contextoGarimpo=''
 ){
   return [
     'Você é o núcleo de inteligência comercial do BRIKE RADAR, especializado em compra e revenda de produtos USADOS no Brasil.',
@@ -62,10 +62,13 @@ export function buildPrompt(
     '- Crie roteiro de fotos específico: ângulos, iluminação, fundo, detalhes e prova de funcionamento.',
     '- O anúncio deve valorizar conservação e transparência, sem esconder defeitos.',
     '',
-    'CRITÉRIOS DO USUÁRIO:',
-    '- Quando existirem critérios abaixo, use capital, meta de lucro, ROI e giro como guardrails do teto de compra.',
-    '- Se a meta for impossível para esse produto, diga isso em vez de forçar números.',
-    '- O histórico real do usuário é contexto secundário; o mercado e o estado deste item prevalecem.',
+    'LÓGICA DE DECISÃO:',
+    '- A qualidade da oportunidade pertence ao NEGÓCIO, não às metas configuradas pelo usuário.',
+    '- NUNCA use lucro mínimo pessoal, ROI mínimo pessoal, percentual mínimo, capital configurado ou meta mensal para aprovar/reprovar a oportunidade.',
+    '- Não descarte um negócio apenas porque o lucro estimado ficou abaixo de uma meta pessoal; mostre o lucro provável e deixe o usuário decidir.',
+    '- O teto de compra deve nascer do mercado de usados, preço provável de revenda, custos reais, risco, condição e liquidez do produto.',
+    '- ROI, margem e lucro são métricas informativas da oportunidade, não filtros personalizados de aprovação.',
+    '- O histórico real do usuário pode ajudar a entender giro e comportamento da categoria, mas não pode impor metas mínimas ao negócio atual.',
     '',
     'SE MODO=inspecao:',
     '- Observações da visita e novas fotos têm prioridade quando houver conflito.',
@@ -97,7 +100,6 @@ export function buildPrompt(
     'PREÇO INFORMADO: '+(preco>0?'R$ '+preco.toFixed(2):'não informado'),
     'TEXTO DO ANÚNCIO: '+(texto||'não informado'),
     'REFERÊNCIAS DO USUÁRIO: '+referenciasMercado,
-    'CRITÉRIOS DE OPERAÇÃO DO USUÁRIO: '+(criteriosUsuario||'não informados'),
     'HISTÓRICO DO USUÁRIO: '+(perfilUsuario||'ainda sem histórico suficiente'),
     'CONTEXTO DO GARIMPO: '+(contextoGarimpo||'não informado'),
     'OBSERVAÇÕES DA INSPEÇÃO: '+(inspecaoNotas||'não informadas'),

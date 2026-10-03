@@ -19,7 +19,7 @@ export function AnalysisView({a,onDecision,decisionBusy,config,purchases=[]}:{a:
     <OpportunityThermometer a={a}/>
     <AnalysisMetrics a={a}/>
     <ProductForensics a={a}/>
-    <RadarVerdictCard a={a} onAction={onDecision} busy={decisionBusy} config={config}/>
+    <RadarVerdictCard a={a} onAction={onDecision} busy={decisionBusy}/>
     <ProfitTargetCard a={a}/>
     <ResaleBlueprint a={a}/>
     <MarketPanel a={a}/>

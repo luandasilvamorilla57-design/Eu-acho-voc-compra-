@@ -44,12 +44,12 @@ async function callModel(key:string,model:string,input:any[],responseFormat:any,
 
 export async function askGemini(
   key:string,origem:string,link:string,texto:string,preco:number,imagens:InputImage[],
-  modo='anuncio',contextoAnterior:any=null,inspecaoNotas='',referencias:MarketRef[]=[],perfilUsuario='',contextoGarimpo='',criteriosUsuario=''
+  modo='anuncio',contextoAnterior:any=null,inspecaoNotas='',referencias:MarketRef[]=[],perfilUsuario='',contextoGarimpo=''
 ):Promise<GeminiResult>{
   const responseFormat={type:'text',mime_type:'application/json',schema}
   const context=contextoAnterior?JSON.stringify(contextoAnterior).slice(0,24000):''
   const refs=JSON.stringify(referencias.slice(0,5)).slice(0,8000)
-  const input:any[]=[{type:'text',text:buildPrompt(origem,link,texto,preco,imagens.length,modo,context,inspecaoNotas,refs,perfilUsuario.slice(0,5000),contextoGarimpo.slice(0,5000),criteriosUsuario.slice(0,3000))}]
+  const input:any[]=[{type:'text',text:buildPrompt(origem,link,texto,preco,imagens.length,modo,context,inspecaoNotas,refs,perfilUsuario.slice(0,5000),contextoGarimpo.slice(0,5000))}]
   for(const image of imagens)input.push({type:'image',mime_type:image.mime_type,data:image.data})
   const hasReferenceUrl=referencias.some(r=>typeof r.url==='string'&&/^https?:\/\//i.test(r.url))
   const useUrlContext=(origem==='olx'&&!!link)||hasReferenceUrl

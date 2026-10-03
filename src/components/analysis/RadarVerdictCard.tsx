@@ -1,12 +1,11 @@
 import { AlertTriangle,ArrowRight,CheckCircle2,ShieldAlert,Target,XCircle } from 'lucide-react'
 import type { AnalysisResult } from '../../types/analysis'
-import type { RadarConfigRow } from '../../types/database'
 import { getRadarVerdict } from '../../utils/radarVerdict'
 
 export type VerdictAction='negotiate'|'discard'|'save'
 
-export function RadarVerdictCard({a,onAction,busy,config}:{a:AnalysisResult;onAction?:(action:VerdictAction)=>void;busy?:VerdictAction|null;config?:RadarConfigRow}){
-  const verdict=getRadarVerdict(a,config)
+export function RadarVerdictCard({a,onAction,busy}:{a:AnalysisResult;onAction?:(action:VerdictAction)=>void;busy?:VerdictAction|null}){
+  const verdict=getRadarVerdict(a)
   const good=verdict.kind==='compensa'
   return <section className={'radar-verdict '+(good?'radar-verdict--good':'radar-verdict--bad')}>
     <div className="radar-verdict__glow"/><div className="relative">

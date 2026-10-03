@@ -83,7 +83,6 @@ Deno.serve(async req=>{
     const contextoAnterior=b.contexto_anterior??null
     const perfilUsuario=typeof b.perfil_usuario==='string'?b.perfil_usuario.trim().slice(0,6000):''
     const contextoGarimpo=b.contexto_garimpo&&typeof b.contexto_garimpo==='object'?JSON.stringify(b.contexto_garimpo).slice(0,6000):''
-    const criteriosUsuario=b.criterios_usuario&&typeof b.criterios_usuario==='object'?JSON.stringify(b.criterios_usuario).slice(0,3000):''
     const referencias:Array<MarketRef>=Array.isArray(b.referencias_mercado)?b.referencias_mercado.slice(0,5).map((r:any)=>({
       url:typeof r?.url==='string'?r.url.trim():'',
       price:Math.max(0,num(r?.price)),
@@ -149,8 +148,8 @@ Deno.serve(async req=>{
         providerChain.push(provider)
         console.log('AI_PROVIDER_ATTEMPT',JSON.stringify({requestId,provider}))
         aiResult=provider==='gemini'
-          ? await askGemini(geminiKey,origem,link,texto,preco,imagens,modo,contextoAnterior,inspecaoNotas,referencias,perfilUsuario,contextoGarimpo,criteriosUsuario)
-          : await askGroq(groqKey,origem,link,texto,preco,imagens,modo,contextoAnterior,inspecaoNotas,referencias,perfilUsuario,contextoGarimpo,criteriosUsuario)
+          ? await askGemini(geminiKey,origem,link,texto,preco,imagens,modo,contextoAnterior,inspecaoNotas,referencias,perfilUsuario,contextoGarimpo)
+          : await askGroq(groqKey,origem,link,texto,preco,imagens,modo,contextoAnterior,inspecaoNotas,referencias,perfilUsuario,contextoGarimpo)
         providerOk(provider)
         console.log('AI_PROVIDER_OK',JSON.stringify({requestId,provider,model:aiResult.model}))
         break
