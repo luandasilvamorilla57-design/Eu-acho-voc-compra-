@@ -1,12 +1,9 @@
-import { schema } from './schema.ts'
-import { buildPrompt } from './prompt.ts'
-
 type InputImage={mime_type:string;data:string;name?:string}
 type MarketRef={url?:string;price?:number;note?:string}
 type GroqResult={raw:any;ai:any;model:string;fallback:boolean;provider:'groq';image_count:number}
 
 const MODEL='qwen/qwen3.8-27b'
-const MAX_GROQ_IMAGES=3
+const MAX_GROQ_IMAGES=1
 const TIMEOUT_MS=22000
 
 const fallbackSchema={
@@ -35,7 +32,6 @@ const fallbackSchema={
   required:['produto','marca','modelo','categoria','condicao_estimada','resumo','confianca_geral','confianca_identificacao','confianca_preco','dados_faltantes','mercado','precos','risco_score','negociabilidade_score','riscos','estrategias_negociacao','checklist_antes_compra','alertas_fraude']
 }
 
-
 function makeProviderError(message:string,status=500,retryable=true){
   const error:any=new Error(message)
   error.status=status
@@ -45,9 +41,80 @@ function makeProviderError(message:string,status=500,retryable=true){
 }
 
 function sampleImages(images:InputImage[]){
-  if(images.length<=MAX_GROQ_IMAGES)return images
-  const picks=[0,Math.floor((images.length-1)/2),images.length-1]
-  return [...new Set(picks)].map(index=>images[index]).filter(Boolean)
+  if(!images.length)return []
+  return [images[0]].slice(0,MAX_GROQ_IMAGES)
+}
+
+function compactPrevious(value:any){
+  if(!value||typeof value!=='object')return ''
+  const v=value as any
+  return JSON.stringify({
+    produto:v.produto||'',
+    categoria:v.categoria||'',
+    resumo:v.resumo||'',
+    risco_score:v.risco_score??null,
+    mercado:v.mercado?{
+      preco_min:v.mercado.preco_min,
+      preco_mediano:v.mercado.preco_mediano,
+      preco_max:v.mercado.preco_max
+    }:null,
+    precos:v.precos?{
+      preco_anunciado:v.precos.preco_anunciado,
+      oferta_equilibrada:v.precos.oferta_equilibrada,
+      teto_compra:v.precos.teto_compra,
+      revenda_provavel:v.precos.revenda_provavel
+    }:null
+  }).slice(0,1800)
+}
+
+function compactRefs(refs:MarketRef[]){
+  return JSON.stringify(refs.slice(0,3).map(r=>({
+    price:Number(r.price||0),
+    note:String(r.note||'').slice(0,160),
+    url:String(r.url||'').slice(0,240)
+  }))).slice(0,1400)
+}
+
+function buildFallbackPrompt(args:{
+  origem:string;link:string;texto:string;preco:number;modo:string;
+  contextoAnterior:any;inspecaoNotas:string;referencias:MarketRef[];imageCount:number
+}){
+  const previous=compactPrevious(args.contextoAnterior)
+  const refs=compactRefs(args.referencias)
+  const text=String(args.texto||'').slice(0,3500)
+  const notes=String(args.inspecaoNotas||'').slice(0,1200)
+  const link=String(args.link||'').slice(0,500)
+
+  return [
+    'Você é o fallback enxuto do BRIKE RADAR para compra e revenda de produtos usados no Brasil.',
+    'Analise somente o que foi enviado. Não navegue na web e não diga que abriu links.',
+    'Objetivo: ajudar a pagar menos, evitar compra ruim e estimar revenda usada de forma conservadora.',
+    '',
+    'REGRAS:',
+    '- Identifique produto/modelo/capacidade somente se houver evidência.',
+    '- Facebook: priorize o print anexado. OLX: sem conteúdo textual, trate o link apenas como referência.',
+    '- Mercado sem pesquisa web = estimativa conservadora. confianca_preco no máximo 55, salvo 3 referências concretas do usuário.',
+    '- Não use preço de produto novo como base de usado.',
+    '- oferta_agressiva <= oferta_equilibrada <= teto_compra.',
+    '- revenda_conservadora <= revenda_provavel <= revenda_otimista.',
+    '- Nunca descarte por meta pessoal de lucro/ROI. Avalie o negócio por preço, risco, custo e liquidez.',
+    '- Se faltar informação, declare em dados_faltantes. Não invente defeitos.',
+    '- Gere no máximo 2 riscos, 2 estratégias e 3 testes de checklist.',
+    '- Mensagens de negociação devem ser curtas, naturais e sem mentira.',
+    '- Seja direto; não repita texto.',
+    '',
+    'MODO: '+args.modo,
+    'ORIGEM: '+args.origem,
+    'PREÇO INFORMADO: '+(args.preco>0?'R$ '+args.preco.toFixed(2):'não informado'),
+    'LINK (não abrir): '+(link||'não informado'),
+    'TEXTO: '+(text||'não informado'),
+    'OBSERVAÇÕES DE INSPEÇÃO: '+(notes||'não informadas'),
+    'REFERÊNCIAS DO USUÁRIO: '+(refs||'[]'),
+    'CONTEXTO ANTERIOR RESUMIDO: '+(previous||'não informado'),
+    'IMAGENS RECEBIDAS NESTE FALLBACK: '+args.imageCount,
+    '',
+    'Responda somente no JSON do schema.'
+  ].join('\n')
 }
 
 async function callGroq(key:string,messages:any[]){
@@ -64,14 +131,14 @@ async function callGroq(key:string,messages:any[]){
       body:JSON.stringify({
         model:MODEL,
         messages,
-        temperature:0.2,
-        top_p:0.8,
+        temperature:0.15,
+        top_p:0.75,
         reasoning_effort:'none',
-        max_completion_tokens:900,
+        max_completion_tokens:750,
         response_format:{
           type:'json_schema',
           json_schema:{
-            name:'brique_radar_analysis',
+            name:'brique_radar_fallback',
             strict:false,
             schema:fallbackSchema
           }
@@ -81,7 +148,7 @@ async function callGroq(key:string,messages:any[]){
     const raw=await response.json().catch(()=>({}))
     if(!response.ok){
       const status=response.status
-      const retryable=status===408||status===409||status===429||status>=500
+      const retryable=status===408||status===409||status===413||status===429||status>=500
       throw makeProviderError(raw?.error?.message||`Groq HTTP ${status}`,status,retryable)
     }
     return raw
@@ -95,24 +162,12 @@ async function callGroq(key:string,messages:any[]){
 
 export async function askGroq(
   key:string,origem:string,link:string,texto:string,preco:number,imagens:InputImage[],
-  modo='anuncio',contextoAnterior:any=null,inspecaoNotas='',referencias:MarketRef[]=[],perfilUsuario='',contextoGarimpo=''
+  modo='anuncio',contextoAnterior:any=null,inspecaoNotas='',referencias:MarketRef[]=[],_perfilUsuario='',_contextoGarimpo=''
 ):Promise<GroqResult>{
   const selectedImages=sampleImages(imagens)
-  const context=contextoAnterior?JSON.stringify(contextoAnterior).slice(0,24000):''
-  const refs=JSON.stringify(referencias.slice(0,5)).slice(0,8000)
-  const prompt=buildPrompt(
-    origem,link,texto,preco,selectedImages.length,modo,context,inspecaoNotas,refs,
-    perfilUsuario.slice(0,5000),contextoGarimpo.slice(0,5000)
-  )+`
-
-REGRAS DESTE PROVEDOR:
-- Você NÃO possui URL Context, Google Search nem navegador nesta execução.
-- Não diga que abriu, leu ou verificou qualquer URL.
-- Para OLX, trate o link apenas como referência textual quando o conteúdo não estiver presente no texto.
-- Para Facebook, use somente os prints anexados e o texto fornecido.
-- Se faltarem dados por limitação da fonte, reduza a confiança e preencha dados_faltantes. Sem pelo menos 3 referências concretas fornecidas pelo usuário, limite confianca_preco a 60.
-- MODO CONTINGÊNCIA: seja extremamente conciso. No máximo 2 riscos, 2 estratégias, 3 itens de checklist e 2 dados faltantes. Não repita explicações.
-- Responda somente no JSON exigido pelo schema.`
+  const prompt=buildFallbackPrompt({
+    origem,link,texto,preco,modo,contextoAnterior,inspecaoNotas,referencias,imageCount:selectedImages.length
+  })
 
   const content:any[]=[{type:'text',text:prompt}]
   for(const image of selectedImages){
@@ -127,7 +182,7 @@ REGRAS DESTE PROVEDOR:
   if(typeof text!=='string'||!text.trim())throw makeProviderError('A Groq não retornou uma análise utilizável.',502,true)
 
   try{
-    return {raw,ai:JSON.parse(text),model:MODEL,fallback:false,provider:'groq',image_count:selectedImages.length}
+    return {raw,ai:JSON.parse(text),model:MODEL,fallback:true,provider:'groq',image_count:selectedImages.length}
   }catch{
     throw makeProviderError('A Groq retornou JSON inválido.',502,true)
   }
