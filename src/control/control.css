@@ -1939,3 +1939,134 @@ body{transition:background .22s ease,color .22s ease}
 .cp-detail-numbers b,.cp-price-line b{font-size:13px!important}
 .cp-section-head span{font-size:10px!important}
 .cp-section-head h2{font-size:20px!important}
+
+
+/* =========================================================
+   CONTROLE+ V7.1 — MOBILE MODAL + READABILITY POLISH
+   ========================================================= */
+.cp-modal-head p{font-size:14px!important;line-height:1.55!important}
+.cp-field>span{font-size:14px!important;font-weight:700!important}
+.cp-field input,.cp-field select,.cp-field textarea{font-size:16px!important}
+.cp-money-input>span{font-size:14px!important}
+.cp-money-input input{font-size:17px!important}
+.cp-input-suffix span{font-size:13px!important}
+.cp-form-tip p,.cp-settings-note p{font-size:13px!important;line-height:1.5!important}
+.cp-photo-drop b{font-size:14px!important}
+.cp-photo-drop span{font-size:12px!important}
+.cp-live-summary span,.cp-live-summary small{font-size:12px!important}
+.cp-review-box b{font-size:15px!important}
+.cp-review-box span{font-size:13px!important}
+.cp-action-sheet>p{font-size:14px!important;line-height:1.55!important}
+.cp-action-sheet>button b{font-size:16px!important}
+.cp-action-sheet>button small{font-size:13px!important;line-height:1.4!important}
+.cp-listing-question b{font-size:15px!important}
+.cp-listing-question small{font-size:13px!important;line-height:1.45!important}
+.cp-yes-no button,.cp-cost-choice button{font-size:14px!important;min-height:46px!important}
+.cp-channel-grid button{font-size:13px!important;min-height:46px!important}
+.cp-listing-age b{font-size:14px!important}
+.cp-listing-age small{font-size:12px!important}
+.cp-checkin-product>div>span{font-size:10px!important}
+.cp-checkin-product p{font-size:12px!important}
+.cp-checkin-body>p{font-size:14px!important}
+.cp-checkin-options b{font-size:15px!important}
+.cp-checkin-options small{font-size:12px!important}
+.cp-listing-advice p{font-size:13px!important}
+.cp-price-suggestion span,.cp-price-suggestion small{font-size:12px!important}
+.cp-listing-status-card>div>span{font-size:10px!important}
+.cp-listing-status-card>div>b{font-size:13px!important}
+.cp-listing-status-card>div>small{font-size:11px!important}
+.cp-checkin-history>span{font-size:11px!important}
+.cp-checkin-history b{font-size:12px!important}
+.cp-checkin-history small{font-size:11px!important}
+.cp-expense-list>div{font-size:12px!important}
+.cp-detail-hero p{font-size:12px!important}
+.cp-muted{font-size:12px!important;line-height:1.5!important}
+.cp-page-title p{font-size:13px!important;line-height:1.55!important}
+.cp-search input{font-size:14px!important}
+.cp-filter-tabs button{font-size:12px!important}
+.cp-sale-main strong,.cp-cash-row>div strong{font-size:13px!important}
+.cp-sale-main span,.cp-cash-row>div span{font-size:11px!important}
+.cp-business-tool p{font-size:11px!important}
+.cp-business-value strong{font-size:13px!important}
+.cp-business-title p{font-size:13px!important}
+.cp-bottom button{font-size:11px!important}
+
+/* cleaner footer everywhere */
+.cp-modal-actions{
+  gap:10px!important;
+}
+.cp-modal-actions .cp-primary,
+.cp-modal-actions .cp-secondary{
+  min-height:52px!important;
+  border-radius:15px!important;
+  font-size:14px!important;
+  font-weight:800!important;
+}
+
+/* Mobile bottom-sheet footer: no black band, app-like sticky action bar */
+@media(max-width:640px){
+  .cp-modal-scroll{
+    padding:24px 16px 0!important;
+    scroll-padding-bottom:108px!important;
+  }
+  .cp-modal-actions{
+    position:sticky!important;
+    bottom:0!important;
+    z-index:12!important;
+    margin:24px -16px 0!important;
+    padding:13px 16px calc(13px + env(safe-area-inset-bottom))!important;
+    background:color-mix(in srgb,var(--cp-panel) 94%,transparent)!important;
+    border-top:1px solid var(--cp-line)!important;
+    backdrop-filter:blur(22px) saturate(1.35)!important;
+    box-shadow:0 -14px 36px rgba(0,0,0,.14)!important;
+  }
+  :root[data-theme="light"] .cp-modal-actions{
+    box-shadow:0 -10px 30px rgba(35,58,88,.08)!important;
+  }
+  .cp-modal-actions .cp-secondary{
+    flex:0 0 34%!important;
+    min-width:112px!important;
+    min-height:58px!important;
+    font-size:16px!important;
+    background:var(--cp-panel-2)!important;
+  }
+  .cp-modal-actions .cp-primary{
+    flex:1 1 auto!important;
+    min-height:58px!important;
+    font-size:16px!important;
+    box-shadow:0 10px 24px rgba(37,99,235,.22)!important;
+  }
+  .cp-action-sheet>button{
+    min-height:88px!important;
+    padding:15px 14px!important;
+  }
+  .cp-action-sheet>button>span{
+    width:48px!important;
+    height:48px!important;
+  }
+  .cp-modal-head h2{font-size:30px!important;letter-spacing:-1.2px!important}
+  .cp-modal-head p{font-size:14px!important}
+  .cp-field>span{font-size:14px!important}
+  .cp-field input,.cp-field select,.cp-field textarea{font-size:17px!important}
+  .cp-money-input input{font-size:18px!important}
+  .cp-channel-grid button{font-size:13px!important}
+  .cp-yes-no button,.cp-cost-choice button{font-size:14px!important}
+  .cp-photo-drop b{font-size:15px!important}
+  .cp-photo-drop span{font-size:12px!important}
+  .cp-review-box span{font-size:13px!important}
+  .cp-smart-card p{font-size:12px!important}
+  .cp-smart-card h2{font-size:15px!important}
+  .cp-product-values small{font-size:11px!important}
+  .cp-product-values b{font-size:14px!important}
+}
+
+/* tiny phone safeguard without shrinking copy */
+@media(max-width:380px){
+  .cp-modal-actions .cp-secondary{
+    min-width:96px!important;
+  }
+  .cp-modal-actions .cp-primary,
+  .cp-modal-actions .cp-secondary{
+    font-size:15px!important;
+  }
+}
