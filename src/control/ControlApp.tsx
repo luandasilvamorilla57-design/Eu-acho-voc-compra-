@@ -2,7 +2,7 @@ import {useEffect,useMemo,useState} from 'react'
 import {
   AlertTriangle,ArrowDownRight,ArrowUpRight,BadgeDollarSign,Banknote,BarChart3,Box,
   Check,ChevronRight,CircleDollarSign,Clock3,Home,ImagePlus,LogOut,Package,Plus,
-  ReceiptText,Search,Settings2,ShoppingBag,Tag,WalletCards,X,Moon,Sun
+  ReceiptText,Search,Settings2,ShoppingBag,Tag,WalletCards,X,Moon,Sun,Megaphone,RefreshCw,TrendingDown
 } from 'lucide-react'
 import {supabase} from '../lib/supabase'
 import {useControlData} from './useControlData'
@@ -11,7 +11,7 @@ import type {CashEntry,ControlView,Product,Sale} from './types'
 
 type Data=ReturnType<typeof useControlData>
 type Metrics=ReturnType<typeof buildMetrics>
-type Modal='actions'|'purchase'|'sale'|'expense'|'cash'|'settings'|null
+type Modal='actions'|'purchase'|'inventory'|'sale'|'expense'|'cash'|'settings'|'listingCheckin'|null
 
 const money=new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL'})
 const number=new Intl.NumberFormat('pt-BR')
@@ -23,6 +23,12 @@ function localDate(){
 function daysSince(date:string){
   return Math.max(0,Math.floor((Date.now()-new Date(date+'T12:00:00').getTime())/86400000))
 }
+function addDays(date:string,days:number){
+  const d=new Date(date+'T12:00:00')
+  d.setDate(d.getDate()+days)
+  return d.toISOString().slice(0,10)
+}
+const LISTING_CHANNELS=['Facebook Marketplace','OLX','Mercado Livre','WhatsApp','Instagram','Outro']
 
 export function ControlApp({userId,email}:{userId:string;email?:string}){
   const data=useControlData(userId)
@@ -46,6 +52,10 @@ export function ControlApp({userId,email}:{userId:string;email?:string}){
     setToast(text)
     window.setTimeout(()=>setToast(null),2600)
   }
+  function openListingCheckin(product:Product){
+    setSelected(product)
+    setModal('listingCheckin')
+  }
 
   if(data.loading)return <LoadingScreen/>
   if(!data.settings)return <div className="cp-fatal"><strong>Não conseguimos abrir o CONTROLE+.</strong><button onClick={()=>void data.load()}>Tentar novamente</button></div>
@@ -55,7 +65,7 @@ export function ControlApp({userId,email}:{userId:string;email?:string}){
     <div className="cp-noise"/>
     <TopBar business={data.settings.business_name} email={email} theme={theme} onTheme={()=>setTheme(v=>v==='dark'?'light':'dark')} onSettings={()=>setModal('settings')} onManage={()=>setView('manage')}/>
     <main className="cp-main">
-      {view==='home'&&<HomePage data={data} calc={calc} onOpenProduct={setSelected} onView={setView} onAction={setModal}/>}
+      {view==='home'&&<HomePage data={data} calc={calc} onOpenProduct={setSelected} onView={setView} onAction={setModal} onCheckListing={openListingCheckin}/>}
       {view==='stock'&&<StockPage data={data} calc={calc} onOpenProduct={setSelected} onPurchase={()=>setModal('purchase')}/>}
       {view==='sales'&&<SalesPage data={data} calc={calc} onSale={()=>setModal('sale')} onOpenProduct={setSelected}/>}
       {view==='cash'&&<CashPage data={data} calc={calc} onCash={()=>setModal('cash')} onSettings={()=>setModal('settings')}/>}
@@ -71,10 +81,11 @@ export function ControlApp({userId,email}:{userId:string;email?:string}){
 
     {modal==='actions'&&<ActionSheet onClose={()=>setModal(null)} onChoose={setModal}/>}
     {modal==='purchase'&&<PurchaseModal data={data} onClose={()=>setModal(null)} onDone={()=>{setModal(null);notify('Compra salva e adicionada ao estoque.')}}/>}
+    {modal==='inventory'&&<InventoryModal data={data} onClose={()=>setModal(null)} onDone={()=>{setModal(null);notify('Produto adicionado ao estoque sem movimentar o caixa.')}}/>}
     {modal==='sale'&&<SaleModal data={data} initialProduct={selected} onClose={()=>setModal(null)} onDone={()=>{setModal(null);setSelected(null);notify('Venda registrada. Caixa e estoque atualizados.')}}/>}
     {modal==='expense'&&<ExpenseModal data={data} initialProduct={selected} onClose={()=>setModal(null)} onDone={()=>{setModal(null);notify('Gasto somado ao custo real do produto.')}}/>}
     {modal==='cash'&&<CashModal data={data} onClose={()=>setModal(null)} onDone={()=>{setModal(null);notify('Movimentação adicionada ao caixa.')}}/>}
-    {modal==='settings'&&<SettingsModal data={data} email={email} onClose={()=>setModal(null)} onDone={notify}/>}
+    {modal==='settings'&&<SettingsModal data={data} email={email} onClose={()=>setModal(null)} onDone={notify}/>}\n    {selected&&modal==='listingCheckin'&&<ListingCheckinModal product={selected} data={data} onClose={()=>{setModal(null);setSelected(null)}} onSold={()=>setModal('sale')} onDone={(text)=>{setModal(null);setSelected(null);notify(text)}}/>}
     {selected&&modal===null&&<ProductDetail product={selected} data={data} calc={calc} onClose={()=>setSelected(null)} onSale={()=>setModal('sale')} onExpense={()=>setModal('expense')} onSaved={()=>notify('Produto atualizado.')}/>}
     {toast&&<div className="cp-toast"><Check size={18}/>{toast}</div>}
     {data.error&&<div className="cp-error-bar"><AlertTriangle size={17}/>{data.error}</div>}
