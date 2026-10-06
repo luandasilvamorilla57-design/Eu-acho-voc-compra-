@@ -9,6 +9,8 @@ import {useControlData} from './useControlData'
 import {BackupPage,ClosuresPage,GoalsPage,ManagePage,PeoplePage,ReceivablesPage,ReportsPage} from './BusinessCenter'
 import {AdminCenter} from './AdminCenter'
 import {InstallAppPrompt} from './InstallAppPrompt'
+import {useControlAccess} from './useControlAccess'
+import {ActivePlanCard,SubscriptionGate,TrialBanner} from './BillingUI'
 import type {CashEntry,ControlView,Product,Sale} from './types'
 
 type Data=ReturnType<typeof useControlData>
@@ -34,10 +36,12 @@ const LISTING_CHANNELS=['Facebook Marketplace','OLX','Mercado Livre','WhatsApp',
 
 export function ControlApp({userId,email}:{userId:string;email?:string}){
   const data=useControlData(userId)
+  const billing=useControlAccess(userId)
   const [view,setView]=useState<ControlView>('home')
   const [modal,setModal]=useState<Modal>(null)
   const [selected,setSelected]=useState<Product|null>(null)
   const [toast,setToast]=useState<string|null>(null)
+  const [readOnlyMode,setReadOnlyMode]=useState(false)
   const [theme,setTheme]=useState<'dark'|'light'>(()=>{
     const saved=window.localStorage.getItem('controle-plus-theme')
     if(saved==='light'||saved==='dark')return saved
@@ -54,46 +58,75 @@ export function ControlApp({userId,email}:{userId:string;email?:string}){
     setToast(text)
     window.setTimeout(()=>setToast(null),2600)
   }
+  const access=billing.access
+  const canWrite=Boolean(access?.can_write||access?.is_admin)
+
+  useEffect(()=>{
+    if(canWrite)setReadOnlyMode(false)
+  },[canWrite])
+
+  function requireWrite(action:()=>void){
+    if(canWrite){action();return}
+    setReadOnlyMode(false)
+  }
+  function openModal(next:Modal){
+    if(next==='settings'||next===null){setModal(next);return}
+    requireWrite(()=>setModal(next))
+  }
+  function openView(next:ControlView){
+    if(canWrite||['home','stock','sales','cash','reports','backup','admin'].includes(next)){
+      setView(next)
+      return
+    }
+    setReadOnlyMode(false)
+  }
   function openListingCheckin(product:Product){
-    setSelected(product)
-    setModal('listingCheckin')
+    requireWrite(()=>{
+      setSelected(product)
+      setModal('listingCheckin')
+    })
   }
 
-  if(data.loading)return <LoadingScreen/>
+  if(data.loading||billing.loading)return <LoadingScreen/>
   if(!data.settings)return <div className="cp-fatal"><strong>Não conseguimos abrir o CONTROLE+.</strong><button onClick={()=>void data.load()}>Tentar novamente</button></div>
+  if(!access)return <div className="cp-fatal"><strong>Não conseguimos validar o acesso da conta.</strong><button onClick={()=>void billing.refresh(true)}>Tentar novamente</button></div>
   if(!data.settings.onboarding_completed)return <FirstRun data={data} email={email} theme={theme} onTheme={()=>setTheme(v=>v==='dark'?'light':'dark')}/>
 
   return <div className="cp-app" data-theme={theme}>
     <div className="cp-noise"/>
-    <TopBar business={data.settings.business_name} email={email} theme={theme} isAdmin={data.isAdmin} adminActive={view==='admin'} onTheme={()=>setTheme(v=>v==='dark'?'light':'dark')} onSettings={()=>setModal('settings')} onManage={()=>setView('manage')} onAdmin={()=>setView('admin')}/>
+    <TopBar business={data.settings.business_name} email={email} theme={theme} isAdmin={data.isAdmin} adminActive={view==='admin'} onTheme={()=>setTheme(v=>v==='dark'?'light':'dark')} onSettings={()=>setModal('settings')} onManage={()=>canWrite?setView('manage'):setReadOnlyMode(false)} onAdmin={()=>setView('admin')}/>
+    {!data.isAdmin&&<TrialBanner access={access} onSubscribe={()=>void billing.subscribe()}/>}
     <main className="cp-main">
-      {view==='home'&&<HomePage data={data} calc={calc} onOpenProduct={setSelected} onView={setView} onAction={setModal} onCheckListing={openListingCheckin}/>}
-      {view==='stock'&&<StockPage data={data} calc={calc} onOpenProduct={setSelected} onAdd={()=>setModal('actions')}/>}
-      {view==='sales'&&<SalesPage data={data} calc={calc} onSale={()=>setModal('sale')} onOpenProduct={setSelected}/>}
-      {view==='cash'&&<CashPage data={data} calc={calc} onCash={()=>setModal('cash')} onSettings={()=>setModal('settings')}/>}
-      {view==='manage'&&<ManagePage data={data} onView={setView} onBack={()=>setView('home')}/>}
-      {view==='receivables'&&<ReceivablesPage data={data} onBack={()=>setView('manage')}/>}
-      {view==='reports'&&<ReportsPage data={data} onBack={()=>setView('manage')}/>}
-      {view==='people'&&<PeoplePage data={data} onBack={()=>setView('manage')}/>}
-      {view==='goals'&&<GoalsPage data={data} onBack={()=>setView('manage')}/>}
-      {view==='closures'&&<ClosuresPage data={data} onBack={()=>setView('manage')}/>}
-      {view==='backup'&&<BackupPage data={data} onBack={()=>setView('manage')}/>}
-      {view==='admin'&&data.isAdmin&&<AdminCenter onBack={()=>setView('home')}/>}
+      {!canWrite&&!readOnlyMode?<SubscriptionGate access={access} products={data.products.length} sales={data.sales.length} stockValue={calc.stockCapital} onSubscribe={()=>void billing.subscribe()} onRefresh={()=>void billing.refresh(true)} onReadOnly={()=>{setReadOnlyMode(true);setView('home')}} busy={billing.busy} error={billing.error}/>:<>
+        {view==='home'&&<HomePage data={data} calc={calc} onOpenProduct={setSelected} onView={openView} onAction={openModal} onCheckListing={openListingCheckin}/>}
+        {view==='stock'&&<StockPage data={data} calc={calc} onOpenProduct={setSelected} onAdd={()=>openModal('actions')}/>}
+        {view==='sales'&&<SalesPage data={data} calc={calc} onSale={()=>openModal('sale')} onOpenProduct={setSelected}/>}
+        {view==='cash'&&<CashPage data={data} calc={calc} onCash={()=>openModal('cash')} onSettings={()=>setModal('settings')}/>}
+        {canWrite&&view==='manage'&&<ManagePage data={data} onView={openView} onBack={()=>setView('home')}/>}
+        {canWrite&&view==='receivables'&&<ReceivablesPage data={data} onBack={()=>setView('manage')}/>}
+        {view==='reports'&&<ReportsPage data={data} onBack={()=>setView('home')}/>}
+        {canWrite&&view==='people'&&<PeoplePage data={data} onBack={()=>setView('manage')}/>}
+        {canWrite&&view==='goals'&&<GoalsPage data={data} onBack={()=>setView('manage')}/>}
+        {canWrite&&view==='closures'&&<ClosuresPage data={data} onBack={()=>setView('manage')}/>}
+        {view==='backup'&&<BackupPage data={data} onBack={()=>setView('home')}/>}
+        {view==='admin'&&data.isAdmin&&<AdminCenter onBack={()=>setView('home')}/>}
+      </>}
     </main>
-    {view!=='admin'&&<BottomNav view={view} onView={setView} onAdd={()=>setModal('actions')}/>}
+    {view!=='admin'&&(canWrite||readOnlyMode)&&<BottomNav view={view} onView={openView} onAdd={()=>openModal('actions')}/>}
     <InstallAppPrompt userId={userId}/>
 
-    {modal==='actions'&&<ActionSheet onClose={()=>setModal(null)} onChoose={setModal}/>}
+    {modal==='actions'&&<ActionSheet onClose={()=>setModal(null)} onChoose={openModal}/>}
     {modal==='purchase'&&<PurchaseModal data={data} onClose={()=>setModal(null)} onDone={()=>{setModal(null);notify('Compra salva e adicionada ao estoque.')}}/>}
     {modal==='inventory'&&<InventoryModal data={data} onClose={()=>setModal(null)} onDone={()=>{setModal(null);notify('Produto adicionado ao estoque sem movimentar o caixa.')}}/>}
     {modal==='sale'&&<SaleModal data={data} initialProduct={selected} onClose={()=>setModal(null)} onDone={()=>{setModal(null);setSelected(null);notify('Venda registrada. Caixa e estoque atualizados.')}}/>}
     {modal==='expense'&&<ExpenseModal data={data} initialProduct={selected} onClose={()=>setModal(null)} onDone={()=>{setModal(null);notify('Gasto somado ao custo real do produto.')}}/>}
     {modal==='cash'&&<CashModal data={data} onClose={()=>setModal(null)} onDone={()=>{setModal(null);notify('Movimentação adicionada ao caixa.')}}/>}
-    {modal==='settings'&&<SettingsModal data={data} email={email} onClose={()=>setModal(null)} onDone={notify}/>} 
+    {modal==='settings'&&<SettingsModal data={data} email={email} access={access} billingBusy={billing.busy} onSubscribe={()=>void billing.subscribe()} onCancel={()=>void billing.cancel()} readOnly={!canWrite} onClose={()=>setModal(null)} onDone={notify}/>} 
     {selected&&modal==='listingCheckin'&&<ListingCheckinModal product={selected} data={data} onClose={()=>{setModal(null);setSelected(null)}} onSold={()=>setModal('sale')} onDone={(text)=>{setModal(null);setSelected(null);notify(text)}}/>}
-    {selected&&modal===null&&<ProductDetail product={selected} data={data} calc={calc} onClose={()=>setSelected(null)} onSale={()=>setModal('sale')} onExpense={()=>setModal('expense')} onSaved={()=>notify('Produto atualizado.')} onDeleted={()=>{setSelected(null);notify('Produto removido do estoque.')}}/>}
+    {selected&&modal===null&&<ProductDetail product={selected} data={data} calc={calc} readOnly={!canWrite} onClose={()=>setSelected(null)} onSale={()=>openModal('sale')} onExpense={()=>openModal('expense')} onSaved={()=>notify('Produto atualizado.')} onDeleted={()=>{setSelected(null);notify('Produto removido do estoque.')}}/>}
     {toast&&<div className="cp-toast"><Check size={18}/>{toast}</div>}
     {data.error&&<div className="cp-error-bar"><AlertTriangle size={17}/>{data.error}</div>}
+    {billing.error&&canWrite&&<div className="cp-error-bar"><AlertTriangle size={17}/>{billing.error}</div>}
   </div>
 }
 
