@@ -1,4 +1,4 @@
-const CACHE='controle-plus-v1'
+const CACHE='controle-plus-blue-v3'
 const SHELL=['/','/manifest.webmanifest','/control-plus-icon.svg','/control-plus-maskable.svg']
 
 self.addEventListener('install',event=>{
