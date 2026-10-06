@@ -156,9 +156,9 @@ function FirstRun({data,email,theme,onTheme}:{data:Data;email?:string;theme:'dar
       <div className="cp-onboarding-progress"><i style={{width:(step/3*100)+'%'}}/></div>
 
       {step===1&&<div className="cp-onboarding-body">
-        <span className="cp-eyebrow">BEM-VINDO AO CONTROLE+</span>
+        <span className="cp-eyebrow">15 DIAS GRÁTIS · SEM PLANO COMPLICADO</span>
         <h1>Vamos colocar seu negócio em ordem.</h1>
-        <p>Você registra o que comprou e vendeu. O app cuida do estoque, caixa e lucro para você.</p>
+        <p>Use o CONTROLE+ completo por 15 dias. Depois, continue com tudo por R$ 12,90 por mês.</p>
         <div className="cp-onboarding-example"><span><ShoppingBag/></span><div><b>Comprou</b><small>entra no estoque e sai do caixa</small></div><ChevronRight/><span><Banknote/></span><div><b>Vendeu</b><small>sai do estoque e volta para o caixa</small></div></div>
       </div>}
 
@@ -615,7 +615,7 @@ function SettingsModal({data,email,access,billingBusy,onSubscribe,onCancel,readO
       <div className="cp-settings-section"><span>01</span><div><b>Identificação</b><small>Como seu negócio aparece dentro do app.</small></div></div>
       <div className="cp-form-grid"><Field label="Nome do negócio" full><input disabled={readOnly} value={business} onChange={e=>setBusiness(e.target.value)} placeholder="Ex.: Brique do Luan"/></Field></div>
       <div className="cp-settings-section"><span>02</span><div><b>Dinheiro de partida</b><small>Use o saldo que você tinha quando começou a controlar aqui.</small></div></div>
-      <div className="cp-form-grid"><Field label="Saldo inicial"><MoneyInput value={cash} setValue={setCash} placeholder="0,00"/></Field></div>
+      <div className="cp-form-grid"><Field label="Saldo inicial"><MoneyInput value={cash} setValue={setCash} placeholder="0,00" disabled={readOnly}/></Field></div>
       <div className="cp-settings-section"><span>03</span><div><b>Alerta de estoque parado</b><small>Depois desse período, o app chama sua atenção.</small></div></div>
       <div className="cp-form-grid"><Field label="Alertar estoque após"><div className="cp-input-suffix"><input disabled={readOnly} type="number" min="1" value={days} onChange={e=>setDays(e.target.value)}/><span>dias</span></div></Field></div>
     </div>
@@ -788,7 +788,7 @@ function ModalShell({children,onClose,compact=false}:{children:React.ReactNode;o
 function ModalHeader({eyebrow,title,text}:{eyebrow:string;title:string;text:string}){return <div className="cp-modal-head"><span className="cp-eyebrow">{eyebrow}</span><h2>{title}</h2><p>{text}</p></div>}
 function Stepper({step}:{step:number}){return <div className="cp-stepper">{[1,2,3].map(i=><div key={i} className={i<=step?'active':''}><span>{i<step?<Check/>:i}</span><small>{i===1?'Produto':i===2?'Valores':'Fotos'}</small></div>)}</div>}
 function Field({label,children,full=false}:{label:string;children:React.ReactNode;full?:boolean}){return <label className={full?'cp-field cp-field--full':'cp-field'}><span>{label}</span>{children}</label>}
-function MoneyInput({value,setValue,placeholder}:{value:string;setValue:(v:string)=>void;placeholder:string}){return <div className="cp-money-input"><span>R$</span><input inputMode="decimal" value={value} onChange={e=>setValue(e.target.value.replace(/[^0-9,.]/g,''))} placeholder={placeholder}/></div>}
+function MoneyInput({value,setValue,placeholder,disabled=false}:{value:string;setValue:(v:string)=>void;placeholder:string;disabled?:boolean}){return <div className="cp-money-input"><span>R$</span><input disabled={disabled} inputMode="decimal" value={value} onChange={e=>setValue(e.target.value.replace(/[^0-9,.]/g,''))} placeholder={placeholder}/></div>}
 function Tip({text}:{text:string}){return <div className="cp-form-tip"><span>+</span><p>{text}</p></div>}
 function LoadingScreen(){return <div className="cp-loading"><Brand/><div className="cp-loading-line"><span/></div><p>Organizando seu negócio...</p></div>}
 function paymentLabel(v:string){return ({pix:'Pix',cash:'Dinheiro',card:'Cartão',transfer:'Transferência',receivable:'A prazo',other:'Outro'} as Record<string,string>)[v]||v}
