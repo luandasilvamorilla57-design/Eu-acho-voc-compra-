@@ -1667,3 +1667,12 @@ body{transition:background .22s ease,color .22s ease}
   box-shadow:0 8px 24px rgba(0,0,0,.10)
 }
 .cp-auth-theme:hover{color:var(--cp-accent-light);border-color:rgba(59,130,246,.32)}
+
+.cp-onboarding-theme{
+  position:fixed;top:18px;right:18px;z-index:30;
+  width:40px;height:40px;border-radius:12px;
+  border:1px solid var(--cp-line);background:var(--cp-panel);
+  color:var(--cp-text-2);display:grid;place-items:center;
+  box-shadow:0 8px 24px rgba(0,0,0,.10)
+}
+.cp-onboarding-theme:hover{color:var(--cp-accent-light);border-color:rgba(59,130,246,.32)}
