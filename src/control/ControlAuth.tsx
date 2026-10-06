@@ -1,5 +1,5 @@
-import {useMemo,useState} from 'react'
-import {ArrowLeft,Eye,EyeOff,LockKeyhole,Mail,ShieldCheck} from 'lucide-react'
+import {useEffect,useMemo,useState} from 'react'
+import {ArrowLeft,Eye,EyeOff,LockKeyhole,Mail,ShieldCheck,Moon,Sun} from 'lucide-react'
 import {supabase} from '../lib/supabase'
 
 type Mode='login'|'register'|'forgot'|'reset'
@@ -14,6 +14,16 @@ export function ControlAuth({reset=false}:{reset?:boolean}){
   const [busy,setBusy]=useState(false)
   const [message,setMessage]=useState<string|null>(null)
   const [error,setError]=useState<string|null>(null)
+  const [theme,setTheme]=useState<'dark'|'light'>(()=>{
+    const saved=window.localStorage.getItem('controle-plus-theme')
+    if(saved==='light'||saved==='dark')return saved
+    return window.matchMedia?.('(prefers-color-scheme: light)').matches?'light':'dark'
+  })
+  useEffect(()=>{
+    window.localStorage.setItem('controle-plus-theme',theme)
+    document.documentElement.dataset.theme=theme
+    document.querySelector('meta[name="theme-color"]')?.setAttribute('content',theme==='light'?'#f3f7fc':'#07111f')
+  },[theme])
 
   const title=useMemo(()=>({
     login:'Bem-vindo de volta.',
@@ -50,7 +60,8 @@ export function ControlAuth({reset=false}:{reset?:boolean}){
     finally{setBusy(false)}
   }
 
-  return <main className="cp-auth">
+  return <main className="cp-auth" data-theme={theme}>
+    <button type="button" className="cp-auth-theme" onClick={()=>setTheme(v=>v==='dark'?'light':'dark')} aria-label={theme==='dark'?'Ativar tema claro':'Ativar tema escuro'}>{theme==='dark'?<Sun size={18}/>:<Moon size={18}/>}</button>
     <div className="cp-auth-glow cp-auth-glow-a"/>
     <div className="cp-auth-glow cp-auth-glow-b"/>
     <section className="cp-auth-wrap">
