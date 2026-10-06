@@ -1,6 +1,20 @@
 export type ControlView=
   |'home'|'stock'|'sales'|'cash'|'manage'
-  |'receivables'|'reports'|'people'|'goals'|'backup'|'closures'
+  |'receivables'|'reports'|'people'|'goals'|'backup'|'closures'|'admin'
+
+export type ControlAccount={
+  user_id:string
+  email:string|null
+  registered_at:string
+  updated_at:string
+}
+
+export type ControlAdmin={
+  user_id:string
+  role:'super_admin'
+  enabled:boolean
+  created_at:string
+}
 
 export type ControlSettings={
   user_id:string
