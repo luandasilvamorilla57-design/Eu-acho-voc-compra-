@@ -66,7 +66,7 @@ export function ControlApp({userId,email}:{userId:string;email?:string}){
     <TopBar business={data.settings.business_name} email={email} theme={theme} onTheme={()=>setTheme(v=>v==='dark'?'light':'dark')} onSettings={()=>setModal('settings')} onManage={()=>setView('manage')}/>
     <main className="cp-main">
       {view==='home'&&<HomePage data={data} calc={calc} onOpenProduct={setSelected} onView={setView} onAction={setModal} onCheckListing={openListingCheckin}/>}
-      {view==='stock'&&<StockPage data={data} calc={calc} onOpenProduct={setSelected} onPurchase={()=>setModal('purchase')}/>}
+      {view==='stock'&&<StockPage data={data} calc={calc} onOpenProduct={setSelected} onAdd={()=>setModal('actions')}/>}
       {view==='sales'&&<SalesPage data={data} calc={calc} onSale={()=>setModal('sale')} onOpenProduct={setSelected}/>}
       {view==='cash'&&<CashPage data={data} calc={calc} onCash={()=>setModal('cash')} onSettings={()=>setModal('settings')}/>}
       {view==='manage'&&<ManagePage data={data} onView={setView} onBack={()=>setView('home')}/>}
@@ -298,18 +298,21 @@ function ProductCard({product,data,calc,onClick}:{product:Product;data:Data;calc
   return <button className="cp-product-card" onClick={onClick}><div className="cp-product-photo">{photo?<img src={photo} alt=""/>:<Box size={32}/>}<span className={pillClass}>{pill}</span></div><div className="cp-product-body"><span>{product.acquisition_type==='owned'?'Produto próprio':product.category||'Produto'}</span><h3>{product.name}</h3><div className="cp-product-values"><div><small>Custo real</small><b>{product.cost_basis_known?money.format(cost):'Não informado'}</b></div><div><small>{potential===null?'Sem preço':'Lucro possível'}</small><b className={potential!==null&&potential>=0?'positive':''}>{potential===null?'—':money.format(potential)}</b></div></div></div></button>
 }
 
-function StockPage({data,calc,onOpenProduct,onPurchase}:{data:Data;calc:Metrics;onOpenProduct:(p:Product)=>void;onPurchase:()=>void}){
+function StockPage({data,calc,onOpenProduct,onAdd}:{data:Data;calc:Metrics;onOpenProduct:(p:Product)=>void;onAdd:()=>void}){
   const [q,setQ]=useState('')
-  const [filter,setFilter]=useState<'all'|'stock'|'attention'|'sold'>('all')
+  const [filter,setFilter]=useState<'all'|'stock'|'listed'|'attention'|'sold'>('all')
+  const listedCount=data.products.filter(p=>p.quantity_available>0&&p.listing_status==='listed').length
+  const reviewCount=data.products.filter(p=>p.quantity_available>0&&p.listing_status==='listed'&&!!p.listing_next_checkin_at&&p.listing_next_checkin_at<=localDate()).length
   const list=data.products.filter(p=>{
     const match=(p.name+' '+(p.category||'')).toLowerCase().includes(q.toLowerCase())
     if(!match)return false
     if(filter==='stock')return p.quantity_available>0
-    if(filter==='attention')return p.quantity_available>0&&daysSince(p.purchase_date)>=calc.alertDays
+    if(filter==='listed')return p.quantity_available>0&&p.listing_status==='listed'
+    if(filter==='attention')return p.quantity_available>0&&(daysSince(p.purchase_date)>=calc.alertDays||(p.listing_status==='listed'&&!!p.listing_next_checkin_at&&p.listing_next_checkin_at<=localDate()))
     if(filter==='sold')return p.quantity_available===0
     return true
   })
-  return <div className="cp-page"><PageTitle eyebrow="ESTOQUE" title="Cada produto é dinheiro." text="Veja quanto custou, há quanto tempo está parado e quanto pode voltar para o caixa." action={<button className="cp-primary cp-small" onClick={onPurchase}><Plus size={18}/> Nova compra</button>}/><div className="cp-stock-summary"><div><span>Capital no estoque</span><strong>{money.format(calc.stockCapital)}</strong></div><div><span>Unidades disponíveis</span><strong>{calc.stockUnits}</strong></div><div><span>Pedem atenção</span><strong>{calc.agedProducts.length}</strong></div></div><div className="cp-tools"><label className="cp-search"><Search size={18}/><input value={q} onChange={e=>setQ(e.target.value)} placeholder="Buscar produto..."/></label><div className="cp-filter-tabs">{([['all','Todos'],['stock','Disponíveis'],['attention','Atenção'],['sold','Vendidos']] as const).map(([key,label])=><button key={key} className={filter===key?'active':''} onClick={()=>setFilter(key)}>{label}</button>)}</div></div>{list.length?<div className="cp-stock-grid">{list.map(p=><ProductCard key={p.id} product={p} data={data} calc={calc} onClick={()=>onOpenProduct(p)}/>)}</div>:<Empty icon={<Search/>} title="Nada por aqui" text={q?'Nenhum produto combina com essa busca.':'Registre uma compra para começar seu estoque.'} action={q?undefined:'Registrar compra'} onAction={onPurchase}/>}</div>
+  return <div className="cp-page"><PageTitle eyebrow="ESTOQUE" title="Seus produtos em um só lugar." text="Comprados para revenda ou produtos que você já tinha: acompanhe custo, anúncio e tempo parado." action={<button className="cp-primary cp-small" onClick={onAdd}><Plus size={18}/> Adicionar produto</button>}/><div className="cp-stock-summary cp-stock-summary--four"><div><span>Capital no estoque</span><strong>{money.format(calc.stockCapital)}</strong></div><div><span>Unidades disponíveis</span><strong>{calc.stockUnits}</strong></div><div><span>Anunciados</span><strong>{listedCount}</strong></div><div><span>Revisar anúncio</span><strong>{reviewCount}</strong></div></div><div className="cp-tools"><label className="cp-search"><Search size={18}/><input value={q} onChange={e=>setQ(e.target.value)} placeholder="Buscar produto..."/></label><div className="cp-filter-tabs">{([['all','Todos'],['stock','Disponíveis'],['listed','Anunciados'],['attention','Atenção'],['sold','Vendidos']] as const).map(([key,label])=><button key={key} className={filter===key?'active':''} onClick={()=>setFilter(key)}>{label}</button>)}</div></div>{list.length?<div className="cp-stock-grid">{list.map(p=><ProductCard key={p.id} product={p} data={data} calc={calc} onClick={()=>onOpenProduct(p)}/>)}</div>:<Empty icon={<Search/>} title="Nada por aqui" text={q?'Nenhum produto combina com essa busca.':'Adicione uma compra ou um produto que você já tem.'} action={q?undefined:'Adicionar produto'} onAction={onAdd}/>}</div>
 }
 
 function SalesPage({data,calc,onSale,onOpenProduct}:{data:Data;calc:Metrics;onSale:()=>void;onOpenProduct:(p:Product)=>void}){
