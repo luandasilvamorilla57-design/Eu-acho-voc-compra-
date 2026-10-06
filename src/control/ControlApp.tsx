@@ -195,13 +195,17 @@ function TopBar({business,email,theme,onTheme,onSettings,onManage}:{business:str
 }
 function Brand(){return <div className="cp-brand"><span className="cp-brand-mark">C<span>+</span></span><span className="cp-brand-word">CONTROLE<span>+</span></span></div>}
 
-function HomePage({data,calc,onOpenProduct,onView,onAction}:{data:Data;calc:Metrics;onOpenProduct:(p:Product)=>void;onView:(v:ControlView)=>void;onAction:(m:Modal)=>void}){
+function HomePage({data,calc,onOpenProduct,onView,onAction,onCheckListing}:{data:Data;calc:Metrics;onOpenProduct:(p:Product)=>void;onView:(v:ControlView)=>void;onAction:(m:Modal)=>void;onCheckListing:(p:Product)=>void}){
   const recent=data.products.slice(0,4)
   const totalCapital=Math.max(0,calc.cash)+calc.stockCapital
   const cashPct=totalCapital>0?Math.max(0,Math.min(100,calc.cash/totalCapital*100)):0
   const stockPct=100-cashPct
   const now=new Date()
   const dateLabel=now.toLocaleDateString('pt-BR',{weekday:'long',day:'2-digit',month:'short'})
+  const dueListings=data.products
+    .filter(p=>p.quantity_available>0&&p.listing_status==='listed'&&!!p.listing_next_checkin_at&&p.listing_next_checkin_at<=localDate())
+    .sort((a,b)=>(a.listing_next_checkin_at||'').localeCompare(b.listing_next_checkin_at||''))
+  const dueListing=dueListings[0]
 
   let guide={
     tone:'good',
@@ -211,9 +215,15 @@ function HomePage({data,calc,onOpenProduct,onView,onAction}:{data:Data;calc:Metr
     action:()=>onView('cash')
   }
   if(data.products.length===0)guide={
-    tone:'brand',title:'Cadastre sua primeira compra',
-    text:'O produto entra no estoque e o valor sai do caixa automaticamente.',
-    button:'Adicionar produto',action:()=>onAction('purchase')
+    tone:'brand',title:'Coloque o primeiro produto no estoque',
+    text:'Pode ser uma compra para revenda ou algo que você já tem em casa.',
+    button:'Adicionar produto',action:()=>onAction('actions')
+  }
+  else if(dueListing)guide={
+    tone:'brand',
+    title:'Como está o anúncio de '+dueListing.name+'?',
+    text:(dueListings.length>1?dueListings.length+' anúncios precisam de revisão. ':'')+'Esse produto está anunciado há '+daysSince(dueListing.listing_started_at||dueListing.purchase_date)+' dia(s). Já vendeu ou está com pouca procura?',
+    button:'Responder agora',action:()=>onCheckListing(dueListing)
   }
   else if(calc.agedProducts.length>0)guide={
     tone:'warn',title:calc.agedProducts.length+' produto(s) com capital parado',
