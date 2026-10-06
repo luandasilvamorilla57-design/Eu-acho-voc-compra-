@@ -33,8 +33,28 @@ export type Product={
   status:'in_stock'|'reserved'|'sold'|'archived'
   notes:string|null
   legacy_purchase_id:string|null
+  acquisition_type:'purchase'|'owned'
+  cost_basis_known:boolean
+  listing_status:'not_listed'|'listed'|'paused'
+  listing_channels:string[]
+  listing_started_at:string|null
+  listing_last_checkin_at:string|null
+  listing_next_checkin_at:string|null
+  listing_refresh_count:number
   created_at:string
   updated_at:string
+}
+
+export type ListingCheckin={
+  id:string
+  user_id:string
+  product_id:string
+  checkin_date:string
+  result:'good'|'keep'|'refreshed'|'price_lowered'
+  previous_price:number|null
+  new_price:number|null
+  note:string|null
+  created_at:string
 }
 
 export type ProductPhoto={
@@ -185,6 +205,11 @@ export type NewProductInput={
   listedPrice?:number|null
   minimumPrice?:number|null
   notes?:string
+  acquisitionType?:'purchase'|'owned'
+  costBasisKnown?:boolean
+  listingStatus?:'not_listed'|'listed'|'paused'
+  listingChannels?:string[]
+  listingStartedAt?:string|null
 }
 
 export type RegisterSaleInput={
