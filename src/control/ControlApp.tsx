@@ -570,23 +570,59 @@ function ListingCheckinModal({product,data,onClose,onSold,onDone}:{product:Produ
   </ModalShell>
 }
 
-function ProductDetail({product,data,calc,onClose,onSale,onExpense,onSaved}:{product:Product;data:Data;calc:Metrics;onClose:()=>void;onSale:()=>void;onExpense:()=>void;onSaved:()=>void}){
+function ProductDetail({product,data,calc,onClose,onSale,onExpense,onSaved,onDeleted}:{product:Product;data:Data;calc:Metrics;onClose:()=>void;onSale:()=>void;onExpense:()=>void;onSaved:()=>void;onDeleted:()=>void}){
   const photos=data.grouped.photosByProduct.get(product.id)||[]
   const expenses=data.grouped.expensesByProduct.get(product.id)||[]
   const cost=calc.unitCost(product)
   const [listed,setListed]=useState(product.listed_price===null?'':String(product.listed_price))
   const [minimum,setMinimum]=useState(product.minimum_price===null?'':String(product.minimum_price))
   const [editing,setEditing]=useState(false)
+  const [editingInfo,setEditingInfo]=useState(false)
+  const [name,setName]=useState(product.name)
+  const [category,setCategory]=useState(product.category||'')
+  const [notes,setNotes]=useState(product.notes||'')
   const [listingEditing,setListingEditing]=useState(false)
   const [isListed,setIsListed]=useState(product.listing_status==='listed')
   const [channels,setChannels]=useState<string[]>(product.listing_channels||[])
   const [listingDate,setListingDate]=useState(product.listing_started_at||localDate())
+  const [confirmDelete,setConfirmDelete]=useState(false)
   const [error,setError]=useState<string|null>(null)
   const potential=product.listed_price!==null?(product.listed_price-cost)*product.quantity_available:null
   const listingDays=product.listing_status==='listed'?daysSince(product.listing_started_at||product.purchase_date):0
   const listingDue=product.listing_status==='listed'&&!!product.listing_next_checkin_at&&product.listing_next_checkin_at<=localDate()
   const checkins=data.grouped.listingCheckinsByProduct.get(product.id)||[]
+  const hasSaleHistory=data.saleItems.some(item=>item.product_id===product.id)
 
+  async function saveInfo(){
+    setError(null)
+    try{
+      if(!name.trim())throw new Error('Informe o nome do produto.')
+      await data.updateProduct(product.id,{name:name.trim(),category:category.trim()||null,notes:notes.trim()||null})
+      setEditingInfo(false);onSaved()
+    }catch(err:any){setError(err?.message||'Não foi possível editar o produto.')}
+  }
+  async function addPhotos(files:File[]){
+    setError(null)
+    try{
+      if(!files.length)return
+      const count=await data.addProductPhotos(product.id,files)
+      if(count>0)onSaved()
+    }catch(err:any){setError(err?.message||'Não foi possível adicionar as fotos.')}
+  }
+  async function removePhoto(photoId:string){
+    setError(null)
+    try{
+      await data.deleteProductPhoto(photoId)
+      onSaved()
+    }catch(err:any){setError(err?.message||'Não foi possível remover a foto.')}
+  }
+  async function removeProduct(){
+    setError(null)
+    try{
+      await data.deleteProduct(product.id)
+      onDeleted()
+    }catch(err:any){setError(err?.message||'Não foi possível excluir o produto.')}
+  }
   async function savePrices(){
     setError(null)
     try{
@@ -612,8 +648,22 @@ function ProductDetail({product,data,calc,onClose,onSale,onExpense,onSaved}:{pro
   }
 
   return <ModalShell onClose={onClose}>
-    <div className="cp-detail-hero"><div className="cp-detail-photo">{photos[0]?.signed_url?<img src={photos[0].signed_url} alt=""/>:<Package/>}</div><div><span className="cp-eyebrow">{product.acquisition_type==='owned'?'PRODUTO PRÓPRIO':product.category||'PRODUTO'}</span><h2>{product.name}</h2><p>{product.quantity_available>0?product.quantity_available+' de '+product.quantity_initial+' unidade(s) disponíveis':'Produto vendido'}</p></div></div>
-    {photos.length>1&&<div className="cp-detail-gallery">{photos.slice(1,6).map(p=><img key={p.id} src={p.signed_url||''} alt=""/>)}</div>}
+    <div className="cp-detail-hero"><div className="cp-detail-photo">{photos[0]?.signed_url?<img src={photos[0].signed_url} alt=""/>:<Package/>}</div><div><span className="cp-eyebrow">{product.acquisition_type==='owned'?'PRODUTO PRÓPRIO':product.category||'PRODUTO'}</span><h2>{name}</h2><p>{product.quantity_available>0?product.quantity_available+' de '+product.quantity_initial+' unidade(s) disponíveis':'Produto vendido'}</p></div></div>
+
+    <section className="cp-detail-section">
+      <div className="cp-section-head"><div><span>FOTOS</span><h2>{photos.length?photos.length+' foto(s) do produto':'Adicione fotos desse produto'}</h2></div><label className="cp-detail-add-photo"><ImagePlus size={16}/> Adicionar<input type="file" accept="image/*" multiple onChange={e=>{const files=Array.from(e.target.files||[]);void addPhotos(files);e.currentTarget.value=''}}/></label></div>
+      <div className="cp-photo-manager">
+        {photos.map(photo=><div key={photo.id}><img src={photo.signed_url||''} alt=""/><button type="button" disabled={data.busy} onClick={()=>void removePhoto(photo.id)} aria-label="Excluir foto"><Trash2/></button></div>)}
+        {photos.length<12&&<label className="cp-photo-add-tile"><ImagePlus/><b>Adicionar fotos</b><small>até {12-photos.length} nova(s)</small><input type="file" accept="image/*" multiple onChange={e=>{const files=Array.from(e.target.files||[]);void addPhotos(files);e.currentTarget.value=''}}/></label>}
+      </div>
+      <p className="cp-muted">Você pode manter até 12 fotos por produto e remover qualquer imagem individualmente.</p>
+    </section>
+
+    <section className="cp-detail-section">
+      <div className="cp-section-head"><div><span>DADOS DO PRODUTO</span><h2>Informações básicas</h2></div><button onClick={()=>setEditingInfo(v=>!v)}><Pencil size={14}/>{editingInfo?'Cancelar':'Editar'}</button></div>
+      {editingInfo?<div className="cp-inline-edit cp-product-edit-grid"><Field label="Nome" full><input value={name} onChange={e=>setName(e.target.value)}/></Field><Field label="Categoria"><input value={category} onChange={e=>setCategory(e.target.value)} placeholder="Ex.: eletrônicos"/></Field><Field label="Observações" full><textarea value={notes} onChange={e=>setNotes(e.target.value)} placeholder="Estado, acessórios, defeitos..."/></Field><button className="cp-primary" disabled={data.busy} onClick={()=>void saveInfo()}>{data.busy?'Salvando...':'Salvar alterações'}</button></div>:<div className="cp-product-info-read"><div><span>Categoria</span><b>{category||'Não informada'}</b></div><div><span>Origem</span><b>{product.acquisition_type==='owned'?'Produto próprio':product.source||'Compra'}</b></div>{notes&&<div className="cp-product-notes"><span>Observações</span><p>{notes}</p></div>}</div>}
+    </section>
+
     <div className="cp-detail-numbers"><div><span>Custo por un.</span><b>{product.cost_basis_known?money.format(product.purchase_unit_cost):'Não informado'}</b></div><div><span>Custo real</span><b>{product.cost_basis_known?money.format(cost):'Sem base'}</b></div><div><span>Lucro possível</span><b className={potential!==null&&potential>=0?'positive':''}>{potential===null?'—':money.format(potential)}</b></div><div><span>Tempo no estoque</span><b>{daysSince(product.purchase_date)} dias</b></div></div>
     <div className="cp-detail-actions">{product.quantity_available>0&&<button className="cp-primary" onClick={onSale}><Banknote/> Registrar venda</button>}<button className="cp-secondary" onClick={onExpense}><Plus/> Adicionar gasto</button></div>
 
@@ -629,6 +679,13 @@ function ProductDetail({product,data,calc,onClose,onSale,onExpense,onSaved}:{pro
 
     <section className="cp-detail-section"><div className="cp-section-head"><div><span>PREÇO DE VENDA</span><h2>Quanto você quer fazer voltar</h2></div><button onClick={()=>setEditing(v=>!v)}>{editing?'Cancelar':'Editar'}</button></div>{editing?<div className="cp-inline-edit"><Field label="Preço anunciado"><MoneyInput value={listed} setValue={setListed} placeholder="0,00"/></Field><Field label="Preço mínimo"><MoneyInput value={minimum} setValue={setMinimum} placeholder="0,00"/></Field><button className="cp-primary" disabled={data.busy} onClick={()=>void savePrices()}>Salvar preços</button></div>:<div className="cp-price-line"><div><span>Anunciado</span><b>{product.listed_price===null?'Não informado':money.format(product.listed_price)}</b></div><div><span>Mínimo</span><b>{product.minimum_price===null?'Não informado':money.format(product.minimum_price)}</b></div></div>}</section>
     <section className="cp-detail-section"><div className="cp-section-head"><div><span>CUSTOS EXTRAS</span><h2>O que aumentou o custo real</h2></div></div>{expenses.length?<div className="cp-expense-list">{expenses.map(e=><div key={e.id}><span><Tag size={15}/>{expenseLabel(e.expense_type)+(e.description?' · '+e.description:'')}</span><b>{money.format(e.amount)}</b></div>)}</div>:<p className="cp-muted">Nenhum gasto extra registrado neste produto.</p>}</section>
+
+    <section className="cp-detail-danger">
+      <div><Trash2/><div><b>Excluir produto do estoque</b><p>{hasSaleHistory?'Este produto possui venda registrada e o histórico financeiro precisa ser preservado.':'Use apenas se o cadastro estiver errado ou se você realmente quiser remover o item e seus movimentos vinculados.'}</p></div></div>
+      {!hasSaleHistory&&!confirmDelete&&<button className="cp-danger-button" onClick={()=>setConfirmDelete(true)}>Excluir produto</button>}
+      {!hasSaleHistory&&confirmDelete&&<div className="cp-delete-confirm"><span>Excluir definitivamente este produto?</span><button className="cp-secondary" onClick={()=>setConfirmDelete(false)}>Cancelar</button><button className="cp-danger-button" disabled={data.busy} onClick={()=>void removeProduct()}>{data.busy?'Excluindo...':'Sim, excluir'}</button></div>}
+    </section>
+
     {error&&<div className="cp-form-error">{error}</div>}
   </ModalShell>
 }
