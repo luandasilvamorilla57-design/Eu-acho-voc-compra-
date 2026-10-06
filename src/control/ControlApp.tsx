@@ -136,7 +136,9 @@ function buildMetrics(data:Data){
     for(const item of items){
       revenue+=item.unit_price*item.quantity
       const product=productMap.get(item.product_id)
-      if(product)cost+=unitCost(product)*item.quantity
+      const snapshot=Number(item.unit_cost_snapshot||0)
+      if(snapshot>0)cost+=snapshot*item.quantity
+      else if(product)cost+=unitCost(product)*item.quantity
     }
     return{revenue,cost,profit:revenue-cost}
   }
@@ -460,6 +462,6 @@ function Field({label,children,full=false}:{label:string;children:React.ReactNod
 function MoneyInput({value,setValue,placeholder}:{value:string;setValue:(v:string)=>void;placeholder:string}){return <div className="cp-money-input"><span>R$</span><input inputMode="decimal" value={value} onChange={e=>setValue(e.target.value.replace(/[^0-9,.]/g,''))} placeholder={placeholder}/></div>}
 function Tip({text}:{text:string}){return <div className="cp-form-tip"><span>+</span><p>{text}</p></div>}
 function LoadingScreen(){return <div className="cp-loading"><Brand/><div className="cp-loading-line"><span/></div><p>Organizando seu negócio...</p></div>}
-function paymentLabel(v:string){return ({pix:'Pix',cash:'Dinheiro',card:'Cartão',transfer:'Transferência',other:'Outro'} as Record<string,string>)[v]||v}
+function paymentLabel(v:string){return ({pix:'Pix',cash:'Dinheiro',card:'Cartão',transfer:'Transferência',receivable:'A prazo',other:'Outro'} as Record<string,string>)[v]||v}
 function expenseLabel(v:string){return ({repair:'Reparo',transport:'Transporte',cleaning:'Limpeza',fee:'Taxa',accessory:'Acessório/peça',other:'Outro'} as Record<string,string>)[v]||v}
 function cashCategory(v:string){return ({purchase:'Compra',sale:'Venda',product_expense:'Gasto de produto',manual:'Manual'} as Record<string,string>)[v]||v}
