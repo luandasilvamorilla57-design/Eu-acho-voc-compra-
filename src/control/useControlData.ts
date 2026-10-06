@@ -32,6 +32,7 @@ export function useControlData(userId:string){
   const [goals,setGoals]=useState<Goal[]>([])
   const [closures,setClosures]=useState<MonthClosure[]>([])
   const [listingCheckins,setListingCheckins]=useState<ListingCheckin[]>([])
+  const [isAdmin,setIsAdmin]=useState(false)
   const [loading,setLoading]=useState(true)
   const [busy,setBusy]=useState(false)
   const [error,setError]=useState<string|null>(null)
@@ -48,20 +49,24 @@ export function useControlData(userId:string){
         setSettings(inserted.data as ControlSettings)
       }else setSettings(current.data as ControlSettings)
 
+      const adminResult=await db.from('control_admins').select('role,enabled').eq('user_id',userId).maybeSingle()
+      if(adminResult.error)throw adminResult.error
+      setIsAdmin(Boolean(adminResult.data?.enabled&&adminResult.data?.role==='super_admin'))
+
       const [p,ph,e,s,si,c,cu,su,r,i,g,cl,lc]=await Promise.all([
-        db.from('control_products').select('*').order('created_at',{ascending:false}),
-        db.from('control_product_photos').select('*').order('position',{ascending:true}),
-        db.from('control_product_expenses').select('*').order('occurred_at',{ascending:false}),
-        db.from('control_sales').select('*').order('sale_date',{ascending:false}).order('created_at',{ascending:false}),
-        db.from('control_sale_items').select('*').order('created_at',{ascending:false}),
-        db.from('control_cash_entries').select('*').order('occurred_at',{ascending:false}).order('created_at',{ascending:false}),
-        db.from('control_customers').select('*').order('name',{ascending:true}),
-        db.from('control_suppliers').select('*').order('name',{ascending:true}),
-        db.from('control_receivables').select('*').order('due_date',{ascending:true}),
-        db.from('control_receivable_installments').select('*').order('due_date',{ascending:true}),
-        db.from('control_goals').select('*').order('period_month',{ascending:false}),
-        db.from('control_month_closures').select('*').order('period_month',{ascending:false}),
-        db.from('control_listing_checkins').select('*').order('checkin_date',{ascending:false}).order('created_at',{ascending:false})
+        db.from('control_products').select('*').eq('user_id',userId).order('created_at',{ascending:false}),
+        db.from('control_product_photos').select('*').eq('user_id',userId).order('position',{ascending:true}),
+        db.from('control_product_expenses').select('*').eq('user_id',userId).order('occurred_at',{ascending:false}),
+        db.from('control_sales').select('*').eq('user_id',userId).order('sale_date',{ascending:false}).order('created_at',{ascending:false}),
+        db.from('control_sale_items').select('*').eq('user_id',userId).order('created_at',{ascending:false}),
+        db.from('control_cash_entries').select('*').eq('user_id',userId).order('occurred_at',{ascending:false}).order('created_at',{ascending:false}),
+        db.from('control_customers').select('*').eq('user_id',userId).order('name',{ascending:true}),
+        db.from('control_suppliers').select('*').eq('user_id',userId).order('name',{ascending:true}),
+        db.from('control_receivables').select('*').eq('user_id',userId).order('due_date',{ascending:true}),
+        db.from('control_receivable_installments').select('*').eq('user_id',userId).order('due_date',{ascending:true}),
+        db.from('control_goals').select('*').eq('user_id',userId).order('period_month',{ascending:false}),
+        db.from('control_month_closures').select('*').eq('user_id',userId).order('period_month',{ascending:false}),
+        db.from('control_listing_checkins').select('*').eq('user_id',userId).order('checkin_date',{ascending:false}).order('created_at',{ascending:false})
       ])
       for(const result of [p,ph,e,s,si,c,cu,su,r,i,g,cl,lc])if(result.error)throw result.error
 
@@ -249,11 +254,11 @@ export function useControlData(userId:string){
       for(const key of ['name','category','brand','model','condition','sku','source','supplier_id','seller_name','listed_price','minimum_price','status','notes','acquisition_type','cost_basis_known','listing_status','listing_channels','listing_started_at','listing_last_checkin_at','listing_next_checkin_at','listing_refresh_count']){
         if(key in patch)allowed[key]=(patch as any)[key]
       }
-      const result=await db.from('control_products').update(allowed).eq('id',productId)
+      const result=await db.from('control_products').update(allowed).eq('id',productId).eq('user_id',userId)
       if(result.error)throw result.error
       await load()
     }finally{setBusy(false)}
-  },[load])
+  },[load,userId])
 
   const createCustomer=useCallback(async(name:string,phone?:string,notes?:string)=>{
     const result=await db.from('control_customers').insert({
