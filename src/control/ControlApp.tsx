@@ -600,7 +600,7 @@ function CashModal({data,onClose,onDone}:{data:Data;onClose:()=>void;onDone:()=>
   return <ModalShell onClose={onClose}><ModalHeader eyebrow="MOVIMENTO DE CAIXA" title="Registre o dinheiro que entrou ou saiu." text="Use para movimentos que não são compra, venda ou gasto de produto."/><div className="cp-kind-toggle"><button className={kind==='income'?'active positive':''} onClick={()=>setKind('income')}><ArrowUpRight/> Entrada</button><button className={kind==='expense'?'active negative':''} onClick={()=>setKind('expense')}><ArrowDownRight/> Saída</button></div><div className="cp-form-grid"><Field label="Valor"><MoneyInput value={amount} setValue={setAmount} placeholder="0,00"/></Field><Field label="Data"><input type="date" value={date} onChange={e=>setDate(e.target.value)}/></Field><Field label="Descrição" full><input value={description} onChange={e=>setDescription(e.target.value)} placeholder="Ex.: retirada pessoal, aporte, frete geral..."/></Field></div>{error&&<div className="cp-form-error">{error}</div>}<div className="cp-modal-actions"><button className="cp-secondary" onClick={onClose}>Cancelar</button><button className="cp-primary" disabled={data.busy} onClick={()=>void save()}>{data.busy?'Salvando...':'Adicionar ao caixa'}</button></div></ModalShell>
 }
 
-function SettingsModal({data,email,onClose,onDone}:{data:Data;email?:string;onClose:()=>void;onDone:(t:string)=>void}){
+function SettingsModal({data,email,access,billingBusy,onSubscribe,onCancel,readOnly,onClose,onDone}:{data:Data;email?:string;access:NonNullable<ReturnType<typeof useControlAccess>['access']>;billingBusy:boolean;onSubscribe:()=>void;onCancel:()=>void;readOnly:boolean;onClose:()=>void;onDone:(t:string)=>void}){
   const [business,setBusiness]=useState(data.settings?.business_name||'Meu negócio'),[cash,setCash]=useState(String(data.settings?.initial_cash||0)),[days,setDays]=useState(String(data.settings?.stock_alert_days||21)),[error,setError]=useState<string|null>(null)
   async function save(){setError(null);try{await data.updateSettings({business_name:business.trim()||'Meu negócio',initial_cash:Math.max(0,Number(cash.replace(',','.'))||0),stock_alert_days:Math.max(1,Number(days)||21),onboarding_completed:true});onDone('Configurações salvas.');onClose()}catch(err:any){setError(err?.message||'Não foi possível salvar.')}}
   return <ModalShell onClose={onClose}>
@@ -609,17 +609,19 @@ function SettingsModal({data,email,onClose,onDone}:{data:Data;email?:string;onCl
       <div><span>CONFIGURAÇÕES DO NEGÓCIO</span><h2>Seu CONTROLE+, do seu jeito.</h2><p>Ajuste apenas o que muda seu caixa, seus alertas e a identificação do negócio.</p></div>
     </section>
     <div className="cp-account-line"><span>{(email?.[0]||'C').toUpperCase()}</span><div><b>{email||'Sua conta'}</b><small>Conta protegida e dados separados por usuário</small></div></div>
+    <ActivePlanCard access={access} busy={billingBusy} onCancel={onCancel}/>
+    {readOnly&&<button className="cp-settings-subscribe" disabled={billingBusy} onClick={onSubscribe}>Continuar por {money.format(access.monthly_price)}/mês</button>}
     <div className="cp-settings-sections">
       <div className="cp-settings-section"><span>01</span><div><b>Identificação</b><small>Como seu negócio aparece dentro do app.</small></div></div>
-      <div className="cp-form-grid"><Field label="Nome do negócio" full><input value={business} onChange={e=>setBusiness(e.target.value)} placeholder="Ex.: Brique do Luan"/></Field></div>
+      <div className="cp-form-grid"><Field label="Nome do negócio" full><input disabled={readOnly} value={business} onChange={e=>setBusiness(e.target.value)} placeholder="Ex.: Brique do Luan"/></Field></div>
       <div className="cp-settings-section"><span>02</span><div><b>Dinheiro de partida</b><small>Use o saldo que você tinha quando começou a controlar aqui.</small></div></div>
       <div className="cp-form-grid"><Field label="Saldo inicial"><MoneyInput value={cash} setValue={setCash} placeholder="0,00"/></Field></div>
       <div className="cp-settings-section"><span>03</span><div><b>Alerta de estoque parado</b><small>Depois desse período, o app chama sua atenção.</small></div></div>
-      <div className="cp-form-grid"><Field label="Alertar estoque após"><div className="cp-input-suffix"><input type="number" min="1" value={days} onChange={e=>setDays(e.target.value)}/><span>dias</span></div></Field></div>
+      <div className="cp-form-grid"><Field label="Alertar estoque após"><div className="cp-input-suffix"><input disabled={readOnly} type="number" min="1" value={days} onChange={e=>setDays(e.target.value)}/><span>dias</span></div></Field></div>
     </div>
     <div className="cp-settings-note"><b>Importante sobre o saldo inicial</b><p>Ele é o ponto de partida do caixa. Depois que você já começou a registrar compras e vendas, mudar esse valor altera o saldo disponível mostrado no app.</p></div>
     {error&&<div className="cp-form-error">{error}</div>}
-    <div className="cp-modal-actions"><button className="cp-danger-link" onClick={()=>void supabase.auth.signOut()}><LogOut size={17}/> Sair</button><button className="cp-primary" disabled={data.busy} onClick={()=>void save()}>Salvar configurações</button></div>
+    <div className="cp-modal-actions"><button className="cp-danger-link" onClick={()=>void supabase.auth.signOut()}><LogOut size={17}/> Sair</button>{!readOnly&&<button className="cp-primary" disabled={data.busy} onClick={()=>void save()}>Salvar configurações</button>}</div>
   </ModalShell>
 }
 
@@ -662,7 +664,7 @@ function ListingCheckinModal({product,data,onClose,onSold,onDone}:{product:Produ
   </ModalShell>
 }
 
-function ProductDetail({product,data,calc,onClose,onSale,onExpense,onSaved,onDeleted}:{product:Product;data:Data;calc:Metrics;onClose:()=>void;onSale:()=>void;onExpense:()=>void;onSaved:()=>void;onDeleted:()=>void}){
+function ProductDetail({product,data,calc,readOnly,onClose,onSale,onExpense,onSaved,onDeleted}:{product:Product;data:Data;calc:Metrics;readOnly:boolean;onClose:()=>void;onSale:()=>void;onExpense:()=>void;onSaved:()=>void;onDeleted:()=>void}){
   const photos=data.grouped.photosByProduct.get(product.id)||[]
   const expenses=data.grouped.expensesByProduct.get(product.id)||[]
   const cost=calc.unitCost(product)
@@ -743,24 +745,24 @@ function ProductDetail({product,data,calc,onClose,onSale,onExpense,onSaved,onDel
     <div className="cp-detail-hero"><div className="cp-detail-photo">{photos[0]?.signed_url?<img src={photos[0].signed_url} alt=""/>:<Package/>}</div><div><span className="cp-eyebrow">{product.acquisition_type==='owned'?'PRODUTO PRÓPRIO':product.category||'PRODUTO'}</span><h2>{name}</h2><p>{product.quantity_available>0?product.quantity_available+' de '+product.quantity_initial+' unidade(s) disponíveis':'Produto vendido'}</p></div></div>
 
     <section className="cp-detail-section">
-      <div className="cp-section-head"><div><span>FOTOS</span><h2>{photos.length?photos.length+' foto(s) do produto':'Adicione fotos desse produto'}</h2></div><label className="cp-detail-add-photo"><ImagePlus size={16}/> Adicionar<input type="file" accept="image/*" multiple onChange={e=>{const files=Array.from(e.target.files||[]);void addPhotos(files);e.currentTarget.value=''}}/></label></div>
+      <div className="cp-section-head"><div><span>FOTOS</span><h2>{photos.length?photos.length+' foto(s) do produto':'Adicione fotos desse produto'}</h2></div>{!readOnly&&<label className="cp-detail-add-photo"><ImagePlus size={16}/> Adicionar<input type="file" accept="image/*" multiple onChange={e=>{const files=Array.from(e.target.files||[]);void addPhotos(files);e.currentTarget.value=''}}/></label>}</div>
       <div className="cp-photo-manager">
-        {photos.map(photo=><div key={photo.id}><img src={photo.signed_url||''} alt=""/><button type="button" disabled={data.busy} onClick={()=>void removePhoto(photo.id)} aria-label="Excluir foto"><Trash2/></button></div>)}
-        {photos.length<12&&<label className="cp-photo-add-tile"><ImagePlus/><b>Adicionar fotos</b><small>até {12-photos.length} nova(s)</small><input type="file" accept="image/*" multiple onChange={e=>{const files=Array.from(e.target.files||[]);void addPhotos(files);e.currentTarget.value=''}}/></label>}
+        {photos.map(photo=><div key={photo.id}><img src={photo.signed_url||''} alt=""/>{!readOnly&&<button type="button" disabled={data.busy} onClick={()=>void removePhoto(photo.id)} aria-label="Excluir foto"><Trash2/></button>}</div>)}
+        {!readOnly&&photos.length<12&&<label className="cp-photo-add-tile"><ImagePlus/><b>Adicionar fotos</b><small>até {12-photos.length} nova(s)</small><input type="file" accept="image/*" multiple onChange={e=>{const files=Array.from(e.target.files||[]);void addPhotos(files);e.currentTarget.value=''}}/></label>}
       </div>
-      <p className="cp-muted">Você pode manter até 12 fotos por produto e remover qualquer imagem individualmente.</p>
+      <p className="cp-muted">{readOnly?'Modo leitura: suas fotos continuam disponíveis.':'Você pode manter até 12 fotos por produto e remover qualquer imagem individualmente.'}</p>
     </section>
 
     <section className="cp-detail-section">
-      <div className="cp-section-head"><div><span>DADOS DO PRODUTO</span><h2>Informações básicas</h2></div><button onClick={()=>setEditingInfo(v=>!v)}><Pencil size={14}/>{editingInfo?'Cancelar':'Editar'}</button></div>
+      <div className="cp-section-head"><div><span>DADOS DO PRODUTO</span><h2>Informações básicas</h2></div>{!readOnly&&<button onClick={()=>setEditingInfo(v=>!v)}><Pencil size={14}/>{editingInfo?'Cancelar':'Editar'}</button>}</div>
       {editingInfo?<div className="cp-inline-edit cp-product-edit-grid"><Field label="Nome" full><input value={name} onChange={e=>setName(e.target.value)}/></Field><Field label="Categoria"><input value={category} onChange={e=>setCategory(e.target.value)} placeholder="Ex.: eletrônicos"/></Field><Field label="Observações" full><textarea value={notes} onChange={e=>setNotes(e.target.value)} placeholder="Estado, acessórios, defeitos..."/></Field><button className="cp-primary" disabled={data.busy} onClick={()=>void saveInfo()}>{data.busy?'Salvando...':'Salvar alterações'}</button></div>:<div className="cp-product-info-read"><div><span>Categoria</span><b>{category||'Não informada'}</b></div><div><span>Origem</span><b>{product.acquisition_type==='owned'?'Produto próprio':product.source||'Compra'}</b></div>{notes&&<div className="cp-product-notes"><span>Observações</span><p>{notes}</p></div>}</div>}
     </section>
 
     <div className="cp-detail-numbers"><div><span>Custo por un.</span><b>{product.cost_basis_known?money.format(product.purchase_unit_cost):'Não informado'}</b></div><div><span>Custo real</span><b>{product.cost_basis_known?money.format(cost):'Sem base'}</b></div><div><span>Lucro possível</span><b className={potential!==null&&potential>=0?'positive':''}>{potential===null?'—':money.format(potential)}</b></div><div><span>Tempo no estoque</span><b>{daysSince(product.purchase_date)} dias</b></div></div>
-    <div className="cp-detail-actions">{product.quantity_available>0&&<button className="cp-primary" onClick={onSale}><Banknote/> Registrar venda</button>}<button className="cp-secondary" onClick={onExpense}><Plus/> Adicionar gasto</button></div>
+    {!readOnly&&<div className="cp-detail-actions">{product.quantity_available>0&&<button className="cp-primary" onClick={onSale}><Banknote/> Registrar venda</button>}<button className="cp-secondary" onClick={onExpense}><Plus/> Adicionar gasto</button></div>}
 
     <section className="cp-detail-section">
-      <div className="cp-section-head"><div><span>ANÚNCIO</span><h2>Acompanhar a venda</h2></div>{product.listing_status!=='sold'&&<button onClick={()=>setListingEditing(v=>!v)}>{listingEditing?'Cancelar':'Editar'}</button>}</div>
+      <div className="cp-section-head"><div><span>ANÚNCIO</span><h2>Acompanhar a venda</h2></div>{!readOnly&&product.listing_status!=='sold'&&<button onClick={()=>setListingEditing(v=>!v)}>{listingEditing?'Cancelar':'Editar'}</button>}</div>
       {listingEditing?<div className="cp-listing-editor"><ListingSetup isListed={isListed} setIsListed={setIsListed} channels={channels} setChannels={setChannels} listingDate={listingDate} setListingDate={setListingDate}/>{isListed&&<Field label="Preço anunciado" full><MoneyInput value={listed} setValue={setListed} placeholder="0,00"/></Field>}<button className="cp-primary" disabled={data.busy} onClick={()=>void saveListing()}>{data.busy?'Salvando...':'Salvar anúncio'}</button></div>:<div className={listingDue?'cp-listing-status-card is-due':'cp-listing-status-card'}>
         <span className="cp-listing-status-icon"><Megaphone/></span>
         <div><span>{product.listing_status==='listed'?'ANUNCIADO':product.listing_status==='sold'?'VENDIDO':'NÃO ANUNCIADO'}</span><b>{product.listing_status==='listed'?(product.listing_channels.join(' · ')||'Plataforma não informada'):product.listing_status==='sold'?'Venda concluída':'Esse produto ainda não está sendo acompanhado'}</b>{product.listing_status==='listed'&&<small>{listingDays} dia(s) no ar · {listingDue?'revisão pendente':'próxima revisão '+new Date((product.listing_next_checkin_at||localDate())+'T12:00:00').toLocaleDateString('pt-BR')}</small>}</div>
@@ -769,14 +771,14 @@ function ProductDetail({product,data,calc,onClose,onSale,onExpense,onSaved,onDel
       {checkins.length>0&&<div className="cp-checkin-history"><span>Últimas revisões</span>{checkins.slice(0,3).map(item=><div key={item.id}><b>{item.result==='refreshed'?'Anúncio renovado':item.result==='price_lowered'?'Preço reduzido':item.result==='good'?'Anúncio indo bem':'Mantido por mais 5 dias'}</b><small>{new Date(item.checkin_date+'T12:00:00').toLocaleDateString('pt-BR')}{item.new_price?' · '+money.format(item.new_price):''}</small></div>)}</div>}
     </section>
 
-    <section className="cp-detail-section"><div className="cp-section-head"><div><span>PREÇO DE VENDA</span><h2>Quanto você quer fazer voltar</h2></div><button onClick={()=>setEditing(v=>!v)}>{editing?'Cancelar':'Editar'}</button></div>{editing?<div className="cp-inline-edit"><Field label="Preço anunciado"><MoneyInput value={listed} setValue={setListed} placeholder="0,00"/></Field><Field label="Preço mínimo"><MoneyInput value={minimum} setValue={setMinimum} placeholder="0,00"/></Field><button className="cp-primary" disabled={data.busy} onClick={()=>void savePrices()}>Salvar preços</button></div>:<div className="cp-price-line"><div><span>Anunciado</span><b>{product.listed_price===null?'Não informado':money.format(product.listed_price)}</b></div><div><span>Mínimo</span><b>{product.minimum_price===null?'Não informado':money.format(product.minimum_price)}</b></div></div>}</section>
+    <section className="cp-detail-section"><div className="cp-section-head"><div><span>PREÇO DE VENDA</span><h2>Quanto você quer fazer voltar</h2></div>{!readOnly&&<button onClick={()=>setEditing(v=>!v)}>{editing?'Cancelar':'Editar'}</button>}</div>{editing?<div className="cp-inline-edit"><Field label="Preço anunciado"><MoneyInput value={listed} setValue={setListed} placeholder="0,00"/></Field><Field label="Preço mínimo"><MoneyInput value={minimum} setValue={setMinimum} placeholder="0,00"/></Field><button className="cp-primary" disabled={data.busy} onClick={()=>void savePrices()}>Salvar preços</button></div>:<div className="cp-price-line"><div><span>Anunciado</span><b>{product.listed_price===null?'Não informado':money.format(product.listed_price)}</b></div><div><span>Mínimo</span><b>{product.minimum_price===null?'Não informado':money.format(product.minimum_price)}</b></div></div>}</section>
     <section className="cp-detail-section"><div className="cp-section-head"><div><span>CUSTOS EXTRAS</span><h2>O que aumentou o custo real</h2></div></div>{expenses.length?<div className="cp-expense-list">{expenses.map(e=><div key={e.id}><span><Tag size={15}/>{expenseLabel(e.expense_type)+(e.description?' · '+e.description:'')}</span><b>{money.format(e.amount)}</b></div>)}</div>:<p className="cp-muted">Nenhum gasto extra registrado neste produto.</p>}</section>
 
-    <section className="cp-detail-danger">
+    {!readOnly&&<section className="cp-detail-danger">
       <div><Trash2/><div><b>Excluir produto do estoque</b><p>{hasSaleHistory?'Este produto possui venda registrada e o histórico financeiro precisa ser preservado.':'Use apenas se o cadastro estiver errado ou se você realmente quiser remover o item e seus movimentos vinculados.'}</p></div></div>
       {!hasSaleHistory&&!confirmDelete&&<button className="cp-danger-button" onClick={()=>setConfirmDelete(true)}>Excluir produto</button>}
       {!hasSaleHistory&&confirmDelete&&<div className="cp-delete-confirm"><span>Excluir definitivamente este produto?</span><button className="cp-secondary" onClick={()=>setConfirmDelete(false)}>Cancelar</button><button className="cp-danger-button" disabled={data.busy} onClick={()=>void removeProduct()}>{data.busy?'Excluindo...':'Sim, excluir'}</button></div>}
-    </section>
+    </section>}
 
     {error&&<div className="cp-form-error">{error}</div>}
   </ModalShell>
