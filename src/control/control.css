@@ -2503,3 +2503,388 @@ body{transition:background .22s ease,color .22s ease}
   .cp-quick-app small{font-size:10px!important}
   .cp-month-app-grid--four,.cp-sales-hero--four{grid-template-columns:1fr!important}
 }
+
+
+/* =========================================================
+   CONTROLE+ V10 — PWA INSTALL + HOME HIERARCHY + SETTINGS
+   ========================================================= */
+
+/* stronger spacing hierarchy on home */
+.cp-home-app{
+  padding-top:24px!important;
+}
+.cp-balance-app{
+  margin-bottom:28px!important;
+  box-shadow:
+    0 28px 68px rgba(5,39,89,.30),
+    0 0 0 1px rgba(94,169,255,.05) inset!important;
+}
+.cp-quick-app{
+  margin:0 0 30px!important;
+}
+.cp-smart-card{
+  margin:0 0 44px!important;
+}
+.cp-smart-card + .cp-app-section{
+  margin-top:0!important;
+}
+.cp-app-section + .cp-month-app{
+  margin-top:38px!important;
+}
+
+/* quick actions have their own personality */
+.cp-quick-app button{
+  position:relative;
+  overflow:hidden;
+  background:
+    linear-gradient(180deg,
+      color-mix(in srgb,var(--cp-panel) 94%,#16325d 6%),
+      var(--cp-panel))!important;
+  border-color:rgba(94,148,222,.16)!important;
+  box-shadow:0 14px 32px rgba(0,0,0,.09)!important;
+}
+.cp-quick-app button:before{
+  content:'';
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+  background:linear-gradient(135deg,rgba(255,255,255,.025),transparent 45%);
+}
+.cp-quick-app button:nth-child(1)>span{
+  background:rgba(37,99,235,.16)!important;
+  color:#70b7ff!important;
+}
+.cp-quick-app button:nth-child(2)>span{
+  background:rgba(14,165,233,.14)!important;
+  color:#66d0ff!important;
+}
+.cp-quick-app button:nth-child(3)>span{
+  background:rgba(99,102,241,.13)!important;
+  color:#9aa7ff!important;
+}
+.cp-quick-app button:nth-child(4)>span{
+  background:rgba(6,182,212,.12)!important;
+  color:#6ee7f7!important;
+}
+.cp-quick-app button:hover{
+  transform:translateY(-2px)!important;
+  border-color:rgba(91,174,255,.28)!important;
+}
+
+/* pending action card should not look like every other card */
+.cp-smart-card--brand{
+  position:relative;
+  overflow:hidden;
+  background:
+    radial-gradient(circle at 3% 0%,rgba(85,170,255,.24),transparent 34%),
+    linear-gradient(135deg,#0d2447 0%,#0b1b34 54%,#0a172b 100%)!important;
+  border-color:rgba(91,174,255,.28)!important;
+  box-shadow:0 22px 48px rgba(5,31,69,.22)!important;
+}
+.cp-smart-card--brand:before{
+  content:'';
+  position:absolute;
+  left:0;top:0;bottom:0;width:4px;
+  background:linear-gradient(180deg,#4ea5ff,#6de0ff);
+}
+.cp-smart-card--brand .cp-smart-icon{
+  background:linear-gradient(145deg,rgba(43,112,230,.34),rgba(76,194,255,.16))!important;
+  border:1px solid rgba(112,197,255,.22)!important;
+  color:#70d2ff!important;
+  box-shadow:0 10px 25px rgba(25,102,214,.18);
+}
+.cp-smart-card--brand>div:nth-child(2)>span{
+  color:#7fcfff!important;
+}
+.cp-smart-card--brand>button{
+  min-height:38px;
+  padding:0 10px!important;
+  border-radius:10px!important;
+  color:#76ceff!important;
+  background:rgba(82,168,255,.08)!important;
+}
+.cp-smart-card--warn{
+  background:
+    radial-gradient(circle at 4% 0%,rgba(245,158,11,.12),transparent 30%),
+    linear-gradient(135deg,var(--cp-panel-2),var(--cp-panel))!important;
+  border-color:rgba(245,158,11,.19)!important;
+}
+
+/* light theme equivalents */
+:root[data-theme="light"] .cp-smart-card--brand{
+  background:
+    radial-gradient(circle at 0 0,rgba(59,130,246,.12),transparent 36%),
+    linear-gradient(135deg,#f2f7ff,#ffffff 68%)!important;
+  border-color:rgba(37,99,235,.18)!important;
+  box-shadow:0 18px 38px rgba(34,75,133,.10)!important;
+}
+:root[data-theme="light"] .cp-smart-card--brand h2{
+  color:#10203a!important;
+}
+:root[data-theme="light"] .cp-smart-card--brand p{
+  color:#61718a!important;
+}
+:root[data-theme="light"] .cp-quick-app button{
+  background:linear-gradient(180deg,#fff,#f8fbff)!important;
+  box-shadow:0 12px 30px rgba(36,66,105,.08)!important;
+}
+
+/* admin shield should clearly be a real control */
+.cp-admin-top.active{
+  color:#dff3ff!important;
+  border-color:rgba(91,184,255,.48)!important;
+  background:linear-gradient(135deg,#175ac9,#2f8bff)!important;
+  box-shadow:0 8px 22px rgba(37,99,235,.22)!important;
+}
+
+/* settings: more like a native app settings sheet */
+.cp-settings-hero{
+  display:grid;
+  grid-template-columns:auto 1fr;
+  gap:14px;
+  align-items:start;
+  margin:2px 0 18px;
+}
+.cp-settings-hero-icon{
+  width:48px;height:48px;border-radius:15px;
+  display:grid;place-items:center;
+  background:linear-gradient(145deg,rgba(37,99,235,.24),rgba(103,195,255,.10));
+  border:1px solid rgba(75,156,255,.22);
+  color:var(--cp-accent-light);
+}
+.cp-settings-hero-icon svg{width:20px}
+.cp-settings-hero>div>span{
+  font-size:9px;letter-spacing:.16em;font-weight:900;
+  color:var(--cp-accent-light)
+}
+.cp-settings-hero h2{
+  font:800 26px/1.08 'Manrope';
+  letter-spacing:-1px;
+  color:var(--cp-text);
+  margin:5px 0 7px
+}
+.cp-settings-hero p{
+  font-size:13px!important;
+  line-height:1.55;
+  color:var(--cp-muted);
+  margin:0;
+}
+.cp-settings-sections{
+  display:grid;
+  gap:12px;
+  margin-top:18px;
+}
+.cp-settings-section{
+  display:grid;
+  grid-template-columns:34px 1fr;
+  gap:10px;
+  align-items:center;
+  padding-top:10px;
+  border-top:1px solid var(--cp-line);
+}
+.cp-settings-section>span{
+  font-size:9px;
+  letter-spacing:.08em;
+  font-weight:900;
+  color:var(--cp-accent-light);
+}
+.cp-settings-section b{
+  display:block;
+  font-size:13px;
+  color:var(--cp-text);
+}
+.cp-settings-section small{
+  display:block;
+  font-size:11px;
+  line-height:1.4;
+  color:var(--cp-muted);
+  margin-top:2px;
+}
+.cp-settings-note{
+  margin-top:18px!important;
+  padding:14px!important;
+  border-radius:14px!important;
+  border-left:3px solid rgba(59,130,246,.48)!important;
+}
+.cp-settings-note b{
+  font-size:12px!important;
+}
+.cp-settings-note p{
+  font-size:12px!important;
+  line-height:1.55!important;
+}
+.cp-account-line{
+  border-radius:15px!important;
+  padding:13px!important;
+}
+.cp-account-line b{
+  font-size:12px!important;
+}
+.cp-account-line small{
+  font-size:10px!important;
+}
+
+/* first-login install prompt */
+.cp-install-layer{
+  position:fixed;
+  inset:0;
+  z-index:160;
+  display:flex;
+  align-items:flex-end;
+  justify-content:center;
+  padding:18px;
+}
+.cp-install-backdrop{
+  position:absolute;
+  inset:0;
+  border:0;
+  background:rgba(2,8,18,.72);
+  backdrop-filter:blur(10px);
+}
+.cp-install-card{
+  position:relative;
+  z-index:1;
+  width:min(560px,100%);
+  border-radius:26px;
+  padding:22px;
+  background:
+    radial-gradient(circle at 90% 0,rgba(60,145,255,.20),transparent 32%),
+    linear-gradient(180deg,var(--cp-panel-2),var(--cp-panel));
+  border:1px solid rgba(104,168,255,.20);
+  box-shadow:0 30px 80px rgba(0,0,0,.40);
+}
+.cp-install-close{
+  position:absolute;
+  right:14px;top:14px;
+  width:36px;height:36px;border-radius:11px;
+  border:1px solid var(--cp-line);
+  background:var(--cp-panel-3);
+  color:var(--cp-muted);
+  display:grid;place-items:center
+}
+.cp-install-close svg{width:17px}
+.cp-install-app-icon{
+  width:58px;height:58px;border-radius:18px;
+  display:grid;place-items:center;
+  position:relative;
+  font:800 24px 'Manrope';
+  color:#fff;
+  background:linear-gradient(145deg,#2e6af7,#63c5ff);
+  box-shadow:0 14px 32px rgba(37,99,235,.28);
+  margin-bottom:17px
+}
+.cp-install-app-icon small{
+  position:absolute;
+  right:10px;bottom:6px;
+  font-size:14px;color:#fff
+}
+.cp-install-copy>span{
+  font-size:9px;letter-spacing:.16em;
+  color:var(--cp-accent-light);
+  font-weight:900
+}
+.cp-install-copy h2{
+  font:800 27px/1.08 'Manrope';
+  letter-spacing:-1.2px;
+  margin:6px 0 9px;
+  color:var(--cp-text);
+  max-width:430px
+}
+.cp-install-copy p{
+  font-size:13px;
+  line-height:1.55;
+  color:var(--cp-muted);
+  margin:0
+}
+.cp-install-actions{
+  display:grid;
+  grid-template-columns:1fr auto;
+  gap:9px;
+  margin-top:20px
+}
+.cp-install-primary{
+  min-height:52px;
+  padding:0 16px;
+  border:0;border-radius:15px;
+  background:linear-gradient(135deg,#2869eb,#4eabff);
+  color:#fff;
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  font-size:13px;font-weight:900;
+  box-shadow:0 12px 28px rgba(37,99,235,.24)
+}
+.cp-install-primary svg{width:18px}
+.cp-install-later{
+  min-height:52px;
+  padding:0 15px;
+  border-radius:15px;
+  border:1px solid var(--cp-line);
+  background:var(--cp-panel-3);
+  color:var(--cp-muted);
+  font-size:12px;font-weight:800
+}
+.cp-install-help{
+  display:grid;
+  gap:10px;
+  margin-top:18px
+}
+.cp-install-help>div{
+  display:grid;
+  grid-template-columns:38px 1fr;
+  gap:10px;
+  align-items:start;
+  padding:12px;
+  border-radius:14px;
+  background:var(--cp-panel-3);
+  border:1px solid var(--cp-line)
+}
+.cp-install-help>div>svg{
+  width:20px;
+  color:var(--cp-accent-light);
+  margin:4px auto 0
+}
+.cp-install-help b{
+  font-size:12px;
+  color:var(--cp-text)
+}
+.cp-install-help p{
+  font-size:11px;
+  line-height:1.5;
+  color:var(--cp-muted);
+  margin:3px 0 0
+}
+.cp-install-help p svg{
+  width:13px;
+  vertical-align:-2px
+}
+
+@media(max-width:640px){
+  .cp-balance-app{margin-bottom:24px!important}
+  .cp-quick-app{margin-bottom:28px!important}
+  .cp-smart-card{margin-bottom:40px!important}
+  .cp-smart-card--brand{
+    border-radius:20px!important;
+  }
+  .cp-install-layer{
+    padding:0;
+  }
+  .cp-install-card{
+    border-radius:28px 28px 0 0;
+    padding:22px 18px calc(20px + env(safe-area-inset-bottom));
+    width:100%;
+  }
+  .cp-install-copy h2{
+    font-size:25px;
+  }
+  .cp-install-copy p{
+    font-size:13px;
+  }
+  .cp-install-actions{
+    grid-template-columns:1fr;
+  }
+  .cp-install-later{
+    min-height:46px;
+  }
+  .cp-settings-hero h2{
+    font-size:25px;
+  }
+}
