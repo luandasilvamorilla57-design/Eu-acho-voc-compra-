@@ -113,7 +113,6 @@ export function useControlAccess(userId:string){
       await refresh(true)
     }catch(err:any){
       setError(err?.message||'Não foi possível cancelar a renovação.')
-      throw err
     }finally{
       setBusy(false)
     }
