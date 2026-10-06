@@ -8,6 +8,7 @@ import {supabase} from '../lib/supabase'
 import {useControlData} from './useControlData'
 import {BackupPage,ClosuresPage,GoalsPage,ManagePage,PeoplePage,ReceivablesPage,ReportsPage} from './BusinessCenter'
 import {AdminCenter} from './AdminCenter'
+import {InstallAppPrompt} from './InstallAppPrompt'
 import type {CashEntry,ControlView,Product,Sale} from './types'
 
 type Data=ReturnType<typeof useControlData>
@@ -64,7 +65,7 @@ export function ControlApp({userId,email}:{userId:string;email?:string}){
 
   return <div className="cp-app" data-theme={theme}>
     <div className="cp-noise"/>
-    <TopBar business={data.settings.business_name} email={email} theme={theme} isAdmin={data.isAdmin} onTheme={()=>setTheme(v=>v==='dark'?'light':'dark')} onSettings={()=>setModal('settings')} onManage={()=>setView('manage')} onAdmin={()=>setView('admin')}/>
+    <TopBar business={data.settings.business_name} email={email} theme={theme} isAdmin={data.isAdmin} adminActive={view==='admin'} onTheme={()=>setTheme(v=>v==='dark'?'light':'dark')} onSettings={()=>setModal('settings')} onManage={()=>setView('manage')} onAdmin={()=>setView('admin')}/>
     <main className="cp-main">
       {view==='home'&&<HomePage data={data} calc={calc} onOpenProduct={setSelected} onView={setView} onAction={setModal} onCheckListing={openListingCheckin}/>}
       {view==='stock'&&<StockPage data={data} calc={calc} onOpenProduct={setSelected} onAdd={()=>setModal('actions')}/>}
@@ -78,7 +79,7 @@ export function ControlApp({userId,email}:{userId:string;email?:string}){
       {view==='closures'&&<ClosuresPage data={data} onBack={()=>setView('manage')}/>}
       {view==='backup'&&<BackupPage data={data} onBack={()=>setView('manage')}/>}
     </main>
-    <BottomNav view={view} onView={setView} onAdd={()=>setModal('actions')}/>
+    {view!=='admin'&&<BottomNav view={view} onView={setView} onAdd={()=>setModal('actions')}/>}\n    <InstallAppPrompt userId={userId}/>
 
     {modal==='actions'&&<ActionSheet onClose={()=>setModal(null)} onChoose={setModal}/>}
     {modal==='purchase'&&<PurchaseModal data={data} onClose={()=>setModal(null)} onDone={()=>{setModal(null);notify('Compra salva e adicionada ao estoque.')}}/>}
@@ -86,7 +87,8 @@ export function ControlApp({userId,email}:{userId:string;email?:string}){
     {modal==='sale'&&<SaleModal data={data} initialProduct={selected} onClose={()=>setModal(null)} onDone={()=>{setModal(null);setSelected(null);notify('Venda registrada. Caixa e estoque atualizados.')}}/>}
     {modal==='expense'&&<ExpenseModal data={data} initialProduct={selected} onClose={()=>setModal(null)} onDone={()=>{setModal(null);notify('Gasto somado ao custo real do produto.')}}/>}
     {modal==='cash'&&<CashModal data={data} onClose={()=>setModal(null)} onDone={()=>{setModal(null);notify('Movimentação adicionada ao caixa.')}}/>}
-    {modal==='settings'&&<SettingsModal data={data} email={email} onClose={()=>setModal(null)} onDone={notify}/>}\n    {selected&&modal==='listingCheckin'&&<ListingCheckinModal product={selected} data={data} onClose={()=>{setModal(null);setSelected(null)}} onSold={()=>setModal('sale')} onDone={(text)=>{setModal(null);setSelected(null);notify(text)}}/>}
+    {modal==='settings'&&<SettingsModal data={data} email={email} onClose={()=>setModal(null)} onDone={notify}/>} 
+    {selected&&modal==='listingCheckin'&&<ListingCheckinModal product={selected} data={data} onClose={()=>{setModal(null);setSelected(null)}} onSold={()=>setModal('sale')} onDone={(text)=>{setModal(null);setSelected(null);notify(text)}}/>}
     {selected&&modal===null&&<ProductDetail product={selected} data={data} calc={calc} onClose={()=>setSelected(null)} onSale={()=>setModal('sale')} onExpense={()=>setModal('expense')} onSaved={()=>notify('Produto atualizado.')} onDeleted={()=>{setSelected(null);notify('Produto removido do estoque.')}}/>}
     {toast&&<div className="cp-toast"><Check size={18}/>{toast}</div>}
     {data.error&&<div className="cp-error-bar"><AlertTriangle size={17}/>{data.error}</div>}
@@ -187,12 +189,12 @@ function buildMetrics(data:Data){
   return{unitCost,productMap,stockCapital,cash,monthSales,monthSaleItems,monthUnitsSold,monthOrders,monthRevenue,monthProfit,stockUnits,alertDays,agedProducts,agedCapital,potentialProfit,saleStats}
 }
 
-function TopBar({business,email,theme,isAdmin,onTheme,onSettings,onManage,onAdmin}:{business:string;email?:string;theme:'dark'|'light';isAdmin:boolean;onTheme:()=>void;onSettings:()=>void;onManage:()=>void;onAdmin:()=>void}){
+function TopBar({business,email,theme,isAdmin,adminActive,onTheme,onSettings,onManage,onAdmin}:{business:string;email?:string;theme:'dark'|'light';isAdmin:boolean;adminActive:boolean;onTheme:()=>void;onSettings:()=>void;onManage:()=>void;onAdmin:()=>void}){
   return <header className="cp-topbar"><div className="cp-top-inner">
     <Brand/>
     <div className="cp-top-business"><span>{business}</span><small>CONTROLE DO NEGÓCIO</small></div>
     <div className="cp-top-actions">
-      {isAdmin&&<button className="cp-admin-top" onClick={onAdmin}><ShieldCheck size={16}/><span>Admin</span></button>}
+      {isAdmin&&<button className={adminActive?'cp-admin-top active':'cp-admin-top'} onClick={onAdmin} aria-label="Abrir painel administrador" title="Administrador geral"><ShieldCheck size={16}/><span>Admin</span></button>}
       <button className="cp-theme-toggle" onClick={onTheme} aria-label={theme==='dark'?'Ativar tema claro':'Ativar tema escuro'}>{theme==='dark'?<Sun size={17}/>:<Moon size={17}/>}</button>
       <button className="cp-manage-top" onClick={onManage}><BarChart3 size={16}/><span>Gestão</span></button>
       <button className="cp-user-btn" onClick={onSettings}><span>{(email?.[0]||'C').toUpperCase()}</span><Settings2 size={16}/></button>
@@ -566,7 +568,24 @@ function CashModal({data,onClose,onDone}:{data:Data;onClose:()=>void;onDone:()=>
 function SettingsModal({data,email,onClose,onDone}:{data:Data;email?:string;onClose:()=>void;onDone:(t:string)=>void}){
   const [business,setBusiness]=useState(data.settings?.business_name||'Meu negócio'),[cash,setCash]=useState(String(data.settings?.initial_cash||0)),[days,setDays]=useState(String(data.settings?.stock_alert_days||21)),[error,setError]=useState<string|null>(null)
   async function save(){setError(null);try{await data.updateSettings({business_name:business.trim()||'Meu negócio',initial_cash:Math.max(0,Number(cash.replace(',','.'))||0),stock_alert_days:Math.max(1,Number(days)||21),onboarding_completed:true});onDone('Configurações salvas.');onClose()}catch(err:any){setError(err?.message||'Não foi possível salvar.')}}
-  return <ModalShell onClose={onClose}><ModalHeader eyebrow="SEU CONTROLE+" title="Ajustes simples, números mais reais." text="Defina o ponto de partida do caixa e quando um produto deve chamar atenção."/><div className="cp-account-line"><span>{(email?.[0]||'C').toUpperCase()}</span><div><b>{email||'Sua conta'}</b><small>Dados protegidos por usuário</small></div></div><div className="cp-form-grid"><Field label="Nome do negócio" full><input value={business} onChange={e=>setBusiness(e.target.value)} placeholder="Ex.: Brique do Luan"/></Field><Field label="Saldo inicial"><MoneyInput value={cash} setValue={setCash} placeholder="0,00"/></Field><Field label="Alertar estoque após"><div className="cp-input-suffix"><input type="number" min="1" value={days} onChange={e=>setDays(e.target.value)}/><span>dias</span></div></Field></div><div className="cp-settings-note"><b>O que é saldo inicial?</b><p>É o dinheiro que você já tinha disponível antes de começar a registrar as movimentações aqui.</p></div>{error&&<div className="cp-form-error">{error}</div>}<div className="cp-modal-actions"><button className="cp-danger-link" onClick={()=>void supabase.auth.signOut()}><LogOut size={17}/> Sair</button><button className="cp-primary" disabled={data.busy} onClick={()=>void save()}>Salvar ajustes</button></div></ModalShell>
+  return <ModalShell onClose={onClose}>
+    <section className="cp-settings-hero">
+      <span className="cp-settings-hero-icon"><Settings2/></span>
+      <div><span>CONFIGURAÇÕES DO NEGÓCIO</span><h2>Seu CONTROLE+, do seu jeito.</h2><p>Ajuste apenas o que muda seu caixa, seus alertas e a identificação do negócio.</p></div>
+    </section>
+    <div className="cp-account-line"><span>{(email?.[0]||'C').toUpperCase()}</span><div><b>{email||'Sua conta'}</b><small>Conta protegida e dados separados por usuário</small></div></div>
+    <div className="cp-settings-sections">
+      <div className="cp-settings-section"><span>01</span><div><b>Identificação</b><small>Como seu negócio aparece dentro do app.</small></div></div>
+      <div className="cp-form-grid"><Field label="Nome do negócio" full><input value={business} onChange={e=>setBusiness(e.target.value)} placeholder="Ex.: Brique do Luan"/></Field></div>
+      <div className="cp-settings-section"><span>02</span><div><b>Dinheiro de partida</b><small>Use o saldo que você tinha quando começou a controlar aqui.</small></div></div>
+      <div className="cp-form-grid"><Field label="Saldo inicial"><MoneyInput value={cash} setValue={setCash} placeholder="0,00"/></Field></div>
+      <div className="cp-settings-section"><span>03</span><div><b>Alerta de estoque parado</b><small>Depois desse período, o app chama sua atenção.</small></div></div>
+      <div className="cp-form-grid"><Field label="Alertar estoque após"><div className="cp-input-suffix"><input type="number" min="1" value={days} onChange={e=>setDays(e.target.value)}/><span>dias</span></div></Field></div>
+    </div>
+    <div className="cp-settings-note"><b>Importante sobre o saldo inicial</b><p>Ele é o ponto de partida do caixa. Depois que você já começou a registrar compras e vendas, mudar esse valor altera o saldo disponível mostrado no app.</p></div>
+    {error&&<div className="cp-form-error">{error}</div>}
+    <div className="cp-modal-actions"><button className="cp-danger-link" onClick={()=>void supabase.auth.signOut()}><LogOut size={17}/> Sair</button><button className="cp-primary" disabled={data.busy} onClick={()=>void save()}>Salvar configurações</button></div>
+  </ModalShell>
 }
 
 function ListingCheckinModal({product,data,onClose,onSold,onDone}:{product:Product;data:Data;onClose:()=>void;onSold:()=>void;onDone:(text:string)=>void}){
