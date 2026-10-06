@@ -5,11 +5,11 @@
   "start_url":"/",
   "scope":"/",
   "display":"standalone",
-  "background_color":"#0a0b0d",
-  "theme_color":"#0a0b0d",
+  "background_color":"#07111f",
+  "theme_color":"#07111f",
   "orientation":"portrait-primary",
   "icons":[
-    {"src":"/control-plus-icon.svg?v=1","sizes":"any","type":"image/svg+xml","purpose":"any"},
-    {"src":"/control-plus-maskable.svg?v=1","sizes":"any","type":"image/svg+xml","purpose":"maskable"}
+    {"src":"/control-plus-icon.svg?v=2","sizes":"any","type":"image/svg+xml","purpose":"any"},
+    {"src":"/control-plus-maskable.svg?v=2","sizes":"any","type":"image/svg+xml","purpose":"maskable"}
   ]
 }
