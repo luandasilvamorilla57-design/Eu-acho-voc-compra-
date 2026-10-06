@@ -1921,3 +1921,21 @@ body{transition:background .22s ease,color .22s ease}
   .cp-quick-app b{font-size:12px!important}
   .cp-quick-app small{display:block!important;font-size:8px!important}
 }
+
+/* final readability pass */
+.cp-balance-app-top span{font-size:11px!important}
+.cp-balance-app-stats span{font-size:9px!important}
+.cp-balance-app-stats b{font-size:13px!important}
+.cp-capital-track-labels span{font-size:9px!important}
+.cp-bottom button{font-size:10px!important}
+.cp-bottom button svg{width:20px!important;height:20px!important}
+.cp-top-business>span{font-size:11px!important}
+.cp-top-business>small{font-size:8px!important}
+.cp-cash-card>span{font-size:11px!important}
+.cp-cash-card>p{font-size:11px!important}
+.cp-cash-row>b,.cp-sale-money b{font-size:12px!important}
+.cp-sale-money span{font-size:10px!important}
+.cp-detail-numbers span,.cp-price-line span{font-size:9px!important}
+.cp-detail-numbers b,.cp-price-line b{font-size:13px!important}
+.cp-section-head span{font-size:10px!important}
+.cp-section-head h2{font-size:20px!important}
