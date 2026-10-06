@@ -11,6 +11,7 @@ import {AdminCenter} from './AdminCenter'
 import {InstallAppPrompt} from './InstallAppPrompt'
 import {useControlAccess} from './useControlAccess'
 import {ActivePlanCard,SubscriptionGate,TrialBanner} from './BillingUI'
+import {BriqueGuidePage} from './BriqueGuidePage'
 import type {CashEntry,ControlView,Product,Sale} from './types'
 
 type Data=ReturnType<typeof useControlData>
@@ -74,7 +75,7 @@ export function ControlApp({userId,email}:{userId:string;email?:string}){
     requireWrite(()=>setModal(next))
   }
   function openView(next:ControlView){
-    if(canWrite||['home','stock','sales','cash','reports','backup','admin'].includes(next)){
+    if(canWrite||['home','stock','sales','cash','reports','backup','guide','admin'].includes(next)){
       setView(next)
       return
     }
