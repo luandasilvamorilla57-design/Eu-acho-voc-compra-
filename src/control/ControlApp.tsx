@@ -315,6 +315,12 @@ function HomePage({data,calc,onOpenProduct,onView,onAction,onCheckListing}:{data
       <button onClick={guide.action}>{guide.button}<ChevronRight size={16}/></button>
     </section>
 
+    <button className="cp-brique-shortcut" onClick={()=>onView('guide')}>
+      <span className="cp-brique-shortcut-icon"><BadgeDollarSign/></span>
+      <div><span>GUIA DO BRIQUE</span><b>Compra x venda + como valorizar o produto</b><p>Referências de preço, testes antes da compra, limpeza, fotos e negociação.</p></div>
+      <ChevronRight/>
+    </button>
+
     <section className="cp-app-section">
       <div className="cp-app-section-head"><div><span>ESTOQUE</span><h2>{recent.length?'Produtos recentes':'Seu estoque está vazio'}</h2></div>{recent.length>0&&<button onClick={()=>onView('stock')}>Ver todos</button>}</div>
       {recent.length?<div className="cp-product-row">{recent.map(p=><ProductCard key={p.id} product={p} data={data} calc={calc} onClick={()=>onOpenProduct(p)}/>)}</div>:<Empty icon={<Package/>} title="Comece pelo primeiro produto" text="Adicione uma compra para visualizar estoque, custo e lucro possível." action="Adicionar compra" onAction={()=>onAction('purchase')}/>}
