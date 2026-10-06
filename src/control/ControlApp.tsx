@@ -157,44 +157,121 @@ function Brand(){return <div className="cp-brand"><span className="cp-brand-mark
 
 function HomePage({data,calc,onOpenProduct,onView,onAction}:{data:Data;calc:Metrics;onOpenProduct:(p:Product)=>void;onView:(v:ControlView)=>void;onAction:(m:Modal)=>void}){
   const recent=data.products.slice(0,4)
-  let guide={tone:'good',title:'Operação em dia',text:'Compras, estoque e caixa estão sincronizados.',button:'Ver caixa',action:()=>onView('cash')}
-  if(data.products.length===0)guide={tone:'brand',title:'Comece pela primeira compra',text:'Cadastre um produto. O CONTROLE+ coloca o valor no caixa e no estoque automaticamente.',button:'Registrar compra',action:()=>onAction('purchase')}
-  else if(calc.agedProducts.length>0)guide={tone:'warn',title:calc.agedProducts.length+' produto(s) merecem atenção',text:money.format(calc.agedCapital)+' do seu capital está parado há '+calc.alertDays+' dias ou mais.',button:'Ver produtos',action:()=>onView('stock')}
-  else if(data.sales.length===0)guide={tone:'soft',title:'Seu estoque já está tomando forma',text:'Quando vender, registre a venda. O lucro e o saldo do caixa serão calculados automaticamente.',button:'Registrar venda',action:()=>onAction('sale')}
+  const totalCapital=Math.max(0,calc.cash)+calc.stockCapital
+  const cashPct=totalCapital>0?Math.max(0,Math.min(100,calc.cash/totalCapital*100)):0
+  const stockPct=100-cashPct
+  const revenueBase=Math.max(calc.monthRevenue,calc.stockCapital,1)
+  const revenuePct=Math.min(100,calc.monthRevenue/revenueBase*100)
+  const profitPct=Math.min(100,Math.max(0,calc.monthProfit)/revenueBase*100)
 
-  return <div className="cp-page cp-home">
-    <section className="cp-welcome"><div><span className="cp-eyebrow">VISÃO DE HOJE</span><h1>Seu negócio, <em>sem adivinhação.</em></h1><p>Você não precisa decorar números. O CONTROLE+ mostra o que aconteceu e o que fazer agora.</p></div><button className="cp-desktop-add" onClick={()=>onAction('actions')}><Plus size={19}/> Registrar</button></section>
+  let guide={
+    tone:'good',
+    eyebrow:'NEGÓCIO ORGANIZADO',
+    title:'Tudo registrado por aqui.',
+    text:'Seu caixa, estoque e vendas estão conversando entre si.',
+    button:'Abrir caixa',
+    action:()=>onView('cash')
+  }
+  if(data.products.length===0)guide={
+    tone:'brand',eyebrow:'PRIMEIRO MOVIMENTO',title:'Coloque sua primeira mercadoria no jogo.',
+    text:'Cadastre uma compra. O valor sai do caixa e o produto entra no estoque sem conta manual.',
+    button:'Registrar compra',action:()=>onAction('purchase')
+  }
+  else if(calc.agedProducts.length>0)guide={
+    tone:'warn',eyebrow:'CAPITAL PARADO',title:calc.agedProducts.length+' produto(s) pedem sua atenção.',
+    text:money.format(calc.agedCapital)+' estão presos em mercadoria há '+calc.alertDays+' dias ou mais.',
+    button:'Revisar estoque',action:()=>onView('stock')
+  }
+  else if(data.sales.length===0)guide={
+    tone:'soft',eyebrow:'PRÓXIMO PASSO',title:'Seu estoque já existe. Agora faça o dinheiro voltar.',
+    text:'Quando sair a primeira venda, registre aqui para enxergar lucro e giro de verdade.',
+    button:'Registrar venda',action:()=>onAction('sale')
+  }
 
-    <section className="cp-balance-card">
-      <div className="cp-balance-head"><span>Disponível em caixa</span><WalletCards size={22}/></div>
-      <strong>{money.format(calc.cash)}</strong>
-      <p>Valor livre depois das compras, gastos e vendas que você registrou.</p>
-      <div className="cp-balance-split"><div><span>Em produtos</span><b>{money.format(calc.stockCapital)}</b></div><div><span>Lucro no mês</span><b className={calc.monthProfit>=0?'positive':'negative'}>{money.format(calc.monthProfit)}</b></div><div><span>Estoque</span><b>{number.format(calc.stockUnits)} un.</b></div></div>
+  return <div className="cp-page cp-home cp-home-v4">
+    <section className="cp-home-intro">
+      <div>
+        <span className="cp-home-kicker">CONTROLE DE HOJE</span>
+        <h1>Dinheiro parado é produto.<br/><em>Produto vendido vira caixa.</em></h1>
+      </div>
+      <div className="cp-home-intro-side">
+        <span>SEU NEGÓCIO</span>
+        <strong>{data.settings?.business_name||'Meu negócio'}</strong>
+        <button onClick={()=>onAction('actions')}><Plus size={17}/> Registrar movimento</button>
+      </div>
     </section>
 
-    <section className={'cp-guide cp-guide--'+guide.tone}><div className="cp-guide-icon">{guide.tone==='warn'?<Clock3/>:guide.tone==='brand'?<ShoppingBag/>:<Check/>}</div><div className="cp-guide-copy"><span>O QUE FAZER AGORA</span><h2>{guide.title}</h2><p>{guide.text}</p></div><button onClick={guide.action}>{guide.button}<ChevronRight size={18}/></button></section>
+    <section className="cp-capital-stage">
+      <div className="cp-capital-main">
+        <div className="cp-capital-label"><span className="cp-live-dot"/> CAIXA LIVRE AGORA</div>
+        <strong className="cp-capital-number">{money.format(calc.cash)}</strong>
+        <p>É o valor realmente disponível depois de tudo que você registrou.</p>
+        <div className="cp-capital-mini">
+          <div><span>Mercadoria</span><b>{money.format(calc.stockCapital)}</b></div>
+          <div><span>Lucro no mês</span><b className={calc.monthProfit>=0?'positive':'negative'}>{money.format(calc.monthProfit)}</b></div>
+          <div><span>Unidades</span><b>{number.format(calc.stockUnits)}</b></div>
+        </div>
+      </div>
 
-    <div className="cp-section-head"><div><span>RESUMO DO MÊS</span><h2>Seu negócio em 4 números</h2></div></div>
-    <section className="cp-kpi-grid">
-      <Kpi icon={<ArrowUpRight/>} label="Faturamento" value={money.format(calc.monthRevenue)} hint={calc.monthSales.length+' venda(s) no mês'}/>
-      <Kpi icon={<CircleDollarSign/>} label="Lucro real" value={money.format(calc.monthProfit)} hint="Descontando o custo real"/>
-      <Kpi icon={<Package/>} label="Capital em estoque" value={money.format(calc.stockCapital)} hint="Dinheiro que ainda precisa girar"/>
-      <Kpi icon={<BarChart3/>} label="Lucro possível" value={money.format(calc.potentialProfit)} hint="Pelos preços anunciados"/>
+      <div className="cp-capital-side">
+        <div className="cp-money-map-head"><span>MAPA DO SEU CAPITAL</span><b>{money.format(totalCapital)}</b></div>
+        <div className="cp-money-map">
+          <i className="is-cash" style={{width:cashPct+'%'}}/>
+          <i className="is-stock" style={{width:stockPct+'%'}}/>
+        </div>
+        <div className="cp-money-map-legend">
+          <div><span><i className="dot-cash"/>Livre</span><b>{cashPct.toFixed(0)}%</b></div>
+          <div><span><i className="dot-stock"/>Em produtos</span><b>{stockPct.toFixed(0)}%</b></div>
+        </div>
+
+        <div className="cp-month-pulse">
+          <div className="cp-month-pulse-head"><span>PULSO DO MÊS</span><small>{calc.monthSales.length} venda(s)</small></div>
+          <div className="cp-pulse-row"><div><span>Faturamento</span><b>{money.format(calc.monthRevenue)}</b></div><i><em style={{width:revenuePct+'%'}}/></i></div>
+          <div className="cp-pulse-row"><div><span>Lucro real</span><b className={calc.monthProfit>=0?'positive':'negative'}>{money.format(calc.monthProfit)}</b></div><i><em className="is-profit" style={{width:profitPct+'%'}}/></i></div>
+        </div>
+      </div>
     </section>
 
-    <section className="cp-quick">
-      <button onClick={()=>onAction('purchase')}><span className="cp-quick-icon"><ShoppingBag/></span><div><b>Comprei</b><small>Colocar no estoque</small></div><ChevronRight/></button>
-      <button onClick={()=>onAction('sale')}><span className="cp-quick-icon"><Banknote/></span><div><b>Vendi</b><small>Dar baixa e calcular lucro</small></div><ChevronRight/></button>
-      <button onClick={()=>onAction('expense')}><span className="cp-quick-icon"><ArrowDownRight/></span><div><b>Tive um gasto</b><small>Somar ao custo real</small></div><ChevronRight/></button>
+    <section className={'cp-next-move cp-next-move--'+guide.tone}>
+      <div className="cp-next-index">01</div>
+      <div className="cp-next-copy"><span>{guide.eyebrow}</span><h2>{guide.title}</h2><p>{guide.text}</p></div>
+      <button onClick={guide.action}>{guide.button}<ChevronRight size={18}/></button>
     </section>
 
-    <div className="cp-section-head"><div><span>ESTOQUE RECENTE</span><h2>{recent.length?'O que está na sua mão':'Seu estoque vai aparecer aqui'}</h2></div>{recent.length>0&&<button onClick={()=>onView('stock')}>Ver tudo</button>}</div>
-    {recent.length?<div className="cp-product-row">{recent.map(p=><ProductCard key={p.id} product={p} data={data} calc={calc} onClick={()=>onOpenProduct(p)}/>)}</div>:<Empty icon={<Package/>} title="Nenhum produto ainda" text="Registre sua primeira compra e o app começa a organizar seu dinheiro." action="Adicionar primeira compra" onAction={()=>onAction('purchase')}/>}
+    <section className="cp-action-editorial">
+      <div className="cp-section-title-v4">
+        <span>ATALHOS</span>
+        <h2>O que aconteceu no seu negócio?</h2>
+      </div>
+      <div className="cp-action-rail">
+        <button onClick={()=>onAction('purchase')}><span className="cp-action-no">01</span><span className="cp-action-symbol"><ShoppingBag/></span><div><b>Comprei</b><small>mercadoria entra, caixa diminui</small></div><ChevronRight/></button>
+        <button onClick={()=>onAction('sale')}><span className="cp-action-no">02</span><span className="cp-action-symbol"><Banknote/></span><div><b>Vendi</b><small>estoque baixa, lucro aparece</small></div><ChevronRight/></button>
+        <button onClick={()=>onAction('expense')}><span className="cp-action-no">03</span><span className="cp-action-symbol"><ArrowDownRight/></span><div><b>Gastei</b><small>reparo, transporte ou taxa</small></div><ChevronRight/></button>
+      </div>
+    </section>
+
+    <section className="cp-home-bottom-grid">
+      <div className="cp-stock-showcase">
+        <div className="cp-section-title-v4">
+          <span>ESTOQUE RECENTE</span>
+          <h2>{recent.length?'Mercadoria na mão':'Seu estoque começa aqui'}</h2>
+        </div>
+        {recent.length?
+          <div className="cp-product-row">{recent.map(p=><ProductCard key={p.id} product={p} data={data} calc={calc} onClick={()=>onOpenProduct(p)}/>)}</div>
+          :<Empty icon={<Package/>} title="Nenhum produto ainda" text="Sua primeira compra já vira histórico, estoque e movimento de caixa." action="Adicionar primeira compra" onAction={()=>onAction('purchase')}/>}
+        {recent.length>0&&<button className="cp-text-link" onClick={()=>onView('stock')}>Abrir estoque completo <ArrowUpRight size={15}/></button>}
+      </div>
+
+      <aside className="cp-profit-note">
+        <span className="cp-profit-note-index">02</span>
+        <span className="cp-profit-note-kicker">VISÃO RÁPIDA</span>
+        <h3>{calc.potentialProfit>0?money.format(calc.potentialProfit):'Seu próximo lucro'}</h3>
+        <p>{calc.potentialProfit>0?'É o lucro possível do estoque atual pelos preços que você informou.':'Quando você definir preços de venda, o CONTROLE+ mostra quanto pode voltar para você.'}</p>
+        <div className="cp-profit-note-line"/>
+        <button onClick={()=>onView('stock')}>Ver mercadorias <ChevronRight size={16}/></button>
+      </aside>
+    </section>
   </div>
-}
-
-function Kpi({icon,label,value,hint}:{icon:React.ReactNode;label:string;value:string;hint:string}){
-  return <article className="cp-kpi"><span className="cp-kpi-icon">{icon}</span><div><span>{label}</span><strong>{value}</strong><small>{hint}</small></div></article>
 }
 
 function ProductCard({product,data,calc,onClick}:{product:Product;data:Data;calc:Metrics;onClick:()=>void}){
