@@ -350,14 +350,76 @@ function PurchaseModal({data,onClose,onDone}:{data:Data;onClose:()=>void;onDone:
 function SaleModal({data,initialProduct,onClose,onDone}:{data:Data;initialProduct:Product|null;onClose:()=>void;onDone:()=>void}){
   const available=data.products.filter(p=>p.quantity_available>0)
   const first=initialProduct&&initialProduct.quantity_available>0?initialProduct:available[0]
-  const [productId,setProductId]=useState(first?.id||''),[qty,setQty]=useState('1'),[price,setPrice]=useState(first?.listed_price?String(first.listed_price):'')
-  const [date,setDate]=useState(localDate()),[payment,setPayment]=useState('pix'),[notes,setNotes]=useState(''),[error,setError]=useState<string|null>(null)
+  const [productId,setProductId]=useState(first?.id||'')
+  const [qty,setQty]=useState('1')
+  const [price,setPrice]=useState(first?.listed_price?String(first.listed_price):'')
+  const [date,setDate]=useState(localDate())
+  const [payment,setPayment]=useState('pix')
+  const [paymentMode,setPaymentMode]=useState<'paid'|'receivable'>('paid')
+  const [customerId,setCustomerId]=useState('')
+  const [newCustomer,setNewCustomer]=useState(false)
+  const [customerName,setCustomerName]=useState('')
+  const [customerPhone,setCustomerPhone]=useState('')
+  const [installments,setInstallments]=useState('2')
+  const [firstDue,setFirstDue]=useState(localDate())
+  const [notes,setNotes]=useState('')
+  const [error,setError]=useState<string|null>(null)
   const product=available.find(p=>p.id===productId)
-  const calc=buildMetrics(data),cost=product?calc.unitCost(product)*(Number(qty)||1):0,revenue=(Number(price.replace(',','.'))||0)*(Number(qty)||1)
-  async function save(){setError(null);try{if(!product)throw new Error('Escolha o produto vendido.');const value=Number(price.replace(',','.'));if(!Number.isFinite(value)||value<=0)throw new Error('Informe o valor da venda.');await data.registerSale({productId:product.id,quantity:Math.max(1,Number(qty)||1),unitPrice:value,saleDate:date,paymentMethod:payment,paymentMode:'paid',notes});onDone()}catch(err:any){setError(err?.message||'Não foi possível registrar a venda.')}}
-  return <ModalShell onClose={onClose}><ModalHeader eyebrow="REGISTRAR VENDA" title="Quanto voltou para o seu caixa?" text="O CONTROLE+ calcula o lucro usando o custo real do produto."/>
-    {available.length?<div className="cp-form-grid"><Field label="Produto vendido" full><select value={productId} onChange={e=>{setProductId(e.target.value);const p=available.find(x=>x.id===e.target.value);setPrice(p?.listed_price?String(p.listed_price):'')}}>{available.map(p=><option key={p.id} value={p.id}>{p.name+' · '+p.quantity_available+' disp.'}</option>)}</select></Field><Field label="Quantidade"><input type="number" min="1" max={product?.quantity_available||1} value={qty} onChange={e=>setQty(e.target.value)}/></Field><Field label="Valor por unidade"><MoneyInput value={price} setValue={setPrice} placeholder="0,00"/></Field><Field label="Data da venda"><input type="date" value={date} onChange={e=>setDate(e.target.value)}/></Field><Field label="Pagamento"><select value={payment} onChange={e=>setPayment(e.target.value)}><option value="pix">Pix</option><option value="cash">Dinheiro</option><option value="card">Cartão</option><option value="transfer">Transferência</option><option value="other">Outro</option></select></Field><Field label="Observação" full><textarea value={notes} onChange={e=>setNotes(e.target.value)} placeholder="Ex.: entreguei com carregador"/></Field><div className="cp-profit-preview"><div><span>Venda</span><b>{money.format(revenue)}</b></div><div><span>Custo real</span><b>{money.format(cost)}</b></div><div><span>Lucro estimado</span><strong className={revenue-cost>=0?'positive':'negative'}>{money.format(revenue-cost)}</strong></div></div></div>:<Empty icon={<Package/>} title="Sem produto disponível" text="Cadastre uma compra antes de registrar uma venda."/>}
-    {error&&<div className="cp-form-error">{error}</div>}<div className="cp-modal-actions"><button className="cp-secondary" onClick={onClose}>Cancelar</button>{available.length>0&&<button className="cp-primary" disabled={data.busy} onClick={()=>void save()}>{data.busy?'Registrando...':'Confirmar venda'}</button>}</div>
+  const calc=buildMetrics(data)
+  const cost=product?calc.unitCost(product)*(Number(qty)||1):0
+  const revenue=(Number(price.replace(',','.'))||0)*(Number(qty)||1)
+
+  async function save(){
+    setError(null)
+    try{
+      if(!product)throw new Error('Escolha o produto vendido.')
+      const value=Number(price.replace(',','.'))
+      if(!Number.isFinite(value)||value<=0)throw new Error('Informe o valor da venda.')
+      let customer=customerId||null
+      if(newCustomer){
+        if(!customerName.trim())throw new Error('Informe o nome do cliente.')
+        const created=await data.createCustomer(customerName,customerPhone)
+        customer=created.id
+      }
+      if(paymentMode==='receivable'&&!customer)throw new Error('Para venda a prazo, informe quem vai pagar.')
+      await data.registerSale({
+        productId:product.id,
+        quantity:Math.max(1,Number(qty)||1),
+        unitPrice:value,
+        saleDate:date,
+        paymentMethod:paymentMode==='receivable'?'receivable':payment,
+        paymentMode,
+        customerId:customer,
+        installmentCount:paymentMode==='receivable'?Math.max(1,Math.min(24,Number(installments)||1)):1,
+        firstDueDate:paymentMode==='receivable'?firstDue:null,
+        notes
+      })
+      onDone()
+    }catch(err:any){setError(err?.message||'Não foi possível registrar a venda.')}
+  }
+
+  return <ModalShell onClose={onClose}>
+    <ModalHeader eyebrow="REGISTRAR VENDA" title="O dinheiro entrou agora ou vai entrar depois?" text="Essa escolha faz o caixa ficar real. Venda a prazo entra em A receber, não no saldo livre."/>
+    {available.length?<div className="cp-form-grid">
+      <Field label="Produto vendido" full><select value={productId} onChange={e=>{setProductId(e.target.value);const p=available.find(x=>x.id===e.target.value);setPrice(p?.listed_price?String(p.listed_price):'')}}>{available.map(p=><option key={p.id} value={p.id}>{p.name+' · '+p.quantity_available+' disp.'}</option>)}</select></Field>
+      <Field label="Quantidade"><input type="number" min="1" max={product?.quantity_available||1} value={qty} onChange={e=>setQty(e.target.value)}/></Field>
+      <Field label="Valor por unidade"><MoneyInput value={price} setValue={setPrice} placeholder="0,00"/></Field>
+      <Field label="Data da venda"><input type="date" value={date} onChange={e=>setDate(e.target.value)}/></Field>
+      <div className="cp-field cp-field--full"><span>Como será recebido?</span><div className="cp-sale-mode"><button type="button" className={paymentMode==='paid'?'active':''} onClick={()=>setPaymentMode('paid')}><Banknote/><div><b>Recebi agora</b><small>entra no caixa hoje</small></div></button><button type="button" className={paymentMode==='receivable'?'active':''} onClick={()=>setPaymentMode('receivable')}><Clock3/><div><b>Venda a prazo</b><small>cria parcelas a receber</small></div></button></div></div>
+      {paymentMode==='paid'&&<Field label="Pagamento"><select value={payment} onChange={e=>setPayment(e.target.value)}><option value="pix">Pix</option><option value="cash">Dinheiro</option><option value="card">Cartão</option><option value="transfer">Transferência</option><option value="other">Outro</option></select></Field>}
+      <Field label={paymentMode==='receivable'?'Quem vai pagar?':'Cliente (opcional)'} full><select value={newCustomer?'new':customerId} onChange={e=>{if(e.target.value==='new'){setNewCustomer(true);setCustomerId('')}else{setNewCustomer(false);setCustomerId(e.target.value)}}><option value="">Não informar</option>{data.customers.map(c=><option key={c.id} value={c.id}>{c.name}</option>)}<option value="new">+ Novo cliente</option></select></Field>
+      {newCustomer&&<><Field label="Nome do cliente"><input value={customerName} onChange={e=>setCustomerName(e.target.value)} placeholder="Nome"/></Field><Field label="WhatsApp"><input value={customerPhone} onChange={e=>setCustomerPhone(e.target.value)} placeholder="Opcional"/></Field></>}
+      {paymentMode==='receivable'&&<><Field label="Quantidade de parcelas"><input type="number" min="1" max="24" value={installments} onChange={e=>setInstallments(e.target.value)}/></Field><Field label="Primeiro vencimento"><input type="date" value={firstDue} onChange={e=>setFirstDue(e.target.value)}/></Field></>}
+      <Field label="Observação" full><textarea value={notes} onChange={e=>setNotes(e.target.value)} placeholder="Ex.: entreguei com carregador"/></Field>
+      <div className={paymentMode==='receivable'?'cp-profit-preview cp-profit-preview--receivable':'cp-profit-preview'}>
+        <div><span>Venda</span><b>{money.format(revenue)}</b></div>
+        <div><span>Custo real</span><b>{money.format(cost)}</b></div>
+        <div><span>Lucro estimado</span><strong className={revenue-cost>=0?'positive':'negative'}>{money.format(revenue-cost)}</strong></div>
+        {paymentMode==='receivable'&&<div className="cp-receivable-preview"><span>Vai para</span><strong>A receber · {Math.max(1,Number(installments)||1)}x</strong></div>}
+      </div>
+    </div>:<Empty icon={<Package/>} title="Sem produto disponível" text="Cadastre uma compra antes de registrar uma venda."/>}
+    {error&&<div className="cp-form-error">{error}</div>}
+    <div className="cp-modal-actions"><button className="cp-secondary" onClick={onClose}>Cancelar</button>{available.length>0&&<button className="cp-primary" disabled={data.busy} onClick={()=>void save()}>{data.busy?'Registrando...':'Confirmar venda'}</button>}</div>
   </ModalShell>
 }
 
