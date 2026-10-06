@@ -566,11 +566,66 @@ function ListingCheckinModal({product,data,onClose,onSold,onDone}:{product:Produ
 }
 
 function ProductDetail({product,data,calc,onClose,onSale,onExpense,onSaved}:{product:Product;data:Data;calc:Metrics;onClose:()=>void;onSale:()=>void;onExpense:()=>void;onSaved:()=>void}){
-  const photos=data.grouped.photosByProduct.get(product.id)||[],expenses=data.grouped.expensesByProduct.get(product.id)||[],cost=calc.unitCost(product)
-  const [listed,setListed]=useState(product.listed_price===null?'':String(product.listed_price)),[minimum,setMinimum]=useState(product.minimum_price===null?'':String(product.minimum_price)),[editing,setEditing]=useState(false)
+  const photos=data.grouped.photosByProduct.get(product.id)||[]
+  const expenses=data.grouped.expensesByProduct.get(product.id)||[]
+  const cost=calc.unitCost(product)
+  const [listed,setListed]=useState(product.listed_price===null?'':String(product.listed_price))
+  const [minimum,setMinimum]=useState(product.minimum_price===null?'':String(product.minimum_price))
+  const [editing,setEditing]=useState(false)
+  const [listingEditing,setListingEditing]=useState(false)
+  const [isListed,setIsListed]=useState(product.listing_status==='listed')
+  const [channels,setChannels]=useState<string[]>(product.listing_channels||[])
+  const [listingDate,setListingDate]=useState(product.listing_started_at||localDate())
+  const [error,setError]=useState<string|null>(null)
   const potential=product.listed_price!==null?(product.listed_price-cost)*product.quantity_available:null
-  async function save(){await data.updateProduct(product.id,{listed_price:listed?Number(listed.replace(',','.')):null,minimum_price:minimum?Number(minimum.replace(',','.')):null});setEditing(false);onSaved()}
-  return <ModalShell onClose={onClose}><div className="cp-detail-hero"><div className="cp-detail-photo">{photos[0]?.signed_url?<img src={photos[0].signed_url} alt=""/>:<Package/>}</div><div><span className="cp-eyebrow">{product.category||'PRODUTO'}</span><h2>{product.name}</h2><p>{product.quantity_available>0?product.quantity_available+' de '+product.quantity_initial+' unidade(s) disponíveis':'Produto vendido'}</p></div></div>{photos.length>1&&<div className="cp-detail-gallery">{photos.slice(1,6).map(p=><img key={p.id} src={p.signed_url||''} alt=""/>)}</div>}<div className="cp-detail-numbers"><div><span>Pago por un.</span><b>{money.format(product.purchase_unit_cost)}</b></div><div><span>Custo real</span><b>{money.format(cost)}</b></div><div><span>Lucro possível</span><b className={potential!==null&&potential>=0?'positive':''}>{potential===null?'—':money.format(potential)}</b></div><div><span>Tempo no estoque</span><b>{daysSince(product.purchase_date)} dias</b></div></div><div className="cp-detail-actions">{product.quantity_available>0&&<button className="cp-primary" onClick={onSale}><Banknote/> Registrar venda</button>}<button className="cp-secondary" onClick={onExpense}><Plus/> Adicionar gasto</button></div><section className="cp-detail-section"><div className="cp-section-head"><div><span>PREÇO DE VENDA</span><h2>Quanto você quer fazer voltar</h2></div><button onClick={()=>setEditing(v=>!v)}>{editing?'Cancelar':'Editar'}</button></div>{editing?<div className="cp-inline-edit"><Field label="Preço anunciado"><MoneyInput value={listed} setValue={setListed} placeholder="0,00"/></Field><Field label="Preço mínimo"><MoneyInput value={minimum} setValue={setMinimum} placeholder="0,00"/></Field><button className="cp-primary" disabled={data.busy} onClick={()=>void save()}>Salvar preços</button></div>:<div className="cp-price-line"><div><span>Anunciado</span><b>{product.listed_price===null?'Não informado':money.format(product.listed_price)}</b></div><div><span>Mínimo</span><b>{product.minimum_price===null?'Não informado':money.format(product.minimum_price)}</b></div></div>}</section><section className="cp-detail-section"><div className="cp-section-head"><div><span>CUSTOS EXTRAS</span><h2>O que aumentou o custo real</h2></div></div>{expenses.length?<div className="cp-expense-list">{expenses.map(e=><div key={e.id}><span><Tag size={15}/>{expenseLabel(e.expense_type)+(e.description?' · '+e.description:'')}</span><b>{money.format(e.amount)}</b></div>)}</div>:<p className="cp-muted">Nenhum gasto extra registrado neste produto.</p>}</section></ModalShell>
+  const listingDays=product.listing_status==='listed'?daysSince(product.listing_started_at||product.purchase_date):0
+  const listingDue=product.listing_status==='listed'&&!!product.listing_next_checkin_at&&product.listing_next_checkin_at<=localDate()
+  const checkins=data.grouped.listingCheckinsByProduct.get(product.id)||[]
+
+  async function savePrices(){
+    setError(null)
+    try{
+      await data.updateProduct(product.id,{listed_price:listed?Number(listed.replace(',','.')):null,minimum_price:minimum?Number(minimum.replace(',','.')):null})
+      setEditing(false);onSaved()
+    }catch(err:any){setError(err?.message||'Não foi possível salvar os preços.')}
+  }
+  async function saveListing(){
+    setError(null)
+    try{
+      const price=listed?Number(listed.replace(',','.')):null
+      if(isListed&&(!price||price<=0))throw new Error('Informe o preço do anúncio.')
+      if(isListed&&channels.length===0)throw new Error('Selecione onde está anunciado.')
+      await data.updateProduct(product.id,{
+        listed_price:price,
+        listing_status:isListed?'listed':'paused',
+        listing_channels:isListed?channels:[],
+        listing_started_at:isListed?listingDate:null,
+        listing_next_checkin_at:isListed?addDays(listingDate,5):null
+      })
+      setListingEditing(false);onSaved()
+    }catch(err:any){setError(err?.message||'Não foi possível atualizar o anúncio.')}
+  }
+
+  return <ModalShell onClose={onClose}>
+    <div className="cp-detail-hero"><div className="cp-detail-photo">{photos[0]?.signed_url?<img src={photos[0].signed_url} alt=""/>:<Package/>}</div><div><span className="cp-eyebrow">{product.acquisition_type==='owned'?'PRODUTO PRÓPRIO':product.category||'PRODUTO'}</span><h2>{product.name}</h2><p>{product.quantity_available>0?product.quantity_available+' de '+product.quantity_initial+' unidade(s) disponíveis':'Produto vendido'}</p></div></div>
+    {photos.length>1&&<div className="cp-detail-gallery">{photos.slice(1,6).map(p=><img key={p.id} src={p.signed_url||''} alt=""/>)}</div>}
+    <div className="cp-detail-numbers"><div><span>Custo por un.</span><b>{product.cost_basis_known?money.format(product.purchase_unit_cost):'Não informado'}</b></div><div><span>Custo real</span><b>{product.cost_basis_known?money.format(cost):'Sem base'}</b></div><div><span>Lucro possível</span><b className={potential!==null&&potential>=0?'positive':''}>{potential===null?'—':money.format(potential)}</b></div><div><span>Tempo no estoque</span><b>{daysSince(product.purchase_date)} dias</b></div></div>
+    <div className="cp-detail-actions">{product.quantity_available>0&&<button className="cp-primary" onClick={onSale}><Banknote/> Registrar venda</button>}<button className="cp-secondary" onClick={onExpense}><Plus/> Adicionar gasto</button></div>
+
+    <section className="cp-detail-section">
+      <div className="cp-section-head"><div><span>ANÚNCIO</span><h2>Acompanhar a venda</h2></div>{product.listing_status!=='sold'&&<button onClick={()=>setListingEditing(v=>!v)}>{listingEditing?'Cancelar':'Editar'}</button>}</div>
+      {listingEditing?<div className="cp-listing-editor"><ListingSetup isListed={isListed} setIsListed={setIsListed} channels={channels} setChannels={setChannels} listingDate={listingDate} setListingDate={setListingDate}/>{isListed&&<Field label="Preço anunciado" full><MoneyInput value={listed} setValue={setListed} placeholder="0,00"/></Field>}<button className="cp-primary" disabled={data.busy} onClick={()=>void saveListing()}>{data.busy?'Salvando...':'Salvar anúncio'}</button></div>:<div className={listingDue?'cp-listing-status-card is-due':'cp-listing-status-card'}>
+        <span className="cp-listing-status-icon"><Megaphone/></span>
+        <div><span>{product.listing_status==='listed'?'ANUNCIADO':product.listing_status==='sold'?'VENDIDO':'NÃO ANUNCIADO'}</span><b>{product.listing_status==='listed'?(product.listing_channels.join(' · ')||'Plataforma não informada'):product.listing_status==='sold'?'Venda concluída':'Esse produto ainda não está sendo acompanhado'}</b>{product.listing_status==='listed'&&<small>{listingDays} dia(s) no ar · {listingDue?'revisão pendente':'próxima revisão '+new Date((product.listing_next_checkin_at||localDate())+'T12:00:00').toLocaleDateString('pt-BR')}</small>}</div>
+        {product.listing_status==='listed'&&<strong>{product.listed_price===null?'—':money.format(product.listed_price)}</strong>}
+      </div>}
+      {checkins.length>0&&<div className="cp-checkin-history"><span>Últimas revisões</span>{checkins.slice(0,3).map(item=><div key={item.id}><b>{item.result==='refreshed'?'Anúncio renovado':item.result==='price_lowered'?'Preço reduzido':item.result==='good'?'Anúncio indo bem':'Mantido por mais 5 dias'}</b><small>{new Date(item.checkin_date+'T12:00:00').toLocaleDateString('pt-BR')}{item.new_price?' · '+money.format(item.new_price):''}</small></div>)}</div>}
+    </section>
+
+    <section className="cp-detail-section"><div className="cp-section-head"><div><span>PREÇO DE VENDA</span><h2>Quanto você quer fazer voltar</h2></div><button onClick={()=>setEditing(v=>!v)}>{editing?'Cancelar':'Editar'}</button></div>{editing?<div className="cp-inline-edit"><Field label="Preço anunciado"><MoneyInput value={listed} setValue={setListed} placeholder="0,00"/></Field><Field label="Preço mínimo"><MoneyInput value={minimum} setValue={setMinimum} placeholder="0,00"/></Field><button className="cp-primary" disabled={data.busy} onClick={()=>void savePrices()}>Salvar preços</button></div>:<div className="cp-price-line"><div><span>Anunciado</span><b>{product.listed_price===null?'Não informado':money.format(product.listed_price)}</b></div><div><span>Mínimo</span><b>{product.minimum_price===null?'Não informado':money.format(product.minimum_price)}</b></div></div>}</section>
+    <section className="cp-detail-section"><div className="cp-section-head"><div><span>CUSTOS EXTRAS</span><h2>O que aumentou o custo real</h2></div></div>{expenses.length?<div className="cp-expense-list">{expenses.map(e=><div key={e.id}><span><Tag size={15}/>{expenseLabel(e.expense_type)+(e.description?' · '+e.description:'')}</span><b>{money.format(e.amount)}</b></div>)}</div>:<p className="cp-muted">Nenhum gasto extra registrado neste produto.</p>}</section>
+    {error&&<div className="cp-form-error">{error}</div>}
+  </ModalShell>
 }
 
 function ModalShell({children,onClose,compact=false}:{children:React.ReactNode;onClose:()=>void;compact?:boolean}){return <div className="cp-modal-layer" role="dialog" aria-modal="true"><button className="cp-modal-backdrop" onClick={onClose} aria-label="Fechar"/><section className={compact?'cp-modal cp-modal--compact':'cp-modal'}><button className="cp-modal-x" onClick={onClose}><X/></button><div className="cp-modal-scroll">{children}</div></section></div>}
