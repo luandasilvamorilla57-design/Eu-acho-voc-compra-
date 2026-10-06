@@ -1,8 +1,8 @@
-import {useMemo,useState} from 'react'
+import {useEffect,useMemo,useState} from 'react'
 import {
   AlertTriangle,ArrowDownRight,ArrowUpRight,BadgeDollarSign,Banknote,BarChart3,Box,
   Check,ChevronRight,CircleDollarSign,Clock3,Home,ImagePlus,LogOut,Package,Plus,
-  ReceiptText,Search,Settings2,ShoppingBag,Tag,WalletCards,X
+  ReceiptText,Search,Settings2,ShoppingBag,Tag,WalletCards,X,Moon,Sun
 } from 'lucide-react'
 import {supabase} from '../lib/supabase'
 import {useControlData} from './useControlData'
@@ -30,6 +30,15 @@ export function ControlApp({userId,email}:{userId:string;email?:string}){
   const [modal,setModal]=useState<Modal>(null)
   const [selected,setSelected]=useState<Product|null>(null)
   const [toast,setToast]=useState<string|null>(null)
+  const [theme,setTheme]=useState<'dark'|'light'>(()=>{
+    const saved=window.localStorage.getItem('controle-plus-theme')
+    if(saved==='light'||saved==='dark')return saved
+    return window.matchMedia?.('(prefers-color-scheme: light)').matches?'light':'dark'
+  })
+  useEffect(()=>{
+    window.localStorage.setItem('controle-plus-theme',theme)
+    document.documentElement.dataset.theme=theme
+  },[theme])
   const calc=useMemo(()=>buildMetrics(data),[data.settings,data.products,data.expenses,data.sales,data.saleItems,data.cashEntries])
 
   function notify(text:string){
@@ -41,9 +50,9 @@ export function ControlApp({userId,email}:{userId:string;email?:string}){
   if(!data.settings)return <div className="cp-fatal"><strong>Não conseguimos abrir o CONTROLE+.</strong><button onClick={()=>void data.load()}>Tentar novamente</button></div>
   if(!data.settings.onboarding_completed)return <FirstRun data={data} email={email}/>
 
-  return <div className="cp-app">
+  return <div className="cp-app" data-theme={theme}>
     <div className="cp-noise"/>
-    <TopBar business={data.settings.business_name} email={email} onSettings={()=>setModal('settings')} onManage={()=>setView('manage')}/>
+    <TopBar business={data.settings.business_name} email={email} theme={theme} onTheme={()=>setTheme(v=>v==='dark'?'light':'dark')} onSettings={()=>setModal('settings')} onManage={()=>setView('manage')}/>
     <main className="cp-main">
       {view==='home'&&<HomePage data={data} calc={calc} onOpenProduct={setSelected} onView={setView} onAction={setModal}/>}
       {view==='stock'&&<StockPage data={data} calc={calc} onOpenProduct={setSelected} onPurchase={()=>setModal('purchase')}/>}
@@ -153,8 +162,16 @@ function buildMetrics(data:Data){
   return{unitCost,productMap,stockCapital,cash,monthSales,monthRevenue,monthProfit,stockUnits,alertDays,agedProducts,agedCapital,potentialProfit,saleStats}
 }
 
-function TopBar({business,email,onSettings,onManage}:{business:string;email?:string;onSettings:()=>void;onManage:()=>void}){
-  return <header className="cp-topbar"><div className="cp-top-inner"><Brand/><div className="cp-top-business"><span>SEU NEGÓCIO</span><strong>{business}</strong></div><button className="cp-manage-top" onClick={onManage}><BarChart3 size={16}/><span>Gestão</span></button><button className="cp-user-btn" onClick={onSettings}><span>{(email?.[0]||'C').toUpperCase()}</span><Settings2 size={17}/></button></div></header>
+function TopBar({business,email,theme,onTheme,onSettings,onManage}:{business:string;email?:string;theme:'dark'|'light';onTheme:()=>void;onSettings:()=>void;onManage:()=>void}){
+  return <header className="cp-topbar"><div className="cp-top-inner">
+    <Brand/>
+    <div className="cp-top-business"><span>{business}</span><small>CONTROLE DO NEGÓCIO</small></div>
+    <div className="cp-top-actions">
+      <button className="cp-theme-toggle" onClick={onTheme} aria-label={theme==='dark'?'Ativar tema claro':'Ativar tema escuro'}>{theme==='dark'?<Sun size={17}/>:<Moon size={17}/>}</button>
+      <button className="cp-manage-top" onClick={onManage}><BarChart3 size={16}/><span>Gestão</span></button>
+      <button className="cp-user-btn" onClick={onSettings}><span>{(email?.[0]||'C').toUpperCase()}</span><Settings2 size={16}/></button>
+    </div>
+  </div></header>
 }
 function Brand(){return <div className="cp-brand"><span className="cp-brand-mark">C<span>+</span></span><span className="cp-brand-word">CONTROLE<span>+</span></span></div>}
 
@@ -163,116 +180,77 @@ function HomePage({data,calc,onOpenProduct,onView,onAction}:{data:Data;calc:Metr
   const totalCapital=Math.max(0,calc.cash)+calc.stockCapital
   const cashPct=totalCapital>0?Math.max(0,Math.min(100,calc.cash/totalCapital*100)):0
   const stockPct=100-cashPct
-  const revenueBase=Math.max(calc.monthRevenue,calc.stockCapital,1)
-  const revenuePct=Math.min(100,calc.monthRevenue/revenueBase*100)
-  const profitPct=Math.min(100,Math.max(0,calc.monthProfit)/revenueBase*100)
+  const now=new Date()
+  const dateLabel=now.toLocaleDateString('pt-BR',{weekday:'long',day:'2-digit',month:'short'})
 
   let guide={
     tone:'good',
-    eyebrow:'NEGÓCIO ORGANIZADO',
-    title:'Tudo registrado por aqui.',
-    text:'Seu caixa, estoque e vendas estão conversando entre si.',
-    button:'Abrir caixa',
+    title:'Tudo em ordem por aqui',
+    text:'Continue registrando cada movimento para manter os números reais.',
+    button:'Ver caixa',
     action:()=>onView('cash')
   }
   if(data.products.length===0)guide={
-    tone:'brand',eyebrow:'PRIMEIRO MOVIMENTO',title:'Coloque sua primeira mercadoria no jogo.',
-    text:'Cadastre uma compra. O valor sai do caixa e o produto entra no estoque sem conta manual.',
-    button:'Registrar compra',action:()=>onAction('purchase')
+    tone:'brand',title:'Cadastre sua primeira compra',
+    text:'O produto entra no estoque e o valor sai do caixa automaticamente.',
+    button:'Adicionar produto',action:()=>onAction('purchase')
   }
   else if(calc.agedProducts.length>0)guide={
-    tone:'warn',eyebrow:'CAPITAL PARADO',title:calc.agedProducts.length+' produto(s) pedem sua atenção.',
-    text:money.format(calc.agedCapital)+' estão presos em mercadoria há '+calc.alertDays+' dias ou mais.',
-    button:'Revisar estoque',action:()=>onView('stock')
+    tone:'warn',title:calc.agedProducts.length+' produto(s) com capital parado',
+    text:money.format(calc.agedCapital)+' estão presos em estoque há '+calc.alertDays+' dias ou mais.',
+    button:'Revisar',action:()=>onView('stock')
   }
   else if(data.sales.length===0)guide={
-    tone:'soft',eyebrow:'PRÓXIMO PASSO',title:'Seu estoque já existe. Agora faça o dinheiro voltar.',
-    text:'Quando sair a primeira venda, registre aqui para enxergar lucro e giro de verdade.',
+    tone:'soft',title:'Pronto para registrar a primeira venda',
+    text:'Ao vender, o CONTROLE+ baixa o estoque e calcula o lucro real.',
     button:'Registrar venda',action:()=>onAction('sale')
   }
 
-  return <div className="cp-page cp-home cp-home-v4">
-    <section className="cp-home-intro">
-      <div>
-        <span className="cp-home-kicker">CONTROLE DE HOJE</span>
-        <h1>Dinheiro parado é produto.<br/><em>Produto vendido vira caixa.</em></h1>
-      </div>
-      <div className="cp-home-intro-side">
-        <span>SEU NEGÓCIO</span>
-        <strong>{data.settings?.business_name||'Meu negócio'}</strong>
-        <button onClick={()=>onAction('actions')}><Plus size={17}/> Registrar movimento</button>
-      </div>
+  return <div className="cp-page cp-home cp-home-app">
+    <section className="cp-app-greeting">
+      <div><span>{dateLabel}</span><h1>Visão geral</h1><p>{data.settings?.business_name||'Meu negócio'}</p></div>
+      <button className="cp-register-main" onClick={()=>onAction('actions')}><Plus size={19}/><span>Registrar</span></button>
     </section>
 
-    <section className="cp-capital-stage">
-      <div className="cp-capital-main">
-        <div className="cp-capital-label"><span className="cp-live-dot"/> CAIXA LIVRE AGORA</div>
-        <strong className="cp-capital-number">{money.format(calc.cash)}</strong>
-        <p>É o valor realmente disponível depois de tudo que você registrou.</p>
-        <div className="cp-capital-mini">
-          <div><span>Mercadoria</span><b>{money.format(calc.stockCapital)}</b></div>
-          <div><span>Lucro no mês</span><b className={calc.monthProfit>=0?'positive':'negative'}>{money.format(calc.monthProfit)}</b></div>
-          <div><span>Unidades</span><b>{number.format(calc.stockUnits)}</b></div>
-        </div>
+    <section className="cp-balance-app">
+      <div className="cp-balance-app-top">
+        <div><span>Saldo disponível</span><strong>{money.format(calc.cash)}</strong></div>
+        <span className="cp-balance-app-badge">CAIXA</span>
       </div>
-
-      <div className="cp-capital-side">
-        <div className="cp-money-map-head"><span>MAPA DO SEU CAPITAL</span><b>{money.format(totalCapital)}</b></div>
-        <div className="cp-money-map">
-          <i className="is-cash" style={{width:cashPct+'%'}}/>
-          <i className="is-stock" style={{width:stockPct+'%'}}/>
-        </div>
-        <div className="cp-money-map-legend">
-          <div><span><i className="dot-cash"/>Livre</span><b>{cashPct.toFixed(0)}%</b></div>
-          <div><span><i className="dot-stock"/>Em produtos</span><b>{stockPct.toFixed(0)}%</b></div>
-        </div>
-
-        <div className="cp-month-pulse">
-          <div className="cp-month-pulse-head"><span>PULSO DO MÊS</span><small>{calc.monthSales.length} venda(s)</small></div>
-          <div className="cp-pulse-row"><div><span>Faturamento</span><b>{money.format(calc.monthRevenue)}</b></div><i><em style={{width:revenuePct+'%'}}/></i></div>
-          <div className="cp-pulse-row"><div><span>Lucro real</span><b className={calc.monthProfit>=0?'positive':'negative'}>{money.format(calc.monthProfit)}</b></div><i><em className="is-profit" style={{width:profitPct+'%'}}/></i></div>
-        </div>
+      <div className="cp-balance-app-stats">
+        <div><span>Em estoque</span><b>{money.format(calc.stockCapital)}</b></div>
+        <div><span>Lucro no mês</span><b className={calc.monthProfit>=0?'positive':'negative'}>{money.format(calc.monthProfit)}</b></div>
+        <div><span>Vendas</span><b>{calc.monthSales.length}</b></div>
       </div>
+      <div className="cp-capital-track"><i style={{width:cashPct+'%'}}/><em style={{width:stockPct+'%'}}/></div>
+      <div className="cp-capital-track-labels"><span>{cashPct.toFixed(0)}% livre</span><span>{stockPct.toFixed(0)}% em produtos</span></div>
     </section>
 
-    <section className={'cp-next-move cp-next-move--'+guide.tone}>
-      <div className="cp-next-index">01</div>
-      <div className="cp-next-copy"><span>{guide.eyebrow}</span><h2>{guide.title}</h2><p>{guide.text}</p></div>
-      <button onClick={guide.action}>{guide.button}<ChevronRight size={18}/></button>
+    <section className="cp-quick-app">
+      <button onClick={()=>onAction('purchase')}><span><ShoppingBag/></span><b>Compra</b><small>Entrar estoque</small></button>
+      <button onClick={()=>onAction('sale')}><span><Banknote/></span><b>Venda</b><small>Dar baixa</small></button>
+      <button onClick={()=>onAction('expense')}><span><ArrowDownRight/></span><b>Gasto</b><small>Somar custo</small></button>
+      <button onClick={()=>onView('receivables')}><span><ReceiptText/></span><b>Receber</b><small>Parcelas</small></button>
     </section>
 
-    <section className="cp-action-editorial">
-      <div className="cp-section-title-v4">
-        <span>ATALHOS</span>
-        <h2>O que aconteceu no seu negócio?</h2>
-      </div>
-      <div className="cp-action-rail">
-        <button onClick={()=>onAction('purchase')}><span className="cp-action-no">01</span><span className="cp-action-symbol"><ShoppingBag/></span><div><b>Comprei</b><small>mercadoria entra, caixa diminui</small></div><ChevronRight/></button>
-        <button onClick={()=>onAction('sale')}><span className="cp-action-no">02</span><span className="cp-action-symbol"><Banknote/></span><div><b>Vendi</b><small>estoque baixa, lucro aparece</small></div><ChevronRight/></button>
-        <button onClick={()=>onAction('expense')}><span className="cp-action-no">03</span><span className="cp-action-symbol"><ArrowDownRight/></span><div><b>Gastei</b><small>reparo, transporte ou taxa</small></div><ChevronRight/></button>
-      </div>
+    <section className={'cp-smart-card cp-smart-card--'+guide.tone}>
+      <div className="cp-smart-icon">{guide.tone==='warn'?<AlertTriangle/>:guide.tone==='brand'?<Package/>:<Check/>}</div>
+      <div><span>AGORA</span><h2>{guide.title}</h2><p>{guide.text}</p></div>
+      <button onClick={guide.action}>{guide.button}<ChevronRight size={16}/></button>
     </section>
 
-    <section className="cp-home-bottom-grid">
-      <div className="cp-stock-showcase">
-        <div className="cp-section-title-v4">
-          <span>ESTOQUE RECENTE</span>
-          <h2>{recent.length?'Mercadoria na mão':'Seu estoque começa aqui'}</h2>
-        </div>
-        {recent.length?
-          <div className="cp-product-row">{recent.map(p=><ProductCard key={p.id} product={p} data={data} calc={calc} onClick={()=>onOpenProduct(p)}/>)}</div>
-          :<Empty icon={<Package/>} title="Nenhum produto ainda" text="Sua primeira compra já vira histórico, estoque e movimento de caixa." action="Adicionar primeira compra" onAction={()=>onAction('purchase')}/>}
-        {recent.length>0&&<button className="cp-text-link" onClick={()=>onView('stock')}>Abrir estoque completo <ArrowUpRight size={15}/></button>}
-      </div>
+    <section className="cp-app-section">
+      <div className="cp-app-section-head"><div><span>ESTOQUE</span><h2>{recent.length?'Produtos recentes':'Seu estoque está vazio'}</h2></div>{recent.length>0&&<button onClick={()=>onView('stock')}>Ver todos</button>}</div>
+      {recent.length?<div className="cp-product-row">{recent.map(p=><ProductCard key={p.id} product={p} data={data} calc={calc} onClick={()=>onOpenProduct(p)}/>)}</div>:<Empty icon={<Package/>} title="Comece pelo primeiro produto" text="Adicione uma compra para visualizar estoque, custo e lucro possível." action="Adicionar compra" onAction={()=>onAction('purchase')}/>}
+    </section>
 
-      <aside className="cp-profit-note">
-        <span className="cp-profit-note-index">02</span>
-        <span className="cp-profit-note-kicker">VISÃO RÁPIDA</span>
-        <h3>{calc.potentialProfit>0?money.format(calc.potentialProfit):'Seu próximo lucro'}</h3>
-        <p>{calc.potentialProfit>0?'É o lucro possível do estoque atual pelos preços que você informou.':'Quando você definir preços de venda, o CONTROLE+ mostra quanto pode voltar para você.'}</p>
-        <div className="cp-profit-note-line"/>
-        <button onClick={()=>onView('stock')}>Ver mercadorias <ChevronRight size={16}/></button>
-      </aside>
+    <section className="cp-month-app">
+      <div className="cp-app-section-head"><div><span>ESTE MÊS</span><h2>Desempenho</h2></div><button onClick={()=>onView('reports')}>Relatórios</button></div>
+      <div className="cp-month-app-grid">
+        <div><span>Faturamento</span><b>{money.format(calc.monthRevenue)}</b><small>{calc.monthSales.length} venda(s)</small></div>
+        <div><span>Lucro real</span><b className={calc.monthProfit>=0?'positive':'negative'}>{money.format(calc.monthProfit)}</b><small>já descontando custos</small></div>
+        <div><span>Lucro possível</span><b>{money.format(calc.potentialProfit)}</b><small>do estoque anunciado</small></div>
+      </div>
     </section>
   </div>
 }
