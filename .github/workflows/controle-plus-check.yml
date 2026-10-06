@@ -12,6 +12,7 @@ on:
       - controle-plus-didactic-home-v9
       - controle-plus-polish-pwa-v10
       - controle-plus-trial-v11
+      - controle-plus-guia-brique-v12
       - main
   pull_request:
     branches:
