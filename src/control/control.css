@@ -3506,3 +3506,66 @@ body{transition:background .22s ease,color .22s ease}
   .cp-guide-negotiation-grid b{font-size:15px}
   .cp-guide-negotiation-grid p{font-size:13px}
 }
+
+
+.cp-brique-shortcut{
+  width:100%;
+  display:grid;
+  grid-template-columns:auto minmax(0,1fr) auto;
+  gap:14px;
+  align-items:center;
+  margin:18px 0 22px;
+  padding:18px;
+  border:1px solid rgba(76,165,255,.19);
+  border-radius:20px;
+  background:
+    radial-gradient(circle at 92% 20%,rgba(76,165,255,.16),transparent 32%),
+    linear-gradient(135deg,var(--cp-panel-2),var(--cp-panel));
+  color:var(--cp-text);
+  text-align:left;
+  box-shadow:0 18px 48px rgba(0,0,0,.10)
+}
+.cp-brique-shortcut-icon{
+  width:52px;height:52px;border-radius:16px;
+  display:grid;place-items:center;
+  color:#7cc9ff;
+  background:linear-gradient(145deg,rgba(37,99,235,.32),rgba(78,181,255,.12));
+  border:1px solid rgba(83,173,255,.20)
+}
+.cp-brique-shortcut-icon svg{width:23px;height:23px}
+.cp-brique-shortcut div>span{
+  display:block;
+  color:var(--cp-accent-light);
+  font-size:11px;
+  font-weight:900;
+  letter-spacing:.10em
+}
+.cp-brique-shortcut b{
+  display:block;
+  margin-top:3px;
+  color:var(--cp-text);
+  font-size:17px;
+  line-height:1.25
+}
+.cp-brique-shortcut p{
+  margin:5px 0 0;
+  color:var(--cp-muted);
+  font-size:13px;
+  line-height:1.45
+}
+.cp-brique-shortcut>svg{width:20px;color:var(--cp-muted)}
+.cp-brique-shortcut:hover{
+  border-color:rgba(76,165,255,.32);
+  transform:translateY(-1px)
+}
+
+@media(max-width:640px){
+  .cp-brique-shortcut{
+    padding:16px 14px;
+    gap:12px;
+    margin:16px 0 20px
+  }
+  .cp-brique-shortcut-icon{width:48px;height:48px}
+  .cp-brique-shortcut b{font-size:16px}
+  .cp-brique-shortcut p{font-size:13px}
+}
