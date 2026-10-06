@@ -59,6 +59,13 @@ export function ControlApp({userId,email}:{userId:string;email?:string}){
       {view==='stock'&&<StockPage data={data} calc={calc} onOpenProduct={setSelected} onPurchase={()=>setModal('purchase')}/>}
       {view==='sales'&&<SalesPage data={data} calc={calc} onSale={()=>setModal('sale')} onOpenProduct={setSelected}/>}
       {view==='cash'&&<CashPage data={data} calc={calc} onCash={()=>setModal('cash')} onSettings={()=>setModal('settings')}/>}
+      {view==='manage'&&<ManagePage data={data} onView={setView} onBack={()=>setView('home')}/>}
+      {view==='receivables'&&<ReceivablesPage data={data} onBack={()=>setView('manage')}/>}
+      {view==='reports'&&<ReportsPage data={data} onBack={()=>setView('manage')}/>}
+      {view==='people'&&<PeoplePage data={data} onBack={()=>setView('manage')}/>}
+      {view==='goals'&&<GoalsPage data={data} onBack={()=>setView('manage')}/>}
+      {view==='closures'&&<ClosuresPage data={data} onBack={()=>setView('manage')}/>}
+      {view==='backup'&&<BackupPage data={data} onBack={()=>setView('manage')}/>}
     </main>
     <BottomNav view={view} onView={setView} onAdd={()=>setModal('actions')}/>
 
