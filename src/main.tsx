@@ -10,7 +10,11 @@ window.addEventListener('beforeinstallprompt',(event:any)=>{
   ;(window as any).__controlPlusInstallPrompt=event
   window.dispatchEvent(new Event('control-plus-install-ready'))
 })
-window.addEventListener('appinstalled',()=>{\n  ;(window as any).__controlPlusInstallPrompt=null\n  window.dispatchEvent(new Event('control-plus-installed'))\n})\nwindow.addEventListener('unhandledrejection',event=>{reportClientError(event.reason,'window.unhandledrejection')})
+window.addEventListener('appinstalled',()=>{
+  ;(window as any).__controlPlusInstallPrompt=null
+  window.dispatchEvent(new Event('control-plus-installed'))
+})
+window.addEventListener('unhandledrejection',event=>{reportClientError(event.reason,'window.unhandledrejection')})
 window.addEventListener('error',event=>{if(event.error)reportClientError(event.error,'window.error')})
 
 if('serviceWorker' in navigator){
