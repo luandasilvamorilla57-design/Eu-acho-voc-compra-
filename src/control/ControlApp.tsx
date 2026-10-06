@@ -78,8 +78,10 @@ export function ControlApp({userId,email}:{userId:string;email?:string}){
       {view==='goals'&&<GoalsPage data={data} onBack={()=>setView('manage')}/>}
       {view==='closures'&&<ClosuresPage data={data} onBack={()=>setView('manage')}/>}
       {view==='backup'&&<BackupPage data={data} onBack={()=>setView('manage')}/>}
+      {view==='admin'&&data.isAdmin&&<AdminCenter onBack={()=>setView('home')}/>}
     </main>
-    {view!=='admin'&&<BottomNav view={view} onView={setView} onAdd={()=>setModal('actions')}/>}\n    <InstallAppPrompt userId={userId}/>
+    {view!=='admin'&&<BottomNav view={view} onView={setView} onAdd={()=>setModal('actions')}/>}
+    <InstallAppPrompt userId={userId}/>
 
     {modal==='actions'&&<ActionSheet onClose={()=>setModal(null)} onChoose={setModal}/>}
     {modal==='purchase'&&<PurchaseModal data={data} onClose={()=>setModal(null)} onDone={()=>{setModal(null);notify('Compra salva e adicionada ao estoque.')}}/>}
