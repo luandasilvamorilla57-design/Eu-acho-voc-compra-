@@ -35,7 +35,7 @@ export type Product={
   legacy_purchase_id:string|null
   acquisition_type:'purchase'|'owned'
   cost_basis_known:boolean
-  listing_status:'not_listed'|'listed'|'paused'
+  listing_status:'not_listed'|'listed'|'paused'|'sold'
   listing_channels:string[]
   listing_started_at:string|null
   listing_last_checkin_at:string|null
