@@ -321,7 +321,16 @@ function BottomNav({view,onView,onAdd}:{view:ControlView;onView:(v:ControlView)=
 }
 
 function ActionSheet({onClose,onChoose}:{onClose:()=>void;onChoose:(m:Modal)=>void}){
-  return <ModalShell onClose={onClose} compact><div className="cp-action-sheet"><span className="cp-eyebrow">REGISTRAR</span><h2>O que aconteceu?</h2><p>Escolha uma ação. O CONTROLE+ cuida das contas por trás.</p><Action icon={<ShoppingBag/>} title="Fiz uma compra" text="Adicionar um produto ao estoque" onClick={()=>onChoose('purchase')}/><Action icon={<Banknote/>} title="Fiz uma venda" text="Dar baixa e calcular o lucro" onClick={()=>onChoose('sale')}/><Action icon={<ArrowDownRight/>} title="Tive um gasto" text="Reparo, transporte, limpeza..." onClick={()=>onChoose('expense')}/><Action icon={<WalletCards/>} title="Outro movimento" text="Entrada ou saída manual de caixa" onClick={()=>onChoose('cash')}/></div></ModalShell>
+  return <ModalShell onClose={onClose} compact><div className="cp-action-sheet">
+    <span className="cp-eyebrow">REGISTRAR</span>
+    <h2>O que você quer registrar?</h2>
+    <p>Escolha o movimento certo. O CONTROLE+ atualiza estoque e caixa sem misturar as coisas.</p>
+    <Action icon={<ShoppingBag/>} title="Fiz uma compra" text="Comprei para revender · sai dinheiro do caixa" onClick={()=>onChoose('purchase')}/>
+    <Action icon={<Box/>} title="Adicionar produto que já tenho" text="Produto de casa ou próprio · não mexe no caixa" onClick={()=>onChoose('inventory')}/>
+    <Action icon={<Banknote/>} title="Fiz uma venda" text="Dar baixa no estoque e calcular o lucro" onClick={()=>onChoose('sale')}/>
+    <Action icon={<ArrowDownRight/>} title="Tive um gasto" text="Reparo, transporte, limpeza ou taxa" onClick={()=>onChoose('expense')}/>
+    <Action icon={<WalletCards/>} title="Outro movimento" text="Entrada ou saída manual de caixa" onClick={()=>onChoose('cash')}/>
+  </div></ModalShell>
 }
 function Action({icon,title,text,onClick}:{icon:React.ReactNode;title:string;text:string;onClick:()=>void}){return <button onClick={onClick}><span>{icon}</span><div><b>{title}</b><small>{text}</small></div><ChevronRight/></button>}
 
