@@ -110,6 +110,7 @@ export function ControlApp({userId,email}:{userId:string;email?:string}){
         {canWrite&&view==='goals'&&<GoalsPage data={data} onBack={()=>setView('manage')}/>}
         {canWrite&&view==='closures'&&<ClosuresPage data={data} onBack={()=>setView('manage')}/>}
         {view==='backup'&&<BackupPage data={data} onBack={()=>setView('home')}/>}
+        {view==='guide'&&<BriqueGuidePage onBack={()=>setView(canWrite?'manage':'home')}/>}
         {view==='admin'&&data.isAdmin&&<AdminCenter onBack={()=>setView('home')}/>}
       </>}
     </main>
