@@ -1676,3 +1676,39 @@ body{transition:background .22s ease,color .22s ease}
   box-shadow:0 8px 24px rgba(0,0,0,.10)
 }
 .cp-onboarding-theme:hover{color:var(--cp-accent-light);border-color:rgba(59,130,246,.32)}
+
+.cp-input-icon{
+  background:var(--cp-panel-2)!important;
+  border-color:var(--cp-line)!important;
+  color:var(--cp-muted)!important
+}
+.cp-show,.cp-auth-links button,.cp-back-link{color:var(--cp-muted)!important}
+.cp-auth-links{color:var(--cp-muted-2)!important}
+.cp-loading,.cp-fatal{
+  background:
+    radial-gradient(circle at 75% 5%,rgba(59,130,246,.16),transparent 28%),
+    linear-gradient(180deg,var(--cp-bg),var(--cp-bg-2))!important;
+  color:var(--cp-text)!important
+}
+.cp-loading-line{background:var(--cp-panel-3)!important}
+.cp-loading-line span{background:linear-gradient(90deg,var(--cp-accent),var(--cp-accent-light))!important}
+.cp-loading p{color:var(--cp-muted)!important}
+.cp-fatal strong{color:var(--cp-text)!important}
+.cp-toast{
+  background:var(--cp-panel)!important;color:var(--cp-text)!important;
+  border:1px solid var(--cp-line-strong)!important;
+  box-shadow:0 16px 44px rgba(0,0,0,.22)!important
+}
+.cp-toast svg{color:var(--cp-success)!important}
+.cp-error-bar,.cp-form-error{
+  background:color-mix(in srgb,var(--cp-danger) 10%,var(--cp-panel))!important;
+  border-color:color-mix(in srgb,var(--cp-danger) 26%,transparent)!important;
+  color:var(--cp-danger)!important
+}
+.cp-form-success{
+  background:color-mix(in srgb,var(--cp-success) 10%,var(--cp-panel))!important;
+  border-color:color-mix(in srgb,var(--cp-success) 26%,transparent)!important;
+  color:var(--cp-success)!important
+}
+*{scrollbar-color:var(--cp-metal) transparent}
+::selection{background:rgba(59,130,246,.28);color:var(--cp-text)}
