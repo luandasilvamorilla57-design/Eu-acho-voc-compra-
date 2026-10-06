@@ -1,15 +1,15 @@
 {
-  "name":"BRIKE RADAR",
-  "short_name":"BRIKE RADAR",
-  "description":"Inteligência para compra e revenda de produtos usados.",
+  "name":"CONTROLE+",
+  "short_name":"CONTROLE+",
+  "description":"Estoque, vendas, caixa e lucro para quem compra e revende.",
   "start_url":"/",
   "scope":"/",
   "display":"standalone",
-  "background_color":"#06101c",
-  "theme_color":"#071723",
+  "background_color":"#0a0b0d",
+  "theme_color":"#0a0b0d",
   "orientation":"portrait-primary",
   "icons":[
-    {"src":"/brike-icon.svg?v=2","sizes":"any","type":"image/svg+xml","purpose":"any"},
-    {"src":"/brike-maskable.svg?v=2","sizes":"any","type":"image/svg+xml","purpose":"maskable"}
+    {"src":"/control-plus-icon.svg?v=1","sizes":"any","type":"image/svg+xml","purpose":"any"},
+    {"src":"/control-plus-maskable.svg?v=1","sizes":"any","type":"image/svg+xml","purpose":"maskable"}
   ]
 }
