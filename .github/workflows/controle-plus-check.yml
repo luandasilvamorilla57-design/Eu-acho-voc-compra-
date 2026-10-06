@@ -11,6 +11,7 @@ on:
       - controle-plus-admin-photos-v8
       - controle-plus-didactic-home-v9
       - controle-plus-polish-pwa-v10
+      - controle-plus-trial-v11
       - main
   pull_request:
     branches:
