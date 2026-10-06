@@ -1,13 +1,17 @@
 {
+  "id":"/",
   "name":"CONTROLE+",
   "short_name":"CONTROLE+",
   "description":"Estoque, vendas, caixa e lucro para quem compra e revende.",
   "start_url":"/",
   "scope":"/",
   "display":"standalone",
+  "display_override":["standalone","minimal-ui"],
   "background_color":"#07111f",
   "theme_color":"#07111f",
   "orientation":"portrait-primary",
+  "categories":["business","finance","productivity"],
+  "prefer_related_applications":false,
   "icons":[
     {"src":"/control-plus-icon.svg?v=2","sizes":"any","type":"image/svg+xml","purpose":"any"},
     {"src":"/control-plus-maskable.svg?v=2","sizes":"any","type":"image/svg+xml","purpose":"maskable"}
