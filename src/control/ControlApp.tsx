@@ -175,12 +175,16 @@ function buildMetrics(data:Data){
   }
   const monthRevenue=monthSales.reduce((s,x)=>s+saleStats(x).revenue,0)
   const monthProfit=monthSales.reduce((s,x)=>s+saleStats(x).profit,0)
+  const monthSaleIds=new Set(monthSales.map(s=>s.id))
+  const monthSaleItems=data.saleItems.filter(item=>monthSaleIds.has(item.sale_id))
+  const monthUnitsSold=monthSaleItems.reduce((sum,item)=>sum+item.quantity,0)
+  const monthOrders=monthSales.length
   const stockUnits=data.products.reduce((s,p)=>s+p.quantity_available,0)
   const alertDays=data.settings?.stock_alert_days||21
   const agedProducts=data.products.filter(p=>p.quantity_available>0&&daysSince(p.purchase_date)>=alertDays)
   const agedCapital=agedProducts.reduce((s,p)=>s+unitCost(p)*p.quantity_available,0)
   const potentialProfit=data.products.reduce((s,p)=>p.quantity_available>0&&p.listed_price!==null?s+(p.listed_price-unitCost(p))*p.quantity_available:s,0)
-  return{unitCost,productMap,stockCapital,cash,monthSales,monthRevenue,monthProfit,stockUnits,alertDays,agedProducts,agedCapital,potentialProfit,saleStats}
+  return{unitCost,productMap,stockCapital,cash,monthSales,monthSaleItems,monthUnitsSold,monthOrders,monthRevenue,monthProfit,stockUnits,alertDays,agedProducts,agedCapital,potentialProfit,saleStats}
 }
 
 function TopBar({business,email,theme,isAdmin,onTheme,onSettings,onManage,onAdmin}:{business:string;email?:string;theme:'dark'|'light';isAdmin:boolean;onTheme:()=>void;onSettings:()=>void;onManage:()=>void;onAdmin:()=>void}){
@@ -249,20 +253,21 @@ function HomePage({data,calc,onOpenProduct,onView,onAction,onCheckListing}:{data
         <div><span>Saldo disponível</span><strong>{money.format(calc.cash)}</strong></div>
         <span className="cp-balance-app-badge">CAIXA</span>
       </div>
-      <div className="cp-balance-app-stats">
-        <div><span>Em estoque</span><b>{money.format(calc.stockCapital)}</b></div>
+      <div className="cp-balance-app-stats cp-balance-app-stats--four">
+        <div><span>Capital em estoque</span><b>{money.format(calc.stockCapital)}</b></div>
         <div><span>Lucro no mês</span><b className={calc.monthProfit>=0?'positive':'negative'}>{money.format(calc.monthProfit)}</b></div>
-        <div><span>Vendas</span><b>{calc.monthSales.length}</b></div>
+        <div><span>Itens vendidos</span><b>{calc.monthUnitsSold} un.</b></div>
+        <div><span>Pedidos fechados</span><b>{calc.monthOrders}</b></div>
       </div>
       <div className="cp-capital-track"><i style={{width:cashPct+'%'}}/><em style={{width:stockPct+'%'}}/></div>
       <div className="cp-capital-track-labels"><span>{cashPct.toFixed(0)}% livre</span><span>{stockPct.toFixed(0)}% em produtos</span></div>
     </section>
 
     <section className="cp-quick-app">
-      <button onClick={()=>onAction('purchase')}><span><ShoppingBag/></span><b>Compra</b><small>Entrar estoque</small></button>
-      <button onClick={()=>onAction('sale')}><span><Banknote/></span><b>Venda</b><small>Dar baixa</small></button>
-      <button onClick={()=>onAction('expense')}><span><ArrowDownRight/></span><b>Gasto</b><small>Somar custo</small></button>
-      <button onClick={()=>onView('receivables')}><span><ReceiptText/></span><b>Receber</b><small>Parcelas</small></button>
+      <button onClick={()=>onAction('purchase')}><span><ShoppingBag/></span><b>Registrar compra</b><small>Produto entra no estoque</small></button>
+      <button onClick={()=>onAction('sale')}><span><Banknote/></span><b>Registrar venda</b><small>Baixa estoque e calcula lucro</small></button>
+      <button onClick={()=>onAction('expense')}><span><ArrowDownRight/></span><b>Adicionar gasto</b><small>Reparo, taxa ou transporte</small></button>
+      <button onClick={()=>onView('receivables')}><span><ReceiptText/></span><b>A receber</b><small>Parcelas e valores pendentes</small></button>
     </section>
 
     <section className={'cp-smart-card cp-smart-card--'+guide.tone}>
@@ -278,10 +283,11 @@ function HomePage({data,calc,onOpenProduct,onView,onAction,onCheckListing}:{data
 
     <section className="cp-month-app">
       <div className="cp-app-section-head"><div><span>ESTE MÊS</span><h2>Desempenho</h2></div><button onClick={()=>onView('reports')}>Relatórios</button></div>
-      <div className="cp-month-app-grid">
-        <div><span>Faturamento</span><b>{money.format(calc.monthRevenue)}</b><small>{calc.monthSales.length} venda(s)</small></div>
-        <div><span>Lucro real</span><b className={calc.monthProfit>=0?'positive':'negative'}>{money.format(calc.monthProfit)}</b><small>já descontando custos</small></div>
-        <div><span>Lucro possível</span><b>{money.format(calc.potentialProfit)}</b><small>do estoque anunciado</small></div>
+      <div className="cp-month-app-grid cp-month-app-grid--four">
+        <div><span>Faturamento</span><b>{money.format(calc.monthRevenue)}</b><small>dinheiro das vendas do mês</small></div>
+        <div><span>Itens vendidos</span><b>{calc.monthUnitsSold} un.</b><small>{calc.monthOrders} pedido(s) fechado(s)</small></div>
+        <div><span>Lucro real</span><b className={calc.monthProfit>=0?'positive':'negative'}>{money.format(calc.monthProfit)}</b><small>depois do custo dos produtos</small></div>
+        <div><span>Lucro possível</span><b>{money.format(calc.potentialProfit)}</b><small>se vender o estoque anunciado</small></div>
       </div>
     </section>
   </div>
@@ -318,7 +324,31 @@ function StockPage({data,calc,onOpenProduct,onAdd}:{data:Data;calc:Metrics;onOpe
 }
 
 function SalesPage({data,calc,onSale,onOpenProduct}:{data:Data;calc:Metrics;onSale:()=>void;onOpenProduct:(p:Product)=>void}){
-  return <div className="cp-page"><PageTitle eyebrow="VENDAS" title="Venda registrada, lucro entendido." text="Sem fazer conta na cabeça: veja o que entrou e quanto realmente sobrou." action={<button className="cp-primary cp-small" onClick={onSale}><Plus size={18}/> Registrar venda</button>}/><section className="cp-sales-hero"><div><span>Faturamento este mês</span><strong>{money.format(calc.monthRevenue)}</strong></div><div><span>Lucro real</span><strong className={calc.monthProfit>=0?'positive':'negative'}>{money.format(calc.monthProfit)}</strong></div><div><span>Vendas</span><strong>{calc.monthSales.length}</strong></div></section><div className="cp-section-head"><div><span>HISTÓRICO</span><h2>Últimas vendas</h2></div></div>{data.sales.length?<div className="cp-sale-list">{data.sales.map(sale=>{const stats=calc.saleStats(sale);const items=data.grouped.itemsBySale.get(sale.id)||[];const product=items[0]?calc.productMap.get(items[0].product_id):undefined;const photo=product?(data.grouped.photosByProduct.get(product.id)||[])[0]?.signed_url:null;return <button key={sale.id} className="cp-sale-row" onClick={()=>product&&onOpenProduct(product)}><span className="cp-sale-thumb">{photo?<img src={photo} alt=""/>:<ReceiptText/>}</span><div className="cp-sale-main"><strong>{product?.name||'Venda'}</strong><span>{new Date(sale.sale_date+'T12:00:00').toLocaleDateString('pt-BR')} · {paymentLabel(sale.payment_method)}</span></div><div className="cp-sale-money"><b>{money.format(stats.revenue)}</b><span className={stats.profit>=0?'positive':'negative'}>{(stats.profit>=0?'+':'')+money.format(stats.profit)} lucro</span></div></button>})}</div>:<Empty icon={<ReceiptText/>} title="Nenhuma venda registrada" text="Quando fechar uma venda, registre aqui. O produto sai do estoque e o valor entra no caixa." action="Registrar primeira venda" onAction={onSale}/>}</div>
+  return <div className="cp-page">
+    <PageTitle eyebrow="VENDAS" title="Venda registrada, lucro entendido." text="Veja quantos pedidos você fechou, quantas unidades realmente vendeu e quanto sobrou de lucro." action={<button className="cp-primary cp-small" onClick={onSale}><Plus size={18}/> Registrar venda</button>}/>
+    <section className="cp-sales-hero cp-sales-hero--four">
+      <div><span>Faturamento este mês</span><strong>{money.format(calc.monthRevenue)}</strong><small>valor total vendido</small></div>
+      <div><span>Lucro real</span><strong className={calc.monthProfit>=0?'positive':'negative'}>{money.format(calc.monthProfit)}</strong><small>depois dos custos</small></div>
+      <div><span>Itens vendidos</span><strong>{calc.monthUnitsSold} un.</strong><small>soma das quantidades</small></div>
+      <div><span>Pedidos fechados</span><strong>{calc.monthOrders}</strong><small>quantidade de vendas</small></div>
+    </section>
+    <div className="cp-section-head"><div><span>HISTÓRICO</span><h2>Últimas vendas</h2></div></div>
+    {data.sales.length?<div className="cp-sale-list">{data.sales.map(sale=>{
+      const stats=calc.saleStats(sale)
+      const items=data.grouped.itemsBySale.get(sale.id)||[]
+      const quantity=items.reduce((sum,item)=>sum+item.quantity,0)
+      const product=items[0]?calc.productMap.get(items[0].product_id):undefined
+      const photo=product?(data.grouped.photosByProduct.get(product.id)||[])[0]?.signed_url:null
+      return <button key={sale.id} className="cp-sale-row" onClick={()=>product&&onOpenProduct(product)}>
+        <span className="cp-sale-thumb">{photo?<img src={photo} alt=""/>:<ReceiptText/>}</span>
+        <div className="cp-sale-main">
+          <strong>{product?.name||'Venda'}</strong>
+          <span>{new Date(sale.sale_date+'T12:00:00').toLocaleDateString('pt-BR')} · {quantity} un. · {paymentLabel(sale.payment_method)}</span>
+        </div>
+        <div className="cp-sale-money"><b>{money.format(stats.revenue)}</b><span className={stats.profit>=0?'positive':'negative'}>{(stats.profit>=0?'+':'')+money.format(stats.profit)} lucro</span></div>
+      </button>
+    })}</div>:<Empty icon={<ReceiptText/>} title="Nenhuma venda registrada" text="Quando fechar uma venda, registre aqui. O produto sai do estoque e o valor entra no caixa." action="Registrar primeira venda" onAction={onSale}/>}
+  </div>
 }
 
 function CashPage({data,calc,onCash,onSettings}:{data:Data;calc:Metrics;onCash:()=>void;onSettings:()=>void}){
