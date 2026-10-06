@@ -8,6 +8,7 @@ on:
       - controle-plus-blue-app-v3
       - controle-plus-listing-v4
       - controle-plus-speed-ui-v7
+      - controle-plus-admin-photos-v8
       - main
   pull_request:
     branches:
