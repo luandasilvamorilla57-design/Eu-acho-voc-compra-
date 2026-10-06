@@ -2,11 +2,12 @@ import {useEffect,useMemo,useState} from 'react'
 import {
   AlertTriangle,ArrowDownRight,ArrowUpRight,BadgeDollarSign,Banknote,BarChart3,Box,
   Check,ChevronRight,CircleDollarSign,Clock3,Home,ImagePlus,LogOut,Package,Plus,
-  ReceiptText,Search,Settings2,ShoppingBag,Tag,WalletCards,X,Moon,Sun,Megaphone,RefreshCw,TrendingDown
+  ReceiptText,Search,Settings2,ShoppingBag,Tag,WalletCards,X,Moon,Sun,Megaphone,RefreshCw,TrendingDown,Trash2,Pencil,ShieldCheck
 } from 'lucide-react'
 import {supabase} from '../lib/supabase'
 import {useControlData} from './useControlData'
 import {BackupPage,ClosuresPage,GoalsPage,ManagePage,PeoplePage,ReceivablesPage,ReportsPage} from './BusinessCenter'
+import {AdminCenter} from './AdminCenter'
 import type {CashEntry,ControlView,Product,Sale} from './types'
 
 type Data=ReturnType<typeof useControlData>
@@ -63,7 +64,7 @@ export function ControlApp({userId,email}:{userId:string;email?:string}){
 
   return <div className="cp-app" data-theme={theme}>
     <div className="cp-noise"/>
-    <TopBar business={data.settings.business_name} email={email} theme={theme} onTheme={()=>setTheme(v=>v==='dark'?'light':'dark')} onSettings={()=>setModal('settings')} onManage={()=>setView('manage')}/>
+    <TopBar business={data.settings.business_name} email={email} theme={theme} isAdmin={data.isAdmin} onTheme={()=>setTheme(v=>v==='dark'?'light':'dark')} onSettings={()=>setModal('settings')} onManage={()=>setView('manage')} onAdmin={()=>setView('admin')}/>
     <main className="cp-main">
       {view==='home'&&<HomePage data={data} calc={calc} onOpenProduct={setSelected} onView={setView} onAction={setModal} onCheckListing={openListingCheckin}/>}
       {view==='stock'&&<StockPage data={data} calc={calc} onOpenProduct={setSelected} onAdd={()=>setModal('actions')}/>}
@@ -86,7 +87,7 @@ export function ControlApp({userId,email}:{userId:string;email?:string}){
     {modal==='expense'&&<ExpenseModal data={data} initialProduct={selected} onClose={()=>setModal(null)} onDone={()=>{setModal(null);notify('Gasto somado ao custo real do produto.')}}/>}
     {modal==='cash'&&<CashModal data={data} onClose={()=>setModal(null)} onDone={()=>{setModal(null);notify('Movimentação adicionada ao caixa.')}}/>}
     {modal==='settings'&&<SettingsModal data={data} email={email} onClose={()=>setModal(null)} onDone={notify}/>}\n    {selected&&modal==='listingCheckin'&&<ListingCheckinModal product={selected} data={data} onClose={()=>{setModal(null);setSelected(null)}} onSold={()=>setModal('sale')} onDone={(text)=>{setModal(null);setSelected(null);notify(text)}}/>}
-    {selected&&modal===null&&<ProductDetail product={selected} data={data} calc={calc} onClose={()=>setSelected(null)} onSale={()=>setModal('sale')} onExpense={()=>setModal('expense')} onSaved={()=>notify('Produto atualizado.')}/>}
+    {selected&&modal===null&&<ProductDetail product={selected} data={data} calc={calc} onClose={()=>setSelected(null)} onSale={()=>setModal('sale')} onExpense={()=>setModal('expense')} onSaved={()=>notify('Produto atualizado.')} onDeleted={()=>{setSelected(null);notify('Produto removido do estoque.')}}/>}
     {toast&&<div className="cp-toast"><Check size={18}/>{toast}</div>}
     {data.error&&<div className="cp-error-bar"><AlertTriangle size={17}/>{data.error}</div>}
   </div>
@@ -182,11 +183,12 @@ function buildMetrics(data:Data){
   return{unitCost,productMap,stockCapital,cash,monthSales,monthRevenue,monthProfit,stockUnits,alertDays,agedProducts,agedCapital,potentialProfit,saleStats}
 }
 
-function TopBar({business,email,theme,onTheme,onSettings,onManage}:{business:string;email?:string;theme:'dark'|'light';onTheme:()=>void;onSettings:()=>void;onManage:()=>void}){
+function TopBar({business,email,theme,isAdmin,onTheme,onSettings,onManage,onAdmin}:{business:string;email?:string;theme:'dark'|'light';isAdmin:boolean;onTheme:()=>void;onSettings:()=>void;onManage:()=>void;onAdmin:()=>void}){
   return <header className="cp-topbar"><div className="cp-top-inner">
     <Brand/>
     <div className="cp-top-business"><span>{business}</span><small>CONTROLE DO NEGÓCIO</small></div>
     <div className="cp-top-actions">
+      {isAdmin&&<button className="cp-admin-top" onClick={onAdmin}><ShieldCheck size={16}/><span>Admin</span></button>}
       <button className="cp-theme-toggle" onClick={onTheme} aria-label={theme==='dark'?'Ativar tema claro':'Ativar tema escuro'}>{theme==='dark'?<Sun size={17}/>:<Moon size={17}/>}</button>
       <button className="cp-manage-top" onClick={onManage}><BarChart3 size={16}/><span>Gestão</span></button>
       <button className="cp-user-btn" onClick={onSettings}><span>{(email?.[0]||'C').toUpperCase()}</span><Settings2 size={16}/></button>
