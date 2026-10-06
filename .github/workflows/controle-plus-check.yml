@@ -5,6 +5,7 @@ on:
     branches:
       - controle-plus-v1
       - controle-plus-business-v2
+      - controle-plus-blue-app-v3
       - main
   pull_request:
     branches:
