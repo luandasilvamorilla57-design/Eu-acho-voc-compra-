@@ -10,6 +10,7 @@ on:
       - controle-plus-speed-ui-v7
       - controle-plus-admin-photos-v8
       - controle-plus-didactic-home-v9
+      - controle-plus-polish-pwa-v10
       - main
   pull_request:
     branches:
