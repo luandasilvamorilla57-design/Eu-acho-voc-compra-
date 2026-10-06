@@ -2,7 +2,7 @@ import {useMemo,useState} from 'react'
 import {
   AlertTriangle,ArrowLeft,ArrowUpRight,Banknote,BarChart3,CalendarCheck,Check,
   ChevronRight,Download,FileArchive,Package,Plus,ReceiptText,Target,Truck,
-  UserRound,UsersRound,WalletCards
+  UserRound,UsersRound,WalletCards,BookOpenText
 } from 'lucide-react'
 import type {ControlView,Customer,Supplier} from './types'
 import {useControlData} from './useControlData'
@@ -59,7 +59,8 @@ export function ManagePage({data,onView,onBack}:{data:Data;onView:(v:ControlView
     {view:'people' as ControlView,icon:<UsersRound/>,name:'Pessoas',desc:'Clientes e fornecedores.',value:(data.customers.length+data.suppliers.length)+' contatos'},
     {view:'goals' as ControlView,icon:<Target/>,name:'Metas',desc:'Objetivos e progresso mensal.',value:goal?'Meta ativa':'Definir meta'},
     {view:'closures' as ControlView,icon:<CalendarCheck/>,name:'Fechamento',desc:'Resultado congelado de cada mês.',value:data.closures.length+' fechamento(s)'},
-    {view:'backup' as ControlView,icon:<FileArchive/>,name:'Backup',desc:'Leve seus dados com você.',value:'JSON + CSV'}
+    {view:'backup' as ControlView,icon:<FileArchive/>,name:'Backup',desc:'Leve seus dados com você.',value:'JSON + CSV'},
+    {view:'guide' as ControlView,icon:<BookOpenText/>,name:'Guia do Brique',desc:'Compra x venda, testes, fotos e valorização.',value:'Referências práticas'}
   ]
   return <div className="cp-page cp-business-page">
     <BackTitle eyebrow="CENTRAL DE GESTÃO" title="O negócio inteiro, sem virar ERP." text="Entre aqui quando quiser entender o que está funcionando e tomar decisões melhores." onBack={onBack}/>
