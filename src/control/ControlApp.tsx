@@ -334,10 +334,23 @@ function ActionSheet({onClose,onChoose}:{onClose:()=>void;onChoose:(m:Modal)=>vo
 }
 function Action({icon,title,text,onClick}:{icon:React.ReactNode;title:string;text:string;onClick:()=>void}){return <button onClick={onClick}><span>{icon}</span><div><b>{title}</b><small>{text}</small></div><ChevronRight/></button>}
 
+function ListingSetup({isListed,setIsListed,channels,setChannels,listingDate,setListingDate}:{isListed:boolean;setIsListed:(v:boolean)=>void;channels:string[];setChannels:(v:string[])=>void;listingDate:string;setListingDate:(v:string)=>void}){
+  function toggle(channel:string){setChannels(channels.includes(channel)?channels.filter(x=>x!==channel):[...channels,channel])}
+  return <div className="cp-listing-setup">
+    <div className="cp-listing-question"><div><Megaphone/><div><b>Esse produto já está anunciado?</b><small>Se estiver, o CONTROLE+ acompanha o anúncio com você.</small></div></div><div className="cp-yes-no"><button type="button" className={!isListed?'active':''} onClick={()=>setIsListed(false)}>Não</button><button type="button" className={isListed?'active':''} onClick={()=>setIsListed(true)}>Sim</button></div></div>
+    {isListed&&<div className="cp-listing-fields">
+      <div className="cp-field cp-field--full"><span>Onde está anunciado?</span><div className="cp-channel-grid">{LISTING_CHANNELS.map(channel=><button type="button" key={channel} className={channels.includes(channel)?'active':''} onClick={()=>toggle(channel)}>{channels.includes(channel)&&<Check size={14}/>} {channel}</button>)}</div></div>
+      <Field label="Desde quando está anunciado?"><input type="date" max={localDate()} value={listingDate} onChange={e=>setListingDate(e.target.value)}/></Field>
+      <div className="cp-listing-age"><Clock3/><div><b>{daysSince(listingDate)} dia(s) de anúncio</b><small>{daysSince(listingDate)>=5?'Já entra na rotina de acompanhamento.':'A primeira revisão acontece ao completar 5 dias.'}</small></div></div>
+    </div>}
+  </div>
+}
+
 function PurchaseModal({data,onClose,onDone}:{data:Data;onClose:()=>void;onDone:()=>void}){
   const [step,setStep]=useState(1)
   const [name,setName]=useState(''),[category,setCategory]=useState(''),[source,setSource]=useState('Marketplace'),[date,setDate]=useState(localDate()),[supplierId,setSupplierId]=useState('')
   const [cost,setCost]=useState(''),[qty,setQty]=useState('1'),[listed,setListed]=useState(''),[minimum,setMinimum]=useState(''),[notes,setNotes]=useState('')
+  const [isListed,setIsListed]=useState(false),[channels,setChannels]=useState<string[]>([]),[listingDate,setListingDate]=useState(localDate())
   const [files,setFiles]=useState<File[]>([]),[error,setError]=useState<string|null>(null)
   async function save(){
     setError(null)
@@ -345,15 +358,59 @@ function PurchaseModal({data,onClose,onDone}:{data:Data;onClose:()=>void;onDone:
       if(!name.trim())throw new Error('Dê um nome para o produto.')
       const purchase=Number(cost.replace(',','.'))
       if(!Number.isFinite(purchase)||purchase<0)throw new Error('Informe quanto você pagou.')
-      await data.createProduct({name:name.trim(),category:category.trim(),source,supplierId:supplierId||null,purchaseDate:date,purchaseUnitCost:purchase,quantity:Math.max(1,Number(qty)||1),listedPrice:listed?Number(listed.replace(',','.')):null,minimumPrice:minimum?Number(minimum.replace(',','.')):null,notes},files)
+      const listPrice=listed?Number(listed.replace(',','.')):null
+      if(isListed&&(!listPrice||listPrice<=0))throw new Error('Informe o preço do anúncio.')
+      if(isListed&&channels.length===0)throw new Error('Selecione onde o produto está anunciado.')
+      await data.createProduct({
+        name:name.trim(),category:category.trim(),source,supplierId:supplierId||null,
+        purchaseDate:date,purchaseUnitCost:purchase,quantity:Math.max(1,Number(qty)||1),
+        listedPrice:listPrice,minimumPrice:minimum?Number(minimum.replace(',','.')):null,notes,
+        acquisitionType:'purchase',costBasisKnown:true,
+        listingStatus:isListed?'listed':'not_listed',listingChannels:channels,
+        listingStartedAt:isListed?listingDate:null
+      },files)
       onDone()
     }catch(err:any){setError(err?.message||'Não foi possível salvar a compra.')}
   }
-  return <ModalShell onClose={onClose}><ModalHeader eyebrow="NOVA COMPRA" title={step===1?'O que você comprou?':step===2?'Quanto entrou nesse produto?':'Guarde o estado em que chegou.'} text={step===1?'Comece pelo básico. Você pode detalhar depois.':step===2?'Esses valores viram custo e lucro automaticamente.':'As fotos ficam ligadas ao histórico da mercadoria.'}/><Stepper step={step}/>
-    {step===1&&<div className="cp-form-grid"><Field label="Produto" full><input autoFocus value={name} onChange={e=>setName(e.target.value)} placeholder="Ex.: iPhone 11 128GB"/></Field><Field label="Categoria"><input value={category} onChange={e=>setCategory(e.target.value)} placeholder="Celular, ferramenta..."/></Field><Field label="Onde comprou?"><select value={source} onChange={e=>setSource(e.target.value)}><option>Marketplace</option><option>OLX</option><option>Fornecedor</option><option>Loja</option><option>Outro</option></select></Field><Field label="Data da compra"><input type="date" value={date} onChange={e=>setDate(e.target.value)}/></Field><Field label="Fornecedor salvo (opcional)" full><select value={supplierId} onChange={e=>setSupplierId(e.target.value)}><option value="">Não vincular</option>{data.suppliers.map(s=><option key={s.id} value={s.id}>{s.name}{s.source?' · '+s.source:''}</option>)}</select></Field><Tip text="Não precisa preencher ficha enorme. Nome, valor e data já bastam para começar."/></div>}
-    {step===2&&<div className="cp-form-grid"><Field label="Quanto pagou por unidade?"><MoneyInput value={cost} setValue={setCost} placeholder="0,00"/></Field><Field label="Quantidade"><input type="number" min="1" value={qty} onChange={e=>setQty(e.target.value)}/></Field><Field label="Preço que pretende anunciar"><MoneyInput value={listed} setValue={setListed} placeholder="Opcional"/></Field><Field label="Menor valor que aceitaria"><MoneyInput value={minimum} setValue={setMinimum} placeholder="Opcional"/></Field><div className="cp-live-summary"><span>Investimento inicial</span><strong>{money.format((Number(cost.replace(',','.'))||0)*(Number(qty)||1))}</strong><small>Será registrado automaticamente como saída do caixa.</small></div></div>}
-    {step===3&&<div className="cp-form-grid"><label className="cp-photo-drop"><ImagePlus size={28}/><b>{files.length?files.length+' foto(s) selecionada(s)':'Adicionar fotos'}</b><span>Até 8 imagens · 10 MB cada</span><input type="file" accept="image/*" multiple onChange={e=>setFiles(Array.from(e.target.files||[]).slice(0,8))}/></label>{files.length>0&&<div className="cp-photo-preview">{files.map((file,i)=><div key={file.name+i}><img src={URL.createObjectURL(file)} alt=""/><button type="button" onClick={()=>setFiles(list=>list.filter((_,index)=>index!==i))}><X/></button></div>)}</div>}<Field label="Observações" full><textarea value={notes} onChange={e=>setNotes(e.target.value)} placeholder="Defeito, acessório, detalhe da compra..."/></Field><div className="cp-review-box"><b>{name||'Seu produto'}</b><span>{(qty||1)+' un. · '+money.format(Number(cost.replace(',','.'))||0)+' cada'}</span><span>{files.length+' foto(s) no histórico'}</span></div></div>}
+  return <ModalShell onClose={onClose}><ModalHeader eyebrow="NOVA COMPRA" title={step===1?'O que você comprou?':step===2?'Valores e anúncio':'Fotos e detalhes'} text={step===1?'Comece pelo básico. Você pode detalhar depois.':step===2?'Separe o que é custo, preço de venda e situação do anúncio.':'Guarde fotos e observações do estado do produto.'}/><Stepper step={step}/>
+    {step===1&&<div className="cp-form-grid"><Field label="Produto" full><input autoFocus value={name} onChange={e=>setName(e.target.value)} placeholder="Ex.: iPhone 11 128GB"/></Field><Field label="Categoria"><input value={category} onChange={e=>setCategory(e.target.value)} placeholder="Celular, ferramenta..."/></Field><Field label="Onde comprou?"><select value={source} onChange={e=>setSource(e.target.value)}><option>Marketplace</option><option>OLX</option><option>Fornecedor</option><option>Loja</option><option>Outro</option></select></Field><Field label="Data da compra"><input type="date" value={date} onChange={e=>setDate(e.target.value)}/></Field><Field label="Fornecedor salvo (opcional)" full><select value={supplierId} onChange={e=>setSupplierId(e.target.value)}><option value="">Não vincular</option>{data.suppliers.map(s=><option key={s.id} value={s.id}>{s.name}{s.source?' · '+s.source:''}</option>)}</select></Field><Tip text="Essa compra sai do caixa automaticamente e entra no estoque."/></div>}
+    {step===2&&<div className="cp-form-grid"><Field label="Quanto pagou por unidade?"><MoneyInput value={cost} setValue={setCost} placeholder="0,00"/></Field><Field label="Quantidade"><input type="number" min="1" value={qty} onChange={e=>setQty(e.target.value)}/></Field><Field label={isListed?'Preço anunciado':'Preço que pretende anunciar'}><MoneyInput value={listed} setValue={setListed} placeholder="Opcional"/></Field><Field label="Menor valor que aceitaria"><MoneyInput value={minimum} setValue={setMinimum} placeholder="Opcional"/></Field><ListingSetup isListed={isListed} setIsListed={setIsListed} channels={channels} setChannels={setChannels} listingDate={listingDate} setListingDate={setListingDate}/><div className="cp-live-summary"><span>Investimento inicial</span><strong>{money.format((Number(cost.replace(',','.'))||0)*(Number(qty)||1))}</strong><small>Será registrado automaticamente como saída do caixa.</small></div></div>}
+    {step===3&&<div className="cp-form-grid"><label className="cp-photo-drop"><ImagePlus size={28}/><b>{files.length?files.length+' foto(s) selecionada(s)':'Adicionar fotos'}</b><span>Até 8 imagens · 10 MB cada</span><input type="file" accept="image/*" multiple onChange={e=>setFiles(Array.from(e.target.files||[]).slice(0,8))}/></label>{files.length>0&&<div className="cp-photo-preview">{files.map((file,i)=><div key={file.name+i}><img src={URL.createObjectURL(file)} alt=""/><button type="button" onClick={()=>setFiles(list=>list.filter((_,index)=>index!==i))}><X/></button></div>)}</div>}<Field label="Observações" full><textarea value={notes} onChange={e=>setNotes(e.target.value)} placeholder="Defeito, acessório, detalhe da compra..."/></Field><div className="cp-review-box"><b>{name||'Seu produto'}</b><span>{(qty||1)+' un. · '+money.format(Number(cost.replace(',','.'))||0)+' cada'}</span><span>{isListed?'Anunciado em '+channels.join(', '):'Ainda não anunciado'}</span><span>{files.length+' foto(s) no histórico'}</span></div></div>}
     {error&&<div className="cp-form-error">{error}</div>}<div className="cp-modal-actions">{step>1&&<button className="cp-secondary" onClick={()=>setStep(s=>s-1)}>Voltar</button>}<button className="cp-primary" disabled={data.busy} onClick={()=>step<3?setStep(s=>s+1):void save()}>{data.busy?'Salvando...':step<3?'Continuar':'Salvar compra'}</button></div>
+  </ModalShell>
+}
+
+function InventoryModal({data,onClose,onDone}:{data:Data;onClose:()=>void;onDone:()=>void}){
+  const [step,setStep]=useState(1)
+  const [name,setName]=useState(''),[category,setCategory]=useState(''),[qty,setQty]=useState('1')
+  const [knowCost,setKnowCost]=useState(false),[cost,setCost]=useState(''),[listed,setListed]=useState(''),[minimum,setMinimum]=useState('')
+  const [isListed,setIsListed]=useState(false),[channels,setChannels]=useState<string[]>([]),[listingDate,setListingDate]=useState(localDate())
+  const [files,setFiles]=useState<File[]>([]),[notes,setNotes]=useState(''),[error,setError]=useState<string|null>(null)
+  async function save(){
+    setError(null)
+    try{
+      if(!name.trim())throw new Error('Dê um nome para o produto.')
+      const originalCost=knowCost?(Number(cost.replace(',','.'))||0):0
+      const listPrice=listed?Number(listed.replace(',','.')):null
+      if(knowCost&&originalCost<0)throw new Error('Informe um custo válido.')
+      if(isListed&&(!listPrice||listPrice<=0))throw new Error('Informe o preço do anúncio.')
+      if(isListed&&channels.length===0)throw new Error('Selecione onde o produto está anunciado.')
+      await data.createProduct({
+        name:name.trim(),category:category.trim(),source:'Produto próprio',
+        purchaseDate:localDate(),purchaseUnitCost:originalCost,quantity:Math.max(1,Number(qty)||1),
+        listedPrice:listPrice,minimumPrice:minimum?Number(minimum.replace(',','.')):null,notes,
+        acquisitionType:'owned',costBasisKnown:knowCost,
+        listingStatus:isListed?'listed':'not_listed',listingChannels:channels,
+        listingStartedAt:isListed?listingDate:null
+      },files)
+      onDone()
+    }catch(err:any){setError(err?.message||'Não foi possível adicionar o produto.')}
+  }
+  return <ModalShell onClose={onClose}><ModalHeader eyebrow="PRODUTO QUE JÁ É SEU" title={step===1?'O que você quer vender?':step===2?'Preço e anúncio':'Fotos e detalhes'} text={step===1?'Cadastre algo que você já tem em casa ou já possuía. Isso não tira dinheiro do caixa.':step===2?'Se já estiver anunciado, o CONTROLE+ começa a acompanhar o desempenho.':'Fotos ajudam a reconhecer o item no estoque e acompanhar a venda.'}/><Stepper step={step}/>
+    {step===1&&<div className="cp-form-grid"><Field label="Produto" full><input autoFocus value={name} onChange={e=>setName(e.target.value)} placeholder="Ex.: TV Samsung 43, bicicleta, ferramenta..."/></Field><Field label="Categoria"><input value={category} onChange={e=>setCategory(e.target.value)} placeholder="Eletrônico, ferramenta..."/></Field><Field label="Quantidade"><input type="number" min="1" value={qty} onChange={e=>setQty(e.target.value)}/></Field><Tip text="Produto próprio entra no estoque, mas não gera saída no caixa."/></div>}
+    {step===2&&<div className="cp-form-grid"><div className="cp-field cp-field--full"><span>Quer considerar quanto esse produto te custou?</span><div className="cp-cost-choice"><button type="button" className={!knowCost?'active':''} onClick={()=>setKnowCost(false)}>Não sei / não considerar</button><button type="button" className={knowCost?'active':''} onClick={()=>setKnowCost(true)}>Sim, sei o valor</button></div></div>{knowCost&&<Field label="Custo original por unidade"><MoneyInput value={cost} setValue={setCost} placeholder="0,00"/></Field>}<Field label={isListed?'Preço anunciado':'Preço que pretende vender'}><MoneyInput value={listed} setValue={setListed} placeholder="Opcional"/></Field><Field label="Menor valor que aceitaria"><MoneyInput value={minimum} setValue={setMinimum} placeholder="Opcional"/></Field><ListingSetup isListed={isListed} setIsListed={setIsListed} channels={channels} setChannels={setChannels} listingDate={listingDate} setListingDate={setListingDate}/></div>}
+    {step===3&&<div className="cp-form-grid"><label className="cp-photo-drop"><ImagePlus size={28}/><b>{files.length?files.length+' foto(s) selecionada(s)':'Adicionar fotos'}</b><span>Até 8 imagens · 10 MB cada</span><input type="file" accept="image/*" multiple onChange={e=>setFiles(Array.from(e.target.files||[]).slice(0,8))}/></label>{files.length>0&&<div className="cp-photo-preview">{files.map((file,i)=><div key={file.name+i}><img src={URL.createObjectURL(file)} alt=""/><button type="button" onClick={()=>setFiles(list=>list.filter((_,index)=>index!==i))}><X/></button></div>)}</div>}<Field label="Observações" full><textarea value={notes} onChange={e=>setNotes(e.target.value)} placeholder="Estado, acessórios, defeitos, motivo da venda..."/></Field><div className="cp-review-box"><b>{name||'Seu produto'}</b><span>Produto próprio · não movimenta o caixa</span><span>{isListed?'Anunciado há '+daysSince(listingDate)+' dia(s)':'Ainda não anunciado'}</span></div></div>}
+    {error&&<div className="cp-form-error">{error}</div>}<div className="cp-modal-actions">{step>1&&<button className="cp-secondary" onClick={()=>setStep(s=>s-1)}>Voltar</button>}<button className="cp-primary" disabled={data.busy} onClick={()=>step<3?setStep(s=>s+1):void save()}>{data.busy?'Salvando...':step<3?'Continuar':'Adicionar ao estoque'}</button></div>
   </ModalShell>
 }
 
