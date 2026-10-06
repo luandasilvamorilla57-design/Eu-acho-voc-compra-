@@ -303,7 +303,15 @@ function ProductCard({product,data,calc,onClick}:{product:Product;data:Data;calc
   const alert=product.quantity_available>0&&days>=calc.alertDays
   const pill=product.quantity_available===0?'Vendido':listingDue?'Revisar anúncio':product.listing_status==='listed'?'Anunciado · '+listedDays+'d':alert?days+' dias':'Em estoque'
   const pillClass=product.quantity_available===0?'cp-pill cp-pill--muted':listingDue?'cp-pill cp-pill--warn':product.listing_status==='listed'?'cp-pill cp-pill--listed':alert?'cp-pill cp-pill--warn':'cp-pill'
-  return <button className="cp-product-card" onClick={onClick}><div className="cp-product-photo">{photo?<img src={photo} alt=""/>:<Box size={32}/>}<span className={pillClass}>{pill}</span></div><div className="cp-product-body"><span>{product.acquisition_type==='owned'?'Produto próprio':product.category||'Produto'}</span><h3>{product.name}</h3><div className="cp-product-values"><div><small>Custo real</small><b>{product.cost_basis_known?money.format(cost):'Não informado'}</b></div><div><small>{potential===null?'Sem preço':'Lucro possível'}</small><b className={potential!==null&&potential>=0?'positive':''}>{potential===null?'—':money.format(potential)}</b></div></div></div></button>
+  return <button className="cp-product-card" onClick={onClick}>
+    <div className="cp-product-photo">{photo?<img src={photo} alt=""/>:<Box size={32}/>}<span className={pillClass}>{pill}</span></div>
+    <div className="cp-product-body">
+      <span>{product.acquisition_type==='owned'?'Produto próprio':product.category||'Produto'}</span>
+      <h3>{product.name}</h3>
+      <div className="cp-product-meta-line"><span>{product.quantity_available} un. disponível(is)</span><span>{product.listed_price!==null?'Anúncio '+money.format(product.listed_price):'Sem preço de anúncio'}</span></div>
+      <div className="cp-product-values"><div><small>Custo real</small><b>{product.cost_basis_known?money.format(cost):'Não informado'}</b></div><div><small>{potential===null?'Lucro possível':'Lucro possível'}</small><b className={potential!==null&&potential>=0?'positive':''}>{potential===null?'—':money.format(potential)}</b></div></div>
+    </div>
+  </button>
 }
 
 function StockPage({data,calc,onOpenProduct,onAdd}:{data:Data;calc:Metrics;onOpenProduct:(p:Product)=>void;onAdd:()=>void}){
