@@ -9,6 +9,7 @@ on:
       - controle-plus-listing-v4
       - controle-plus-speed-ui-v7
       - controle-plus-admin-photos-v8
+      - controle-plus-didactic-home-v9
       - main
   pull_request:
     branches:
