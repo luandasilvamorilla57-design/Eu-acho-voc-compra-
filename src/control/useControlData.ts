@@ -99,6 +99,11 @@ export function useControlData(userId:string){
   const createProduct=useCallback(async(input:NewProductInput,files:File[])=>{
     setBusy(true);setError(null)
     try{
+      const selectedFiles=files.slice(0,8)
+      for(const file of selectedFiles){
+        if(file.size>10*1024*1024)throw new Error('Cada foto pode ter no máximo 10 MB.')
+      }
+
       const rpc=await db.rpc('control_create_product_v3',{
         p_name:input.name,
         p_purchase_unit_cost:input.purchaseUnitCost,
@@ -119,26 +124,66 @@ export function useControlData(userId:string){
       if(rpc.error)throw rpc.error
       const productId=String(rpc.data)
 
-      for(let index=0;index<Math.min(files.length,8);index++){
-        const file=files[index]
-        if(file.size>10*1024*1024)throw new Error('Cada foto pode ter no máximo 10 MB.')
+      const uploadResults=await Promise.allSettled(selectedFiles.map(async(file,index)=>{
         const ext=(file.name.split('.').pop()||'jpg').toLowerCase()
         const safeExt=['jpg','jpeg','png','webp','heic','heif'].includes(ext)?ext:'jpg'
         const path=`${userId}/${productId}/${crypto.randomUUID()}.${safeExt}`
-        const uploaded=await supabase.storage.from(PHOTO_BUCKET).upload(path,file,{cacheControl:'3600',upsert:false})
-        if(uploaded.error)throw uploaded.error
-        const photo=await db.from('control_product_photos').insert({
-          user_id:userId,product_id:productId,storage_path:path,stage:'purchase',position:index
+
+        const uploaded=await supabase.storage.from(PHOTO_BUCKET).upload(path,file,{
+          cacheControl:'3600',
+          upsert:false
         })
+        if(uploaded.error)throw uploaded.error
+
+        const photo=await db.from('control_product_photos').insert({
+          user_id:userId,
+          product_id:productId,
+          storage_path:path,
+          stage:'purchase',
+          position:index
+        }).select('*').single()
+
         if(photo.error){
           await supabase.storage.from(PHOTO_BUCKET).remove([path])
           throw photo.error
         }
+        return photo.data as ProductPhoto
+      }))
+
+      const savedPhotos=uploadResults
+        .filter((result):result is PromiseFulfilledResult<ProductPhoto>=>result.status==='fulfilled')
+        .map(result=>result.value)
+      const photoFailures=uploadResults.length-savedPhotos.length
+
+      const [productResult,cashResult]=await Promise.all([
+        db.from('control_products').select('*').eq('id',productId).single(),
+        db.from('control_cash_entries').select('*').eq('product_id',productId).order('created_at',{ascending:false})
+      ])
+      if(productResult.error)throw productResult.error
+      if(cashResult.error)throw cashResult.error
+
+      const signedPhotos=await Promise.all(savedPhotos.map(async photo=>{
+        const signed=await supabase.storage.from(PHOTO_BUCKET).createSignedUrl(photo.storage_path,3600)
+        return {...photo,signed_url:signed.data?.signedUrl||null}
+      }))
+
+      const freshProduct=asNumber([productResult.data as Product],['purchase_unit_cost','listed_price','minimum_price'])[0]
+      const freshCash=asNumber((cashResult.data||[]) as CashEntry[],['amount'])
+
+      setProducts(current=>[freshProduct,...current.filter(item=>item.id!==productId)])
+      setPhotos(current=>[...signedPhotos,...current.filter(item=>item.product_id!==productId)])
+      if(freshCash.length){
+        const freshIds=new Set(freshCash.map(item=>item.id))
+        setCashEntries(current=>[...freshCash,...current.filter(item=>!freshIds.has(item.id))])
       }
-      await load()
+
+      if(photoFailures>0){
+        setError(`Produto salvo. ${photoFailures} foto(s) não conseguiram ser enviadas.`)
+      }
+
       return productId
     }finally{setBusy(false)}
-  },[load,userId])
+  },[userId])
 
   const registerSale=useCallback(async(input:RegisterSaleInput)=>{
     setBusy(true);setError(null)
