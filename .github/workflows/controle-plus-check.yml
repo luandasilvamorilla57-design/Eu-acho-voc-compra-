@@ -7,6 +7,7 @@ on:
       - controle-plus-business-v2
       - controle-plus-blue-app-v3
       - controle-plus-listing-v4
+      - controle-plus-speed-ui-v7
       - main
   pull_request:
     branches:
