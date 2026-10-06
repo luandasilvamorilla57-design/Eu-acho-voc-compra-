@@ -1,4 +1,6 @@
-export type ControlView='home'|'stock'|'sales'|'cash'
+export type ControlView=
+  |'home'|'stock'|'sales'|'cash'|'manage'
+  |'receivables'|'reports'|'people'|'goals'|'backup'|'closures'
 
 export type ControlSettings={
   user_id:string
@@ -30,6 +32,7 @@ export type Product={
   minimum_price:number|null
   status:'in_stock'|'reserved'|'sold'|'archived'
   notes:string|null
+  legacy_purchase_id:string|null
   created_at:string
   updated_at:string
 }
@@ -66,12 +69,24 @@ export type Customer={
   updated_at:string
 }
 
+export type Supplier={
+  id:string
+  user_id:string
+  name:string
+  phone:string|null
+  source:string|null
+  notes:string|null
+  created_at:string
+  updated_at:string
+}
+
 export type Sale={
   id:string
   user_id:string
   customer_id:string|null
   sale_date:string
   payment_method:string
+  payment_mode:'paid'|'receivable'
   status:'completed'|'cancelled'
   notes:string|null
   created_at:string
@@ -84,6 +99,7 @@ export type SaleItem={
   product_id:string
   quantity:number
   unit_price:number
+  unit_cost_snapshot:number
   created_at:string
 }
 
@@ -100,6 +116,64 @@ export type CashEntry={
   created_at:string
 }
 
+export type Receivable={
+  id:string
+  user_id:string
+  sale_id:string
+  customer_id:string
+  description:string
+  total_amount:number
+  paid_amount:number
+  due_date:string
+  status:'open'|'partial'|'paid'|'cancelled'
+  notes:string|null
+  created_at:string
+  updated_at:string
+}
+
+export type ReceivableInstallment={
+  id:string
+  user_id:string
+  receivable_id:string
+  installment_number:number
+  amount:number
+  due_date:string
+  paid_at:string|null
+  payment_method:string|null
+  status:'open'|'paid'|'cancelled'
+  notes:string|null
+  created_at:string
+}
+
+export type Goal={
+  id:string
+  user_id:string
+  period_month:string
+  revenue_target:number
+  profit_target:number
+  sales_target:number
+  purchase_budget:number
+  created_at:string
+  updated_at:string
+}
+
+export type MonthClosure={
+  id:string
+  user_id:string
+  period_month:string
+  revenue:number
+  cost_of_goods:number
+  general_expenses:number
+  gross_profit:number
+  net_profit:number
+  sales_count:number
+  stock_value:number
+  cash_balance:number
+  receivables_open:number
+  notes:string|null
+  closed_at:string
+}
+
 export type NewProductInput={
   name:string
   category?:string
@@ -107,6 +181,7 @@ export type NewProductInput={
   purchaseUnitCost:number
   purchaseDate:string
   source?:string
+  supplierId?:string|null
   listedPrice?:number|null
   minimumPrice?:number|null
   notes?:string
@@ -118,7 +193,10 @@ export type RegisterSaleInput={
   unitPrice:number
   saleDate:string
   paymentMethod:string
+  paymentMode:'paid'|'receivable'
   customerId?:string|null
+  installmentCount?:number
+  firstDueDate?:string|null
   notes?:string
 }
 
@@ -128,4 +206,12 @@ export type AddExpenseInput={
   expenseType:string
   description?:string
   occurredAt:string
+}
+
+export type GoalInput={
+  periodMonth:string
+  revenueTarget:number
+  profitTarget:number
+  salesTarget:number
+  purchaseBudget:number
 }
