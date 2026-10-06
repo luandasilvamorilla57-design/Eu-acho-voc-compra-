@@ -1,4 +1,4 @@
-import {useMemo,useState} from 'react'
+import {useMemo,useState,type ReactNode} from 'react'
 import {
   AlertTriangle,ArrowLeft,BadgeDollarSign,Bike,Camera,Car,CheckCircle2,ChevronDown,
   Gamepad2,Info,Monitor,Search,ShieldCheck,Smartphone,Sparkles,Tv,Wrench
@@ -17,7 +17,7 @@ type PriceItem={
 type Category={
   id:string
   name:string
-  icon:React.ReactNode
+  icon:ReactNode
   items:PriceItem[]
 }
 
