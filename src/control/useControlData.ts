@@ -7,7 +7,7 @@ const PHOTO_BUCKET='control-product-photos'
 
 function asNumber<T extends Record<string,any>>(rows:T[],keys:string[]){
   return rows.map(row=>{
-    const next={...row}
+    const next:Record<string,any>={...row}
     for(const key of keys)if(next[key]!==null&&next[key]!==undefined)next[key]=Number(next[key])
     return next as T
   })
