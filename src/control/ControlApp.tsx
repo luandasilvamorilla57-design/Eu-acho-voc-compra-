@@ -290,8 +290,12 @@ function ProductCard({product,data,calc,onClick}:{product:Product;data:Data;calc
   const cost=calc.unitCost(product)
   const potential=product.listed_price!==null?(product.listed_price-cost)*product.quantity_available:null
   const days=daysSince(product.purchase_date)
+  const listedDays=daysSince(product.listing_started_at||product.purchase_date)
+  const listingDue=product.listing_status==='listed'&&!!product.listing_next_checkin_at&&product.listing_next_checkin_at<=localDate()
   const alert=product.quantity_available>0&&days>=calc.alertDays
-  return <button className="cp-product-card" onClick={onClick}><div className="cp-product-photo">{photo?<img src={photo} alt=""/>:<Box size={32}/>}<span className={alert?'cp-pill cp-pill--warn':product.quantity_available===0?'cp-pill cp-pill--muted':'cp-pill'}>{product.quantity_available===0?'Vendido':alert?days+' dias':'Em estoque'}</span></div><div className="cp-product-body"><span>{product.category||'Produto'}</span><h3>{product.name}</h3><div className="cp-product-values"><div><small>Custo real</small><b>{money.format(cost)}</b></div><div><small>{potential===null?'Sem preço':'Lucro possível'}</small><b className={potential!==null&&potential>=0?'positive':''}>{potential===null?'—':money.format(potential)}</b></div></div></div></button>
+  const pill=product.quantity_available===0?'Vendido':listingDue?'Revisar anúncio':product.listing_status==='listed'?'Anunciado · '+listedDays+'d':alert?days+' dias':'Em estoque'
+  const pillClass=product.quantity_available===0?'cp-pill cp-pill--muted':listingDue?'cp-pill cp-pill--warn':product.listing_status==='listed'?'cp-pill cp-pill--listed':alert?'cp-pill cp-pill--warn':'cp-pill'
+  return <button className="cp-product-card" onClick={onClick}><div className="cp-product-photo">{photo?<img src={photo} alt=""/>:<Box size={32}/>}<span className={pillClass}>{pill}</span></div><div className="cp-product-body"><span>{product.acquisition_type==='owned'?'Produto próprio':product.category||'Produto'}</span><h3>{product.name}</h3><div className="cp-product-values"><div><small>Custo real</small><b>{product.cost_basis_known?money.format(cost):'Não informado'}</b></div><div><small>{potential===null?'Sem preço':'Lucro possível'}</small><b className={potential!==null&&potential>=0?'positive':''}>{potential===null?'—':money.format(potential)}</b></div></div></div></button>
 }
 
 function StockPage({data,calc,onOpenProduct,onPurchase}:{data:Data;calc:Metrics;onOpenProduct:(p:Product)=>void;onPurchase:()=>void}){
@@ -520,6 +524,45 @@ function SettingsModal({data,email,onClose,onDone}:{data:Data;email?:string;onCl
   const [business,setBusiness]=useState(data.settings?.business_name||'Meu negócio'),[cash,setCash]=useState(String(data.settings?.initial_cash||0)),[days,setDays]=useState(String(data.settings?.stock_alert_days||21)),[error,setError]=useState<string|null>(null)
   async function save(){setError(null);try{await data.updateSettings({business_name:business.trim()||'Meu negócio',initial_cash:Math.max(0,Number(cash.replace(',','.'))||0),stock_alert_days:Math.max(1,Number(days)||21),onboarding_completed:true});onDone('Configurações salvas.');onClose()}catch(err:any){setError(err?.message||'Não foi possível salvar.')}}
   return <ModalShell onClose={onClose}><ModalHeader eyebrow="SEU CONTROLE+" title="Ajustes simples, números mais reais." text="Defina o ponto de partida do caixa e quando um produto deve chamar atenção."/><div className="cp-account-line"><span>{(email?.[0]||'C').toUpperCase()}</span><div><b>{email||'Sua conta'}</b><small>Dados protegidos por usuário</small></div></div><div className="cp-form-grid"><Field label="Nome do negócio" full><input value={business} onChange={e=>setBusiness(e.target.value)} placeholder="Ex.: Brique do Luan"/></Field><Field label="Saldo inicial"><MoneyInput value={cash} setValue={setCash} placeholder="0,00"/></Field><Field label="Alertar estoque após"><div className="cp-input-suffix"><input type="number" min="1" value={days} onChange={e=>setDays(e.target.value)}/><span>dias</span></div></Field></div><div className="cp-settings-note"><b>O que é saldo inicial?</b><p>É o dinheiro que você já tinha disponível antes de começar a registrar as movimentações aqui.</p></div>{error&&<div className="cp-form-error">{error}</div>}<div className="cp-modal-actions"><button className="cp-danger-link" onClick={()=>void supabase.auth.signOut()}><LogOut size={17}/> Sair</button><button className="cp-primary" disabled={data.busy} onClick={()=>void save()}>Salvar ajustes</button></div></ModalShell>
+}
+
+function ListingCheckinModal({product,data,onClose,onSold,onDone}:{product:Product;data:Data;onClose:()=>void;onSold:()=>void;onDone:(text:string)=>void}){
+  const [stage,setStage]=useState<'ask'|'slow'|'price'>('ask')
+  const suggested=product.listed_price?Math.max(1,Math.round(product.listed_price*.95)):''
+  const [newPrice,setNewPrice]=useState(String(suggested))
+  const [error,setError]=useState<string|null>(null)
+  const photo=(data.grouped.photosByProduct.get(product.id)||[])[0]?.signed_url
+  const listedDays=daysSince(product.listing_started_at||product.purchase_date)
+  const channels=product.listing_channels.length?product.listing_channels.join(' · '):'Plataforma não informada'
+  const price=product.listed_price||0
+
+  const suggestion=listedDays>=15
+    ?'Esse anúncio já está há bastante tempo no ar. Vale renovar as fotos e o título e considerar uma redução de 8% a 12% para destravar a venda.'
+    :listedDays>=10
+      ?'Com mais de 10 dias, vale refazer o anúncio e testar uma redução leve de 5% a 8% se as mensagens estiverem fracas.'
+      :'Antes de cortar muito o preço, teste uma foto principal melhor, um título mais direto e renove o anúncio. Se quase ninguém chamar, uma redução pequena pode ajudar.'
+
+  async function record(result:'good'|'keep'|'refreshed'|'price_lowered',nextPrice?:number){
+    setError(null)
+    try{
+      await data.recordListingCheckin({productId:product.id,result,newPrice:nextPrice})
+      onDone(result==='refreshed'?'Anúncio renovado. Vou perguntar de novo em 5 dias.':result==='price_lowered'?'Preço atualizado. Nova revisão em 5 dias.':'Certo. Próxima revisão em 5 dias.')
+    }catch(err:any){setError(err?.message||'Não foi possível atualizar o acompanhamento.')}
+  }
+
+  async function lowerPrice(){
+    const value=Number(newPrice.replace(',','.'))
+    if(!Number.isFinite(value)||value<=0){setError('Informe um preço válido.');return}
+    await record('price_lowered',value)
+  }
+
+  return <ModalShell onClose={onClose}>
+    <div className="cp-checkin-product">{photo?<img src={photo} alt=""/>:<span><Megaphone/></span>}<div><span>REVISÃO DO ANÚNCIO</span><h2>{product.name}</h2><p>{channels} · {listedDays} dia(s) anunciado</p></div></div>
+    {stage==='ask'&&<div className="cp-checkin-body"><h3>Como está esse anúncio?</h3><p>Já passaram {listedDays} dias. Isso ajuda o CONTROLE+ a não deixar uma mercadoria esquecida.</p><div className="cp-checkin-options"><button onClick={onSold}><span className="is-success"><Banknote/></span><div><b>Vendeu</b><small>Registrar a venda agora</small></div><ChevronRight/></button><button disabled={data.busy} onClick={()=>void record('good')}><span><Check/></span><div><b>Está indo bem</b><small>Tem procura ou negociação acontecendo</small></div><ChevronRight/></button><button onClick={()=>setStage('slow')}><span className="is-warn"><TrendingDown/></span><div><b>Está fraco</b><small>Poucas mensagens ou nenhuma proposta</small></div><ChevronRight/></button></div></div>}
+    {stage==='slow'&&<div className="cp-checkin-body"><span className="cp-eyebrow">ANÚNCIO FRACO</span><h3>Não deixa o produto morrer no estoque.</h3><div className="cp-listing-advice"><RefreshCw/><p>{suggestion}</p></div>{price>0&&<div className="cp-price-suggestion"><span>Preço atual</span><b>{money.format(price)}</b><small>Teste inicial sugerido: perto de {money.format(Number(suggested)||price)}</small></div>}<div className="cp-checkin-actions"><button className="cp-primary" disabled={data.busy} onClick={()=>void record('refreshed')}><RefreshCw/> Refiz o anúncio</button><button className="cp-secondary" onClick={()=>setStage('price')}><TrendingDown/> Baixar o preço</button><button className="cp-text-button" disabled={data.busy} onClick={()=>void record('keep')}>Manter como está por mais 5 dias</button></div></div>}
+    {stage==='price'&&<div className="cp-checkin-body"><span className="cp-eyebrow">AJUSTAR PREÇO</span><h3>Quanto vai pedir agora?</h3><p>Faça uma mudança pequena primeiro. Você ainda pode revisar novamente daqui a 5 dias.</p><Field label="Novo preço anunciado" full><MoneyInput value={newPrice} setValue={setNewPrice} placeholder="0,00"/></Field>{price>0&&Number(newPrice.replace(',','.'))>0&&<div className="cp-discount-preview"><span>Diferença</span><b>{money.format(Number(newPrice.replace(',','.'))-price)}</b><small>{(((Number(newPrice.replace(',','.'))-price)/price)*100).toFixed(1)}%</small></div>}<div className="cp-modal-actions"><button className="cp-secondary" onClick={()=>setStage('slow')}>Voltar</button><button className="cp-primary" disabled={data.busy} onClick={()=>void lowerPrice()}>{data.busy?'Salvando...':'Atualizar preço'}</button></div></div>}
+    {error&&<div className="cp-form-error">{error}</div>}
+  </ModalShell>
 }
 
 function ProductDetail({product,data,calc,onClose,onSale,onExpense,onSaved}:{product:Product;data:Data;calc:Metrics;onClose:()=>void;onSale:()=>void;onExpense:()=>void;onSaved:()=>void}){
