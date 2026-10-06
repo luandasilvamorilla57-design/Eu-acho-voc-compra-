@@ -5,7 +5,7 @@ import {
   ReceiptText,Search,Settings2,ShoppingBag,Tag,WalletCards,X
 } from 'lucide-react'
 import {supabase} from '../lib/supabase'
-import {useControlData} from './useControlData'
+import {useControlData} from './useControlData'\nimport {BackupPage,ClosuresPage,GoalsPage,ManagePage,PeoplePage,ReceivablesPage,ReportsPage} from './BusinessCenter'
 import type {CashEntry,ControlView,Product,Sale} from './types'
 
 type Data=ReturnType<typeof useControlData>
@@ -42,7 +42,7 @@ export function ControlApp({userId,email}:{userId:string;email?:string}){
 
   return <div className="cp-app">
     <div className="cp-noise"/>
-    <TopBar business={data.settings.business_name} email={email} onSettings={()=>setModal('settings')}/>
+    <TopBar business={data.settings.business_name} email={email} onSettings={()=>setModal('settings')} onManage={()=>setView('manage')}/>
     <main className="cp-main">
       {view==='home'&&<HomePage data={data} calc={calc} onOpenProduct={setSelected} onView={setView} onAction={setModal}/>}
       {view==='stock'&&<StockPage data={data} calc={calc} onOpenProduct={setSelected} onPurchase={()=>setModal('purchase')}/>}
@@ -150,8 +150,8 @@ function buildMetrics(data:Data){
   return{unitCost,productMap,stockCapital,cash,monthSales,monthRevenue,monthProfit,stockUnits,alertDays,agedProducts,agedCapital,potentialProfit,saleStats}
 }
 
-function TopBar({business,email,onSettings}:{business:string;email?:string;onSettings:()=>void}){
-  return <header className="cp-topbar"><div className="cp-top-inner"><Brand/><div className="cp-top-business"><span>SEU NEGÓCIO</span><strong>{business}</strong></div><button className="cp-user-btn" onClick={onSettings}><span>{(email?.[0]||'C').toUpperCase()}</span><Settings2 size={17}/></button></div></header>
+function TopBar({business,email,onSettings,onManage}:{business:string;email?:string;onSettings:()=>void;onManage:()=>void}){
+  return <header className="cp-topbar"><div className="cp-top-inner"><Brand/><div className="cp-top-business"><span>SEU NEGÓCIO</span><strong>{business}</strong></div><button className="cp-manage-top" onClick={onManage}><BarChart3 size={16}/><span>Gestão</span></button><button className="cp-user-btn" onClick={onSettings}><span>{(email?.[0]||'C').toUpperCase()}</span><Settings2 size={17}/></button></div></header>
 }
 function Brand(){return <div className="cp-brand"><span className="cp-brand-mark">C<span>+</span></span><span className="cp-brand-word">CONTROLE<span>+</span></span></div>}
 
