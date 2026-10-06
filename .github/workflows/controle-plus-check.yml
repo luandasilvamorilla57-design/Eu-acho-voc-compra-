@@ -3,7 +3,7 @@ name: CONTROLE+ Build
 on:
   push:
     branches:
-      - controle-plus-v1
+      - controle-plus-v1\n      - controle-plus-business-v2
       - main
   pull_request:
     branches:
