@@ -49,7 +49,7 @@ export function ControlApp({userId,email}:{userId:string;email?:string}){
 
   if(data.loading)return <LoadingScreen/>
   if(!data.settings)return <div className="cp-fatal"><strong>Não conseguimos abrir o CONTROLE+.</strong><button onClick={()=>void data.load()}>Tentar novamente</button></div>
-  if(!data.settings.onboarding_completed)return <FirstRun data={data} email={email}/>
+  if(!data.settings.onboarding_completed)return <FirstRun data={data} email={email} theme={theme} onTheme={()=>setTheme(v=>v==='dark'?'light':'dark')}/>
 
   return <div className="cp-app" data-theme={theme}>
     <div className="cp-noise"/>
@@ -81,7 +81,7 @@ export function ControlApp({userId,email}:{userId:string;email?:string}){
   </div>
 }
 
-function FirstRun({data,email}:{data:Data;email?:string}){
+function FirstRun({data,email,theme,onTheme}:{data:Data;email?:string;theme:'dark'|'light';onTheme:()=>void}){
   const [business,setBusiness]=useState('')
   const [cash,setCash]=useState('')
   const [step,setStep]=useState(1)
@@ -99,7 +99,8 @@ function FirstRun({data,email}:{data:Data;email?:string}){
     }catch(err:any){setError(err?.message||'Não foi possível concluir a configuração.')}
   }
 
-  return <main className="cp-onboarding">
+  return <main className="cp-onboarding" data-theme={theme}>
+    <button type="button" className="cp-onboarding-theme" onClick={onTheme} aria-label={theme==='dark'?'Ativar tema claro':'Ativar tema escuro'}>{theme==='dark'?<Sun size={18}/>:<Moon size={18}/>}</button>
     <div className="cp-onboarding-glow"/>
     <section className="cp-onboarding-card">
       <div className="cp-onboarding-top"><Brand/><span>{step} de 3</span></div>
