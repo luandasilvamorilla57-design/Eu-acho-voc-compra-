@@ -2,7 +2,7 @@ import {useCallback,useEffect,useMemo,useState} from 'react'
 import {supabase} from '../lib/supabase'
 import type {
   AddExpenseInput,CashEntry,ControlSettings,Customer,Goal,GoalInput,MonthClosure,
-  NewProductInput,Product,ProductExpense,ProductPhoto,Receivable,ReceivableInstallment,
+  ListingCheckin,NewProductInput,Product,ProductExpense,ProductPhoto,Receivable,ReceivableInstallment,
   RegisterSaleInput,Sale,SaleItem,Supplier
 } from './types'
 
@@ -31,6 +31,7 @@ export function useControlData(userId:string){
   const [installments,setInstallments]=useState<ReceivableInstallment[]>([])
   const [goals,setGoals]=useState<Goal[]>([])
   const [closures,setClosures]=useState<MonthClosure[]>([])
+  const [listingCheckins,setListingCheckins]=useState<ListingCheckin[]>([])
   const [loading,setLoading]=useState(true)
   const [busy,setBusy]=useState(false)
   const [error,setError]=useState<string|null>(null)
@@ -47,7 +48,7 @@ export function useControlData(userId:string){
         setSettings(inserted.data as ControlSettings)
       }else setSettings(current.data as ControlSettings)
 
-      const [p,ph,e,s,si,c,cu,su,r,i,g,cl]=await Promise.all([
+      const [p,ph,e,s,si,c,cu,su,r,i,g,cl,lc]=await Promise.all([
         db.from('control_products').select('*').order('created_at',{ascending:false}),
         db.from('control_product_photos').select('*').order('position',{ascending:true}),
         db.from('control_product_expenses').select('*').order('occurred_at',{ascending:false}),
@@ -59,9 +60,10 @@ export function useControlData(userId:string){
         db.from('control_receivables').select('*').order('due_date',{ascending:true}),
         db.from('control_receivable_installments').select('*').order('due_date',{ascending:true}),
         db.from('control_goals').select('*').order('period_month',{ascending:false}),
-        db.from('control_month_closures').select('*').order('period_month',{ascending:false})
+        db.from('control_month_closures').select('*').order('period_month',{ascending:false}),
+        db.from('control_listing_checkins').select('*').order('checkin_date',{ascending:false}).order('created_at',{ascending:false})
       ])
-      for(const result of [p,ph,e,s,si,c,cu,su,r,i,g,cl])if(result.error)throw result.error
+      for(const result of [p,ph,e,s,si,c,cu,su,r,i,g,cl,lc])if(result.error)throw result.error
 
       const rawPhotos=(ph.data||[]) as ProductPhoto[]
       const signed=await Promise.all(rawPhotos.map(async photo=>{
@@ -84,6 +86,7 @@ export function useControlData(userId:string){
         'revenue','cost_of_goods','general_expenses','gross_profit','net_profit',
         'stock_value','cash_balance','receivables_open'
       ]))
+      setListingCheckins(asNumber((lc.data||[]) as ListingCheckin[],['previous_price','new_price']))
     }catch(err:any){
       setError(err?.message||'Não foi possível carregar seus dados.')
     }finally{
@@ -96,7 +99,7 @@ export function useControlData(userId:string){
   const createProduct=useCallback(async(input:NewProductInput,files:File[])=>{
     setBusy(true);setError(null)
     try{
-      const rpc=await db.rpc('control_create_product_v2',{
+      const rpc=await db.rpc('control_create_product_v3',{
         p_name:input.name,
         p_purchase_unit_cost:input.purchaseUnitCost,
         p_quantity:input.quantity,
@@ -106,7 +109,12 @@ export function useControlData(userId:string){
         p_supplier_id:input.supplierId||null,
         p_listed_price:input.listedPrice??null,
         p_minimum_price:input.minimumPrice??null,
-        p_notes:input.notes||null
+        p_notes:input.notes||null,
+        p_acquisition_type:input.acquisitionType||'purchase',
+        p_cost_basis_known:input.costBasisKnown??true,
+        p_listing_status:input.listingStatus||'not_listed',
+        p_listing_channels:input.listingChannels||[],
+        p_listing_started_at:input.listingStartedAt||null
       })
       if(rpc.error)throw rpc.error
       const productId=String(rpc.data)
@@ -193,7 +201,7 @@ export function useControlData(userId:string){
     setBusy(true);setError(null)
     try{
       const allowed:any={}
-      for(const key of ['name','category','brand','model','condition','sku','source','supplier_id','seller_name','listed_price','minimum_price','status','notes']){
+      for(const key of ['name','category','brand','model','condition','sku','source','supplier_id','seller_name','listed_price','minimum_price','status','notes','acquisition_type','cost_basis_known','listing_status','listing_channels','listing_started_at','listing_last_checkin_at','listing_next_checkin_at','listing_refresh_count']){
         if(key in patch)allowed[key]=(patch as any)[key]
       }
       const result=await db.from('control_products').update(allowed).eq('id',productId)
@@ -255,6 +263,21 @@ export function useControlData(userId:string){
     }finally{setBusy(false)}
   },[load])
 
+  const recordListingCheckin=useCallback(async(input:{productId:string;result:'good'|'keep'|'refreshed'|'price_lowered';newPrice?:number|null;note?:string})=>{
+    setBusy(true);setError(null)
+    try{
+      const result=await db.rpc('control_record_listing_checkin',{
+        p_product_id:input.productId,
+        p_result:input.result,
+        p_new_price:input.newPrice??null,
+        p_note:input.note||null
+      })
+      if(result.error)throw result.error
+      await load()
+      return String(result.data)
+    }finally{setBusy(false)}
+  },[load])
+
   const saveGoal=useCallback(async(input:GoalInput)=>{
     setBusy(true);setError(null)
     try{
@@ -292,14 +315,16 @@ export function useControlData(userId:string){
     const customerById=new Map(customers.map(item=>[item.id,item]))
     const supplierById=new Map(suppliers.map(item=>[item.id,item]))
     const saleById=new Map(sales.map(item=>[item.id,item]))
-    return{photosByProduct,expensesByProduct,itemsBySale,installmentsByReceivable,customerById,supplierById,saleById}
-  },[customers,expenses,installments,photos,saleItems,sales,suppliers])
+    const listingCheckinsByProduct=new Map<string,ListingCheckin[]>()
+    for(const item of listingCheckins)listingCheckinsByProduct.set(item.product_id,[...(listingCheckinsByProduct.get(item.product_id)||[]),item])
+    return{photosByProduct,expensesByProduct,itemsBySale,installmentsByReceivable,customerById,supplierById,saleById,listingCheckinsByProduct}
+  },[customers,expenses,installments,listingCheckins,photos,saleItems,sales,suppliers])
 
   return{
     settings,products,photos,expenses,sales,saleItems,cashEntries,customers,suppliers,
-    receivables,installments,goals,closures,grouped,
+    receivables,installments,goals,closures,listingCheckins,grouped,
     loading,busy,error,load,createProduct,registerSale,addExpense,addCashEntry,updateSettings,
     updateProduct,createCustomer,updateCustomer,createSupplier,updateSupplier,payInstallment,
-    saveGoal,closeMonth
+    recordListingCheckin,saveGoal,closeMonth
   }
 }
