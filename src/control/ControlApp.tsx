@@ -5,7 +5,8 @@ import {
   ReceiptText,Search,Settings2,ShoppingBag,Tag,WalletCards,X
 } from 'lucide-react'
 import {supabase} from '../lib/supabase'
-import {useControlData} from './useControlData'\nimport {BackupPage,ClosuresPage,GoalsPage,ManagePage,PeoplePage,ReceivablesPage,ReportsPage} from './BusinessCenter'
+import {useControlData} from './useControlData'
+import {BackupPage,ClosuresPage,GoalsPage,ManagePage,PeoplePage,ReceivablesPage,ReportsPage} from './BusinessCenter'
 import type {CashEntry,ControlView,Product,Sale} from './types'
 
 type Data=ReturnType<typeof useControlData>
