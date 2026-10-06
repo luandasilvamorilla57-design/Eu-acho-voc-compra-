@@ -254,11 +254,85 @@ export function useControlData(userId:string){
       for(const key of ['name','category','brand','model','condition','sku','source','supplier_id','seller_name','listed_price','minimum_price','status','notes','acquisition_type','cost_basis_known','listing_status','listing_channels','listing_started_at','listing_last_checkin_at','listing_next_checkin_at','listing_refresh_count']){
         if(key in patch)allowed[key]=(patch as any)[key]
       }
-      const result=await db.from('control_products').update(allowed).eq('id',productId).eq('user_id',userId)
+      const result=await db.from('control_products').update(allowed).eq('id',productId).eq('user_id',userId).select('*').single()
       if(result.error)throw result.error
-      await load()
+      const updated=asNumber([result.data as Product],['purchase_unit_cost','listed_price','minimum_price'])[0]
+      setProducts(current=>current.map(item=>item.id===productId?updated:item))
     }finally{setBusy(false)}
-  },[load,userId])
+  },[userId])
+
+  const addProductPhotos=useCallback(async(productId:string,files:File[])=>{
+    setBusy(true);setError(null)
+    try{
+      const current=photos.filter(photo=>photo.product_id===productId)
+      const remaining=Math.max(0,12-current.length)
+      if(remaining===0)throw new Error('Esse produto já tem o limite de 12 fotos.')
+      const selected=files.slice(0,remaining)
+      if(!selected.length)return 0
+      for(const file of selected){
+        if(file.size>10*1024*1024)throw new Error('Cada foto pode ter no máximo 10 MB.')
+      }
+      const startPosition=current.reduce((max,item)=>Math.max(max,item.position),-1)+1
+      const uploaded=await Promise.allSettled(selected.map(async(file,index)=>{
+        const ext=(file.name.split('.').pop()||'jpg').toLowerCase()
+        const safeExt=['jpg','jpeg','png','webp','heic','heif'].includes(ext)?ext:'jpg'
+        const path=`${userId}/${productId}/${crypto.randomUUID()}.${safeExt}`
+        const storage=await supabase.storage.from(PHOTO_BUCKET).upload(path,file,{cacheControl:'3600',upsert:false})
+        if(storage.error)throw storage.error
+        const inserted=await db.from('control_product_photos').insert({
+          user_id:userId,product_id:productId,storage_path:path,stage:'listing',position:startPosition+index
+        }).select('*').single()
+        if(inserted.error){
+          await supabase.storage.from(PHOTO_BUCKET).remove([path])
+          throw inserted.error
+        }
+        const photo=inserted.data as ProductPhoto
+        const signed=await supabase.storage.from(PHOTO_BUCKET).createSignedUrl(path,3600)
+        return {...photo,signed_url:signed.data?.signedUrl||null} as ProductPhoto
+      }))
+      const success=uploaded.filter((result):result is PromiseFulfilledResult<ProductPhoto>=>result.status==='fulfilled').map(result=>result.value)
+      const failed=uploaded.length-success.length
+      if(success.length)setPhotos(list=>[...list,...success].sort((a,b)=>a.product_id===b.product_id?a.position-b.position:0))
+      if(failed)setError(`${failed} foto(s) não conseguiram ser enviadas.`)
+      return success.length
+    }finally{setBusy(false)}
+  },[photos,userId])
+
+  const deleteProductPhoto=useCallback(async(photoId:string)=>{
+    setBusy(true);setError(null)
+    try{
+      const photo=photos.find(item=>item.id===photoId)
+      if(!photo)throw new Error('Foto não encontrada.')
+      const removed=await supabase.storage.from(PHOTO_BUCKET).remove([photo.storage_path])
+      if(removed.error)throw removed.error
+      const deleted=await db.from('control_product_photos').delete().eq('id',photoId).eq('user_id',userId)
+      if(deleted.error)throw deleted.error
+      setPhotos(list=>list.filter(item=>item.id!==photoId))
+    }finally{setBusy(false)}
+  },[photos,userId])
+
+  const deleteProduct=useCallback(async(productId:string)=>{
+    setBusy(true);setError(null)
+    try{
+      const paths=photos.filter(photo=>photo.product_id===productId).map(photo=>photo.storage_path)
+      const result=await db.rpc('control_delete_product',{p_product_id:productId})
+      if(result.error){
+        if(String(result.error.message||'').includes('product has sale history')){
+          throw new Error('Esse produto já possui venda registrada e precisa continuar no histórico.')
+        }
+        throw result.error
+      }
+      if(paths.length){
+        const removed=await supabase.storage.from(PHOTO_BUCKET).remove(paths)
+        if(removed.error)setError('Produto excluído. Algumas fotos antigas podem levar um tempo para sair do armazenamento.')
+      }
+      setProducts(list=>list.filter(item=>item.id!==productId))
+      setPhotos(list=>list.filter(item=>item.product_id!==productId))
+      setExpenses(list=>list.filter(item=>item.product_id!==productId))
+      setCashEntries(list=>list.filter(item=>item.product_id!==productId))
+      setListingCheckins(list=>list.filter(item=>item.product_id!==productId))
+    }finally{setBusy(false)}
+  },[photos])
 
   const createCustomer=useCallback(async(name:string,phone?:string,notes?:string)=>{
     const result=await db.from('control_customers').insert({
@@ -372,9 +446,9 @@ export function useControlData(userId:string){
 
   return{
     settings,products,photos,expenses,sales,saleItems,cashEntries,customers,suppliers,
-    receivables,installments,goals,closures,listingCheckins,grouped,
+    receivables,installments,goals,closures,listingCheckins,grouped,isAdmin,
     loading,busy,error,load,createProduct,registerSale,addExpense,addCashEntry,updateSettings,
-    updateProduct,createCustomer,updateCustomer,createSupplier,updateSupplier,payInstallment,
+    updateProduct,addProductPhotos,deleteProductPhoto,deleteProduct,createCustomer,updateCustomer,createSupplier,updateSupplier,payInstallment,
     recordListingCheckin,saveGoal,closeMonth
   }
 }
