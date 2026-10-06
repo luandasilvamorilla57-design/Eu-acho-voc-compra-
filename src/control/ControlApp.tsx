@@ -38,6 +38,7 @@ export function ControlApp({userId,email}:{userId:string;email?:string}){
 
   if(data.loading)return <LoadingScreen/>
   if(!data.settings)return <div className="cp-fatal"><strong>Não conseguimos abrir o CONTROLE+.</strong><button onClick={()=>void data.load()}>Tentar novamente</button></div>
+  if(!data.settings.onboarding_completed)return <FirstRun data={data} email={email}/>
 
   return <div className="cp-app">
     <div className="cp-noise"/>
@@ -60,6 +61,62 @@ export function ControlApp({userId,email}:{userId:string;email?:string}){
     {toast&&<div className="cp-toast"><Check size={18}/>{toast}</div>}
     {data.error&&<div className="cp-error-bar"><AlertTriangle size={17}/>{data.error}</div>}
   </div>
+}
+
+function FirstRun({data,email}:{data:Data;email?:string}){
+  const [business,setBusiness]=useState('')
+  const [cash,setCash]=useState('')
+  const [step,setStep]=useState(1)
+  const [error,setError]=useState<string|null>(null)
+
+  async function finish(){
+    setError(null)
+    try{
+      await data.updateSettings({
+        business_name:business.trim()||'Meu negócio',
+        initial_cash:Math.max(0,Number(cash.replace(',','.'))||0),
+        stock_alert_days:21,
+        onboarding_completed:true
+      })
+    }catch(err:any){setError(err?.message||'Não foi possível concluir a configuração.')}
+  }
+
+  return <main className="cp-onboarding">
+    <div className="cp-onboarding-glow"/>
+    <section className="cp-onboarding-card">
+      <div className="cp-onboarding-top"><Brand/><span>{step} de 3</span></div>
+      <div className="cp-onboarding-progress"><i style={{width:(step/3*100)+'%'}}/></div>
+
+      {step===1&&<div className="cp-onboarding-body">
+        <span className="cp-eyebrow">BEM-VINDO AO CONTROLE+</span>
+        <h1>Vamos colocar seu negócio em ordem.</h1>
+        <p>Você registra o que comprou e vendeu. O app cuida do estoque, caixa e lucro para você.</p>
+        <div className="cp-onboarding-example"><span><ShoppingBag/></span><div><b>Comprou</b><small>entra no estoque e sai do caixa</small></div><ChevronRight/><span><Banknote/></span><div><b>Vendeu</b><small>sai do estoque e volta para o caixa</small></div></div>
+      </div>}
+
+      {step===2&&<div className="cp-onboarding-body">
+        <span className="cp-eyebrow">SEU NEGÓCIO</span>
+        <h1>Como você quer chamar seu controle?</h1>
+        <p>Pode ser o nome da sua loja, do seu brique ou simplesmente seu nome.</p>
+        <Field label="Nome do negócio" full><input autoFocus value={business} onChange={e=>setBusiness(e.target.value)} placeholder="Ex.: Brique do Luan"/></Field>
+      </div>}
+
+      {step===3&&<div className="cp-onboarding-body">
+        <span className="cp-eyebrow">PONTO DE PARTIDA</span>
+        <h1>Quanto você tem livre para comprar mercadoria hoje?</h1>
+        <p>Não é seu faturamento. É o dinheiro disponível agora. A partir daqui, cada compra e venda movimenta esse saldo automaticamente.</p>
+        <Field label="Dinheiro disponível" full><MoneyInput value={cash} setValue={setCash} placeholder="0,00"/></Field>
+        <div className="cp-onboarding-note"><CircleDollarSign/><div><b>Você pode mudar depois.</b><small>Se não quiser informar agora, deixe em R$ 0,00.</small></div></div>
+      </div>}
+
+      {error&&<div className="cp-form-error">{error}</div>}
+      <div className="cp-onboarding-actions">
+        {step>1&&<button className="cp-secondary" onClick={()=>setStep(v=>v-1)}>Voltar</button>}
+        <button className="cp-primary" disabled={data.busy} onClick={()=>step<3?setStep(v=>v+1):void finish()}>{data.busy?'Preparando...':step<3?'Continuar':'Entrar no CONTROLE+'}</button>
+      </div>
+      <small className="cp-onboarding-account">{email||'Sua conta'} · seus dados ficam separados por usuário</small>
+    </section>
+  </main>
 }
 
 function buildMetrics(data:Data){
