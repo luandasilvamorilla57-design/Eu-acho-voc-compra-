@@ -14,6 +14,7 @@ on:
       - controle-plus-trial-v11
       - controle-plus-guia-brique-v12
       - controle-plus-vendas-hoje-v13
+      - controle-plus-trial-modal-v14
       - main
   pull_request:
     branches:
