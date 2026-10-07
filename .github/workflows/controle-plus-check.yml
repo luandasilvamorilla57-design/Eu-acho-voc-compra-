@@ -38,3 +38,4 @@ jobs:
 
 # v14 retry
 # vercel redeploy 2026-10-06 21:31
+# fresh production deploy after Vercel quota release
