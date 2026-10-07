@@ -13,6 +13,7 @@ on:
       - controle-plus-polish-pwa-v10
       - controle-plus-trial-v11
       - controle-plus-guia-brique-v12
+      - controle-plus-vendas-hoje-v13
       - main
   pull_request:
     branches:
