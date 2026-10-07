@@ -3569,3 +3569,205 @@ body{transition:background .22s ease,color .22s ease}
   .cp-brique-shortcut b{font-size:16px}
   .cp-brique-shortcut p{font-size:13px}
 }
+
+
+/* =========================================================
+   CONTROLE+ V13 — VENDAS DE HOJE NO CARD PRINCIPAL
+   ========================================================= */
+.cp-today-sales{
+  position:relative;
+  z-index:2;
+  margin-top:22px;
+  padding:15px;
+  border-radius:17px;
+  border:1px solid rgba(255,255,255,.13);
+  background:
+    linear-gradient(145deg,rgba(4,22,50,.46),rgba(9,39,79,.26));
+  box-shadow:
+    inset 0 1px rgba(255,255,255,.035),
+    0 12px 28px rgba(0,0,0,.10);
+  backdrop-filter:blur(8px)
+}
+.cp-today-sales-head{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) auto;
+  align-items:center;
+  gap:12px
+}
+.cp-today-sales-head>div>span{
+  display:block;
+  font-size:11px;
+  font-weight:900;
+  letter-spacing:.11em;
+  color:#83d6ff
+}
+.cp-today-sales-head>div>b{
+  display:block;
+  margin-top:4px;
+  font:800 23px/1.05 'Manrope';
+  letter-spacing:-.7px;
+  color:#fff
+}
+.cp-today-sales-head>div>small{
+  display:block;
+  margin-top:4px;
+  color:rgba(255,255,255,.62);
+  font-size:12px;
+  line-height:1.4
+}
+.cp-today-sales-head>button{
+  min-height:36px;
+  padding:0 10px;
+  border-radius:10px;
+  border:1px solid rgba(124,204,255,.18);
+  background:rgba(108,193,255,.09);
+  color:#91dbff;
+  font-size:11px;
+  font-weight:850;
+  display:flex;
+  align-items:center;
+  gap:5px
+}
+.cp-today-sales-head>button svg{width:15px;height:15px}
+
+.cp-today-sales-metrics{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:1px;
+  margin-top:13px;
+  overflow:hidden;
+  border-radius:13px;
+  background:rgba(255,255,255,.09)
+}
+.cp-today-sales-metrics>div{
+  padding:11px 12px;
+  background:rgba(2,18,42,.35)
+}
+.cp-today-sales-metrics span{
+  display:block;
+  font-size:10px;
+  color:rgba(255,255,255,.58)
+}
+.cp-today-sales-metrics strong{
+  display:block;
+  margin-top:4px;
+  color:#fff;
+  font-size:14px;
+  line-height:1.2
+}
+.cp-today-sales-metrics strong.positive{color:#67e5a1!important}
+.cp-today-sales-metrics strong.negative{color:#ff9a9a!important}
+
+.cp-today-sales-products{
+  display:grid;
+  gap:0;
+  margin-top:10px;
+  border-top:1px solid rgba(255,255,255,.09)
+}
+.cp-today-sales-products>div{
+  display:grid;
+  grid-template-columns:auto minmax(0,1fr) auto;
+  gap:9px;
+  align-items:center;
+  min-height:52px;
+  padding:8px 0;
+  border-bottom:1px solid rgba(255,255,255,.08)
+}
+.cp-today-sales-products>div:last-of-type{border-bottom:0}
+.cp-today-product-qty{
+  min-width:38px;
+  height:34px;
+  padding:0 8px;
+  border-radius:10px;
+  display:grid;
+  place-items:center;
+  background:rgba(104,195,255,.12);
+  border:1px solid rgba(104,195,255,.16);
+  color:#90ddff;
+  font-size:12px;
+  font-weight:900
+}
+.cp-today-sales-products b{
+  display:block;
+  color:#fff;
+  font-size:13px;
+  line-height:1.25
+}
+.cp-today-sales-products small{
+  display:block;
+  margin-top:3px;
+  color:rgba(255,255,255,.55);
+  font-size:10px;
+  line-height:1.35
+}
+.cp-today-sales-products>div>strong{
+  color:#67e5a1;
+  font-size:12px;
+  font-weight:900;
+  text-align:right
+}
+.cp-today-sales-products>button{
+  justify-self:start;
+  margin-top:7px;
+  padding:0;
+  border:0;
+  background:none;
+  color:#8fdcff;
+  font-size:11px;
+  font-weight:800
+}
+.cp-today-sales.is-empty{
+  padding:13px 15px;
+  background:rgba(4,22,50,.24)
+}
+.cp-today-sales.is-empty .cp-today-sales-head>div>b{
+  font-size:16px;
+  letter-spacing:-.2px
+}
+
+/* the monthly block should breathe after today's movement */
+.cp-today-sales + .cp-balance-app-stats{
+  margin-top:14px!important
+}
+
+@media(max-width:640px){
+  .cp-today-sales{
+    margin-top:19px;
+    padding:14px;
+    border-radius:16px
+  }
+  .cp-today-sales-head{
+    grid-template-columns:1fr auto;
+    gap:8px
+  }
+  .cp-today-sales-head>div>span{font-size:10px}
+  .cp-today-sales-head>div>b{font-size:21px}
+  .cp-today-sales-head>div>small{font-size:11px}
+  .cp-today-sales-head>button{
+    min-height:34px;
+    padding:0 8px;
+    font-size:10px
+  }
+  .cp-today-sales-metrics>div{padding:10px 9px}
+  .cp-today-sales-metrics span{font-size:10px}
+  .cp-today-sales-metrics strong{font-size:13px}
+  .cp-today-sales-products>div{min-height:50px}
+  .cp-today-sales-products b{font-size:13px}
+  .cp-today-sales-products small{font-size:10px}
+  .cp-today-sales-products>div>strong{font-size:11px}
+}
+
+@media(max-width:390px){
+  .cp-today-sales-head{
+    grid-template-columns:1fr
+  }
+  .cp-today-sales-head>button{
+    justify-self:start
+  }
+  .cp-today-sales-metrics{
+    grid-template-columns:1fr 1fr
+  }
+  .cp-today-sales-metrics>div:last-child{
+    grid-column:1/-1
+  }
+}
