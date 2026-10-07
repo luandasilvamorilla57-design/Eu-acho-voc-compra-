@@ -247,6 +247,29 @@ function HomePage({data,calc,onOpenProduct,onView,onAction,onCheckListing}:{data
   const stockPct=100-cashPct
   const now=new Date()
   const dateLabel=now.toLocaleDateString('pt-BR',{weekday:'long',day:'2-digit',month:'short'})
+  const todayKey=localDate()
+  const todaySales=data.sales.filter(s=>s.status==='completed'&&s.sale_date===todayKey)
+  const todaySaleIds=new Set(todaySales.map(s=>s.id))
+  const todayItems=data.saleItems.filter(item=>todaySaleIds.has(item.sale_id))
+  const todayRevenue=todayItems.reduce((sum,item)=>sum+item.unit_price*item.quantity,0)
+  const todayCost=todayItems.reduce((sum,item)=>sum+item.unit_cost_snapshot*item.quantity,0)
+  const todayProfit=todayRevenue-todayCost
+  const todayUnits=todayItems.reduce((sum,item)=>sum+item.quantity,0)
+  const todayProductMap=new Map<string,{name:string;qty:number;revenue:number;cost:number}>()
+  for(const item of todayItems){
+    const product=calc.productMap.get(item.product_id)
+    const current=todayProductMap.get(item.product_id)||{
+      name:product?.name||'Produto',
+      qty:0,
+      revenue:0,
+      cost:0
+    }
+    current.qty+=item.quantity
+    current.revenue+=item.unit_price*item.quantity
+    current.cost+=item.unit_cost_snapshot*item.quantity
+    todayProductMap.set(item.product_id,current)
+  }
+  const todayProducts=[...todayProductMap.values()].sort((a,b)=>b.revenue-a.revenue)
   const dueListings=data.products
     .filter(p=>p.quantity_available>0&&p.listing_status==='listed'&&!!p.listing_next_checkin_at&&p.listing_next_checkin_at<=localDate())
     .sort((a,b)=>(a.listing_next_checkin_at||'').localeCompare(b.listing_next_checkin_at||''))
@@ -292,6 +315,33 @@ function HomePage({data,calc,onOpenProduct,onView,onAction,onCheckListing}:{data
         <div><span>Saldo disponível</span><strong>{money.format(calc.cash)}</strong></div>
         <span className="cp-balance-app-badge">CAIXA</span>
       </div>
+
+      <section className={todaySales.length?'cp-today-sales has-sales':'cp-today-sales is-empty'}>
+        <div className="cp-today-sales-head">
+          <div>
+            <span>VENDAS DE HOJE</span>
+            <b>{todaySales.length?money.format(todayRevenue):'Nenhuma venda ainda'}</b>
+            <small>{todaySales.length?todayUnits+' item(ns) vendido(s) em '+todaySales.length+' pedido(s)':'Quando vender, o resumo do dia aparece aqui.'}</small>
+          </div>
+          {todaySales.length?<button onClick={()=>onView('sales')}>Ver vendas <ChevronRight/></button>:<button onClick={()=>onAction('sale')}>Registrar venda <Plus/></button>}
+        </div>
+
+        {todaySales.length>0&&<>
+          <div className="cp-today-sales-metrics">
+            <div><span>Entrou</span><strong>{money.format(todayRevenue)}</strong></div>
+            <div><span>Custo vendido</span><strong>{money.format(todayCost)}</strong></div>
+            <div><span>Lucro de hoje</span><strong className={todayProfit>=0?'positive':'negative'}>{money.format(todayProfit)}</strong></div>
+          </div>
+          <div className="cp-today-sales-products">
+            {todayProducts.slice(0,3).map((item,i)=><div key={item.name+'-'+i}>
+              <span className="cp-today-product-qty">{item.qty}×</span>
+              <div><b>{item.name}</b><small>Venda {money.format(item.revenue)} · custo {money.format(item.cost)}</small></div>
+              <strong className={item.revenue-item.cost>=0?'positive':'negative'}>{money.format(item.revenue-item.cost)}</strong>
+            </div>)}
+            {todayProducts.length>3&&<button onClick={()=>onView('sales')}>+{todayProducts.length-3} produto(s) vendidos hoje</button>}
+          </div>
+        </>}
+      </section>
       <div className="cp-balance-app-stats cp-balance-app-stats--four">
         <div><span>Capital em estoque</span><b>{money.format(calc.stockCapital)}</b></div>
         <div><span>Lucro no mês</span><b className={calc.monthProfit>=0?'positive':'negative'}>{money.format(calc.monthProfit)}</b></div>
