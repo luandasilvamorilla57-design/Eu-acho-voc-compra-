@@ -10,7 +10,7 @@ import {BackupPage,ClosuresPage,GoalsPage,ManagePage,PeoplePage,ReceivablesPage,
 import {AdminCenter} from './AdminCenter'
 import {InstallAppPrompt} from './InstallAppPrompt'
 import {useControlAccess} from './useControlAccess'
-import {ActivePlanCard,SubscriptionGate,TrialBanner} from './BillingUI'
+import {ActivePlanCard,SubscriptionGate,TrialBanner,TrialInfoModal} from './BillingUI'
 import {BriqueGuidePage} from './BriqueGuidePage'
 import type {CashEntry,ControlView,Product,Sale} from './types'
 
@@ -43,6 +43,7 @@ export function ControlApp({userId,email}:{userId:string;email?:string}){
   const [selected,setSelected]=useState<Product|null>(null)
   const [toast,setToast]=useState<string|null>(null)
   const [readOnlyMode,setReadOnlyMode]=useState(false)
+  const [trialInfoOpen,setTrialInfoOpen]=useState(false)
   const [theme,setTheme]=useState<'dark'|'light'>(()=>{
     const saved=window.localStorage.getItem('controle-plus-theme')
     if(saved==='light'||saved==='dark')return saved
@@ -96,7 +97,7 @@ export function ControlApp({userId,email}:{userId:string;email?:string}){
   return <div className="cp-app" data-theme={theme}>
     <div className="cp-noise"/>
     <TopBar business={data.settings.business_name} email={email} theme={theme} isAdmin={data.isAdmin} adminActive={view==='admin'} onTheme={()=>setTheme(v=>v==='dark'?'light':'dark')} onSettings={()=>setModal('settings')} onManage={()=>canWrite?setView('manage'):setReadOnlyMode(false)} onAdmin={()=>setView('admin')}/>
-    {!data.isAdmin&&<TrialBanner access={access} onSubscribe={()=>void billing.subscribe()}/>}
+    {!data.isAdmin&&<TrialBanner access={access} onSubscribe={()=>void billing.subscribe()} onOpen={()=>setTrialInfoOpen(true)}/>}
     <main className="cp-main">
       {!canWrite&&!readOnlyMode?<SubscriptionGate access={access} products={data.products.length} sales={data.sales.length} stockValue={calc.stockCapital} onSubscribe={()=>void billing.subscribe()} onRefresh={()=>void billing.refresh(true)} onReadOnly={()=>{setReadOnlyMode(true);setView('home')}} busy={billing.busy} error={billing.error}/>:<>
         {view==='home'&&<HomePage data={data} calc={calc} onOpenProduct={setSelected} onView={openView} onAction={openModal} onCheckListing={openListingCheckin}/>}
@@ -116,6 +117,7 @@ export function ControlApp({userId,email}:{userId:string;email?:string}){
     </main>
     {view!=='admin'&&(canWrite||readOnlyMode)&&<BottomNav view={view} onView={openView} onAdd={()=>openModal('actions')}/>}
     <InstallAppPrompt userId={userId}/>
+    {trialInfoOpen&&!data.isAdmin&&<TrialInfoModal access={access} busy={billing.busy} error={billing.error} onClose={()=>setTrialInfoOpen(false)} onSubscribe={()=>void billing.subscribe()}/>} 
 
     {modal==='actions'&&<ActionSheet onClose={()=>setModal(null)} onChoose={openModal}/>}
     {modal==='purchase'&&<PurchaseModal data={data} onClose={()=>setModal(null)} onDone={()=>{setModal(null);notify('Compra salva e adicionada ao estoque.')}}/>}
