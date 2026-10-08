@@ -12,6 +12,7 @@ import {InstallAppPrompt} from './InstallAppPrompt'
 import {useControlAccess} from './useControlAccess'
 import {ActivePlanCard,SubscriptionGate,TrialBanner,TrialInfoModal} from './BillingUI'
 import {BriqueGuidePage} from './BriqueGuidePage'
+import {PersonalRankingCard,PersonalRankingPage} from './PersonalRanking'
 import type {CashEntry,ControlView,Product,Sale} from './types'
 
 type Data=ReturnType<typeof useControlData>
@@ -76,7 +77,7 @@ export function ControlApp({userId,email}:{userId:string;email?:string}){
     requireWrite(()=>setModal(next))
   }
   function openView(next:ControlView){
-    if(canWrite||['home','stock','sales','cash','reports','backup','guide','admin'].includes(next)){
+    if(canWrite||['home','stock','sales','cash','reports','backup','guide','ranking','admin'].includes(next)){
       setView(next)
       return
     }
@@ -366,6 +367,8 @@ function HomePage({data,calc,onOpenProduct,onView,onAction,onCheckListing}:{data
       <div><span>AGORA</span><h2>{guide.title}</h2><p>{guide.text}</p></div>
       <button onClick={guide.action}>{guide.button}<ChevronRight size={16}/></button>
     </section>
+
+    <PersonalRankingCard products={data.products} sales={data.sales} saleItems={data.saleItems} onOpen={()=>onView('ranking')}/>
 
     <button className="cp-brique-shortcut" onClick={()=>onView('guide')}>
       <span className="cp-brique-shortcut-icon"><BadgeDollarSign/></span>
