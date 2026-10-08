@@ -26,19 +26,32 @@ function titleCase(value:string){
 }
 
 function categoryOf(product:Product){
+  const saved=(product.category_group||'').trim()
+  if(saved)return saved
+
   const text=((product.category||'')+' '+product.name).toLowerCase()
+
+  // Accessories must be resolved before brand/model words.
+  if(/cabo|carregador|fonte|adaptador|lightning|usb|tipo\s?c|type\s?c/.test(text))return 'Cabos e carregadores'
+  if(/capinha|\bcapa\b|pel[ií]cula|suporte|popsocket|pop\s?socket/.test(text))return 'Acessórios para celular'
+  if(/(controle|dualshock|dualsense)/.test(text)&&/(ps|playstation|xbox|videogame)/.test(text))return 'Controles e acessórios'
+  if(/fone|airpods|headset|earbud/.test(text))return 'Áudio'
+
   if(/iphone/.test(text))return 'iPhones'
+  if(/ipad|tablet/.test(text))return 'Tablets'
   if(/xbox/.test(text))return 'Xbox'
   if(/playstation|\bps\s?2\b|\bps\s?3\b|\bps\s?4\b|\bps\s?5\b/.test(text))return 'PlayStation'
   if(/tv|televis/.test(text))return 'Televisões'
   if(/bike|bicic/.test(text))return 'Bicicletas'
-  if(/notebook|computador|\bpc\b/.test(text))return 'Computadores'
+  if(/notebook|computador|\bpc\b|macbook/.test(text))return 'Computadores'
   if(/moto/.test(text))return 'Motos'
   if(/carro|veículo|veiculo/.test(text))return 'Carros'
-  if(/furadeira|parafusadeira|ferrament/.test(text))return 'Ferramentas'
+  if(/furadeira|parafusadeira|alicate|chave de impacto|ferrament/.test(text))return 'Ferramentas'
   if(/celular|smartphone|samsung|motorola|xiaomi/.test(text))return 'Celulares'
-  if(/fone|airpods|headset/.test(text))return 'Áudio'
-  if(/relógio|relogio|watch/.test(text))return 'Smartwatches'
+  if(/microondas|liquidificador|chaleira|eletrodom/.test(text))return 'Eletrodomésticos'
+  if(/panela|talher|copo|cozinha|utens[ií]lio/.test(text))return 'Casa e cozinha'
+  if(/relógio|relogio|watch/.test(text))return 'Relógios e smartwatches'
+
   const category=(product.category||'').trim()
   return category?titleCase(category):'Outros'
 }
