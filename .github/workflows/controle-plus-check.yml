@@ -18,6 +18,7 @@ on:
       - controle-plus-error-telemetry-fix-v15
       - controle-plus-ranking-pessoal-v16
       - controle-plus-feedback-category-v17
+      - controle-plus-admin-feedback-preview-v18
       - main
   pull_request:
     branches:
