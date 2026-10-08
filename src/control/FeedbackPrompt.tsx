@@ -5,7 +5,7 @@ import {supabase} from '../lib/supabase'
 const db=supabase as any
 const TAGS=['Gostei do visual','Mais relatórios','Mais velocidade','Melhor estoque']
 
-export function FeedbackPrompt({userId}:{userId:string}){
+export function FeedbackPrompt({userId,enabled=true}:{userId:string;enabled?:boolean}){
   const [open,setOpen]=useState(false)
   const [stars,setStars]=useState(0)
   const [hover,setHover]=useState(0)
@@ -16,6 +16,7 @@ export function FeedbackPrompt({userId}:{userId:string}){
   const [error,setError]=useState<string|null>(null)
 
   useEffect(()=>{
+    if(!enabled){setOpen(false);return}
     let alive=true
     let timer:number|undefined
     ;(async()=>{
@@ -41,7 +42,7 @@ export function FeedbackPrompt({userId}:{userId:string}){
       }
     })()
     return()=>{alive=false;if(timer)window.clearTimeout(timer)}
-  },[userId])
+  },[userId,enabled])
 
   const activeStars=hover||stars
   const canSend=stars>=1&&!busy
