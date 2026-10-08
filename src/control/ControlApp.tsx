@@ -120,7 +120,7 @@ export function ControlApp({userId,email}:{userId:string;email?:string}){
     </main>
     {view!=='admin'&&(canWrite||readOnlyMode)&&<BottomNav view={view} onView={openView} onAdd={()=>openModal('actions')}/>}
     <InstallAppPrompt userId={userId}/>
-    {!data.isAdmin&&<FeedbackPrompt userId={userId} enabled={modal===null&&!trialInfoOpen&&selected===null&&view!=='admin'}/>} 
+    <FeedbackPrompt userId={userId} forcePreview={data.isAdmin} enabled={modal===null&&!trialInfoOpen&&selected===null&&view!=='admin'}/> 
     {trialInfoOpen&&!data.isAdmin&&<TrialInfoModal access={access} busy={billing.busy} error={billing.error} onClose={()=>setTrialInfoOpen(false)} onSubscribe={()=>void billing.subscribe()}/>} 
 
     {modal==='actions'&&<ActionSheet onClose={()=>setModal(null)} onChoose={openModal}/>}
