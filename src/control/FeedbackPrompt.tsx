@@ -5,7 +5,7 @@ import {supabase} from '../lib/supabase'
 const db=supabase as any
 const TAGS=['Gostei do visual','Mais relatórios','Mais velocidade','Melhor estoque']
 
-export function FeedbackPrompt({userId,enabled=true}:{userId:string;enabled?:boolean}){
+export function FeedbackPrompt({userId,enabled=true,forcePreview=false}:{userId:string;enabled?:boolean;forcePreview?:boolean}){
   const [open,setOpen]=useState(false)
   const [stars,setStars]=useState(0)
   const [hover,setHover]=useState(0)
@@ -21,6 +21,10 @@ export function FeedbackPrompt({userId,enabled=true}:{userId:string;enabled?:boo
     let timer:number|undefined
     ;(async()=>{
       try{
+        if(forcePreview){
+          timer=window.setTimeout(()=>{if(alive)setOpen(true)},650)
+          return
+        }
         const status=await db.rpc('control_feedback_prompt_status')
         if(status.error)throw status.error
         const row=Array.isArray(status.data)?status.data[0]:status.data
@@ -42,7 +46,7 @@ export function FeedbackPrompt({userId,enabled=true}:{userId:string;enabled?:boo
       }
     })()
     return()=>{alive=false;if(timer)window.clearTimeout(timer)}
-  },[userId,enabled])
+  },[userId,enabled,forcePreview])
 
   const activeStars=hover||stars
   const canSend=stars>=1&&!busy
@@ -53,6 +57,7 @@ export function FeedbackPrompt({userId,enabled=true}:{userId:string;enabled?:boo
 
   async function dismiss(){
     setOpen(false)
+    if(forcePreview)return
     try{
       const until=new Date()
       until.setDate(until.getDate()+4)
@@ -68,6 +73,11 @@ export function FeedbackPrompt({userId,enabled=true}:{userId:string;enabled?:boo
     if(!canSend)return
     setBusy(true);setError(null)
     try{
+      if(forcePreview){
+        setSent(true)
+        window.setTimeout(()=>setOpen(false),1500)
+        return
+      }
       const inserted=await db.from('control_feedback').insert({
         user_id:userId,
         stars,
@@ -103,7 +113,7 @@ export function FeedbackPrompt({userId,enabled=true}:{userId:string;enabled?:boo
       {sent?<div className="cp-feedback-thanks">
         <span><Sparkles/></span>
         <h2>Obrigado pela sua opinião.</h2>
-        <p>Seu feedback foi enviado e vai ajudar a deixar o CONTROLE+ ainda melhor para quem vive de compra e revenda.</p>
+        <p>{forcePreview?'Prévia concluída. Nenhuma avaliação foi salva no painel.':'Seu feedback foi enviado e vai ajudar a deixar o CONTROLE+ ainda melhor para quem vive de compra e revenda.'}</p>
       </div>:<>
         <div className="cp-feedback-kicker"><Sparkles/> SUA OPINIÃO IMPORTA</div>
         <h2>Como está sendo sua experiência com o <strong>CONTROLE+</strong>?</h2>
