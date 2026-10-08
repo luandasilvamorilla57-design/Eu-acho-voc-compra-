@@ -31,6 +31,9 @@ export type Product={
   user_id:string
   name:string
   category:string|null
+  item_type:'main'|'accessory'|'part'|null
+  category_group:string|null
+  category_source:'auto'|'manual'|null
   brand:string|null
   model:string|null
   condition:string
