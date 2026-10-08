@@ -20,6 +20,7 @@ on:
       - controle-plus-feedback-category-v17
       - controle-plus-admin-feedback-preview-v18
       - controle-plus-feedback-center-v19
+      - controle-plus-remove-admin-feedback-preview-v20
       - main
   pull_request:
     branches:
