@@ -2,7 +2,7 @@ import {useEffect,useMemo,useState} from 'react'
 import {
   AlertTriangle,ArrowDownRight,ArrowUpRight,BadgeDollarSign,Banknote,BarChart3,Box,
   Check,ChevronRight,CircleDollarSign,Clock3,Home,ImagePlus,LogOut,Package,Plus,
-  ReceiptText,Search,Settings2,ShoppingBag,Tag,WalletCards,X,Moon,Sun,Megaphone,RefreshCw,TrendingDown,Trash2,Pencil,ShieldCheck
+  ReceiptText,Search,Settings2,ShoppingBag,Tag,WalletCards,X,Moon,Sun,Megaphone,RefreshCw,TrendingDown,Trash2,Pencil,ShieldCheck,Sparkles
 } from 'lucide-react'
 import {supabase} from '../lib/supabase'
 import {useControlData} from './useControlData'
@@ -13,6 +13,7 @@ import {useControlAccess} from './useControlAccess'
 import {ActivePlanCard,SubscriptionGate,TrialBanner,TrialInfoModal} from './BillingUI'
 import {BriqueGuidePage} from './BriqueGuidePage'
 import {PersonalRankingCard,PersonalRankingPage} from './PersonalRanking'
+import {FeedbackPrompt} from './FeedbackPrompt'
 import type {CashEntry,ControlView,Product,Sale} from './types'
 
 type Data=ReturnType<typeof useControlData>
@@ -119,6 +120,7 @@ export function ControlApp({userId,email}:{userId:string;email?:string}){
     </main>
     {view!=='admin'&&(canWrite||readOnlyMode)&&<BottomNav view={view} onView={openView} onAdd={()=>openModal('actions')}/>}
     <InstallAppPrompt userId={userId}/>
+    {!data.isAdmin&&<FeedbackPrompt userId={userId} enabled={modal===null&&!trialInfoOpen&&selected===null&&view!=='admin'}/>} 
     {trialInfoOpen&&!data.isAdmin&&<TrialInfoModal access={access} busy={billing.busy} error={billing.error} onClose={()=>setTrialInfoOpen(false)} onSubscribe={()=>void billing.subscribe()}/>} 
 
     {modal==='actions'&&<ActionSheet onClose={()=>setModal(null)} onChoose={openModal}/>}
@@ -738,6 +740,9 @@ function ProductDetail({product,data,calc,readOnly,onClose,onSale,onExpense,onSa
   const [editingInfo,setEditingInfo]=useState(false)
   const [name,setName]=useState(product.name)
   const [category,setCategory]=useState(product.category||'')
+  const [categoryGroup,setCategoryGroup]=useState(product.category_group||'Outros')
+  const [itemType,setItemType]=useState<'main'|'accessory'|'part'>(product.item_type||'main')
+  const [classificationTouched,setClassificationTouched]=useState(false)
   const [notes,setNotes]=useState(product.notes||'')
   const [listingEditing,setListingEditing]=useState(false)
   const [isListed,setIsListed]=useState(product.listing_status==='listed')
@@ -755,7 +760,14 @@ function ProductDetail({product,data,calc,readOnly,onClose,onSale,onExpense,onSa
     setError(null)
     try{
       if(!name.trim())throw new Error('Informe o nome do produto.')
-      await data.updateProduct(product.id,{name:name.trim(),category:category.trim()||null,notes:notes.trim()||null})
+      const patch:Partial<Product>={name:name.trim(),category:category.trim()||null,notes:notes.trim()||null}
+      if(classificationTouched){
+        patch.category_group=categoryGroup.trim()||'Outros'
+        patch.item_type=itemType
+        patch.category_source='manual'
+      }
+      await data.updateProduct(product.id,patch)
+      setClassificationTouched(false)
       setEditingInfo(false);onSaved()
     }catch(err:any){setError(err?.message||'Não foi possível editar o produto.')}
   }
@@ -819,7 +831,20 @@ function ProductDetail({product,data,calc,readOnly,onClose,onSale,onExpense,onSa
 
     <section className="cp-detail-section">
       <div className="cp-section-head"><div><span>DADOS DO PRODUTO</span><h2>Informações básicas</h2></div>{!readOnly&&<button onClick={()=>setEditingInfo(v=>!v)}><Pencil size={14}/>{editingInfo?'Cancelar':'Editar'}</button>}</div>
-      {editingInfo?<div className="cp-inline-edit cp-product-edit-grid"><Field label="Nome" full><input value={name} onChange={e=>setName(e.target.value)}/></Field><Field label="Categoria"><input value={category} onChange={e=>setCategory(e.target.value)} placeholder="Ex.: eletrônicos"/></Field><Field label="Observações" full><textarea value={notes} onChange={e=>setNotes(e.target.value)} placeholder="Estado, acessórios, defeitos..."/></Field><button className="cp-primary" disabled={data.busy} onClick={()=>void saveInfo()}>{data.busy?'Salvando...':'Salvar alterações'}</button></div>:<div className="cp-product-info-read"><div><span>Categoria</span><b>{category||'Não informada'}</b></div><div><span>Origem</span><b>{product.acquisition_type==='owned'?'Produto próprio':product.source||'Compra'}</b></div>{notes&&<div className="cp-product-notes"><span>Observações</span><p>{notes}</p></div>}</div>}
+      {editingInfo?<div className="cp-inline-edit cp-product-edit-grid">
+        <Field label="Nome" full><input value={name} onChange={e=>setName(e.target.value)}/></Field>
+        <Field label="Categoria informada"><input value={category} onChange={e=>setCategory(e.target.value)} placeholder="Ex.: eletrônicos"/></Field>
+        <Field label="Tipo no ranking"><select value={itemType} onChange={e=>{setItemType(e.target.value as 'main'|'accessory'|'part');setClassificationTouched(true)}}><option value="main">Produto principal</option><option value="accessory">Acessório</option><option value="part">Peça</option></select></Field>
+        <Field label="Categoria do ranking" full><input list="cp-ranking-categories" value={categoryGroup} onChange={e=>{setCategoryGroup(e.target.value);setClassificationTouched(true)}} placeholder="Ex.: Cabos e carregadores"/><datalist id="cp-ranking-categories"><option value="Cabos e carregadores"/><option value="Acessórios para celular"/><option value="iPhones"/><option value="Celulares"/><option value="PlayStation"/><option value="Xbox"/><option value="Controles e acessórios"/><option value="Áudio"/><option value="Televisões"/><option value="Ferramentas"/><option value="Eletrodomésticos"/><option value="Casa e cozinha"/><option value="Computadores"/><option value="Tablets"/><option value="Relógios e smartwatches"/><option value="Bicicletas"/><option value="Motos"/><option value="Carros"/></datalist></Field>
+        <div className="cp-classification-tip"><Sparkles size={16}/><span>O CONTROLE+ classifica automaticamente. Altere apenas se quiser corrigir como este produto aparece no Ranking Pessoal.</span></div>
+        <Field label="Observações" full><textarea value={notes} onChange={e=>setNotes(e.target.value)} placeholder="Estado, acessórios, defeitos..."/></Field>
+        <button className="cp-primary" disabled={data.busy} onClick={()=>void saveInfo()}>{data.busy?'Salvando...':'Salvar alterações'}</button>
+      </div>:<div className="cp-product-info-read">
+        <div><span>Categoria</span><b>{category||'Não informada'}</b></div>
+        <div><span>Origem</span><b>{product.acquisition_type==='owned'?'Produto próprio':product.source||'Compra'}</b></div>
+        <div className="cp-ranking-classification"><span>Ranking pessoal</span><b>{product.category_group||categoryGroup||'Outros'}</b><small>{product.item_type==='accessory'?'Acessório':product.item_type==='part'?'Peça':'Produto principal'} · {product.category_source==='manual'?'corrigido manualmente':'classificação automática'}</small></div>
+        {notes&&<div className="cp-product-notes"><span>Observações</span><p>{notes}</p></div>}
+      </div>}
     </section>
 
     <div className="cp-detail-numbers"><div><span>Custo por un.</span><b>{product.cost_basis_known?money.format(product.purchase_unit_cost):'Não informado'}</b></div><div><span>Custo real</span><b>{product.cost_basis_known?money.format(cost):'Sem base'}</b></div><div><span>Lucro possível</span><b className={potential!==null&&potential>=0?'positive':''}>{potential===null?'—':money.format(potential)}</b></div><div><span>Tempo no estoque</span><b>{daysSince(product.purchase_date)} dias</b></div></div>
