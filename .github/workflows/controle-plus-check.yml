@@ -16,6 +16,7 @@ on:
       - controle-plus-vendas-hoje-v13
       - controle-plus-trial-modal-v14
       - controle-plus-error-telemetry-fix-v15
+      - controle-plus-ranking-pessoal-v16
       - main
   pull_request:
     branches:
