@@ -251,7 +251,7 @@ export function useControlData(userId:string){
     setBusy(true);setError(null)
     try{
       const allowed:any={}
-      for(const key of ['name','category','brand','model','condition','sku','source','supplier_id','seller_name','listed_price','minimum_price','status','notes','acquisition_type','cost_basis_known','listing_status','listing_channels','listing_started_at','listing_last_checkin_at','listing_next_checkin_at','listing_refresh_count']){
+      for(const key of ['name','category','item_type','category_group','category_source','brand','model','condition','sku','source','supplier_id','seller_name','listed_price','minimum_price','status','notes','acquisition_type','cost_basis_known','listing_status','listing_channels','listing_started_at','listing_last_checkin_at','listing_next_checkin_at','listing_refresh_count']){
         if(key in patch)allowed[key]=(patch as any)[key]
       }
       const result=await db.from('control_products').update(allowed).eq('id',productId).eq('user_id',userId).select('*').single()
