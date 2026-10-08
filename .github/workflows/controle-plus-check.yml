@@ -19,6 +19,7 @@ on:
       - controle-plus-ranking-pessoal-v16
       - controle-plus-feedback-category-v17
       - controle-plus-admin-feedback-preview-v18
+      - controle-plus-feedback-center-v19
       - main
   pull_request:
     branches:
