@@ -1,10 +1,11 @@
 import {useEffect,useMemo,useState} from 'react'
 import {
   ArrowLeft,Boxes,ChevronRight,CircleDollarSign,Mail,Package,ReceiptText,
-  Search,ShieldCheck,Store,UsersRound,WalletCards
+  MessageSquareText,Search,ShieldCheck,Star,Store,UsersRound,WalletCards
 } from 'lucide-react'
 import {supabase} from '../lib/supabase'
 import type {CashEntry,ControlAccount,ControlSettings,Product,Sale,SaleItem} from './types'
+import {feedbackSummary,StarRating,type FeedbackRow} from './FeedbackPrompt'
 
 const db=supabase as any
 const money=new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL'})
@@ -18,6 +19,7 @@ type AdminData={
   saleItems:SaleItem[]
   cashEntries:CashEntry[]
   billing:any[]
+  feedback:FeedbackRow[]
 }
 
 function toNumber<T extends Record<string,any>>(rows:T[],keys:string[]){
@@ -29,7 +31,7 @@ function toNumber<T extends Record<string,any>>(rows:T[],keys:string[]){
 }
 
 export function AdminCenter({onBack}:{onBack:()=>void}){
-  const [data,setData]=useState<AdminData>({accounts:[],settings:[],products:[],sales:[],saleItems:[],cashEntries:[],billing:[]})
+  const [data,setData]=useState<AdminData>({accounts:[],settings:[],products:[],sales:[],saleItems:[],cashEntries:[],billing:[],feedback:[]})
   const [loading,setLoading]=useState(true)
   const [error,setError]=useState<string|null>(null)
   const [query,setQuery]=useState('')
@@ -40,16 +42,17 @@ export function AdminCenter({onBack}:{onBack:()=>void}){
     ;(async()=>{
       setLoading(true);setError(null)
       try{
-        const [a,s,p,sa,si,c,b]=await Promise.all([
+        const [a,s,p,sa,si,c,b,f]=await Promise.all([
           db.from('control_accounts').select('*').order('registered_at',{ascending:false}),
           db.from('control_settings').select('*'),
           db.from('control_products').select('*').order('created_at',{ascending:false}),
           db.from('control_sales').select('*').order('sale_date',{ascending:false}),
           db.from('control_sale_items').select('*').order('created_at',{ascending:false}),
           db.from('control_cash_entries').select('*').order('occurred_at',{ascending:false}),
-          db.from('control_billing').select('*').order('created_at',{ascending:false})
+          db.from('control_billing').select('*').order('created_at',{ascending:false}),
+          db.from('control_feedback').select('*').order('created_at',{ascending:false})
         ])
-        for(const result of [a,s,p,sa,si,c,b])if(result.error)throw result.error
+        for(const result of [a,s,p,sa,si,c,b,f])if(result.error)throw result.error
         if(!alive)return
         setData({
           accounts:(a.data||[]) as ControlAccount[],
@@ -58,7 +61,8 @@ export function AdminCenter({onBack}:{onBack:()=>void}){
           sales:(sa.data||[]) as Sale[],
           saleItems:toNumber((si.data||[]) as SaleItem[],['unit_price','unit_cost_snapshot']),
           cashEntries:toNumber((c.data||[]) as CashEntry[],['amount']),
-          billing:toNumber((b.data||[]) as any[],['monthly_price'])
+          billing:toNumber((b.data||[]) as any[],['monthly_price']),
+          feedback:(f.data||[]) as FeedbackRow[]
         })
       }catch(err:any){
         if(alive)setError(err?.message||'Não foi possível carregar o painel administrador.')
@@ -71,6 +75,7 @@ export function AdminCenter({onBack}:{onBack:()=>void}){
 
   const settingsByUser=useMemo(()=>new Map(data.settings.map(item=>[item.user_id,item])),[data.settings])
   const billingByUser=useMemo(()=>new Map(data.billing.map(item=>[item.user_id,item])),[data.billing])
+  const feedbackByUser=useMemo(()=>new Map(data.feedback.map(item=>[item.user_id,item])),[data.feedback])
   const metrics=useMemo(()=>{
     return data.accounts.map(account=>{
       const products=data.products.filter(item=>item.user_id===account.user_id)
@@ -80,6 +85,7 @@ export function AdminCenter({onBack}:{onBack:()=>void}){
       const cash=data.cashEntries.filter(item=>item.user_id===account.user_id)
       const settings=settingsByUser.get(account.user_id)
       const billing=billingByUser.get(account.user_id)
+      const feedback=feedbackByUser.get(account.user_id)
       const now=Date.now()
       const trialEnd=billing?.trial_ends_at?new Date(billing.trial_ends_at).getTime():0
       const validUntil=billing?.valid_until?new Date(billing.valid_until).getTime():0
@@ -94,10 +100,10 @@ export function AdminCenter({onBack}:{onBack:()=>void}){
         account,
         business:settings?.business_name||'Conta sem configuração',
         onboarded:Boolean(settings?.onboarding_completed),
-        products, sales, items, revenue, profit, stockUnits, stockValue, cashBalance, billing, accessLabel, trialDays
+        products, sales, items, revenue, profit, stockUnits, stockValue, cashBalance, billing, feedback, accessLabel, trialDays
       }
     })
-  },[data,billingByUser,settingsByUser])
+  },[data,billingByUser,feedbackByUser,settingsByUser])
 
   const totals=useMemo(()=>metrics.reduce((acc,item)=>({
     accounts:acc.accounts+1,
@@ -106,6 +112,8 @@ export function AdminCenter({onBack}:{onBack:()=>void}){
     revenue:acc.revenue+item.revenue,
     cash:acc.cash+item.cashBalance
   }),{accounts:0,onboarded:0,stockUnits:0,revenue:0,cash:0}),[metrics])
+
+  const feedbackStats=useMemo(()=>feedbackSummary(data.feedback),[data.feedback])
 
   const filtered=metrics.filter(item=>{
     const hay=(item.business+' '+(item.account.email||'')).toLowerCase()
@@ -137,6 +145,15 @@ export function AdminCenter({onBack}:{onBack:()=>void}){
         </article>)}</div>:<div className="cp-admin-empty">Nenhum produto cadastrado nessa conta.</div>}
       </section>
 
+      {active.feedback&&<section className="cp-admin-section cp-admin-user-feedback">
+        <div className="cp-admin-section-head"><div><span>AVALIAÇÃO DESTE USUÁRIO</span><h2>O que ele achou do CONTROLE+</h2></div></div>
+        <article>
+          <div className="cp-admin-user-feedback-top"><StarRating value={Number(active.feedback.stars)}/><b>{active.feedback.stars}/5</b><small>{new Date(active.feedback.created_at).toLocaleDateString('pt-BR')}</small></div>
+          {active.feedback.comment&&<p>“{active.feedback.comment}”</p>}
+          {(active.feedback.selected_tags||[]).length>0&&<div className="cp-admin-feedback-tags">{active.feedback.selected_tags.map((tag:string)=><span key={tag}>{tag}</span>)}</div>}
+        </article>
+      </section>}
+
       <section className="cp-admin-section">
         <div className="cp-admin-section-head"><div><span>VENDAS RECENTES</span><h2>Histórico da conta</h2></div></div>
         {active.sales.length?<div className="cp-admin-sales">{active.sales.slice(0,15).map(sale=>{
@@ -163,6 +180,29 @@ export function AdminCenter({onBack}:{onBack:()=>void}){
         <div><span><Boxes/> Estoque global</span><strong>{number.format(totals.stockUnits)} un.</strong><small>todas as contas</small></div>
         <div><span><CircleDollarSign/> Faturamento</span><strong>{money.format(totals.revenue)}</strong><small>vendas registradas</small></div>
         <div><span><WalletCards/> Caixa somado</span><strong>{money.format(totals.cash)}</strong><small>saldo estimado</small></div>
+      </section>
+
+      <section className="cp-admin-feedback-block">
+        <div className="cp-admin-feedback-title"><div><span>FEEDBACK DOS USUÁRIOS</span><h2>O que os clientes estão achando</h2><p>Avaliações aparecem somente depois de pelo menos 2 dias de uso.</p></div><MessageSquareText/></div>
+        <div className="cp-admin-feedback-kpis">
+          <div><span>Média geral</span><strong>{feedbackStats.total?feedbackStats.average.toFixed(1):'—'} <Star/></strong><small>{feedbackStats.total} avaliação(ões)</small></div>
+          <div><span>5 estrelas</span><strong>{feedbackStats.five}</strong><small>clientes muito satisfeitos</small></div>
+          <div><span>Mais pedido</span><strong>{feedbackStats.topTag?.[0]||'—'}</strong><small>{feedbackStats.topTag?feedbackStats.topTag[1]+' marcação(ões)':'sem dados ainda'}</small></div>
+        </div>
+        {data.feedback.length>0?<div className="cp-admin-feedback-list">
+          {data.feedback.slice(0,12).map(review=>{
+            const metric=metrics.find(item=>item.account.user_id===review.user_id)
+            return <article key={review.id}>
+              <div className="cp-admin-feedback-review-head">
+                <span className="cp-admin-avatar">{((metric?.business||metric?.account.email||'C')[0]||'C').toUpperCase()}</span>
+                <div><b>{metric?.business||'Conta'}</b><small>{metric?.account.email||'E-mail indisponível'} · {metric?.accessLabel||'Conta'}</small></div>
+                <div><StarRating value={Number(review.stars)}/><small>{new Date(review.created_at).toLocaleDateString('pt-BR')}</small></div>
+              </div>
+              {review.comment&&<p>“{review.comment}”</p>}
+              {(review.selected_tags||[]).length>0&&<div className="cp-admin-feedback-tags">{review.selected_tags.map(tag=><span key={tag}>{tag}</span>)}</div>}
+            </article>
+          })}
+        </div>:<div className="cp-admin-empty">As avaliações aparecerão aqui conforme usuários com mais de 2 dias responderem.</div>}
       </section>
 
       <div className="cp-admin-toolbar">
