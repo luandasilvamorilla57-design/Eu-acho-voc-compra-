@@ -41,20 +41,17 @@ export function useControlAccess(userId:string){
     if(!userId)return null
     setError(null)
     try{
-      let row:any=null
-      if(forceRemote){
+      // O banco (RLS) é a fonte de verdade, inclusive no teste da conta master.
+      // A função remota só reconcilia pagamentos e nunca substitui o bloqueio local.
+      let result=await db.rpc('control_access_status')
+      if(result.error)throw result.error
+      let row:any=Array.isArray(result.data)?result.data[0]:result.data
+      if(forceRemote||(row&&!row.can_write&&!row.is_admin)){
         const remote=await supabase.functions.invoke('controle-status',{body:{}})
-        if(remote.error)throw remote.error
-        row=remote.data
-      }else{
-        const result=await db.rpc('control_access_status')
+        if(remote.error&&forceRemote)throw remote.error
+        result=await db.rpc('control_access_status')
         if(result.error)throw result.error
         row=Array.isArray(result.data)?result.data[0]:result.data
-
-        if(row&&!row.can_write&&!row.is_admin){
-          const remote=await supabase.functions.invoke('controle-status',{body:{}})
-          if(!remote.error&&remote.data)row=remote.data
-        }
       }
       const next=normalize(row)
       setAccess(next)
@@ -83,6 +80,10 @@ export function useControlAccess(userId:string){
   },[refresh])
 
   const subscribe=useCallback(async()=>{
+    if(access?.is_admin&&!access.can_write){
+      setError('Sua conta master está em simulação de acesso expirado. Reative o acesso administrativo ao finalizar o teste.')
+      return
+    }
     setBusy(true);setError(null)
     try{
       const result=await supabase.functions.invoke('controle-assinar',{
@@ -101,7 +102,7 @@ export function useControlAccess(userId:string){
     }finally{
       setBusy(false)
     }
-  },[refresh])
+  },[refresh,access])
 
   const cancel=useCallback(async()=>{
     setBusy(true);setError(null)
