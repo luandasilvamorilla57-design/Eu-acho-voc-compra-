@@ -44,9 +44,12 @@ export function useControlData(userId:string){
       const current=await db.from('control_settings').select('*').eq('user_id',userId).maybeSingle()
       if(current.error)throw current.error
       if(!current.data){
-        const inserted=await db.from('control_settings').insert({user_id:userId}).select('*').single()
-        if(inserted.error)throw inserted.error
-        setSettings(inserted.data as ControlSettings)
+        // Cria somente os valores padrão, mesmo em contas cujo teste já expirou.
+        // O banco valida o usuário autenticado; este procedimento NÃO libera escrita.
+        const initialized=await db.rpc('control_ensure_settings')
+        if(initialized.error)throw initialized.error
+        if(!initialized.data)throw new Error('Configurações não encontradas. Tente novamente.')
+        setSettings(initialized.data as ControlSettings)
       }else setSettings(current.data as ControlSettings)
 
       const adminResult=await db.from('control_admins').select('role,enabled').eq('user_id',userId).maybeSingle()
