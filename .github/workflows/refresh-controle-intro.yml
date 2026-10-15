@@ -1,0 +1,32 @@
+name: Atualizar comercial CONTROLE+
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/refresh-controle-intro.yml
+
+permissions:
+  contents: write
+
+jobs:
+  upload-new-video:
+    if: "github.event.head_commit.message == 'chore: stage new CONTROLE+ welcome film'"
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - name: Replace bundled video using verified original
+        env:
+          INTRO_SOURCE_URL: "https://d2jqrm6oza8nb6.cloudfront.net/datasets/bcb20ef6-157e-4d04-9406-41068a4a0038.mp4?_jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJrZXlIYXNoIjoiZjA3N2ZiMTlhYWVjZjE1OSIsImJ1Y2tldCI6InJ1bndheS1kYXRhc2V0cyIsInN0YWdlIjoicHJvZCIsImV4cCI6MTc5MjIyODUwNX0.gzZMS6TJrQJ-ZvEZ9hf_pVTo8KbtVsz7tlbcGelUMw4"
+        run: |
+          set -euo pipefail
+          mkdir -p public/videos
+          curl --fail --location --retry 3 --connect-timeout 20 --max-time 240 --silent --show-error "$INTRO_SOURCE_URL" --output public/videos/controle-plus-apresentacao.mp4
+          echo "0fd8e9c228ede479fffd8acbcb3e4e76cac0e7309e2840bb252e114f8ea6e6e7  public/videos/controle-plus-apresentacao.mp4" | sha256sum -c -
+          git config user.name 'CONTROLE+ automation'
+          git config user.email 'github-actions[bot]@users.noreply.github.com'
+          git add public/videos/controle-plus-apresentacao.mp4
+          git commit -m 'feat(assets): replace welcome commercial with cinematic reseller story'
+          git push origin HEAD:main
