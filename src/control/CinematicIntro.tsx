@@ -9,6 +9,7 @@ const db=supabase as any
 
 export function CinematicIntro({userId,isAdmin,onDone}:{userId:string;isAdmin:boolean;onDone:()=>void}){
   const [ready,setReady]=useState(false)
+  const [checked,setChecked]=useState(false)
   const [started,setStarted]=useState(false)
   const [finished,setFinished]=useState(false)
   const [saving,setSaving]=useState(false)
@@ -22,6 +23,7 @@ export function CinematicIntro({userId,isAdmin,onDone}:{userId:string;isAdmin:bo
       const response=await fetch(url+'?t='+Date.now(),{method:'HEAD',cache:'no-store'})
       setReady(response.ok)
     }catch{setReady(false)}
+    finally{setChecked(true)}
   }
   useEffect(()=>{void verify()},[])
   async function upload(file:File){
@@ -48,7 +50,8 @@ export function CinematicIntro({userId,isAdmin,onDone}:{userId:string;isAdmin:bo
     onDone()
   }
   // A ausência do arquivo nunca prende o usuário: a estreia passa a funcionar assim que o vídeo é publicado.
-  useEffect(()=>{if(!ready&&!isAdmin)onDone()},[ready,isAdmin,onDone])
+  useEffect(()=>{if(checked&&!ready&&!isAdmin)onDone()},[checked,ready,isAdmin,onDone])
+  if(!checked)return <div className="cp-intro-layer"/>
   if(!ready){
     if(!isAdmin)return null
     return <div className="cp-intro-layer"><div className="cp-intro-setup"><Film size={36}/><h2>Estreia cinematográfica</h2><p>O vídeo está preparado para o primeiro acesso. Publique o MP4 de boas-vindas para ativar a apresentação.</p><label className="cp-intro-upload"><UploadCloud size={18}/>{uploading?'Enviando vídeo...':'Publicar vídeo MP4'}<input type="file" accept="video/mp4" disabled={uploading} onChange={event=>{const file=event.target.files?.[0];if(file)void upload(file)}}/></label>{problem&&<p role="alert">{problem}</p>}<button onClick={onDone}>Entrar sem apresentação</button></div></div>
