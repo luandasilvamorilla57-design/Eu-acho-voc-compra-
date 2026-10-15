@@ -5,16 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
   <meta name="theme-color" content="#07111f"/>
   <meta name="description" content="CONTROLE+ — estoque, vendas, caixa e lucro para quem compra e revende."/>
-  <script>
-    (function(){
-      try{
-        var saved=localStorage.getItem('controle-plus-theme');
-        var theme=saved==='light'||saved==='dark'?saved:(matchMedia('(prefers-color-scheme: light)').matches?'light':'dark');
-        document.documentElement.dataset.theme=theme;
-        document.querySelector('meta[name="theme-color"]').setAttribute('content',theme==='light'?'#f3f7fc':'#07111f');
-      }catch(e){}
-    })();
-  </script>
+  <script src="/theme-bootstrap.js?v=1"></script>
   <link rel="manifest" href="/manifest.webmanifest?v=12"/>
   <link rel="icon" href="/control-plus-icon.svg?v=2" type="image/svg+xml"/>
   <link rel="apple-touch-icon" href="/control-plus-icon.svg?v=2"/>
