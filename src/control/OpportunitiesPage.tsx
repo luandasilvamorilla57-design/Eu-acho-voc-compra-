@@ -190,6 +190,14 @@ export function OpportunitiesPage({isAdmin,onBack}:{isAdmin:boolean;onBack:()=>v
       {!item.is_active&&<span className="cp-opp-hidden">Oculta dos usuários</span>}
      </div>
     </button>
+    {item.is_active&&validShopLink(item.shop_url)&&<div className="cp-opp-cta-wrap">
+      <a className="cp-opp-invest-cta" href={item.shop_url} target="_blank" rel="noopener noreferrer sponsored" aria-label={'Investir neste item: '+item.title+' (abre o TikTok Shop)'}>
+        <ShoppingBag size={19} aria-hidden="true"/>
+        <span>INVESTIR NESSE ITEM</span>
+        <ExternalLink size={17} aria-hidden="true"/>
+      </a>
+      <span className="cp-opp-cta-note">Ver oferta no TikTok Shop · Link de afiliado</span>
+    </div>}
     {isAdmin&&<div className="cp-opp-admin-row">
      <button type="button" onClick={()=>openEditor(item)}><Pencil size={15}/> Editar</button>
      <button type="button" className="danger" onClick={()=>{setError('');setConfirmDelete(item)}}><Trash2 size={15}/> Excluir</button>
@@ -209,7 +217,7 @@ export function OpportunitiesPage({isAdmin,onBack}:{isAdmin:boolean;onBack:()=>v
     <p>{selected.description}</p>
     <div className="cp-opp-why"><b><Info size={17}/> Por que o CONTROLE+ recomenda?</b><p>{selected.reason}</p></div>
     <div className="cp-opp-tip"><Tag size={16}/>{selected.investment}</div>
-    <a className="cp-opp-external" href={selected.shop_url} target="_blank" rel="noopener noreferrer sponsored">Ver produto no TikTok Shop <ExternalLink size={18}/></a>
+    {validShopLink(selected.shop_url)&&<a className="cp-opp-external" href={selected.shop_url} target="_blank" rel="noopener noreferrer sponsored"><ShoppingBag size={19}/> INVESTIR NESSE ITEM <ExternalLink size={18}/></a>}
     <span className="cp-opp-modal-disclosure">Link de afiliado. Confira valores, disponibilidade e especificações na loja.</span>
    </section>
   </div>,document.body)}
