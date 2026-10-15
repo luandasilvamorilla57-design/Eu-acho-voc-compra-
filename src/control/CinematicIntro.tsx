@@ -48,12 +48,13 @@ export function CinematicIntro({userId,isAdmin,onDone}:{userId:string;isAdmin:bo
     onDone()
   }
   // A ausência do arquivo nunca prende o usuário: a estreia passa a funcionar assim que o vídeo é publicado.
+  useEffect(()=>{if(!ready&&!isAdmin)onDone()},[ready,isAdmin,onDone])
   if(!ready){
-    if(!isAdmin){onDone();return null}
+    if(!isAdmin)return null
     return <div className="cp-intro-layer"><div className="cp-intro-setup"><Film size={36}/><h2>Estreia cinematográfica</h2><p>O vídeo está preparado para o primeiro acesso. Publique o MP4 de boas-vindas para ativar a apresentação.</p><label className="cp-intro-upload"><UploadCloud size={18}/>{uploading?'Enviando vídeo...':'Publicar vídeo MP4'}<input type="file" accept="video/mp4" disabled={uploading} onChange={event=>{const file=event.target.files?.[0];if(file)void upload(file)}}/></label>{problem&&<p role="alert">{problem}</p>}<button onClick={onDone}>Entrar sem apresentação</button></div></div>
   }
   return <div className="cp-intro-layer" role="dialog" aria-modal="true" aria-label="Boas-vindas ao CONTROLE+">
-    <video ref={video} className="cp-intro-video" src={url} playsInline preload="auto" disablePictureInPicture controls={false} onEnded={()=>{setFinished(true);setStarted(false)}} onError={()=>setProblem('Vídeo indisponível no momento.')} onSeeking={event=>{if(!finished && event.currentTarget.currentTime>0)event.currentTarget.currentTime=0}}/>
+    <video ref={video} className="cp-intro-video" src={url} playsInline preload="auto" disablePictureInPicture controls={false} onEnded={()=>{setFinished(true);setStarted(false)}} onError={()=>setProblem('Vídeo indisponível no momento.')} />
     <div className="cp-intro-shade"/>
     {!started&&!finished&&<div className="cp-intro-welcome"><strong>CONTROLE<span>+</span></strong><p>Sua nova experiência começa aqui.</p><button onClick={()=>void start()}><Play size={18} fill="currentColor"/> Iniciar experiência com som <Volume2 size={18}/></button></div>}
     {finished&&<div className="cp-intro-finish"><strong>CONTROLE<span>+</span></strong><h2>Seu próximo nível começa agora.</h2><button onClick={()=>void complete()} disabled={saving}>{saving?'Preparando sua conta...':'Entrar na ferramenta'}</button></div>}
