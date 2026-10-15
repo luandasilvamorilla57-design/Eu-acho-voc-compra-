@@ -1,4 +1,5 @@
 import {useCallback,useEffect,useMemo,useState} from 'react'
+import {createPortal} from 'react-dom'
 import {
  ArrowLeft,ArrowRight,Check,ChevronRight,ExternalLink,ImagePlus,Info,Package,
  Pencil,Plus,Search,ShieldCheck,ShoppingBag,Sparkles,Tag,Trash2,TrendingUp,
@@ -69,6 +70,14 @@ export function OpportunitiesPage({isAdmin,onBack}:{isAdmin:boolean;onBack:()=>v
   setLoading(false)
  },[])
  useEffect(()=>{void load()},[load])
+ // Impede rolagem do painel atrás do modal enquanto ele estiver aberto.
+ const dialogOpen=Boolean(selected||editor||confirmDelete)
+ useEffect(()=>{
+  if(!dialogOpen)return
+  const previous=document.body.style.overflow
+  document.body.style.overflow='hidden'
+  return ()=>{document.body.style.overflow=previous}
+ },[dialogOpen])
 
  const active=useMemo(()=>items.filter(item=>item.is_active||isAdmin),[items,isAdmin])
  const filtered=useMemo(()=>active.filter(item=>
@@ -191,7 +200,7 @@ export function OpportunitiesPage({isAdmin,onBack}:{isAdmin:boolean;onBack:()=>v
    <span>As indicações são sugestões de produtos, não garantia de vendas ou lucros. Alguns links são de afiliados: o CONTROLE+ pode receber comissão sem custo adicional para você.</span>
   </footer>
 
-  {selected&&!editor&&!confirmDelete&&<div className="cp-opp-modal-layer" role="presentation" onMouseDown={e=>{if(e.target===e.currentTarget)setSelected(null)}}>
+  {selected&&!editor&&!confirmDelete&&createPortal(<div className="cp-opp-modal-layer" role="presentation" onMouseDown={e=>{if(e.target===e.currentTarget)setSelected(null)}}>
    <section className="cp-opp-modal" role="dialog" aria-modal="true" aria-labelledby="cp-opp-detail-title">
     <button type="button" className="cp-opp-x" onClick={()=>setSelected(null)} aria-label="Fechar"><X size={20}/></button>
     <div className="cp-opp-modal-picture">{getImage(selected.image_url)?<img src={getImage(selected.image_url)} alt={selected.title}/>:<ShoppingBag size={48}/>}</div>
@@ -203,15 +212,20 @@ export function OpportunitiesPage({isAdmin,onBack}:{isAdmin:boolean;onBack:()=>v
     <a className="cp-opp-external" href={selected.shop_url} target="_blank" rel="noopener noreferrer sponsored">Ver produto no TikTok Shop <ExternalLink size={18}/></a>
     <span className="cp-opp-modal-disclosure">Link de afiliado. Confira valores, disponibilidade e especificações na loja.</span>
    </section>
-  </div>}
+  </div>,document.body)}
 
-  {editor&&isAdmin&&<div className="cp-opp-modal-layer" role="presentation">
+  {editor&&isAdmin&&createPortal(<div className="cp-opp-modal-layer" role="presentation">
    <section className="cp-opp-modal cp-opp-edit" role="dialog" aria-modal="true" aria-labelledby="cp-opp-editor-title">
-    <button type="button" className="cp-opp-x" onClick={()=>{if(!saving){setEditor(false);setError('')}}} aria-label="Fechar"><X size={20}/></button>
-    <span className="cp-opp-eyebrow">PAINEL MASTER</span>
-    <h2 id="cp-opp-editor-title">{editing?'Editar indicação':'Nova indicação'}</h2>
-    <p>As informações salvas aqui serão exibidas na aba Oportunidades de todas as contas.</p>
-    <form onSubmit={e=>void saveItem(e)} className="cp-opp-form">
+    <header className="cp-opp-edit-header">
+     <div>
+      <span className="cp-opp-eyebrow">PAINEL MASTER</span>
+      <h2 id="cp-opp-editor-title">{editing?'Editar indicação':'Nova indicação'}</h2>
+      <p>Você controla o que aparece na aba Oportunidades de todas as contas.</p>
+     </div>
+     <button type="button" className="cp-opp-edit-close" onClick={()=>{if(!saving){setEditor(false);setError('')}}} aria-label="Fechar"><X size={21}/></button>
+    </header>
+    <form onSubmit={e=>void saveItem(e)} className="cp-opp-form" id="cp-opp-edit-form">
+     <div className="cp-opp-form-scroll">
      <label>Nome do produto<input maxLength={160} required value={form.title} onChange={e=>setForm(v=>({...v,title:e.target.value}))} placeholder="Ex.: Kit de cabos para iPhone"/></label>
      <label>Link do TikTok Shop<input type="url" required value={form.shop_url} onChange={e=>setForm(v=>({...v,shop_url:e.target.value}))} placeholder="https://vt.tiktok.com/..."/></label>
      <label>Foto do produto <span className="cp-opp-upload"><ImagePlus size={19}/>{photo?photo.name:editing?'Trocar a foto (opcional)':'Selecionar foto'}<input type="file" accept="image/png,image/jpeg,image/webp" onChange={e=>setPhoto(e.target.files?.[0]||null)}/></span></label>
@@ -227,13 +241,16 @@ export function OpportunitiesPage({isAdmin,onBack}:{isAdmin:boolean;onBack:()=>v
       <label>Ordem de exibição<input type="number" value={form.sort_order} onChange={e=>setForm(v=>({...v,sort_order:Number(e.target.value)}))}/></label>
       <label className="cp-opp-switch"><input type="checkbox" checked={form.is_active} onChange={e=>setForm(v=>({...v,is_active:e.target.checked}))}/> Publicar para todos</label>
      </div>
-     {error&&<p className="cp-opp-form-error" role="alert">{error}</p>}
-     <button type="submit" className="cp-opp-save" disabled={saving}><UploadCloud size={19}/>{saving?'Salvando e enviando...':editing?'Salvar alterações':'Publicar indicação'}</button>
+     </div>
+     <div className="cp-opp-edit-footer">
+      {error&&<p className="cp-opp-form-error" role="alert">{error}</p>}
+      <button type="submit" className="cp-opp-save" disabled={saving}><UploadCloud size={19}/>{saving?'Salvando e enviando...':editing?'Salvar alterações':'Publicar indicação'}</button>
+     </div>
     </form>
    </section>
-  </div>}
+  </div>,document.body)}
 
-  {confirmDelete&&isAdmin&&<div className="cp-opp-modal-layer" role="presentation">
+  {confirmDelete&&isAdmin&&createPortal(<div className="cp-opp-modal-layer" role="presentation">
    <section className="cp-opp-modal cp-opp-confirm" role="alertdialog" aria-modal="true" aria-labelledby="cp-opp-delete-title">
     <span className="cp-opp-delete-icon"><Trash2 size={25}/></span>
     <h2 id="cp-opp-delete-title">Excluir esta indicação?</h2>
@@ -241,6 +258,6 @@ export function OpportunitiesPage({isAdmin,onBack}:{isAdmin:boolean;onBack:()=>v
     {error&&<p className="cp-opp-form-error" role="alert">{error}</p>}
     <div className="cp-opp-confirm-actions"><button disabled={saving} onClick={()=>{setConfirmDelete(null);setError('')}}>Cancelar</button><button disabled={saving} className="cp-opp-danger" onClick={()=>void deleteItem()}>{saving?'Excluindo...':'Sim, excluir'}</button></div>
    </section>
-  </div>}
+  </div>,document.body)}
  </div>
 }
