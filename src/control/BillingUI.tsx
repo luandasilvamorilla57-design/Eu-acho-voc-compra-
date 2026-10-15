@@ -4,7 +4,7 @@ import type {ControlAccess} from './useControlAccess'
 const money=new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL'})
 
 export function TrialBanner({access,onSubscribe,onOpen}:{access:ControlAccess;onSubscribe:()=>void;onOpen:()=>void}){
-  if(access.is_admin||access.access_state==='active')return null
+  if((access.is_admin&&access.can_write)||access.access_state==='active')return null
   const remaining=Math.max(0,access.days_remaining)
   const progress=Math.max(0,Math.min(100,(remaining/15)*100))
   const urgent=remaining<=3
