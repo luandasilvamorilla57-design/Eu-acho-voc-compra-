@@ -48,6 +48,7 @@ export function ControlApp({userId,email}:{userId:string;email?:string}){
   const [readOnlyMode,setReadOnlyMode]=useState(true)
   const [trialInfoOpen,setTrialInfoOpen]=useState(false)
   const [expiredModalOpen,setExpiredModalOpen]=useState(false)
+  const [expiredTriggeredByAction,setExpiredTriggeredByAction]=useState(false)
   const [expiredModalShown,setExpiredModalShown]=useState(false)
   const [theme,setTheme]=useState<'dark'|'light'>(()=>{
     const saved=window.localStorage.getItem('controle-plus-theme')
@@ -71,16 +72,21 @@ export function ControlApp({userId,email}:{userId:string;email?:string}){
   useEffect(()=>{
     setReadOnlyMode(!canWrite)
     if(access&&!canWrite&&!expiredModalShown){
+      setExpiredTriggeredByAction(false)
       setExpiredModalOpen(true)
       setExpiredModalShown(true)
     }
     if(canWrite)setExpiredModalOpen(false)
   },[access,canWrite,expiredModalShown])
 
+  function showBlocked(){
+    setExpiredTriggeredByAction(true)
+    setExpiredModalOpen(true)
+  }
   function requireWrite(action:()=>void){
     if(canWrite){action();return}
     setReadOnlyMode(true)
-    setExpiredModalOpen(true)
+    showBlocked()
   }
   function openModal(next:Modal){
     if(next==='settings'||next===null){setModal(next);return}
@@ -92,7 +98,7 @@ export function ControlApp({userId,email}:{userId:string;email?:string}){
       return
     }
     setReadOnlyMode(true)
-    setExpiredModalOpen(true)
+    showBlocked()
   }
   function openListingCheckin(product:Product){
     requireWrite(()=>{
@@ -108,7 +114,7 @@ export function ControlApp({userId,email}:{userId:string;email?:string}){
 
   return <div className="cp-app" data-theme={theme}>
     <div className="cp-noise"/>
-    <TopBar business={data.settings.business_name} email={email} theme={theme} isAdmin={data.isAdmin} adminActive={view==='admin'} onTheme={()=>setTheme(v=>v==='dark'?'light':'dark')} onSettings={()=>setModal('settings')} onManage={()=>canWrite?setView('manage'):setExpiredModalOpen(true)} onAdmin={()=>setView('admin')}/>
+    <TopBar business={data.settings.business_name} email={email} theme={theme} isAdmin={data.isAdmin} adminActive={view==='admin'} onTheme={()=>setTheme(v=>v==='dark'?'light':'dark')} onSettings={()=>setModal('settings')} onManage={()=>canWrite?setView('manage'):showBlocked()} onAdmin={()=>setView('admin')}/>
     {(!data.isAdmin||!canWrite)&&<TrialBanner access={access} onSubscribe={()=>void billing.subscribe()} onOpen={()=>canWrite?setTrialInfoOpen(true):setExpiredModalOpen(true)}/>}
     <main className="cp-main">
       {!canWrite&&!readOnlyMode?<SubscriptionGate access={access} products={data.products.length} sales={data.sales.length} stockValue={calc.stockCapital} onSubscribe={()=>void billing.subscribe()} onRefresh={()=>void billing.refresh(true)} onReadOnly={()=>{setReadOnlyMode(true);setView('home')}} busy={billing.busy} error={billing.error}/>:<>
@@ -132,7 +138,7 @@ export function ControlApp({userId,email}:{userId:string;email?:string}){
     <InstallAppPrompt userId={userId}/>
     {!data.isAdmin&&<FeedbackPrompt userId={userId} enabled={modal===null&&!trialInfoOpen&&selected===null&&view!=='admin'}/>} 
     {trialInfoOpen&&!data.isAdmin&&canWrite&&<TrialInfoModal access={access} busy={billing.busy} error={billing.error} onClose={()=>setTrialInfoOpen(false)} onSubscribe={()=>void billing.subscribe()}/>} 
-    {expiredModalOpen&&!canWrite&&<ExpiredAccessModal access={access} busy={billing.busy} error={billing.error} onClose={()=>setExpiredModalOpen(false)} onSubscribe={()=>void billing.subscribe()} blockedAction={expiredModalShown&&!readOnlyMode}/>} 
+    {expiredModalOpen&&!canWrite&&<ExpiredAccessModal access={access} busy={billing.busy} error={billing.error} onClose={()=>setExpiredModalOpen(false)} onSubscribe={()=>void billing.subscribe()} blockedAction={expiredTriggeredByAction}/>} 
 
     {modal==='actions'&&<ActionSheet onClose={()=>setModal(null)} onChoose={openModal}/>}
     {modal==='purchase'&&<PurchaseModal data={data} onClose={()=>setModal(null)} onDone={()=>{setModal(null);notify('Compra salva e adicionada ao estoque.')}}/>}
@@ -142,7 +148,7 @@ export function ControlApp({userId,email}:{userId:string;email?:string}){
     {modal==='cash'&&<CashModal data={data} onClose={()=>setModal(null)} onDone={()=>{setModal(null);notify('Movimentação adicionada ao caixa.')}}/>}
     {modal==='settings'&&<SettingsModal data={data} email={email} access={access} billingBusy={billing.busy} onSubscribe={()=>void billing.subscribe()} onCancel={()=>void billing.cancel()} readOnly={!canWrite} onClose={()=>setModal(null)} onDone={notify}/>} 
     {selected&&modal==='listingCheckin'&&<ListingCheckinModal product={selected} data={data} onClose={()=>{setModal(null);setSelected(null)}} onSold={()=>setModal('sale')} onDone={(text)=>{setModal(null);setSelected(null);notify(text)}}/>}
-    {selected&&modal===null&&<ProductDetail product={selected} data={data} calc={calc} readOnly={!canWrite} onClose={()=>setSelected(null)} onSale={()=>openModal('sale')} onExpense={()=>openModal('expense')} onSaved={()=>notify('Produto atualizado.')} onDeleted={()=>{setSelected(null);notify('Produto removido do estoque.')}}/>}
+    {selected&&modal===null&&<ProductDetail product={selected} data={data} calc={calc} readOnly={!canWrite} onClose={()=>setSelected(null)} onSale={()=>openModal('sale')} onExpense={()=>openModal('expense')} onSaved={()=>notify('Produto atualizado.')} onDeleted={()=>{setSelected(null);notify('Produto removido do estoque.')}} onBlocked={showBlocked}/>}
     {toast&&<div className="cp-toast"><Check size={18}/>{toast}</div>}
     {data.error&&<div className="cp-error-bar"><AlertTriangle size={17}/>{data.error}</div>}
     {billing.error&&canWrite&&<div className="cp-error-bar"><AlertTriangle size={17}/>{billing.error}</div>}
@@ -741,7 +747,7 @@ function ListingCheckinModal({product,data,onClose,onSold,onDone}:{product:Produ
   </ModalShell>
 }
 
-function ProductDetail({product,data,calc,readOnly,onClose,onSale,onExpense,onSaved,onDeleted}:{product:Product;data:Data;calc:Metrics;readOnly:boolean;onClose:()=>void;onSale:()=>void;onExpense:()=>void;onSaved:()=>void;onDeleted:()=>void}){
+function ProductDetail({product,data,calc,readOnly,onClose,onSale,onExpense,onSaved,onDeleted,onBlocked}:{product:Product;data:Data;calc:Metrics;readOnly:boolean;onClose:()=>void;onSale:()=>void;onExpense:()=>void;onSaved:()=>void;onDeleted:()=>void;onBlocked:()=>void}){
   const photos=data.grouped.photosByProduct.get(product.id)||[]
   const expenses=data.grouped.expensesByProduct.get(product.id)||[]
   const cost=calc.unitCost(product)
@@ -832,7 +838,7 @@ function ProductDetail({product,data,calc,readOnly,onClose,onSale,onExpense,onSa
     <div className="cp-detail-hero"><div className="cp-detail-photo">{photos[0]?.signed_url?<img src={photos[0].signed_url} alt=""/>:<Package/>}</div><div><span className="cp-eyebrow">{product.acquisition_type==='owned'?'PRODUTO PRÓPRIO':product.category||'PRODUTO'}</span><h2>{name}</h2><p>{product.quantity_available>0?product.quantity_available+' de '+product.quantity_initial+' unidade(s) disponíveis':'Produto vendido'}</p></div></div>
 
     <section className="cp-detail-section">
-      <div className="cp-section-head"><div><span>FOTOS</span><h2>{photos.length?photos.length+' foto(s) do produto':'Adicione fotos desse produto'}</h2></div>{!readOnly&&<label className="cp-detail-add-photo"><ImagePlus size={16}/> Adicionar<input type="file" accept="image/*" multiple onChange={e=>{const files=Array.from(e.target.files||[]);void addPhotos(files);e.currentTarget.value=''}}/></label>}</div>
+      <div className="cp-section-head"><div><span>FOTOS</span><h2>{photos.length?photos.length+' foto(s) do produto':'Adicione fotos desse produto'}</h2></div>{readOnly?<button className="cp-detail-add-photo" onClick={onBlocked}><ImagePlus size={16}/> Adicionar</button>:<label className="cp-detail-add-photo"><ImagePlus size={16}/> Adicionar<input type="file" accept="image/*" multiple onChange={e=>{const files=Array.from(e.target.files||[]);void addPhotos(files);e.currentTarget.value=''}}/></label>}</div>
       <div className="cp-photo-manager">
         {photos.map(photo=><div key={photo.id}><img src={photo.signed_url||''} alt=""/>{!readOnly&&<button type="button" disabled={data.busy} onClick={()=>void removePhoto(photo.id)} aria-label="Excluir foto"><Trash2/></button>}</div>)}
         {!readOnly&&photos.length<12&&<label className="cp-photo-add-tile"><ImagePlus/><b>Adicionar fotos</b><small>até {12-photos.length} nova(s)</small><input type="file" accept="image/*" multiple onChange={e=>{const files=Array.from(e.target.files||[]);void addPhotos(files);e.currentTarget.value=''}}/></label>}
@@ -841,7 +847,7 @@ function ProductDetail({product,data,calc,readOnly,onClose,onSale,onExpense,onSa
     </section>
 
     <section className="cp-detail-section">
-      <div className="cp-section-head"><div><span>DADOS DO PRODUTO</span><h2>Informações básicas</h2></div>{!readOnly&&<button onClick={()=>setEditingInfo(v=>!v)}><Pencil size={14}/>{editingInfo?'Cancelar':'Editar'}</button>}</div>
+      <div className="cp-section-head"><div><span>DADOS DO PRODUTO</span><h2>Informações básicas</h2></div><button onClick={()=>readOnly?onBlocked():setEditingInfo(v=>!v)}><Pencil size={14}/>{editingInfo?'Cancelar':'Editar'}</button></div>
       {editingInfo?<div className="cp-inline-edit cp-product-edit-grid">
         <Field label="Nome" full><input value={name} onChange={e=>setName(e.target.value)}/></Field>
         <Field label="Categoria informada"><input value={category} onChange={e=>setCategory(e.target.value)} placeholder="Ex.: eletrônicos"/></Field>
@@ -859,10 +865,10 @@ function ProductDetail({product,data,calc,readOnly,onClose,onSale,onExpense,onSa
     </section>
 
     <div className="cp-detail-numbers"><div><span>Custo por un.</span><b>{product.cost_basis_known?money.format(product.purchase_unit_cost):'Não informado'}</b></div><div><span>Custo real</span><b>{product.cost_basis_known?money.format(cost):'Sem base'}</b></div><div><span>Lucro possível</span><b className={potential!==null&&potential>=0?'positive':''}>{potential===null?'—':money.format(potential)}</b></div><div><span>Tempo no estoque</span><b>{daysSince(product.purchase_date)} dias</b></div></div>
-    {!readOnly&&<div className="cp-detail-actions">{product.quantity_available>0&&<button className="cp-primary" onClick={onSale}><Banknote/> Registrar venda</button>}<button className="cp-secondary" onClick={onExpense}><Plus/> Adicionar gasto</button></div>}
+    <div className="cp-detail-actions">{product.quantity_available>0&&<button className="cp-primary" onClick={onSale}><Banknote/> Registrar venda</button>}<button className="cp-secondary" onClick={onExpense}><Plus/> Adicionar gasto</button></div>
 
     <section className="cp-detail-section">
-      <div className="cp-section-head"><div><span>ANÚNCIO</span><h2>Acompanhar a venda</h2></div>{!readOnly&&product.listing_status!=='sold'&&<button onClick={()=>setListingEditing(v=>!v)}>{listingEditing?'Cancelar':'Editar'}</button>}</div>
+      <div className="cp-section-head"><div><span>ANÚNCIO</span><h2>Acompanhar a venda</h2></div>{product.listing_status!=='sold'&&<button onClick={()=>readOnly?onBlocked():setListingEditing(v=>!v)}>{listingEditing?'Cancelar':'Editar'}</button>}</div>
       {listingEditing?<div className="cp-listing-editor"><ListingSetup isListed={isListed} setIsListed={setIsListed} channels={channels} setChannels={setChannels} listingDate={listingDate} setListingDate={setListingDate}/>{isListed&&<Field label="Preço anunciado" full><MoneyInput value={listed} setValue={setListed} placeholder="0,00"/></Field>}<button className="cp-primary" disabled={data.busy} onClick={()=>void saveListing()}>{data.busy?'Salvando...':'Salvar anúncio'}</button></div>:<div className={listingDue?'cp-listing-status-card is-due':'cp-listing-status-card'}>
         <span className="cp-listing-status-icon"><Megaphone/></span>
         <div><span>{product.listing_status==='listed'?'ANUNCIADO':product.listing_status==='sold'?'VENDIDO':'NÃO ANUNCIADO'}</span><b>{product.listing_status==='listed'?(product.listing_channels.join(' · ')||'Plataforma não informada'):product.listing_status==='sold'?'Venda concluída':'Esse produto ainda não está sendo acompanhado'}</b>{product.listing_status==='listed'&&<small>{listingDays} dia(s) no ar · {listingDue?'revisão pendente':'próxima revisão '+new Date((product.listing_next_checkin_at||localDate())+'T12:00:00').toLocaleDateString('pt-BR')}</small>}</div>
@@ -871,9 +877,10 @@ function ProductDetail({product,data,calc,readOnly,onClose,onSale,onExpense,onSa
       {checkins.length>0&&<div className="cp-checkin-history"><span>Últimas revisões</span>{checkins.slice(0,3).map(item=><div key={item.id}><b>{item.result==='refreshed'?'Anúncio renovado':item.result==='price_lowered'?'Preço reduzido':item.result==='good'?'Anúncio indo bem':'Mantido por mais 5 dias'}</b><small>{new Date(item.checkin_date+'T12:00:00').toLocaleDateString('pt-BR')}{item.new_price?' · '+money.format(item.new_price):''}</small></div>)}</div>}
     </section>
 
-    <section className="cp-detail-section"><div className="cp-section-head"><div><span>PREÇO DE VENDA</span><h2>Quanto você quer fazer voltar</h2></div>{!readOnly&&<button onClick={()=>setEditing(v=>!v)}>{editing?'Cancelar':'Editar'}</button>}</div>{editing?<div className="cp-inline-edit"><Field label="Preço anunciado"><MoneyInput value={listed} setValue={setListed} placeholder="0,00"/></Field><Field label="Preço mínimo"><MoneyInput value={minimum} setValue={setMinimum} placeholder="0,00"/></Field><button className="cp-primary" disabled={data.busy} onClick={()=>void savePrices()}>Salvar preços</button></div>:<div className="cp-price-line"><div><span>Anunciado</span><b>{product.listed_price===null?'Não informado':money.format(product.listed_price)}</b></div><div><span>Mínimo</span><b>{product.minimum_price===null?'Não informado':money.format(product.minimum_price)}</b></div></div>}</section>
+    <section className="cp-detail-section"><div className="cp-section-head"><div><span>PREÇO DE VENDA</span><h2>Quanto você quer fazer voltar</h2></div><button onClick={()=>readOnly?onBlocked():setEditing(v=>!v)}>{editing?'Cancelar':'Editar'}</button></div>{editing?<div className="cp-inline-edit"><Field label="Preço anunciado"><MoneyInput value={listed} setValue={setListed} placeholder="0,00"/></Field><Field label="Preço mínimo"><MoneyInput value={minimum} setValue={setMinimum} placeholder="0,00"/></Field><button className="cp-primary" disabled={data.busy} onClick={()=>void savePrices()}>Salvar preços</button></div>:<div className="cp-price-line"><div><span>Anunciado</span><b>{product.listed_price===null?'Não informado':money.format(product.listed_price)}</b></div><div><span>Mínimo</span><b>{product.minimum_price===null?'Não informado':money.format(product.minimum_price)}</b></div></div>}</section>
     <section className="cp-detail-section"><div className="cp-section-head"><div><span>CUSTOS EXTRAS</span><h2>O que aumentou o custo real</h2></div></div>{expenses.length?<div className="cp-expense-list">{expenses.map(e=><div key={e.id}><span><Tag size={15}/>{expenseLabel(e.expense_type)+(e.description?' · '+e.description:'')}</span><b>{money.format(e.amount)}</b></div>)}</div>:<p className="cp-muted">Nenhum gasto extra registrado neste produto.</p>}</section>
 
+    {readOnly&&<section className="cp-detail-danger"><div><Trash2/><div><b>Excluir produto</b><p>Seu plano precisa estar ativo para alterar o estoque.</p></div></div><button className="cp-danger-button" onClick={onBlocked}>Excluir produto</button></section>}
     {!readOnly&&<section className="cp-detail-danger">
       <div><Trash2/><div><b>Excluir produto do estoque</b><p>{hasSaleHistory?'Este produto possui venda registrada e o histórico financeiro precisa ser preservado.':'Use apenas se o cadastro estiver errado ou se você realmente quiser remover o item e seus movimentos vinculados.'}</p></div></div>
       {!hasSaleHistory&&!confirmDelete&&<button className="cp-danger-button" onClick={()=>setConfirmDelete(true)}>Excluir produto</button>}
