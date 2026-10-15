@@ -1,0 +1,31 @@
+.cp-daytrial-layer{position:fixed;inset:0;z-index:12000;background:rgba(1,8,19,.92);backdrop-filter:blur(12px);display:flex;align-items:center;justify-content:center;padding:max(12px,env(safe-area-inset-top)) 12px max(12px,env(safe-area-inset-bottom));color:#f5f9ff;font-family:inherit}
+.cp-daytrial-card{display:flex;flex-direction:column;width:min(100%,505px);max-height:100%;min-height:0;overflow:hidden;background:radial-gradient(ellipse at 80% 2%,rgba(37,154,255,.20),transparent 45%),linear-gradient(158deg,#112a4c,#08182e 55%,#07182b);border:1px solid rgba(133,201,255,.31);border-radius:27px;box-shadow:0 34px 100px #000a}
+.cp-daytrial-top{display:flex;align-items:center;justify-content:space-between;padding:19px 23px;border-bottom:1px solid #ffffff12;flex-shrink:0}
+.cp-daytrial-brand{font-size:18px;font-weight:900;letter-spacing:.015em}.cp-daytrial-brand span{color:#3dafff}
+.cp-daytrial-top button{width:36px;height:36px;display:grid;place-items:center;border:1px solid #bedfff27;border-radius:11px;color:#dbeeff;background:#ffffff0a}
+.cp-daytrial-content{overflow-y:auto;min-height:0;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;padding:21px 23px 18px;scrollbar-width:thin}
+.cp-daytrial-label{display:inline-flex;align-items:center;gap:7px;color:#8ddbff;font-size:11px;font-weight:850;letter-spacing:.085em}
+.cp-daytrial-number{display:flex;gap:21px;align-items:center;margin:14px 0 15px}
+.cp-daytrial-number>b{font-family:Manrope,system-ui,sans-serif;font-size:clamp(70px,18vw,92px);line-height:.98;letter-spacing:-.1em;background:linear-gradient(145deg,#fff,#4baaff);background-clip:text;-webkit-background-clip:text;color:transparent}
+.cp-daytrial-number>b span{font-size:.45em;letter-spacing:-.05em}
+.cp-daytrial-number>span{font-size:13px;color:#c3dbf6;font-weight:650;line-height:1.45}
+.cp-daytrial-content h2{margin:0 0 12px;font:850 clamp(25px,5vw,34px)/1.18 Manrope,system-ui,sans-serif;letter-spacing:-.052em}
+.cp-daytrial-content h2 em{font-style:normal;color:#65bcff}
+.cp-daytrial-content>p{margin:0 0 19px;color:#c2d6ed;font-size:13px;line-height:1.6}
+.cp-daytrial-benefits{display:grid;gap:8px}
+.cp-daytrial-benefits>div{display:flex;align-items:center;gap:13px;padding:11px 13px;border:1px solid rgba(153,199,246,.14);background:#ffffff09;border-radius:14px}
+.cp-daytrial-benefits>div>svg:first-child{color:#6fc7ff;flex-shrink:0}
+.cp-daytrial-benefits>div>svg:last-child{margin-left:auto;color:#47d8a2;flex-shrink:0}
+.cp-daytrial-benefits>div>span{font-size:13px;font-weight:800;line-height:1.25}.cp-daytrial-benefits small{font-weight:500;color:#b3cbe5;font-size:11px}
+.cp-daytrial-expiration{margin-top:14px;display:flex;align-items:flex-start;gap:12px;padding:13px;border:1px solid #52aeff4d;border-radius:14px;background:rgba(29,114,198,.14)}
+.cp-daytrial-expiration>svg{color:#8acfff;flex-shrink:0}
+.cp-daytrial-expiration b{display:block;font-size:12px;line-height:1.4}
+.cp-daytrial-expiration span{display:block;margin-top:5px;font-size:11px;line-height:1.5;color:#c5d9ed}
+.cp-daytrial-actions{flex-shrink:0;padding:15px 23px max(20px,env(safe-area-inset-bottom));border-top:1px solid #ffffff18;background:#06182c;display:grid;gap:11px}
+.cp-daytrial-continue{display:flex;align-items:center;justify-content:center;gap:12px;background:linear-gradient(115deg,#0b7de8,#36b1ff);color:#fff;border:1px solid #a8e2ff74;box-shadow:0 9px 25px #007de440;border-radius:14px;min-height:55px;font-weight:900;font-size:14px;letter-spacing:.016em}
+.cp-daytrial-continue:disabled{opacity:.6}
+.cp-daytrial-trust{display:flex;align-items:center;justify-content:center;gap:6px;color:#a9c7e4;font-size:11px;text-align:center;line-height:1.4}
+.cp-daytrial-actions>p{color:#ffcbcb;font-size:12px;margin:0}
+@media(max-width:640px){.cp-daytrial-card{border-radius:22px}.cp-daytrial-top{padding:14px 17px}.cp-daytrial-content{padding:17px 17px 13px}.cp-daytrial-actions{padding:13px 17px max(14px,env(safe-area-inset-bottom))}.cp-daytrial-number{margin:10px 0 13px}.cp-daytrial-content>p{margin-bottom:15px}.cp-daytrial-benefits>div{padding:9px 11px}.cp-daytrial-benefits{gap:7px}}
+@media(max-height:710px){.cp-daytrial-content{padding-top:12px}.cp-daytrial-number{margin:6px 0 9px}.cp-daytrial-number>b{font-size:65px}.cp-daytrial-content h2{font-size:24px}}
+@media(prefers-reduced-motion:reduce){.cp-daytrial-continue{transition:none}}
