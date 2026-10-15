@@ -132,3 +132,146 @@
   .cp-opp-home-copy b{font-size:16px}
   .cp-opp-home-copy em{font-size:11px}
 }
+
+
+/* PATCH 2026-10-15: modais independentes do cabeçalho e do dock.
+   Os diálogos usam createPortal(document.body) para escapar do stacking context do .cp-main. */
+.cp-opp-modal-layer{
+  position:fixed!important;
+  inset:0!important;
+  z-index:12000!important;
+  width:100vw;
+  height:100dvh;
+  min-height:0;
+  padding:max(12px,env(safe-area-inset-top)) 12px max(12px,env(safe-area-inset-bottom));
+  align-items:center;
+  justify-content:center;
+  background:rgba(2,9,22,.88)!important;
+  backdrop-filter:blur(11px);
+  -webkit-backdrop-filter:blur(11px);
+  overscroll-behavior:contain;
+}
+.cp-opp-modal{
+  box-sizing:border-box;
+  max-width:490px;
+  max-height:100%;
+  min-height:0;
+  border:1px solid color-mix(in srgb,var(--cp-accent-light) 24%,var(--cp-line-strong));
+  box-shadow:0 28px 85px rgba(0,0,0,.55);
+}
+/* Modal de administração: título/fechar fixos, conteúdo central rolável, salvar sempre visível. */
+.cp-opp-modal.cp-opp-edit{
+  display:flex!important;
+  flex-direction:column!important;
+  width:min(100%,520px)!important;
+  height:min(92dvh,840px)!important;
+  max-height:100%!important;
+  min-height:0!important;
+  padding:0!important;
+  overflow:hidden!important;
+  border-radius:24px!important;
+  background:var(--cp-panel)!important;
+}
+.cp-opp-edit-header{
+  flex-shrink:0;
+  min-height:0;
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:13px;
+  padding:22px 22px 17px;
+  background:linear-gradient(135deg,color-mix(in srgb,var(--cp-accent) 12%,var(--cp-panel)),var(--cp-panel));
+  border-bottom:1px solid var(--cp-line-strong);
+}
+.cp-opp-edit-header>div{min-width:0}
+.cp-opp-edit-header h2{
+  font-family:Manrope,sans-serif;
+  font-size:clamp(21px,4vw,27px)!important;
+  letter-spacing:-.035em;
+  line-height:1.15;
+  margin:6px 0 7px!important;
+  padding:0;
+}
+.cp-opp-edit-header p{
+  margin:0!important;
+  font-size:12px!important;
+  line-height:1.45!important;
+  color:var(--cp-text-2)!important;
+}
+.cp-opp-edit-close{
+  display:grid;
+  place-items:center;
+  flex-shrink:0;
+  width:41px;
+  height:41px;
+  border-radius:12px;
+  border:1px solid var(--cp-line-strong);
+  background:var(--cp-panel-2);
+  color:var(--cp-text);
+  cursor:pointer;
+}
+.cp-opp-modal.cp-opp-edit .cp-opp-form{
+  flex:1 1 auto;
+  display:flex!important;
+  flex-direction:column;
+  gap:0!important;
+  min-height:0;
+  overflow:hidden;
+}
+.cp-opp-form-scroll{
+  padding:20px 22px;
+  flex:1 1 auto;
+  min-height:0;
+  display:grid;
+  align-content:start;
+  gap:17px;
+  overflow-y:auto;
+  overflow-x:hidden;
+  overscroll-behavior:contain;
+  scrollbar-width:thin;
+  scrollbar-color:rgba(90,161,238,.6) transparent;
+  -webkit-overflow-scrolling:touch;
+}
+.cp-opp-edit-footer{
+  flex:0 0 auto;
+  display:grid;
+  gap:10px;
+  padding:15px 22px max(17px,env(safe-area-inset-bottom));
+  background:var(--cp-panel);
+  border-top:1px solid var(--cp-line-strong);
+  box-shadow:0 -12px 25px rgba(0,0,0,.05);
+}
+.cp-opp-form-scroll label{gap:8px!important;line-height:1.35}
+.cp-opp-form-scroll input:not([type=file]):not([type=checkbox]),
+.cp-opp-form-scroll textarea,.cp-opp-form-scroll select{
+  min-height:46px;
+  font-size:16px!important;
+  border-radius:12px;
+}
+.cp-opp-form-scroll textarea{min-height:93px}
+.cp-opp-edit-footer .cp-opp-save{
+  min-height:53px;
+  border-radius:14px;
+  font-size:14px;
+}
+.cp-opp-edit-footer .cp-opp-form-error{font-size:12px}
+.cp-opp-form-scroll .cp-opp-upload{min-height:49px}
+@media(max-width:640px){
+  .cp-opp-modal-layer{
+    padding:max(9px,env(safe-area-inset-top)) 9px max(9px,env(safe-area-inset-bottom));
+  }
+  .cp-opp-modal.cp-opp-edit{
+    height:calc(100dvh - max(18px,env(safe-area-inset-top)) - max(18px,env(safe-area-inset-bottom)))!important;
+    max-height:100%!important;
+    border-radius:20px!important;
+  }
+  .cp-opp-edit-header{padding:17px 16px 15px}
+  .cp-opp-edit-header h2{font-size:23px!important}
+  .cp-opp-form-scroll{padding:17px 16px;gap:15px}
+  .cp-opp-edit-footer{padding:13px 16px max(13px,env(safe-area-inset-bottom))}
+  .cp-opp-form-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+}
+@media(max-width:360px){
+ .cp-opp-edit-header p{font-size:11px!important}
+ .cp-opp-form-grid{grid-template-columns:1fr}
+}
