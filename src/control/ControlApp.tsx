@@ -16,6 +16,7 @@ import {CinematicIntro} from './CinematicIntro'
 import {BriqueGuidePage} from './BriqueGuidePage'
 import {PersonalRankingCard,PersonalRankingPage} from './PersonalRanking'
 import {FeedbackPrompt} from './FeedbackPrompt'
+import './control-home-refinement.css'
 import type {CashEntry,ControlView,Product,Sale} from './types'
 
 type Data=ReturnType<typeof useControlData>
