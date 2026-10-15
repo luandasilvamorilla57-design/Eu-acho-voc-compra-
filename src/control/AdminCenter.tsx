@@ -1,11 +1,12 @@
 import {useEffect,useMemo,useState} from 'react'
 import {
-  ArrowLeft,Boxes,ChevronRight,CircleDollarSign,Mail,Package,ReceiptText,
+  ArrowLeft,Boxes,ChevronRight,CircleDollarSign,Mail,Package,ReceiptText,Link2,RefreshCw,
   MessageSquareText,Search,ShieldCheck,Star,Store,UsersRound,WalletCards
 } from 'lucide-react'
 import {supabase} from '../lib/supabase'
 import type {CashEntry,ControlAccount,ControlSettings,Product,Sale,SaleItem} from './types'
 import {feedbackSummary,StarRating,type FeedbackRow} from './FeedbackPrompt'
+import './admin-asaas-test.css'
 
 const db=supabase as any
 const money=new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL'})
@@ -36,6 +37,33 @@ export function AdminCenter({onBack}:{onBack:()=>void}){
   const [error,setError]=useState<string|null>(null)
   const [query,setQuery]=useState('')
   const [selected,setSelected]=useState<string|null>(null)
+  const [asaasChecking,setAsaasChecking]=useState(false)
+  const [asaasResult,setAsaasResult]=useState<{ok:boolean;message:string}|null>(null)
+
+  async function testAsaasSandbox(){
+    if(asaasChecking)return
+    setAsaasChecking(true)
+    setAsaasResult(null)
+    try{
+      const {data,error}=await supabase.functions.invoke('controle-asaas-testar',{body:{}})
+      if(error)throw error
+      if(data?.ok===true){
+        setAsaasResult({ok:true,message:'Conexão confirmada! O CONTROLE+ consegue consultar o Asaas Sandbox.'})
+      }else{
+        const code=String(data?.code||'UNKNOWN')
+        const detail=code==='ASAAS_SANDBOX_KEY_MISSING'?'O segredo ASAAS_SANDBOX_API_KEY não foi encontrado no Supabase.':
+          code==='ASAAS_REJECTED'?('Asaas respondeu HTTP '+String(data?.http_status||'?')+'. Confira a validade da chave, o ambiente Sandbox e a configuração de segurança da API.'):
+          code==='TIMEOUT'?'Tempo limite esgotado. Tente novamente.':
+          code==='NETWORK_ERROR'?'Não foi possível alcançar o Asaas pelo servidor.':
+          'Não conseguimos confirmar a conexão. Código: '+code
+        setAsaasResult({ok:false,message:detail})
+      }
+    }catch{
+      setAsaasResult({ok:false,message:'Não foi possível executar a verificação. Confirme que a sessão master está ativa e tente novamente.'})
+    }finally{
+      setAsaasChecking(false)
+    }
+  }
 
   useEffect(()=>{
     let alive=true
@@ -180,6 +208,20 @@ export function AdminCenter({onBack}:{onBack:()=>void}){
         <div><span><Boxes/> Estoque global</span><strong>{number.format(totals.stockUnits)} un.</strong><small>todas as contas</small></div>
         <div><span><CircleDollarSign/> Faturamento</span><strong>{money.format(totals.revenue)}</strong><small>vendas registradas</small></div>
         <div><span><WalletCards/> Caixa somado</span><strong>{money.format(totals.cash)}</strong><small>saldo estimado</small></div>
+      </section>
+
+      <section className="cp-asaas-admin-test" aria-label="Integração de pagamento Asaas">
+        <div className="cp-asaas-admin-info">
+          <span className="cp-asaas-admin-kicker"><Link2 size={15}/> INTEGRAÇÃO DE PAGAMENTOS</span>
+          <h2>Asaas Sandbox</h2>
+          <p>Verifique se a chave armazenada no Supabase funciona. Teste seguro, sem cobrar ninguém e sem acessar dados financeiros dos usuários.</p>
+          <span className="cp-asaas-admin-environment">AMBIENTE DE TESTES · R$ 18,90 / MÊS (FUTURO PLANO)</span>
+        </div>
+        <button type="button" className="cp-asaas-admin-check" disabled={asaasChecking} onClick={()=>void testAsaasSandbox()}>
+          <RefreshCw size={18} className={asaasChecking?'cp-asaas-spin':''}/>{asaasChecking?'Verificando conexão...':'TESTAR CONEXÃO'}
+        </button>
+        {asaasResult&&<p role="status" className={asaasResult.ok?'cp-asaas-admin-status is-ok':'cp-asaas-admin-status is-error'}>{asaasResult.message}</p>}
+        <small>O checkout atual do Mercado Pago permanece inalterado até a aprovação dos testes.</small>
       </section>
 
       <section className="cp-admin-feedback-block">
