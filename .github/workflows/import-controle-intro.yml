@@ -1,0 +1,33 @@
+name: Importar video original CONTROLE+
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/import-controle-intro.yml
+
+permissions:
+  contents: write
+
+jobs:
+  import-original-video:
+    if: "github.event.head_commit.message == 'chore: stage official cinematic video importer'"
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - name: Transferir vídeo para a pasta pública do aplicativo
+        env:
+          INTRO_SOURCE_URL: "https://d2jqrm6oza8nb6.cloudfront.net/datasets/b96895fe-dded-41e4-86f1-ed52d9a133e0.mp4?_jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJrZXlIYXNoIjoiNTM2ODFhZDRiMWFkMjkwMiIsImJ1Y2tldCI6InJ1bndheS1kYXRhc2V0cyIsInN0YWdlIjoicHJvZCIsImV4cCI6MTc5MjE5MjM0MH0.4-fmDjlBd1Lmxn8vt7PFtq3-zBkv9ddOalULp7cxEXA"
+        run: |
+          set -euo pipefail
+          mkdir -p public/videos
+          curl --fail --location --retry 3 --connect-timeout 20 --max-time 240 --silent --show-error "$INTRO_SOURCE_URL" --output public/videos/controle-plus-apresentacao.mp4
+          test "$(wc -c < public/videos/controle-plus-apresentacao.mp4)" -gt 10000000
+          file public/videos/controle-plus-apresentacao.mp4
+          git config user.name 'CONTROLE+ automation'
+          git config user.email 'github-actions[bot]@users.noreply.github.com'
+          git add public/videos/controle-plus-apresentacao.mp4
+          git commit -m 'chore(assets): add official 30s cinematic welcome video'
+          git push origin HEAD:main
