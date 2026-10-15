@@ -36,7 +36,7 @@ export function CinematicIntro({onDone}:{userId:string;isAdmin:boolean;onDone:()
     savingRef.current=true
     setEnded(true)
     setError('')
-    const result=await supabase.rpc('control_mark_intro_watched')
+    const result=await (supabase as any).rpc('control_mark_intro_watched')
     if(result.error||result.data!==true){
       savingRef.current=false
       setError('Não foi possível concluir sua entrada. Verifique a conexão e tente novamente.')
