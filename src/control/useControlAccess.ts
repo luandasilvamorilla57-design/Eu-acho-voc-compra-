@@ -79,6 +79,27 @@ export function useControlAccess(userId:string){
     return()=>{alive=false}
   },[refresh])
 
+  // A expiração é verificada pelo servidor; atualize o estado também sem recarregar o PWA.
+  // Durante o teste, atualiza o indicador a cada minuto e verifica imediatamente ao vencer.
+  useEffect(()=>{
+    if(access?.access_state!=='trial'||!access.trial_ends_at)return
+    const remaining=new Date(access.trial_ends_at).getTime()-Date.now()
+    const delay=Math.max(1000,Math.min(60000,remaining+1000))
+    const id=window.setTimeout(()=>{void refresh(false)},delay)
+    return()=>window.clearTimeout(id)
+  },[access?.access_state,access?.trial_ends_at,access?.can_write,refresh])
+
+  // O celular pode ficar em segundo plano depois das 24 horas.
+  useEffect(()=>{
+    const recheck=()=>{if(document.visibilityState==='visible')void refresh(false)}
+    document.addEventListener('visibilitychange',recheck)
+    window.addEventListener('focus',recheck)
+    return()=>{
+      document.removeEventListener('visibilitychange',recheck)
+      window.removeEventListener('focus',recheck)
+    }
+  },[refresh])
+
   const subscribe=useCallback(async()=>{
     if(access?.is_admin&&!access.can_write){
       setError('Sua conta master está em simulação de acesso expirado. Reative o acesso administrativo ao finalizar o teste.')
