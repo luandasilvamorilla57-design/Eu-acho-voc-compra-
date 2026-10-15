@@ -51,8 +51,17 @@ export function AdminCenter({onBack}:{onBack:()=>void}){
         setAsaasResult({ok:true,message:'Conexão confirmada! O CONTROLE+ consegue consultar o Asaas Sandbox.'})
       }else{
         const code=String(data?.code||'UNKNOWN')
+        const asaasError=String(data?.asaas_error_code||'')
+        const errorHints:Record<string,string>={
+          invalid_environment:'A chave pertence ao ambiente errado. Use uma chave criada no Asaas Sandbox.',
+          access_token_not_found:'O Asaas não recebeu o cabeçalho de autenticação. Verifique a integração.',
+          invalid_access_token_format:'Formato inválido. No Supabase, cole o valor completo da chave, incluindo o símbolo $ e sem aspas.',
+          invalid_access_token:'Chave inválida, expirada ou revogada. Confira a chave ativa no Asaas Sandbox.'
+        }
         const detail=code==='ASAAS_SANDBOX_KEY_MISSING'?'O segredo ASAAS_SANDBOX_API_KEY não foi encontrado no Supabase.':
-          code==='ASAAS_REJECTED'?('Asaas respondeu HTTP '+String(data?.http_status||'?')+'. Confira a validade da chave, o ambiente Sandbox e a configuração de segurança da API.'):
+          code==='ASAAS_WRONG_ENVIRONMENT'?'Você salvou uma chave de PRODUÇÃO no segredo do Sandbox. Use uma chave de testes, começando por $aact_hmlg_.':
+          code==='ASAAS_KEY_FORMAT'?'O valor salvo não tem o formato de chave do Sandbox. Verifique se começa por $aact_hmlg_, sem aspas e sem caracteres extras.':
+          code==='ASAAS_REJECTED'?('Asaas respondeu HTTP '+String(data?.http_status||'?')+'. '+(errorHints[asaasError]||'Verifique a validade da chave e as regras de segurança da conta no Asaas.')):
           code==='TIMEOUT'?'Tempo limite esgotado. Tente novamente.':
           code==='NETWORK_ERROR'?'Não foi possível alcançar o Asaas pelo servidor.':
           'Não conseguimos confirmar a conexão. Código: '+code
