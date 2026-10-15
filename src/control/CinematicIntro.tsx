@@ -3,7 +3,7 @@ import {ArrowRight,Play,Volume2} from 'lucide-react'
 import {supabase} from '../lib/supabase'
 import './intro-video.css'
 
-const VIDEO_SRC='/videos/controle-plus-apresentacao.mp4'
+const VIDEO_SRC='/videos/controle-plus-apresentacao.mp4?v=2'
 
 export function CinematicIntro({onDone}:{userId:string;isAdmin:boolean;onDone:()=>void}){
   const videoRef=useRef<HTMLVideoElement>(null)
