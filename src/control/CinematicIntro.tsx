@@ -1,5 +1,5 @@
 import {useRef,useState} from 'react'
-import {ArrowRight,Play,Volume2} from 'lucide-react'
+import {ArrowRight,Play} from 'lucide-react'
 import {supabase} from '../lib/supabase'
 import './intro-video.css'
 
@@ -58,12 +58,11 @@ export function CinematicIntro({onDone}:{userId:string;isAdmin:boolean;onDone:()
       onError={()=>{setVideoError(true);setError('Não foi possível carregar o comercial.')}}/>
     <div className={started?'cp-intro-shade is-playing':'cp-intro-shade'}/>
     {!started&&!ended&&!videoError&&<div className="cp-intro-welcome">
-      <button className="cp-intro-start" type="button" disabled={starting} onClick={()=>void playWithSound()}>
+      <button className="cp-intro-start" type="button" disabled={starting} onClick={()=>void playWithSound()} aria-label="ACESSAR FERRAMENTA">
         <span className="cp-intro-play-icon"><Play size={24} fill="currentColor"/></span>
         <span>ACESSAR FERRAMENTA</span>
         <ArrowRight size={21}/>
       </button>
-      <span className="cp-intro-sound-hint"><Volume2 size={16}/> Toque para iniciar a apresentação com som</span>
     </div>}
     {ended&&<div className="cp-intro-finish"><strong>CONTROLE<span>+</span></strong><p>Preparando sua ferramenta...</p></div>}
     {error&&<div className="cp-intro-error" role="alert"><p>{error}</p>
