@@ -23,6 +23,7 @@ export type ControlSettings={
   stock_alert_days:number
   onboarding_completed:boolean
   intro_video_watched_at:string|null
+  trial_welcome_seen_at:string|null
   created_at:string
   updated_at:string
 }
