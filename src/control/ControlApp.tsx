@@ -13,6 +13,7 @@ import {useControlAccess} from './useControlAccess'
 import {ActivePlanCard,SubscriptionGate,TrialBanner,TrialInfoModal} from './BillingUI'
 import {ExpiredAccessModal} from './ExpiredAccessModal'
 import {CinematicIntro} from './CinematicIntro'
+import {OpportunitiesPage} from './OpportunitiesPage'
 import {BriqueGuidePage} from './BriqueGuidePage'
 import {PersonalRankingCard,PersonalRankingPage} from './PersonalRanking'
 import {FeedbackPrompt} from './FeedbackPrompt'
@@ -96,7 +97,7 @@ export function ControlApp({userId,email}:{userId:string;email?:string}){
     requireWrite(()=>setModal(next))
   }
   function openView(next:ControlView){
-    if(canWrite||['home','stock','sales','cash','reports','backup','guide','ranking','admin'].includes(next)){
+    if(canWrite||['home','stock','sales','cash','reports','backup','guide','ranking','opportunities','admin'].includes(next)){
       setView(next)
       return
     }
@@ -134,6 +135,7 @@ export function ControlApp({userId,email}:{userId:string;email?:string}){
         {canWrite&&view==='closures'&&<ClosuresPage data={data} onBack={()=>setView('manage')}/>}
         {view==='backup'&&<BackupPage data={data} onBack={()=>setView('home')}/>}
         {view==='guide'&&<BriqueGuidePage onBack={()=>setView(canWrite?'manage':'home')}/>}
+        {view==='opportunities'&&<OpportunitiesPage isAdmin={data.isAdmin} onBack={()=>setView('home')}/>}
         {view==='ranking'&&<PersonalRankingPage products={data.products} sales={data.sales} saleItems={data.saleItems} onBack={()=>setView('home')}/>}
         {view==='admin'&&data.isAdmin&&<AdminCenter onBack={()=>setView('home')}/>}
       </>}
@@ -385,6 +387,8 @@ function HomePage({data,calc,onOpenProduct,onView,onAction,onCheckListing}:{data
       <button onClick={()=>onAction('expense')}><span><ArrowDownRight/></span><b>Adicionar gasto</b><small>Reparo, taxa ou transporte</small></button>
       <button onClick={()=>onView('receivables')}><span><ReceiptText/></span><b>A receber</b><small>Parcelas e valores pendentes</small></button>
     </section>
+
+    <button className="cp-opp-home-link" type="button" onClick={()=>onView('opportunities')}><span className="cp-opp-home-icon"><Sparkles size={24}/></span><span className="cp-opp-home-copy"><small>SELEÇÃO CONTROLE+</small><b>Oportunidades para revender</b><em>Ideias de produtos para começar com pouco e avaliar novos negócios.</em></span><ChevronRight size={22}/></button>
 
     <section className={'cp-smart-card cp-smart-card--'+guide.tone}>
       <div className="cp-smart-icon">{guide.tone==='warn'?<AlertTriangle/>:guide.tone==='brand'?<Package/>:<Check/>}</div>
