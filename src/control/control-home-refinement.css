@@ -1,0 +1,234 @@
+/* CONTROLE+ • acabamento premium da Home, sem remover dados ou ações.
+   Escopo restrito à Home; mantém os 4 indicadores, vendas do dia e barra de capital. */
+
+.cp-home-app{
+  --cp-home-readable:color-mix(in srgb,var(--cp-text-2) 91%,white 9%);
+}
+.cp-home-app .cp-app-greeting{
+  gap:14px;
+  margin-bottom:16px;
+}
+.cp-home-app .cp-app-greeting>div>span,
+.cp-home-app .cp-app-greeting p{
+  color:var(--cp-text-2)!important;
+  opacity:.92;
+  line-height:1.4;
+}
+.cp-home-app .cp-app-greeting h1{
+  letter-spacing:-.045em;
+  line-height:1.1;
+}
+.cp-home-app .cp-register-main{
+  flex-shrink:0;
+  border-radius:14px!important;
+  box-shadow:0 11px 25px rgba(20,94,221,.20)!important;
+  transition:transform .18s ease,filter .18s ease;
+}
+.cp-home-app .cp-register-main:active{transform:scale(.98)!important}
+
+/* Caixa principal: mesmas métricas, densidade e hierarquia melhores. */
+.cp-home-app .cp-balance-app{
+  padding:23px!important;
+  margin-bottom:23px!important;
+  border-radius:25px;
+  border-color:rgba(164,211,255,.36)!important;
+  background:
+    radial-gradient(ellipse at 92% 3%,rgba(130,207,255,.20),transparent 33%),
+    linear-gradient(142deg,#102e5d 0%,#143f7a 53%,#1766bc 100%)!important;
+  box-shadow:0 21px 49px rgba(3,24,56,.27),inset 0 1px rgba(240,250,255,.12)!important;
+  animation:cp-refined-card-enter .45s both;
+}
+.cp-home-app .cp-balance-app-top{gap:12px}
+.cp-home-app .cp-balance-app-top>div{min-width:0}
+.cp-home-app .cp-balance-app-top span{
+  color:rgba(240,248,255,.86)!important;
+  font-weight:650;
+}
+.cp-home-app .cp-balance-app-top strong{
+  font-variant-numeric:tabular-nums;
+  letter-spacing:-.045em!important;
+  overflow-wrap:anywhere;
+}
+.cp-home-app .cp-balance-app-badge{
+  color:#e7f6ff!important;
+  background:rgba(233,249,255,.11);
+  border-color:rgba(230,247,255,.24);
+  font-weight:800;
+  flex-shrink:0;
+}
+.cp-home-app .cp-today-sales{
+  margin-top:16px;
+  padding:13px;
+  border-color:rgba(172,214,255,.22);
+  background:linear-gradient(145deg,rgba(3,22,53,.53),rgba(11,45,89,.34));
+  box-shadow:inset 0 1px rgba(255,255,255,.065),0 7px 22px rgba(1,14,36,.09);
+}
+.cp-home-app .cp-today-sales.is-empty{
+  padding:13px;
+}
+.cp-home-app .cp-today-sales-head>div>span{color:#92ddff}
+.cp-home-app .cp-today-sales-head>div>small{
+  color:rgba(235,244,255,.83);
+  line-height:1.45;
+  font-size:12px;
+}
+.cp-home-app .cp-today-sales-head>button{
+  min-height:39px;
+  padding:7px 11px;
+  border-radius:12px;
+  border-color:rgba(149,207,255,.30);
+  color:#caedff;
+  background:rgba(77,161,242,.12);
+  transition:background .2s ease,transform .2s ease;
+}
+.cp-home-app .cp-today-sales-head>button:active{transform:scale(.98)}
+.cp-home-app .cp-today-sales-metrics span,
+.cp-home-app .cp-today-sales-products small{color:rgba(235,245,255,.83)}
+.cp-home-app .cp-today-sales-metrics strong,
+.cp-home-app .cp-today-sales-products>div>strong{font-variant-numeric:tabular-nums}
+.cp-home-app .cp-balance-app-stats--four{
+  margin-top:14px!important;
+  border-radius:16px!important;
+  background:rgba(197,228,255,.15);
+}
+.cp-home-app .cp-balance-app-stats--four>div{
+  min-width:0;
+  padding:13px 12px!important;
+  background:rgba(8,28,61,.38);
+}
+.cp-home-app .cp-balance-app-stats--four span{
+  color:rgba(238,247,255,.82)!important;
+  font-size:11.5px!important;
+  line-height:1.35!important;
+}
+.cp-home-app .cp-balance-app-stats--four b{
+  color:#fff;
+  font-size:15px!important;
+  font-variant-numeric:tabular-nums;
+  line-height:1.3!important;
+  overflow-wrap:anywhere;
+}
+.cp-home-app .cp-capital-track{
+  height:6px;
+  margin-top:15px;
+  background:rgba(255,255,255,.16);
+}
+.cp-home-app .cp-capital-track i{background:linear-gradient(90deg,#7bd2ff,#b7eaff)}
+.cp-home-app .cp-capital-track em{background:rgba(220,237,255,.31)}
+.cp-home-app .cp-capital-track-labels{margin-top:9px}
+.cp-home-app .cp-capital-track-labels span{
+  color:rgba(234,245,255,.83);
+  font-size:11px!important;
+  font-weight:550;
+  font-variant-numeric:tabular-nums;
+}
+
+/* Atalhos: todos continuam disponíveis, sem disputar atenção com o saldo. */
+.cp-home-app .cp-quick-app{gap:11px!important;margin-bottom:25px!important}
+.cp-home-app .cp-quick-app button{
+  min-height:124px!important;
+  border-color:color-mix(in srgb,var(--cp-accent-light) 18%,var(--cp-line))!important;
+  border-radius:20px!important;
+  box-shadow:0 11px 27px rgba(1,16,40,.09)!important;
+  transition:transform .18s ease,border-color .18s ease,box-shadow .18s ease!important;
+}
+.cp-home-app .cp-quick-app button:hover,
+.cp-home-app .cp-quick-app button:focus-visible{
+  border-color:rgba(105,187,255,.48)!important;
+  box-shadow:0 14px 30px rgba(7,66,126,.16)!important;
+}
+.cp-home-app .cp-quick-app button:active{transform:scale(.985)!important}
+.cp-home-app .cp-quick-app b{
+  color:var(--cp-text);
+  letter-spacing:-.015em;
+  line-height:1.3!important;
+}
+.cp-home-app .cp-quick-app small{
+  color:var(--cp-text-2)!important;
+  line-height:1.4!important;
+}
+.cp-home-app .cp-smart-card{margin-bottom:33px!important}
+.cp-home-app .cp-smart-card p{color:var(--cp-text-2)!important}
+
+/* Acessibilidade e polimento do dock, sem mudar ações ou posições. */
+.cp-bottom .cp-bottom-inner{
+  border-color:color-mix(in srgb,var(--cp-accent-light) 13%,var(--cp-line-strong))!important;
+  box-shadow:0 15px 36px rgba(0,12,30,.22),inset 0 1px rgba(180,210,245,.07)!important;
+}
+.cp-bottom button{transition:color .18s ease,transform .18s ease}
+.cp-bottom button:focus-visible,
+.cp-home-app button:focus-visible{
+  outline:2px solid #77caff;
+  outline-offset:3px;
+}
+.cp-bottom button:active{transform:scale(.96)}
+.cp-bottom button.active{font-weight:750}
+.cp-bottom .cp-add-main{
+  box-shadow:0 11px 28px rgba(33,115,243,.35),inset 0 1px rgba(255,255,255,.19)!important;
+}
+
+@media(max-width:640px){
+  .cp-home-app .cp-app-greeting{margin-bottom:15px}
+  .cp-home-app .cp-balance-app{
+    padding:18px 16px!important;
+    margin-bottom:21px!important;
+    border-radius:23px;
+  }
+  .cp-home-app .cp-balance-app-top strong{
+    font-size:clamp(36px,9vw,48px)!important;
+    line-height:1.05;
+  }
+  .cp-home-app .cp-today-sales{
+    padding:12px;
+    margin-top:15px;
+    border-radius:15px;
+  }
+  .cp-home-app .cp-today-sales.is-empty{padding:12px}
+  .cp-home-app .cp-today-sales-head{gap:10px}
+  .cp-home-app .cp-today-sales-head>div>small{font-size:11.5px}
+  .cp-home-app .cp-today-sales-head>button{
+    font-size:11px;
+    min-height:37px;
+    padding:6px 9px;
+    white-space:nowrap;
+  }
+  .cp-home-app .cp-balance-app-stats--four{
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+    margin-top:13px!important;
+  }
+  .cp-home-app .cp-balance-app-stats--four>div{
+    min-height:69px!important;
+    padding:11px 10px!important;
+  }
+  .cp-home-app .cp-balance-app-stats--four span{font-size:11.5px!important}
+  .cp-home-app .cp-balance-app-stats--four b{font-size:14.5px!important}
+  .cp-home-app .cp-capital-track{margin-top:14px}
+  .cp-home-app .cp-quick-app{gap:9px!important;margin-bottom:24px!important}
+  .cp-home-app .cp-quick-app button{
+    min-height:109px!important;
+    padding:12px 11px!important;
+    column-gap:10px!important;
+  }
+  .cp-home-app .cp-quick-app b{font-size:14px!important}
+  .cp-home-app .cp-quick-app small{font-size:11px!important}
+}
+@media(max-width:385px){
+  .cp-home-app .cp-balance-app{padding:17px 13px!important}
+  .cp-home-app .cp-balance-app-top strong{font-size:clamp(32px,9vw,40px)!important}
+  .cp-home-app .cp-balance-app-badge{padding:6px 7px}
+  .cp-home-app .cp-today-sales-head{grid-template-columns:minmax(0,1fr)}
+  .cp-home-app .cp-today-sales-head>button{justify-self:start}
+  .cp-home-app .cp-balance-app-stats--four>div{padding:10px 8px!important}
+  .cp-home-app .cp-quick-app button{grid-template-columns:36px minmax(0,1fr)!important;padding:11px 9px!important}
+  .cp-home-app .cp-quick-app button>span{width:36px!important;height:36px!important}
+  .cp-home-app .cp-quick-app b{font-size:12.5px!important}
+  .cp-home-app .cp-quick-app small{font-size:10.5px!important}
+}
+@media(prefers-reduced-motion:reduce){
+  .cp-home-app .cp-balance-app{animation:none!important}
+  .cp-home-app button,.cp-bottom button{transition:none!important}
+}
+@keyframes cp-refined-card-enter{
+  from{opacity:.90;transform:translateY(7px)}
+  to{opacity:1;transform:translateY(0)}
+}
