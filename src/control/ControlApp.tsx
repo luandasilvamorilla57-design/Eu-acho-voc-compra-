@@ -112,7 +112,7 @@ export function ControlApp({userId,email}:{userId:string;email?:string}){
   if(data.loading||billing.loading)return <LoadingScreen/>
   if(!data.settings)return <div className="cp-fatal"><strong>Não conseguimos abrir o CONTROLE+.</strong><button onClick={()=>void data.load()}>Tentar novamente</button></div>
   if(!access)return <div className="cp-fatal"><strong>Não conseguimos validar o acesso da conta.</strong><button onClick={()=>void billing.refresh(true)}>Tentar novamente</button></div>
-  if(!introDismissed&&!data.settings.intro_video_watched_at)return <CinematicIntro userId={userId} isAdmin={data.isAdmin} onDone={()=>{setIntroDismissed(true);void data.load()}}/>
+  if(!introDismissed&&!data.settings.intro_video_watched_at&&(data.isAdmin||Date.parse(data.settings.created_at)>=Date.parse('2026-10-15T19:00:00Z')))return <CinematicIntro userId={userId} isAdmin={data.isAdmin} onDone={()=>{setIntroDismissed(true);void data.load()}}/>
   if(!data.settings.onboarding_completed&&canWrite)return <FirstRun data={data} email={email} theme={theme} onTheme={()=>setTheme(v=>v==='dark'?'light':'dark')}/>
 
   return <div className="cp-app" data-theme={theme}>
