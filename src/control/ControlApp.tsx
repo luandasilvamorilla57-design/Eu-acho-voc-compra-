@@ -11,6 +11,7 @@ import {AdminCenter} from './AdminCenter'
 import {InstallAppPrompt} from './InstallAppPrompt'
 import {useControlAccess} from './useControlAccess'
 import {ActivePlanCard,SubscriptionGate,TrialBanner,TrialInfoModal} from './BillingUI'
+import {ExpiredAccessModal} from './ExpiredAccessModal'
 import {BriqueGuidePage} from './BriqueGuidePage'
 import {PersonalRankingCard,PersonalRankingPage} from './PersonalRanking'
 import {FeedbackPrompt} from './FeedbackPrompt'
@@ -44,8 +45,10 @@ export function ControlApp({userId,email}:{userId:string;email?:string}){
   const [modal,setModal]=useState<Modal>(null)
   const [selected,setSelected]=useState<Product|null>(null)
   const [toast,setToast]=useState<string|null>(null)
-  const [readOnlyMode,setReadOnlyMode]=useState(false)
+  const [readOnlyMode,setReadOnlyMode]=useState(true)
   const [trialInfoOpen,setTrialInfoOpen]=useState(false)
+  const [expiredModalOpen,setExpiredModalOpen]=useState(false)
+  const [expiredModalShown,setExpiredModalShown]=useState(false)
   const [theme,setTheme]=useState<'dark'|'light'>(()=>{
     const saved=window.localStorage.getItem('controle-plus-theme')
     if(saved==='light'||saved==='dark')return saved
@@ -63,15 +66,21 @@ export function ControlApp({userId,email}:{userId:string;email?:string}){
     window.setTimeout(()=>setToast(null),2600)
   }
   const access=billing.access
-  const canWrite=Boolean(access?.can_write||access?.is_admin)
+  const canWrite=Boolean(access?.can_write)
 
   useEffect(()=>{
-    if(canWrite)setReadOnlyMode(false)
-  },[canWrite])
+    setReadOnlyMode(!canWrite)
+    if(access&&!canWrite&&!expiredModalShown){
+      setExpiredModalOpen(true)
+      setExpiredModalShown(true)
+    }
+    if(canWrite)setExpiredModalOpen(false)
+  },[access,canWrite,expiredModalShown])
 
   function requireWrite(action:()=>void){
     if(canWrite){action();return}
-    setReadOnlyMode(false)
+    setReadOnlyMode(true)
+    setExpiredModalOpen(true)
   }
   function openModal(next:Modal){
     if(next==='settings'||next===null){setModal(next);return}
@@ -82,7 +91,8 @@ export function ControlApp({userId,email}:{userId:string;email?:string}){
       setView(next)
       return
     }
-    setReadOnlyMode(false)
+    setReadOnlyMode(true)
+    setExpiredModalOpen(true)
   }
   function openListingCheckin(product:Product){
     requireWrite(()=>{
@@ -94,12 +104,12 @@ export function ControlApp({userId,email}:{userId:string;email?:string}){
   if(data.loading||billing.loading)return <LoadingScreen/>
   if(!data.settings)return <div className="cp-fatal"><strong>Não conseguimos abrir o CONTROLE+.</strong><button onClick={()=>void data.load()}>Tentar novamente</button></div>
   if(!access)return <div className="cp-fatal"><strong>Não conseguimos validar o acesso da conta.</strong><button onClick={()=>void billing.refresh(true)}>Tentar novamente</button></div>
-  if(!data.settings.onboarding_completed)return <FirstRun data={data} email={email} theme={theme} onTheme={()=>setTheme(v=>v==='dark'?'light':'dark')}/>
+  if(!data.settings.onboarding_completed&&canWrite)return <FirstRun data={data} email={email} theme={theme} onTheme={()=>setTheme(v=>v==='dark'?'light':'dark')}/>
 
   return <div className="cp-app" data-theme={theme}>
     <div className="cp-noise"/>
-    <TopBar business={data.settings.business_name} email={email} theme={theme} isAdmin={data.isAdmin} adminActive={view==='admin'} onTheme={()=>setTheme(v=>v==='dark'?'light':'dark')} onSettings={()=>setModal('settings')} onManage={()=>canWrite?setView('manage'):setReadOnlyMode(false)} onAdmin={()=>setView('admin')}/>
-    {!data.isAdmin&&<TrialBanner access={access} onSubscribe={()=>void billing.subscribe()} onOpen={()=>setTrialInfoOpen(true)}/>}
+    <TopBar business={data.settings.business_name} email={email} theme={theme} isAdmin={data.isAdmin} adminActive={view==='admin'} onTheme={()=>setTheme(v=>v==='dark'?'light':'dark')} onSettings={()=>setModal('settings')} onManage={()=>canWrite?setView('manage'):setExpiredModalOpen(true)} onAdmin={()=>setView('admin')}/>
+    {(!data.isAdmin||!canWrite)&&<TrialBanner access={access} onSubscribe={()=>void billing.subscribe()} onOpen={()=>canWrite?setTrialInfoOpen(true):setExpiredModalOpen(true)}/>}
     <main className="cp-main">
       {!canWrite&&!readOnlyMode?<SubscriptionGate access={access} products={data.products.length} sales={data.sales.length} stockValue={calc.stockCapital} onSubscribe={()=>void billing.subscribe()} onRefresh={()=>void billing.refresh(true)} onReadOnly={()=>{setReadOnlyMode(true);setView('home')}} busy={billing.busy} error={billing.error}/>:<>
         {view==='home'&&<HomePage data={data} calc={calc} onOpenProduct={setSelected} onView={openView} onAction={openModal} onCheckListing={openListingCheckin}/>}
@@ -121,7 +131,8 @@ export function ControlApp({userId,email}:{userId:string;email?:string}){
     {view!=='admin'&&(canWrite||readOnlyMode)&&<BottomNav view={view} onView={openView} onAdd={()=>openModal('actions')}/>}
     <InstallAppPrompt userId={userId}/>
     {!data.isAdmin&&<FeedbackPrompt userId={userId} enabled={modal===null&&!trialInfoOpen&&selected===null&&view!=='admin'}/>} 
-    {trialInfoOpen&&!data.isAdmin&&<TrialInfoModal access={access} busy={billing.busy} error={billing.error} onClose={()=>setTrialInfoOpen(false)} onSubscribe={()=>void billing.subscribe()}/>} 
+    {trialInfoOpen&&!data.isAdmin&&canWrite&&<TrialInfoModal access={access} busy={billing.busy} error={billing.error} onClose={()=>setTrialInfoOpen(false)} onSubscribe={()=>void billing.subscribe()}/>} 
+    {expiredModalOpen&&!canWrite&&<ExpiredAccessModal access={access} busy={billing.busy} error={billing.error} onClose={()=>setExpiredModalOpen(false)} onSubscribe={()=>void billing.subscribe()} blockedAction={expiredModalShown&&!readOnlyMode}/>} 
 
     {modal==='actions'&&<ActionSheet onClose={()=>setModal(null)} onChoose={openModal}/>}
     {modal==='purchase'&&<PurchaseModal data={data} onClose={()=>setModal(null)} onDone={()=>{setModal(null);notify('Compra salva e adicionada ao estoque.')}}/>}
