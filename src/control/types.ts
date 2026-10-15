@@ -1,6 +1,6 @@
 export type ControlView=
   |'home'|'stock'|'sales'|'cash'|'manage'
-  |'receivables'|'reports'|'people'|'goals'|'backup'|'closures'|'guide'|'ranking'|'admin'
+  |'receivables'|'reports'|'people'|'goals'|'backup'|'closures'|'guide'|'ranking'|'opportunities'|'admin'
 
 export type ControlAccount={
   user_id:string
