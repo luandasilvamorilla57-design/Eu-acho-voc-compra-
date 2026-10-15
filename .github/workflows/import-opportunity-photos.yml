@@ -1,0 +1,31 @@
+name: Importar fotos oficiais das oportunidades
+on:
+  push:
+    branches: [main]
+    paths: [.github/workflows/import-opportunity-photos.yml]
+permissions:
+  contents: write
+jobs:
+  import:
+    if: "github.event.head_commit.message == 'chore: stage opportunity product photos'"
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - name: Publicar quatro fotos mantendo associação
+        run: |
+          set -euo pipefail
+          mkdir -p public/opportunities
+          curl --fail --location --retry 3 --connect-timeout 15 --max-time 120 --silent --show-error "https://d2jqrm6oza8nb6.cloudfront.net/datasets/9d55490b-a866-482d-ab55-3a949ca05dfa.png?_jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJrZXlIYXNoIjoiYTdlOTNiYzMyMzVjZjQ5YSIsImJ1Y2tldCI6InJ1bndheS1kYXRhc2V0cyIsInN0YWdlIjoicHJvZCIsImV4cCI6MTc5MjIwMzQ1OX0.c6I3yCwotGuUdG6ECC74NNbzzxjcWRYPU4pYZpMtXjQ" -o public/opportunities/01-parafusadeira.png
+          echo "fb75422a3a059dbcd8b50748e7f933fe97830c1aafd70fa3af3296e94e2a54a4  public/opportunities/01-parafusadeira.png" | sha256sum -c -
+          curl --fail --location --retry 3 --connect-timeout 15 --max-time 120 --silent --show-error "https://d2jqrm6oza8nb6.cloudfront.net/datasets/1cd25689-c244-4737-a55b-c0718da78959.png?_jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJrZXlIYXNoIjoiMWU4MDIyZWNkNzg2YjI1YSIsImJ1Y2tldCI6InJ1bndheS1kYXRhc2V0cyIsInN0YWdlIjoicHJvZCIsImV4cCI6MTc5MjI0ODQyOH0.SP-KSYb3aLf3NzMStqU6vpRo0_PYFpeoG3z0tFP-ae4" -o public/opportunities/02-soquetes.png
+          echo "629c0b66fdab35e5a7da4b234e44b42fa4f74742d97c14a89c0c9dfa5a2164bf  public/opportunities/02-soquetes.png" | sha256sum -c -
+          curl --fail --location --retry 3 --connect-timeout 15 --max-time 120 --silent --show-error "https://d2jqrm6oza8nb6.cloudfront.net/datasets/3d4be9bc-8a05-411c-b4be-c583ab672f9e.png?_jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJrZXlIYXNoIjoiMGVlMzQzYjVkNGVhYmM4NCIsImJ1Y2tldCI6InJ1bndheS1kYXRhc2V0cyIsImV4cCI6MTc5MjE4NzgyOX0.cY3ImuVbtsjdGC5CoUco32lRT6oWIi9Nu6RTBYunLQg" -o public/opportunities/03-cabos-iphone.png
+          echo "8f74b9956842a3c666d9498f742b1756cadb1168e07e0425d8a752e3e4593a0c  public/opportunities/03-cabos-iphone.png" | sha256sum -c -
+          curl --fail --location --retry 3 --connect-timeout 15 --max-time 120 --silent --show-error "https://d2jqrm6oza8nb6.cloudfront.net/datasets/afbe244e-75bc-4add-b6fb-b18bc4d68d64.png?_jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJrZXlIYXNoIjoiN2M5ZGIxODcwYzUwNTQwNyIsImJ1Y2tldCI6InJ1bndheS1kYXRhc2V0cyIsInN0YWdlIjoicHJvZCIsImV4cCI6MTc5MjE5NzM4M30.awF2yQMXPOmYvH7rj_BOHyxIeW-iXGxQY4ebAFP--5g" -o public/opportunities/04-panelas.png
+          echo "5926bbde6e9a2079cf2485b2f039e938ae0352170706166f31e37542b84c4e64  public/opportunities/04-panelas.png" | sha256sum -c -
+          git config user.name "CONTROLE+ automation"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add public/opportunities/
+          git commit -m "feat(assets): add four official recommendation product photos"
+          git push origin HEAD:main
