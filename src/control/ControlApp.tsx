@@ -13,6 +13,7 @@ import {useControlAccess} from './useControlAccess'
 import {ActivePlanCard,SubscriptionGate,TrialBanner,TrialInfoModal} from './BillingUI'
 import {ExpiredAccessModal} from './ExpiredAccessModal'
 import {CinematicIntro} from './CinematicIntro'
+import {OneDayTrialModal} from './OneDayTrialModal'
 import {OpportunitiesPage} from './OpportunitiesPage'
 import {BriqueGuidePage} from './BriqueGuidePage'
 import {PersonalRankingCard,PersonalRankingPage} from './PersonalRanking'
@@ -54,6 +55,7 @@ export function ControlApp({userId,email}:{userId:string;email?:string}){
   const [expiredTriggeredByAction,setExpiredTriggeredByAction]=useState(false)
   const [expiredModalShown,setExpiredModalShown]=useState(false)
   const [introDismissed,setIntroDismissed]=useState(false)
+  const [trialWelcomeDismissed,setTrialWelcomeDismissed]=useState(false)
   const [theme,setTheme]=useState<'dark'|'light'>(()=>{
     const saved=window.localStorage.getItem('controle-plus-theme')
     if(saved==='light'||saved==='dark')return saved
@@ -115,6 +117,7 @@ export function ControlApp({userId,email}:{userId:string;email?:string}){
   if(!data.settings)return <div className="cp-fatal"><strong>Não conseguimos abrir o CONTROLE+.</strong><button onClick={()=>void data.load()}>Tentar novamente</button></div>
   if(!access)return <div className="cp-fatal"><strong>Não conseguimos validar o acesso da conta.</strong><button onClick={()=>void billing.refresh(true)}>Tentar novamente</button></div>
   if(!introDismissed&&!data.settings.intro_video_watched_at&&(data.isAdmin||Date.parse(data.settings.created_at)>=Date.parse('2026-10-15T19:00:00Z')))return <CinematicIntro userId={userId} isAdmin={data.isAdmin} onDone={()=>{setIntroDismissed(true);void data.load()}}/>
+  if(access.access_state==='trial'&&!access.is_admin&&canWrite&&!data.settings.trial_welcome_seen_at&&!trialWelcomeDismissed)return <OneDayTrialModal access={access} onDone={()=>{setTrialWelcomeDismissed(true);void data.load()}}/>
   if(!data.settings.onboarding_completed&&canWrite)return <FirstRun data={data} email={email} theme={theme} onTheme={()=>setTheme(v=>v==='dark'?'light':'dark')}/>
 
   return <div className="cp-app" data-theme={theme}>
@@ -187,9 +190,9 @@ function FirstRun({data,email,theme,onTheme}:{data:Data;email?:string;theme:'dar
       <div className="cp-onboarding-progress"><i style={{width:(step/3*100)+'%'}}/></div>
 
       {step===1&&<div className="cp-onboarding-body">
-        <span className="cp-eyebrow">15 DIAS GRÁTIS · SEM PLANO COMPLICADO</span>
+        <span className="cp-eyebrow">24 HORAS GRÁTIS · SEM CARTÃO</span>
         <h1>Vamos colocar seu negócio em ordem.</h1>
-        <p>Use o CONTROLE+ completo por 15 dias. Depois, continue com tudo por R$ 12,90 por mês.</p>
+        <p>Experimente o CONTROLE+ completo durante 24 horas a partir do cadastro, sem cartão. Depois, assine por R$ 12,90/mês se quiser continuar registrando compras e vendas. Seus dados permanecem salvos.</p>
         <div className="cp-onboarding-example"><span><ShoppingBag/></span><div><b>Comprou</b><small>entra no estoque e sai do caixa</small></div><ChevronRight/><span><Banknote/></span><div><b>Vendeu</b><small>sai do estoque e volta para o caixa</small></div></div>
       </div>}
 
