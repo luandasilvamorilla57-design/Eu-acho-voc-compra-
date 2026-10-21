@@ -23,7 +23,7 @@ import type {CashEntry,ControlView,Product,Sale} from './types'
 
 type Data=ReturnType<typeof useControlData>
 type Metrics=ReturnType<typeof buildMetrics>
-type Modal='actions'|'purchase'|'inventory'|'sale'|'expense'|'cash'|'settings'|'listingCheckin'|null
+type Modal='actions'|'stockAdd'|'purchase'|'inventory'|'sale'|'expense'|'cash'|'settings'|'listingCheckin'|null
 
 const money=new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL'})
 const number=new Intl.NumberFormat('pt-BR')
@@ -127,7 +127,7 @@ export function ControlApp({userId,email}:{userId:string;email?:string}){
     <main className="cp-main">
       {!canWrite&&!readOnlyMode?<SubscriptionGate access={access} products={data.products.length} sales={data.sales.length} stockValue={calc.stockCapital} onSubscribe={()=>void billing.subscribe()} onRefresh={()=>void billing.refresh(true)} onReadOnly={()=>{setReadOnlyMode(true);setView('home')}} busy={billing.busy} error={billing.error}/>:<>
         {view==='home'&&<HomePage data={data} calc={calc} onOpenProduct={setSelected} onView={openView} onAction={openModal} onCheckListing={openListingCheckin}/>}
-        {view==='stock'&&<StockPage data={data} calc={calc} onOpenProduct={setSelected} onAdd={()=>openModal('actions')}/>}
+        {view==='stock'&&<StockPage data={data} calc={calc} onOpenProduct={setSelected} onAdd={()=>openModal('stockAdd')}/>}
         {view==='sales'&&<SalesPage data={data} calc={calc} onSale={()=>openModal('sale')} onOpenProduct={setSelected}/>}
         {view==='cash'&&<CashPage data={data} calc={calc} onCash={()=>openModal('cash')} onSettings={()=>setModal('settings')}/>}
         {canWrite&&view==='manage'&&<ManagePage data={data} onView={openView} onBack={()=>setView('home')}/>}
@@ -150,6 +150,7 @@ export function ControlApp({userId,email}:{userId:string;email?:string}){
     {expiredModalOpen&&!canWrite&&<ExpiredAccessModal access={access} busy={billing.busy} error={billing.error} onClose={()=>setExpiredModalOpen(false)} onSubscribe={()=>void billing.subscribe()} blockedAction={expiredTriggeredByAction}/>} 
 
     {modal==='actions'&&<ActionSheet onClose={()=>setModal(null)} onChoose={openModal}/>}
+    {modal==='stockAdd'&&<StockAddSheet data={data} onClose={()=>setModal(null)} onOwn={()=>setModal('inventory')} onRegisterPurchase={()=>setModal('purchase')} onOpenPurchased={product=>{setModal(null);setSelected(product)}}/>}
     {modal==='purchase'&&<PurchaseModal data={data} onClose={()=>setModal(null)} onDone={()=>{setModal(null);notify('Compra salva e adicionada ao estoque.')}}/>}
     {modal==='inventory'&&<InventoryModal data={data} onClose={()=>setModal(null)} onDone={()=>{setModal(null);notify('Produto adicionado ao estoque sem movimentar o caixa.')}}/>}
     {modal==='sale'&&<SaleModal data={data} initialProduct={selected} onClose={()=>setModal(null)} onDone={()=>{setModal(null);setSelected(null);notify('Venda registrada. Caixa e estoque atualizados.')}}/>}
@@ -192,7 +193,7 @@ function FirstRun({data,email,theme,onTheme}:{data:Data;email?:string;theme:'dar
       {step===1&&<div className="cp-onboarding-body">
         <span className="cp-eyebrow">24 HORAS GRÁTIS · SEM CARTÃO</span>
         <h1>Vamos colocar seu negócio em ordem.</h1>
-        <p>Experimente o CONTROLE+ completo durante 24 horas a partir do cadastro, sem cartão. Depois, assine por R$ 12,90/mês se quiser continuar registrando compras e vendas. Seus dados permanecem salvos.</p>
+        <p>Experimente o CONTROLE+ completo durante 24 horas a partir do cadastro, sem cartão. Depois, assine por R$ 18,90/mês se quiser continuar registrando compras e vendas. Seus dados permanecem salvos.</p>
         <div className="cp-onboarding-example"><span><ShoppingBag/></span><div><b>Comprou</b><small>entra no estoque e sai do caixa</small></div><ChevronRight/><span><Banknote/></span><div><b>Vendeu</b><small>sai do estoque e volta para o caixa</small></div></div>
       </div>}
 
@@ -506,6 +507,18 @@ function Empty({icon,title,text,action,onAction}:{icon:React.ReactNode;title:str
 
 function BottomNav({view,onView,onAdd}:{view:ControlView;onView:(v:ControlView)=>void;onAdd:()=>void}){
   return <nav className="cp-bottom"><div className="cp-bottom-inner"><button className={view==='home'?'active':''} onClick={()=>onView('home')}><Home/><span>Início</span></button><button className={view==='stock'?'active':''} onClick={()=>onView('stock')}><Package/><span>Estoque</span></button><button className="cp-add-main" onClick={onAdd}><Plus/><span>Registrar</span></button><button className={view==='sales'?'active':''} onClick={()=>onView('sales')}><ReceiptText/><span>Vendas</span></button><button className={view==='cash'?'active':''} onClick={()=>onView('cash')}><WalletCards/><span>Caixa</span></button></div></nav>
+}
+
+function StockAddSheet({data,onClose,onOwn,onRegisterPurchase,onOpenPurchased}:{data:Data;onClose:()=>void;onOwn:()=>void;onRegisterPurchase:()=>void;onOpenPurchased:(product:Product)=>void}){
+  const purchased=data.products.filter(product=>product.acquisition_type==='purchase')
+  return <ModalShell onClose={onClose} compact><div className="cp-action-sheet cp-stock-add-sheet">
+    <span className="cp-eyebrow">ADICIONAR AO ESTOQUE</span>
+    <h2>De onde vem esse produto?</h2>
+    <p>Compras registradas no CONTROLE+ já entram no estoque automaticamente. Assim você não duplica mercadoria.</p>
+    <Action icon={<Box/>} title="Produto que já tenho" text="Algo que já era seu · não mexe no caixa" onClick={onOwn}/>
+    <Action icon={<ShoppingBag/>} title="Ainda não registrei a compra" text="Registra a compra, desconta do caixa e coloca no estoque" onClick={onRegisterPurchase}/>
+    {purchased.length>0&&<div className="cp-stock-existing"><div className="cp-stock-existing-head"><span>COMPRAS JÁ CADASTRADAS</span><small>Esses produtos já fazem parte do estoque/histórico.</small></div><div className="cp-stock-existing-list">{purchased.slice(0,8).map(product=><button type="button" key={product.id} onClick={()=>onOpenPurchased(product)}><span><Package/></span><div><b>{product.name}</b><small>{product.quantity_available>0?product.quantity_available+' un. disponível(is)':'Sem unidades disponíveis · ver histórico'}</small></div><ChevronRight/></button>)}</div></div>}
+  </div></ModalShell>
 }
 
 function ActionSheet({onClose,onChoose}:{onClose:()=>void;onChoose:(m:Modal)=>void}){
