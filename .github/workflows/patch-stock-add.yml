@@ -1,5 +1,6 @@
 name: One-time stock add UX patch
 
+# Triggered intentionally after creation so GitHub can execute the workflow from the default branch.
 on:
   push:
     branches: [main]
@@ -59,7 +60,6 @@ jobs:
           assert marker in s, 'ActionSheet anchor not found'
           s=s.replace(marker,component+marker,1)
 
-          # Corrige também o texto antigo do onboarding que ainda mostrava o preço anterior.
           s=s.replace('Depois, assine por R$ 12,90/mês se quiser continuar registrando compras e vendas.','Depois, assine por R$ 18,90/mês se quiser continuar registrando compras e vendas.')
 
           p.write_text(s)
