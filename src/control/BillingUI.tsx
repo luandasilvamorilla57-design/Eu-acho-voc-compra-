@@ -30,7 +30,6 @@ export function TrialBanner({access,onSubscribe,onOpen}:{access:ControlAccess;on
   </section>
 }
 
-
 function formatDate(value:string|null){
   if(!value)return '—'
   const date=new Date(value)
@@ -107,14 +106,14 @@ export function TrialInfoModal({
 
       <button className="cp-trial-modal-subscribe" disabled={busy} onClick={onSubscribe}>
         <CreditCard/>
-        <span>{busy?'Abrindo Mercado Pago...':isExpired?'Assinar CONTROLE+ por '+money.format(access.monthly_price)+'/mês':'Quero continuar com o CONTROLE+'}</span>
+        <span>{busy?'Abrindo Cakto...':isExpired?'Assinar CONTROLE+ por '+money.format(access.monthly_price)+'/mês':'Quero continuar com o CONTROLE+'}</span>
         {!busy&&<ArrowRight/>}
       </button>
       <button className="cp-trial-modal-later" onClick={onClose}>{isExpired?'Voltar':'Continuar usando grátis'}</button>
 
       <div className="cp-trial-modal-safe">
         <ShieldCheck/>
-        <span>Pagamento processado pelo Mercado Pago. O CONTROLE+ não armazena os dados do seu cartão.</span>
+        <span>Pagamento processado pela Cakto. O CONTROLE+ não armazena os dados do seu cartão.</span>
       </div>
     </section>
   </div>
@@ -140,7 +139,7 @@ export function SubscriptionGate({
       <span className="cp-subscription-symbol"><ShieldCheck/></span>
       <span className="cp-subscription-kicker">{pending?'PAGAMENTO EM PROCESSAMENTO':pastDue?'PAGAMENTO PENDENTE':'TESTE GRÁTIS ENCERRADO'}</span>
       <h1>{pending?'Estamos confirmando sua assinatura.':pastDue?'Regularize para continuar usando.':'Seu negócio continua aqui.'}</h1>
-      <p>{pending?'Assim que o Mercado Pago confirmar, o acesso é liberado automaticamente.':'Nada foi apagado. Estoque, vendas, fotos e histórico continuam salvos na sua conta.'}</p>
+      <p>{pending?'Assim que a Cakto confirmar o pagamento, o acesso é liberado automaticamente.':'Nada foi apagado. Estoque, vendas, fotos e histórico continuam salvos na sua conta.'}</p>
 
       <div className="cp-subscription-price">
         <span>CONTROLE+ COMPLETO</span>
@@ -164,12 +163,12 @@ export function SubscriptionGate({
       {error&&<div className="cp-form-error">{error}</div>}
 
       <button className="cp-subscribe-main" disabled={busy} onClick={onSubscribe}>
-        <CreditCard/>{busy?'Abrindo pagamento...':pending?'Abrir pagamento novamente':'Continuar por '+money.format(access.monthly_price)+'/mês'}
+        <CreditCard/>{busy?'Abrindo Cakto...':pending?'Abrir pagamento novamente':'Continuar por '+money.format(access.monthly_price)+'/mês'}
       </button>
       {pending&&<button className="cp-subscribe-refresh" disabled={busy} onClick={onRefresh}><RefreshCw/> Já paguei · atualizar status</button>}
       <button className="cp-subscribe-readonly" onClick={onReadOnly}>Ver meus dados em modo leitura</button>
 
-      <div className="cp-subscription-safe"><LockKeyhole/><span>Pagamento processado pelo Mercado Pago. O CONTROLE+ não armazena os dados do seu cartão.</span></div>
+      <div className="cp-subscription-safe"><LockKeyhole/><span>Pagamento processado pela Cakto. O CONTROLE+ não armazena os dados do seu cartão.</span></div>
     </section>
   </div>
 }
@@ -180,6 +179,6 @@ export function ActivePlanCard({access,onCancel,busy}:{access:ControlAccess;onCa
     const hours=Math.max(0,Math.ceil(((access.trial_ends_at?new Date(access.trial_ends_at).getTime():0)-Date.now())/3600000))
     return <div className="cp-plan-status"><Clock3/><div><b>Teste grátis · {hours} hora(s) restantes</b><span>Depois, escolha assinar por {money.format(access.monthly_price)}/mês.</span></div></div>
   }
-  if(access.access_state==='active')return <div className="cp-plan-status is-active"><ShieldCheck/><div><b>CONTROLE+ ativo</b><span>{access.valid_until?'Acesso válido até '+new Date(access.valid_until).toLocaleDateString('pt-BR'):'Assinatura mensal ativa'}</span></div>{access.subscription_status!=='cancelled'&&<button disabled={busy} onClick={onCancel}>Cancelar renovação</button>}</div>
+  if(access.access_state==='active')return <div className="cp-plan-status is-active"><ShieldCheck/><div><b>CONTROLE+ ativo</b><span>{access.valid_until?'Acesso válido até '+new Date(access.valid_until).toLocaleDateString('pt-BR'):'Assinatura mensal ativa'}</span></div>{access.subscription_status!=='cancelled'&&<button disabled={busy} onClick={onCancel}>Como cancelar</button>}</div>
   return null
 }
