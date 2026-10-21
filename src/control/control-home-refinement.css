@@ -218,6 +218,44 @@
   color:#0f9f7c!important;
 }
 
+/* Override forte no tema claro: os cards precisam parecer ações, não campos desabilitados. */
+.cp-app[data-theme="light"] .cp-action-sheet>button,
+[data-theme="light"] .cp-action-sheet>button{
+  background:#ffffff!important;
+  border:1.5px solid #8fc7ff!important;
+  box-shadow:0 10px 24px rgba(26,92,160,.14),0 2px 6px rgba(21,68,116,.08)!important;
+  opacity:1!important;
+}
+.cp-app[data-theme="light"] .cp-action-sheet>button>span,
+[data-theme="light"] .cp-action-sheet>button>span{
+  background:linear-gradient(145deg,#dceeff,#dff8f1)!important;
+  color:#0a9ec7!important;
+  border:1px solid #9fdaf0!important;
+  box-shadow:inset 0 1px rgba(255,255,255,.95)!important;
+}
+.cp-app[data-theme="light"] .cp-action-sheet>button b,
+[data-theme="light"] .cp-action-sheet>button b{
+  color:#071a2f!important;
+  font-weight:850!important;
+}
+.cp-app[data-theme="light"] .cp-action-sheet>button small,
+[data-theme="light"] .cp-action-sheet>button small{
+  color:#435a72!important;
+  font-weight:600!important;
+}
+.cp-app[data-theme="light"] .cp-action-sheet>button>svg,
+[data-theme="light"] .cp-action-sheet>button>svg{
+  color:#174d73!important;
+  stroke-width:2.4!important;
+}
+.cp-app[data-theme="light"] .cp-action-sheet>button:active,
+[data-theme="light"] .cp-action-sheet>button:active{
+  transform:scale(.98)!important;
+  background:#eef8ff!important;
+  border-color:#20c997!important;
+  box-shadow:0 6px 14px rgba(16,110,119,.16),0 0 0 3px rgba(32,201,151,.12)!important;
+}
+
 @media(max-width:640px){
   .cp-home-app .cp-app-greeting{margin-bottom:15px}
   .cp-home-app .cp-balance-app{
@@ -262,8 +300,8 @@
   }
   .cp-home-app .cp-quick-app b{font-size:14px!important}
   .cp-home-app .cp-quick-app small{font-size:11px!important}
-  .cp-action-sheet>button{padding:14px!important;margin-top:9px!important}
-  .cp-action-sheet>button>span{width:42px!important;height:42px!important}
+  .cp-action-sheet>button{padding:15px!important;margin-top:10px!important}
+  .cp-action-sheet>button>span{width:46px!important;height:46px!important}
 }
 @media(max-width:385px){
   .cp-home-app .cp-balance-app{padding:17px 13px!important}
