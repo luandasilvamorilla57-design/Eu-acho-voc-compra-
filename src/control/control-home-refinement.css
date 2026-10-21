@@ -1,19 +1,6 @@
 /* CONTROLE+ • acabamento premium da Home, sem remover dados ou ações.
    Escopo restrito à Home; mantém os 4 indicadores, vendas do dia e barra de capital. */
 
-.cp-app{
-  --cp-brand-green:#08c99b;
-  --cp-brand-green-strong:#00b88d;
-  --cp-brand-green-soft:rgba(8,201,155,.14);
-}
-.cp-brand-mark span,.cp-brand-word span{color:var(--cp-brand-green)!important}
-.positive{color:var(--cp-brand-green)!important}
-.cp-toast svg{color:var(--cp-brand-green)!important}
-.cp-plan-status.is-active svg,
-.cp-plan-status.is-active b,
-.cp-subscription-safe svg,
-.cp-trial-modal-safe svg{color:var(--cp-brand-green)!important}
-
 .cp-home-app{
   --cp-home-readable:color-mix(in srgb,var(--cp-text-2) 91%,white 9%);
 }
@@ -46,8 +33,8 @@
   border-radius:25px;
   border-color:rgba(164,211,255,.36)!important;
   background:
-    radial-gradient(ellipse at 92% 3%,rgba(8,201,155,.11),transparent 30%),
-    radial-gradient(ellipse at 92% 3%,rgba(130,207,255,.18),transparent 36%),
+    radial-gradient(ellipse at 92% 3%,rgba(44,226,177,.11),transparent 32%),
+    radial-gradient(ellipse at 92% 3%,rgba(130,207,255,.20),transparent 33%),
     linear-gradient(142deg,#102e5d 0%,#143f7a 53%,#1766bc 100%)!important;
   box-shadow:0 21px 49px rgba(3,24,56,.27),inset 0 1px rgba(240,250,255,.12)!important;
   animation:cp-refined-card-enter .45s both;
@@ -122,13 +109,13 @@
   line-height:1.3!important;
   overflow-wrap:anywhere;
 }
-.cp-home-app .cp-balance-app-stats--four .positive{color:#21e0ad!important}
+.cp-home-app .cp-balance-app-stats--four .positive{color:#32d3a1!important}
 .cp-home-app .cp-capital-track{
   height:6px;
   margin-top:15px;
   background:rgba(255,255,255,.16);
 }
-.cp-home-app .cp-capital-track i{background:linear-gradient(90deg,#63cfff,#9be3ff 72%,#5fe1bd)}
+.cp-home-app .cp-capital-track i{background:linear-gradient(90deg,#2dd4bf,#8de8d0)}
 .cp-home-app .cp-capital-track em{background:rgba(220,237,255,.31)}
 .cp-home-app .cp-capital-track-labels{margin-top:9px}
 .cp-home-app .cp-capital-track-labels span{
@@ -149,12 +136,11 @@
 }
 .cp-home-app .cp-quick-app button:hover,
 .cp-home-app .cp-quick-app button:focus-visible{
-  border-color:rgba(8,201,155,.42)!important;
-  box-shadow:0 14px 30px rgba(7,66,126,.14),0 0 0 1px rgba(8,201,155,.05)!important;
+  border-color:rgba(45,212,191,.48)!important;
+  box-shadow:0 14px 30px rgba(7,66,126,.16)!important;
 }
 .cp-home-app .cp-quick-app button:active{transform:scale(.985)!important}
-.cp-home-app .cp-quick-app button>span{transition:color .18s ease,background .18s ease}
-.cp-home-app .cp-quick-app button:hover>span{color:var(--cp-brand-green)!important;background:var(--cp-brand-green-soft)!important}
+.cp-home-app .cp-quick-app button>span{color:#20c997!important}
 .cp-home-app .cp-quick-app b{
   color:var(--cp-text);
   letter-spacing:-.015em;
@@ -175,13 +161,61 @@
 .cp-bottom button{transition:color .18s ease,transform .18s ease}
 .cp-bottom button:focus-visible,
 .cp-home-app button:focus-visible{
-  outline:2px solid #77caff;
+  outline:2px solid #2dd4bf;
   outline-offset:3px;
 }
 .cp-bottom button:active{transform:scale(.96)}
 .cp-bottom button.active{font-weight:750}
 .cp-bottom .cp-add-main{
-  box-shadow:0 11px 28px rgba(33,115,243,.35),inset 0 1px rgba(255,255,255,.19)!important;
+  box-shadow:0 11px 28px rgba(33,115,243,.35),0 0 0 1px rgba(45,212,191,.16),inset 0 1px rgba(255,255,255,.19)!important;
+}
+
+/* Identidade CONTROLE+: azul como base, teal da marca nos sinais positivos. */
+.cp-brand-word span{color:#20c997!important}
+.cp-brand-mark{box-shadow:inset 0 1px rgba(255,255,255,.10),0 0 0 1px rgba(45,212,191,.15)!important}
+.cp-plan-status.is-active svg,
+.cp-subscription-safe svg,
+.cp-trial-modal-safe svg{color:#20c997!important}
+.cp-toast{border-color:rgba(45,212,191,.34)!important}
+.cp-toast svg{color:#20c997!important}
+
+/* Modal Registrar: mais contraste para não parecer desabilitado. */
+.cp-action-sheet>button{
+  border-color:rgba(72,126,186,.28)!important;
+  background:linear-gradient(145deg,#ffffff 0%,#f3f8ff 100%)!important;
+  box-shadow:0 8px 20px rgba(26,72,122,.09),inset 0 1px rgba(255,255,255,.8)!important;
+  color:#0b1729!important;
+  transition:transform .16s ease,border-color .16s ease,box-shadow .16s ease,background .16s ease!important;
+}
+.cp-action-sheet>button>span{
+  background:linear-gradient(145deg,#e6f3ff,#e8fbf6)!important;
+  color:#149bc1!important;
+  border:1px solid rgba(20,155,193,.12);
+}
+.cp-action-sheet>button b{
+  color:#0a1526!important;
+  font-weight:800!important;
+}
+.cp-action-sheet>button small{
+  color:#58697d!important;
+  font-weight:500;
+}
+.cp-action-sheet>button>svg{
+  color:#3e536a!important;
+}
+.cp-action-sheet>button:hover,
+.cp-action-sheet>button:focus-visible{
+  border-color:rgba(45,212,191,.56)!important;
+  background:linear-gradient(145deg,#ffffff,#effbf8)!important;
+  box-shadow:0 10px 24px rgba(24,96,112,.14),0 0 0 2px rgba(45,212,191,.08)!important;
+}
+.cp-action-sheet>button:active{
+  transform:scale(.985);
+  background:linear-gradient(145deg,#eef8ff,#e9f9f4)!important;
+}
+.cp-action-sheet>button:active>span{
+  background:#d8f5ed!important;
+  color:#0f9f7c!important;
 }
 
 @media(max-width:640px){
@@ -228,6 +262,8 @@
   }
   .cp-home-app .cp-quick-app b{font-size:14px!important}
   .cp-home-app .cp-quick-app small{font-size:11px!important}
+  .cp-action-sheet>button{padding:14px!important;margin-top:9px!important}
+  .cp-action-sheet>button>span{width:42px!important;height:42px!important}
 }
 @media(max-width:385px){
   .cp-home-app .cp-balance-app{padding:17px 13px!important}
