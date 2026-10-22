@@ -42,7 +42,7 @@ export function OneDayTrialModal({access,onDone}:{access:ControlAccess;onDone:()
      <div><ReceiptText size={20}/><span>Compras e vendas<br/><small>Registre cada movimento</small></span><Check size={17}/></div>
      <div><WalletCards size={20}/><span>Caixa e lucro real<br/><small>Acompanhe seus resultados</small></span><Check size={17}/></div>
     </div>
-    <div className="cp-daytrial-expiration"><CalendarClock size={19}/><div><b>Seu teste termina em {endLabel}</b><span>Depois, você pode assinar por R$ 12,90/mês para continuar cadastrando e vendendo. Seus dados permanecem disponíveis para consulta.</span></div></div>
+    <div className="cp-daytrial-expiration"><CalendarClock size={19}/><div><b>Seu teste termina em {endLabel}</b><span>Depois, você pode assinar por R$ 18,90/mês para continuar cadastrando e vendendo. Seus dados permanecem disponíveis para consulta.</span></div></div>
    </div>
    <div className="cp-daytrial-actions">
     {error&&<p role="status">{error}</p>}
