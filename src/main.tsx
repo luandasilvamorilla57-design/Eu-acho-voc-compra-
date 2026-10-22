@@ -4,6 +4,7 @@ import App from './App'
 import {ErrorBoundary} from './components/ErrorBoundary'
 import {reportClientError} from './lib/errorReporter'
 import './styles.css'
+import './control/trial-banner-refinement.css'
 
 window.addEventListener('beforeinstallprompt',(event:any)=>{
   event.preventDefault()
