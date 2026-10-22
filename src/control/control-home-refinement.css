@@ -355,34 +355,3 @@
     padding-bottom:max(22px,env(safe-area-inset-bottom))!important;
   }
 }
-/* Modais padrao no celular: sempre centralizados, com o mesmo respiro em cima e embaixo. */
-@media(max-width:820px){
-  .cp-modal-layer{
-    display:flex!important;
-    align-items:center!important;
-    justify-content:center!important;
-    padding:6dvh 18px!important;
-  }
-  .cp-modal-layer .cp-modal{
-    position:relative!important;
-    inset:auto!important;
-    top:auto!important;
-    right:auto!important;
-    bottom:auto!important;
-    left:auto!important;
-    transform:none!important;
-    width:calc(100vw - 36px)!important;
-    max-width:680px!important;
-    max-height:88dvh!important;
-    margin:0!important;
-    border-radius:24px!important;
-    overflow:hidden!important;
-    box-shadow:0 26px 70px rgba(0,15,40,.30),0 8px 24px rgba(0,15,40,.18)!important;
-  }
-  .cp-modal-layer .cp-modal-scroll{
-    max-height:88dvh!important;
-    overflow-y:auto!important;
-    overscroll-behavior:contain;
-    padding-bottom:max(22px,env(safe-area-inset-bottom))!important;
-  }
-}
