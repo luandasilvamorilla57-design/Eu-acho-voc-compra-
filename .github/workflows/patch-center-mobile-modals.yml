@@ -1,0 +1,40 @@
+name: One-time global mobile modal centering patch
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/patch-center-mobile-modals.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Center standard modals on mobile
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import base64
+          p=Path('src/control/control-home-refinement.css')
+          s=p.read_text()
+          marker='/* Estoque: o seletor específico de adicionar produto deve flutuar no centro,'
+          if marker in s:
+              s=s.split(marker,1)[0].rstrip()+'\n\n'
+          encoded='LyogTW9kYWlzIHBhZHJhbyBubyBjZWx1bGFyOiBzZW1wcmUgY2VudHJhbGl6YWRvcywgY29tIG8gbWVzbW8gcmVzcGlybyBlbSBjaW1hIGUgZW1iYWl4by4gKi8KQG1lZGlhKG1heC13aWR0aDo4MjBweCl7CiAgLmNwLW1vZGFsLWxheWVyewogICAgZGlzcGxheTpmbGV4IWltcG9ydGFudDsKICAgIGFsaWduLWl0ZW1zOmNlbnRlciFpbXBvcnRhbnQ7CiAgICBqdXN0aWZ5LWNvbnRlbnQ6Y2VudGVyIWltcG9ydGFudDsKICAgIHBhZGRpbmc6NmR2aCAxOHB4IWltcG9ydGFudDsKICB9CiAgLmNwLW1vZGFsLWxheWVyIC5jcC1tb2RhbHsKICAgIHBvc2l0aW9uOnJlbGF0aXZlIWltcG9ydGFudDsKICAgIGluc2V0OmF1dG8haW1wb3J0YW50OwogICAgdG9wOmF1dG8haW1wb3J0YW50OwogICAgcmlnaHQ6YXV0byFpbXBvcnRhbnQ7CiAgICBib3R0b206YXV0byFpbXBvcnRhbnQ7CiAgICBsZWZ0OmF1dG8haW1wb3J0YW50OwogICAgdHJhbnNmb3JtOm5vbmUhaW1wb3J0YW50OwogICAgd2lkdGg6Y2FsYygxMDB2dyAtIDM2cHgpIWltcG9ydGFudDsKICAgIG1heC13aWR0aDo2ODBweCFpbXBvcnRhbnQ7CiAgICBtYXgtaGVpZ2h0Ojg4ZHZoIWltcG9ydGFudDsKICAgIG1hcmdpbjowIWltcG9ydGFudDsKICAgIGJvcmRlci1yYWRpdXM6MjRweCFpbXBvcnRhbnQ7CiAgICBvdmVyZmxvdzpoaWRkZW4haW1wb3J0YW50OwogICAgYm94LXNoYWRvdzowIDI2cHggNzBweCByZ2JhKDAsMTUsNDAsLjMwKSwwIDhweCAyNHB4IHJnYmEoMCwxNSw0MCwuMTgpIWltcG9ydGFudDsKICB9CiAgLmNwLW1vZGFsLWxheWVyIC5jcC1tb2RhbC1zY3JvbGx7CiAgICBtYXgtaGVpZ2h0Ojg4ZHZoIWltcG9ydGFudDsKICAgIG92ZXJmbG93LXk6YXV0byFpbXBvcnRhbnQ7CiAgICBvdmVyc2Nyb2xsLWJlaGF2aW9yOmNvbnRhaW47CiAgICBwYWRkaW5nLWJvdHRvbTptYXgoMjJweCxlbnYoc2FmZS1hcmVhLWluc2V0LWJvdHRvbSkpIWltcG9ydGFudDsKICB9Cn0K'
+          s += base64.b64decode(encoded).decode()
+          p.write_text(s)
+          PY
+      - name: Commit patch and remove one-time workflow
+        shell: bash
+        run: |
+          rm .github/workflows/patch-center-mobile-modals.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "fix: center all standard mobile modals"
+          git push
