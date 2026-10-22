@@ -364,3 +364,44 @@
   from{opacity:.92;transform:scale(.97) translateY(8px)}
   to{opacity:1;transform:scale(1) translateY(0)}
 }
+
+/* Estoque: o seletor específico de adicionar produto deve flutuar no centro,
+   em vez de se comportar como bottom sheet no celular. */
+.cp-modal-layer:hras(.cp-stock-add-sheet){
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  padding:22px!important;
+}
+.cp-modal-layer:hras(.cp-stock-add-sheet) .cp-modal{
+  position:relative!important;
+  inset:auto!important;
+  width:min(620px,calc(100vw - 32px))!important;
+  max-height:min(76vh,720px)!important;
+  margin:0!important;
+  border-radius:28px!important;
+  overflow:hidden!important;
+  box-shadow:0 26px 70px rgba(0,15,40,.30),0 8px 24px rgba(0,15,40,.18)!important;
+  animation:cp-stock-modal-pop .18s ease-out both!important;
+}
+.cp-modal-layer:hras(.cp-stock-add-sheet) .cp-modal-scroll{
+  max-height:min(76vh,720px)!important;
+  padding-bottom:22px!important;
+}
+@media(max-width:640px){
+  .cp-modal-layer:hras(.cp-stock-add-sheet){
+    padding:18px!important;
+  }
+  .cp-modal-layer:has(.cp-stock-add-sheet) .cp-modal{
+    width:calc(100vw - 36px)!important;
+    max-height:78vh!important;
+    border-radius:24px!important;
+  }
+  .cp-modal-layer:hras(.cp-stock-add-sheet) .cp-modal-scroll{
+    max-height:78vh!important;
+  }
+}
+@keyframes cp-stock-modal-pop{
+  from{opacity:.92;transform:scale(.97) translateY(8px)}
+  to{opacity:1;transform:scale(1) translateY(0)}
+}
