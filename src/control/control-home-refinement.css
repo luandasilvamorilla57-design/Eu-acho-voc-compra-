@@ -21,7 +21,7 @@
 .cp-home-app .cp-register-main{
   flex-shrink:0;
   border-radius:14px!important;
-  box-shadow:0 11px 25px rgba(20,94,221,.20)!important;
+  box-shadow:0 11px 25px rgba(63,183,129,.20)!important;
   transition:transform .18s ease,filter .18s ease;
 }
 .cp-home-app .cp-register-main:active{transform:scale(.98)!important}
@@ -31,12 +31,12 @@
   padding:23px!important;
   margin-bottom:23px!important;
   border-radius:25px;
-  border-color:rgba(164,211,255,.36)!important;
+  border-color:rgba(184,251,221,.36)!important;
   background:
     radial-gradient(ellipse at 92% 3%,rgba(44,226,177,.11),transparent 32%),
-    radial-gradient(ellipse at 92% 3%,rgba(130,207,255,.20),transparent 33%),
-    linear-gradient(142deg,#102e5d 0%,#143f7a 53%,#1766bc 100%)!important;
-  box-shadow:0 21px 49px rgba(3,24,56,.27),inset 0 1px rgba(240,250,255,.12)!important;
+    radial-gradient(ellipse at 92% 3%,rgba(135,209,176,.20),transparent 33%),
+    linear-gradient(142deg,#22513c 0%,#2b684d 53%,#3a9e71 100%)!important;
+  box-shadow:0 21px 49px rgba(20,53,38,.27),inset 0 1px rgba(240,250,255,.12)!important;
   animation:cp-refined-card-enter .45s both;
 }
 .cp-home-app .cp-balance-app-top{gap:12px}
@@ -60,14 +60,14 @@
 .cp-home-app .cp-today-sales{
   margin-top:16px;
   padding:13px;
-  border-color:rgba(172,214,255,.22);
-  background:linear-gradient(145deg,rgba(3,22,53,.53),rgba(11,45,89,.34));
-  box-shadow:inset 0 1px rgba(255,255,255,.065),0 7px 22px rgba(1,14,36,.09);
+  border-color:rgba(190,251,224,.22);
+  background:linear-gradient(145deg,rgba(19,50,36,.53),rgba(30,78,56,.34));
+  box-shadow:inset 0 1px rgba(255,255,255,.065),0 7px 22px rgba(13,35,25,.09);
 }
 .cp-home-app .cp-today-sales.is-empty{
   padding:13px;
 }
-.cp-home-app .cp-today-sales-head>div>span{color:#92ddff}
+.cp-home-app .cp-today-sales-head>div>span{color:#8ad1b1}
 .cp-home-app .cp-today-sales-head>div>small{
   color:rgba(235,244,255,.83);
   line-height:1.45;
@@ -77,9 +77,9 @@
   min-height:39px;
   padding:7px 11px;
   border-radius:12px;
-  border-color:rgba(149,207,255,.30);
-  color:#caedff;
-  background:rgba(77,161,242,.12);
+  border-color:rgba(138,209,177,.30);
+  color:#d4fbea;
+  background:rgba(101,199,155,.12);
   transition:background .2s ease,transform .2s ease;
 }
 .cp-home-app .cp-today-sales-head>button:active{transform:scale(.98)}
@@ -90,12 +90,12 @@
 .cp-home-app .cp-balance-app-stats--four{
   margin-top:14px!important;
   border-radius:16px!important;
-  background:rgba(197,228,255,.15);
+  background:rgba(208,251,232,.15);
 }
 .cp-home-app .cp-balance-app-stats--four>div{
   min-width:0;
   padding:13px 12px!important;
-  background:rgba(8,28,61,.38);
+  background:rgba(22,57,41,.38);
 }
 .cp-home-app .cp-balance-app-stats--four span{
   color:rgba(238,247,255,.82)!important;
@@ -116,7 +116,7 @@
   background:rgba(255,255,255,.16);
 }
 .cp-home-app .cp-capital-track i{background:linear-gradient(90deg,#2dd4bf,#8de8d0)}
-.cp-home-app .cp-capital-track em{background:rgba(220,237,255,.31)}
+.cp-home-app .cp-capital-track em{background:rgba(225,251,240,.31)}
 .cp-home-app .cp-capital-track-labels{margin-top:9px}
 .cp-home-app .cp-capital-track-labels span{
   color:rgba(234,245,255,.83);
@@ -131,13 +131,13 @@
   min-height:124px!important;
   border-color:color-mix(in srgb,var(--cp-accent-light) 18%,var(--cp-line))!important;
   border-radius:20px!important;
-  box-shadow:0 11px 27px rgba(1,16,40,.09)!important;
+  box-shadow:0 11px 27px rgba(15,39,28,.09)!important;
   transition:transform .18s ease,border-color .18s ease,box-shadow .18s ease!important;
 }
 .cp-home-app .cp-quick-app button:hover,
 .cp-home-app .cp-quick-app button:focus-visible{
   border-color:rgba(45,212,191,.48)!important;
-  box-shadow:0 14px 30px rgba(7,66,126,.16)!important;
+  box-shadow:0 14px 30px rgba(37,107,76,.16)!important;
 }
 .cp-home-app .cp-quick-app button:active{transform:scale(.985)!important}
 .cp-home-app .cp-quick-app button>span{color:#20c997!important}
@@ -156,7 +156,7 @@
 /* Acessibilidade e polimento do dock, sem mudar ações ou posições. */
 .cp-bottom .cp-bottom-inner{
   border-color:color-mix(in srgb,var(--cp-accent-light) 13%,var(--cp-line-strong))!important;
-  box-shadow:0 15px 36px rgba(0,12,30,.22),inset 0 1px rgba(180,210,245,.07)!important;
+  box-shadow:0 15px 36px rgba(11,30,22,.22),inset 0 1px rgba(193,241,220,.07)!important;
 }
 .cp-bottom button{transition:color .18s ease,transform .18s ease}
 .cp-bottom button:focus-visible,
@@ -167,7 +167,7 @@
 .cp-bottom button:active{transform:scale(.96)}
 .cp-bottom button.active{font-weight:750}
 .cp-bottom .cp-add-main{
-  box-shadow:0 11px 28px rgba(33,115,243,.35),0 0 0 1px rgba(45,212,191,.16),inset 0 1px rgba(255,255,255,.19)!important;
+  box-shadow:0 11px 28px rgba(76,200,144,.35),0 0 0 1px rgba(45,212,191,.16),inset 0 1px rgba(255,255,255,.19)!important;
 }
 
 /* Identidade CONTROLE+: azul como base, teal da marca nos sinais positivos. */
@@ -181,37 +181,37 @@
 
 /* Modal Registrar: mais contraste para não parecer desabilitado. */
 .cp-action-sheet>button{
-  border-color:rgba(72,126,186,.28)!important;
+  border-color:rgba(88,157,126,.28)!important;
   background:linear-gradient(145deg,#ffffff 0%,#f3f8ff 100%)!important;
-  box-shadow:0 8px 20px rgba(26,72,122,.09),inset 0 1px rgba(255,255,255,.8)!important;
-  color:#0b1729!important;
+  box-shadow:0 8px 20px rgba(47,104,78,.09),inset 0 1px rgba(255,255,255,.8)!important;
+  color:#10271d!important;
   transition:transform .16s ease,border-color .16s ease,box-shadow .16s ease,background .16s ease!important;
 }
 .cp-action-sheet>button>span{
-  background:linear-gradient(145deg,#e6f3ff,#e8fbf6)!important;
-  color:#149bc1!important;
-  border:1px solid rgba(20,155,193,.12);
+  background:linear-gradient(145deg,#e6f1e8,#e8fbf6)!important;
+  color:#39a273!important;
+  border:1px solid rgba(57,162,115,.12);
 }
 .cp-action-sheet>button b{
-  color:#0a1526!important;
+  color:#0d1c18!important;
   font-weight:800!important;
 }
 .cp-action-sheet>button small{
-  color:#58697d!important;
+  color:#516b5f!important;
   font-weight:500;
 }
 .cp-action-sheet>button>svg{
-  color:#3e536a!important;
+  color:#415b4f!important;
 }
 .cp-action-sheet>button:hover,
 .cp-action-sheet>button:focus-visible{
   border-color:rgba(45,212,191,.56)!important;
   background:linear-gradient(145deg,#ffffff,#effbf8)!important;
-  box-shadow:0 10px 24px rgba(24,96,112,.14),0 0 0 2px rgba(45,212,191,.08)!important;
+  box-shadow:0 10px 24px rgba(43,96,72,.14),0 0 0 2px rgba(45,212,191,.08)!important;
 }
 .cp-action-sheet>button:active{
   transform:scale(.985);
-  background:linear-gradient(145deg,#eef8ff,#e9f9f4)!important;
+  background:linear-gradient(145deg,#edf5ef,#e9f9f4)!important;
 }
 .cp-action-sheet>button:active>span{
   background:#d8f5ed!important;
@@ -222,38 +222,38 @@
 .cp-app[data-theme="light"] .cp-action-sheet>button,
 [data-theme="light"] .cp-action-sheet>button{
   background:#ffffff!important;
-  border:1.5px solid #8fc7ff!important;
-  box-shadow:0 10px 24px rgba(26,92,160,.14),0 2px 6px rgba(21,68,116,.08)!important;
+  border:1.5px solid #8ad1b1!important;
+  box-shadow:0 10px 24px rgba(56,135,99,.14),0 2px 6px rgba(42,99,74,.08)!important;
   opacity:1!important;
 }
 .cp-app[data-theme="light"] .cp-action-sheet>button>span,
 [data-theme="light"] .cp-action-sheet>button>span{
-  background:linear-gradient(145deg,#dceeff,#dff8f1)!important;
-  color:#0a9ec7!important;
-  border:1px solid #9fdaf0!important;
+  background:linear-gradient(145deg,#e1fbf0,#dff8f1)!important;
+  color:#39a775!important;
+  border:1px solid #b1ecd1!important;
   box-shadow:inset 0 1px rgba(255,255,255,.95)!important;
 }
 .cp-app[data-theme="light"] .cp-action-sheet>button b,
 [data-theme="light"] .cp-action-sheet>button b{
-  color:#071a2f!important;
+  color:#112d20!important;
   font-weight:850!important;
 }
 .cp-app[data-theme="light"] .cp-action-sheet>button small,
 [data-theme="light"] .cp-action-sheet>button small{
-  color:#435a72!important;
+  color:#466255!important;
   font-weight:600!important;
 }
 .cp-app[data-theme="light"] .cp-action-sheet>button>svg,
 [data-theme="light"] .cp-action-sheet>button>svg{
-  color:#174d73!important;
+  color:#2b634a!important;
   stroke-width:2.4!important;
 }
 .cp-app[data-theme="light"] .cp-action-sheet>button:active,
 [data-theme="light"] .cp-action-sheet>button:active{
   transform:scale(.98)!important;
-  background:#eef8ff!important;
+  background:#edf5ef!important;
   border-color:#20c997!important;
-  box-shadow:0 6px 14px rgba(16,110,119,.16),0 0 0 3px rgba(32,201,151,.12)!important;
+  box-shadow:0 6px 14px rgba(40,102,74,.16),0 0 0 3px rgba(32,201,151,.12)!important;
 }
 
 @media(max-width:640px){
@@ -346,7 +346,7 @@
     margin:0!important;
     border-radius:24px!important;
     overflow:hidden!important;
-    box-shadow:0 26px 70px rgba(0,15,40,.30),0 8px 24px rgba(0,15,40,.18)!important;
+    box-shadow:0 26px 70px rgba(15,39,28,.30),0 8px 24px rgba(15,39,28,.18)!important;
   }
   .cp-modal-layer .cp-modal-scroll{
     max-height:88dvh!important;

@@ -1,11 +1,11 @@
 /* CONTROLE+ NEXT — design system incremental, acessível e reversível. */
 :root[data-theme="dark"]{
-  --cp-bg:#0b1316;
-  --cp-bg-2:#101c1f;
-  --cp-panel:#142025;
-  --cp-panel-2:#192a2d;
-  --cp-panel-3:#203337;
-  --cp-elevated:#203337;
+  --cp-bg:#0b1512;
+  --cp-bg-2:#0e1c17;
+  --cp-panel:#14221d;
+  --cp-panel-2:#1a2b23;
+  --cp-panel-3:#23372c;
+  --cp-elevated:#23372c;
   --cp-line:rgba(192,226,220,.12);
   --cp-line-strong:rgba(192,226,220,.21);
   --cp-text:#f5f8f6;
@@ -290,4 +290,184 @@
 }
 @media (prefers-reduced-motion:reduce){
   .cp-v3-insights>button,.cp-v3-sim-shortcut,.cp-primary,.cp-register-main,.cp-top-actions>button{transition:none!important;animation:none!important}
+}
+
+
+/* CONTROLE+ FOREST — identidade definitiva: verde profundo, sem azul elétrico.
+   Camada aplicada sobre estilos legados; mantém contrastes, tema claro e interações. */
+:root[data-theme="dark"]{
+  --cp-bg:#0b1512;
+  --cp-bg-2:#0e1c17;
+  --cp-panel:#14221d;
+  --cp-panel-2:#1a2b23;
+  --cp-panel-3:#23372c;
+  --cp-elevated:#20342a;
+  --cp-line:rgba(184,220,192,.12);
+  --cp-line-strong:rgba(184,220,192,.19);
+  --cp-text:#f2f6f0;
+  --cp-text-2:#d4e2d7;
+  --cp-muted:#a4b9ac;
+  --cp-muted-2:#90a99a;
+  --cp-accent:#47886a;
+  --cp-accent-strong:#2b6a50;
+  --cp-accent-light:#a0d4b2;
+  --cp-accent-soft:rgba(109,177,133,.13);
+  --cp-success:#8dd3a8;
+  --cp-glow:0 10px 30px rgba(10,63,38,.18);
+  --cp-v3-focus:0 0 0 3px rgba(115,183,141,.27);
+}
+:root[data-theme="light"]{
+  --cp-bg:#f3f6f2;
+  --cp-bg-2:#eaf1e9;
+  --cp-panel:#ffffff;
+  --cp-panel-2:#f7faf6;
+  --cp-panel-3:#e5efe6;
+  --cp-elevated:#ffffff;
+  --cp-text:#192d24;
+  --cp-text-2:#435f50;
+  --cp-muted:#667e6e;
+  --cp-muted-2:#758b79;
+  --cp-accent:#28664c;
+  --cp-accent-strong:#194f3a;
+  --cp-accent-light:#28664c;
+  --cp-accent-soft:rgba(52,122,83,.09);
+  --cp-success:#206b48;
+  --cp-glow:0 12px 32px rgba(23,79,51,.12);
+  --cp-v3-focus:0 0 0 3px rgba(61,125,83,.21);
+}
+:root[data-theme="dark"] .cp-app{
+  background:
+    radial-gradient(ellipse at 76% -20%,rgba(66,115,78,.10),transparent 48%),
+    linear-gradient(180deg,#0b1613 0%,#111f1a 100%)!important;
+}
+:root[data-theme="light"] .cp-app{
+  background:
+    radial-gradient(ellipse at 86% -15%,rgba(91,145,102,.09),transparent 45%),
+    linear-gradient(180deg,#f5f8f4 0%,#eaf1eb 100%)!important;
+}
+.cp-topbar{
+  background:color-mix(in srgb,var(--cp-bg) 90%,var(--cp-panel) 10%)!important;
+  border-bottom-color:var(--cp-line)!important;
+}
+.cp-topbar .cp-brand-mark,
+.cp-loading .cp-brand-mark,
+.cp-auth .cp-brand-mark,
+.cp-home-app .cp-register-main,
+.cp-app .cp-desktop-add,
+.cp-app .cp-primary,
+.cp-app .cp-add-main,
+.cp-bottom .cp-add-main{
+  background:linear-gradient(136deg,#194a38 0%,#276b4e 100%)!important;
+  color:#f7fff8!important;
+  border:1px solid rgba(159,219,177,.21)!important;
+  box-shadow:inset 0 1px rgba(255,255,255,.12),0 10px 24px rgba(3,30,19,.22)!important;
+}
+.cp-topbar .cp-brand-mark{
+  box-shadow:inset 0 1px rgba(255,255,255,.19),0 7px 17px rgba(0,0,0,.16)!important;
+}
+.cp-topbar .cp-brand-mark span,
+.cp-loading .cp-brand-mark span{color:#f7fff8!important}
+.cp-topbar .cp-brand-word span,
+.cp-loading .cp-brand-word span{color:#91c8a5!important}
+.cp-bottom .cp-add-main svg,
+.cp-home-app .cp-register-main svg{
+  color:#f7fff8!important;
+  stroke:#f7fff8!important;
+  opacity:1!important;
+}
+.cp-topbar .cp-admin-top.active,
+.cp-topbar .cp-manage-top.active,
+.cp-topbar .cp-theme-toggle.active{
+  background:rgba(62,122,86,.15)!important;
+  border-color:rgba(113,187,137,.32)!important;
+  color:#a7d7b6!important;
+}
+.cp-bottom .cp-bottom-inner{
+  background:color-mix(in srgb,var(--cp-panel) 96%,transparent)!important;
+  border-color:rgba(147,190,158,.20)!important;
+  box-shadow:0 14px 36px rgba(0,0,0,.24)!important;
+}
+.cp-bottom button.active,
+:root[data-theme="dark"] .cp-bottom button.active{
+  color:#9cceb0!important;
+}
+:root[data-theme="light"] .cp-bottom button.active{
+  color:#28664c!important;
+}
+.cp-bottom button:not(.active):not(.cp-add-main){color:var(--cp-muted)!important}
+.cp-home-app .cp-balance-app{
+  background:
+    radial-gradient(ellipse at 100% -6%,rgba(173,225,173,.11),transparent 49%),
+    linear-gradient(133deg,#102f26 0%,#194734 57%,#20583f 100%)!important;
+  border:1px solid rgba(177,222,188,.19)!important;
+  box-shadow:0 18px 42px rgba(1,31,20,.24),inset 0 1px rgba(255,255,255,.10)!important;
+}
+.cp-home-app .cp-balance-app:after{
+  border-color:rgba(196,239,205,.075)!important;
+  box-shadow:0 0 0 44px rgba(208,245,210,.012),0 0 0 88px rgba(208,245,210,.009)!important;
+}
+.cp-home-app .cp-balance-app-badge{
+  border-color:rgba(219,246,226,.23)!important;
+  background:rgba(221,245,226,.065)!important;
+}
+.cp-home-app .cp-today-sales{
+  background:linear-gradient(155deg,rgba(5,31,23,.37),rgba(14,56,37,.23))!important;
+  border-color:rgba(192,235,204,.15)!important;
+}
+.cp-home-app .cp-today-sales-head>div>span{color:#badbc4!important}
+.cp-home-app .cp-today-sales-head>button{
+  background:rgba(205,241,208,.10)!important;
+  border-color:rgba(205,241,208,.19)!important;
+  color:#effaef!important;
+}
+.cp-home-app .cp-balance-app-stats{
+  background:rgba(5,35,24,.24)!important;
+  border:1px solid rgba(209,238,212,.10)!important;
+}
+.cp-home-app .cp-balance-app-stats>div{
+  background:rgba(213,243,215,.04)!important;
+}
+.cp-home-app .cp-capital-track i{
+  background:linear-gradient(90deg,#67ad80,#a6d5ac)!important;
+}
+.cp-home-app .cp-capital-track em{
+  background:rgba(221,239,221,.20)!important;
+}
+.cp-home-app .cp-quick-app button>span{
+  background:var(--cp-accent-soft)!important;
+  color:var(--cp-accent-light)!important;
+}
+.cp-home-app .cp-opp-home-link,
+.cp-home-app .cp-smart-card--brand,
+.cp-home-app .cp-brique-shortcut{
+  border-color:rgba(126,174,132,.21)!important;
+}
+.cp-v3-sim-shortcut{
+  background:radial-gradient(circle at 94% 0%,rgba(159,209,166,.10),transparent 44%),
+    linear-gradient(116deg,#11271e,#24563c)!important;
+  box-shadow:0 16px 34px rgba(2,37,23,.22)!important;
+}
+.cp-v3-sim-shortcut-icon{
+  color:#b0d6b7!important;
+  background:rgba(195,233,196,.10)!important;
+}
+.cp-v3-profit-hero.is-positive{
+  background:radial-gradient(circle at 93% -12%,rgba(169,214,171,.12),transparent 48%),
+    linear-gradient(135deg,#143427,#236147)!important;
+}
+.cp-v3-projection>button{
+  background:linear-gradient(125deg,#20563f,#2e7152)!important;
+  color:#fff!important;
+}
+.cp-v3-feature-label,
+.cp-v3-eyebrow,
+.cp-v3-back:hover,
+.cp-v3-reset{color:var(--cp-accent-light)!important}
+:root[data-theme="light"] .cp-v3-feature-label,
+:root[data-theme="light"] .cp-v3-eyebrow,
+:root[data-theme="light"] .cp-v3-back:hover,
+:root[data-theme="light"] .cp-v3-reset{color:var(--cp-accent)!important}
+@media (max-width:640px){
+  .cp-topbar .cp-brand-mark{border-radius:12px!important}
+  .cp-home-app .cp-register-main{min-height:43px!important}
 }
