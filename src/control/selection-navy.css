@@ -1,0 +1,477 @@
+/* CONTROLE+ · SELECTION NAVY
+ * Identidade inspirada no card "Seleção CONTROLE+": azul noturno,
+ * cartões brancos com acentos azuis e status financeiros semânticos.
+ * Importado por último. Não altera regras de negócio. */
+
+:root[data-theme="light"]{
+  color-scheme:light;
+  --cp-bg:#f3f6fa;
+  --cp-bg-2:#ecf2f8;
+  --cp-panel:#fff;
+  --cp-panel-2:#f7f9fc;
+  --cp-panel-3:#eaf0f8;
+  --cp-elevated:#fff;
+  --cp-line:rgba(28,56,94,.105);
+  --cp-line-strong:rgba(28,56,94,.18);
+  --cp-text:#13253d;
+  --cp-text-2:#3c526a;
+  --cp-muted:#66798c;
+  --cp-muted-2:#8494a6;
+  --cp-accent:#214d80;
+  --cp-accent-strong:#123762;
+  --cp-accent-light:#326ba0;
+  --cp-accent-soft:rgba(43,100,164,.085);
+  --cp-success:#137c59;
+  --cp-danger:#c44352;
+  --cp-shadow:0 12px 34px rgba(16,47,83,.065);
+  --cp-glow:0 12px 25px rgba(16,58,105,.18);
+  --cp-v3-focus:0 0 0 3px rgba(61,135,207,.20);
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --cp-bg:#081321;
+  --cp-bg-2:#0c1a2e;
+  --cp-panel:#122239;
+  --cp-panel-2:#192d47;
+  --cp-panel-3:#213a58;
+  --cp-elevated:#1a304c;
+  --cp-line:rgba(189,216,248,.12);
+  --cp-line-strong:rgba(189,216,248,.21);
+  --cp-text:#f4f7fe;
+  --cp-text-2:#cfddef;
+  --cp-muted:#a7bbd0;
+  --cp-muted-2:#8fa8bf;
+  --cp-accent:#73b7ee;
+  --cp-accent-strong:#3576b3;
+  --cp-accent-light:#a3d3fb;
+  --cp-accent-soft:rgba(96,157,230,.16);
+  --cp-success:#80d6b1;
+  --cp-danger:#ffa0ae;
+  --cp-shadow:0 18px 45px rgba(2,8,20,.20);
+  --cp-glow:0 12px 30px rgba(34,99,165,.19);
+}
+:root[data-theme="light"],
+:root[data-theme="light"] body{
+  background:#f3f6fa!important;color:#13253d!important;
+}
+:root[data-theme="light"] .cp-app{
+  background:radial-gradient(ellipse at 80% -24%,rgba(125,176,233,.14),transparent 40%),
+    linear-gradient(180deg,#f8fafc 0%,#eff4f9 60%,#f4f7fb 100%)!important;
+  color:var(--cp-text)!important;
+}
+:root[data-theme="dark"] .cp-app{
+  background:radial-gradient(ellipse at 80% -22%,rgba(35,105,181,.14),transparent 42%),
+    linear-gradient(180deg,#081321,#101f32)!important;
+}
+:root[data-theme="light"] .cp-topbar{
+  background:rgba(255,255,255,.965)!important;
+  border-color:#dce5f0!important;
+  box-shadow:0 5px 24px rgba(19,49,82,.065)!important;
+}
+:root[data-theme="dark"] .cp-topbar{
+  background:rgba(8,19,35,.96)!important;
+  border-color:var(--cp-line)!important;
+}
+:root[data-theme="light"] .cp-brand-word,
+:root[data-theme="light"] .cp-topbar .cp-brand-word{
+  color:#13273f!important;
+}
+:root[data-theme="light"] .cp-brand-word span,
+:root[data-theme="light"] .cp-topbar .cp-brand-word span,
+:root[data-theme="light"] .cp-auth .cp-brand-word span{color:#2b6c9e!important}
+:root[data-theme="light"] .cp-topbar .cp-brand-mark,
+:root[data-theme="light"] .cp-auth .cp-brand-mark,
+:root[data-theme="light"] .cp-onboarding .cp-brand-mark,
+:root[data-theme="light"] .cp-loading .cp-brand-mark,
+:root[data-theme="dark"] .cp-topbar .cp-brand-mark,
+:root[data-theme="dark"] .cp-auth .cp-brand-mark{
+  background:linear-gradient(139deg,#19497d 0%,#102e55 68%,#09223d 100%)!important;
+  border:1px solid rgba(159,196,241,.16)!important;
+  box-shadow:inset 0 1px rgba(255,255,255,.18),0 9px 22px rgba(12,52,100,.18)!important;
+  color:#fff!important;
+}
+:root[data-theme="light"] .cp-topbar .cp-brand-mark span,
+:root[data-theme="light"] .cp-auth .cp-brand-mark span,
+:root[data-theme="dark"] .cp-topbar .cp-brand-mark span{color:#fff!important}
+:root[data-theme="light"] .cp-top-actions>button,
+:root[data-theme="light"] .cp-manage-top,
+:root[data-theme="light"] .cp-theme-toggle{
+  background:#f9fbff!important;
+  border:1px solid #dce6f2!important;
+  color:#264d79!important;
+  box-shadow:0 4px 13px rgba(24,66,111,.045)!important;
+}
+:root[data-theme="light"] .cp-top-actions>button:hover{
+  background:#edf4fb!important;
+  border-color:#bed1e8!important;
+}
+:root[data-theme="light"] .cp-top-actions .cp-admin-top.active{
+  background:#e8f2ff!important;color:#27669d!important;
+  border-color:#b9d6f3!important;
+}
+:root[data-theme="light"] .cp-user-btn>span{
+  background:#eff4fa!important;color:#173e68!important;
+  border-color:#d7e3ee!important;
+}
+:root[data-theme="light"] .cp-app-greeting h1,
+:root[data-theme="light"] .cp-page-title h1,
+:root[data-theme="light"] .cp-business-title h1{
+  color:#14283f!important;
+}
+:root[data-theme="light"] .cp-app-greeting p,
+:root[data-theme="light"] .cp-app-greeting>div>span,
+:root[data-theme="light"] .cp-page-title p{color:#687b8d!important}
+:root[data-theme="light"] .cp-primary,
+:root[data-theme="light"] .cp-desktop-add,
+:root[data-theme="light"] .cp-home-app .cp-register-main,
+:root[data-theme="light"] .cp-app .cp-add-main,
+:root[data-theme="light"] .cp-bottom .cp-add-main{
+  background:linear-gradient(125deg,#1d5289 0%,#153961 57%,#0b294a 100%)!important;
+  color:#fff!important;
+  border:1px solid rgba(98,165,222,.22)!important;
+  box-shadow:0 11px 24px rgba(14,56,100,.18)!important;
+}
+:root[data-theme="dark"] .cp-primary,
+:root[data-theme="dark"] .cp-desktop-add,
+:root[data-theme="dark"] .cp-home-app .cp-register-main,
+:root[data-theme="dark"] .cp-app .cp-add-main{
+  background:linear-gradient(125deg,#255f98,#19426e 58%,#122e54)!important;
+  color:#fff!important;border-color:rgba(153,198,246,.28)!important;
+  box-shadow:0 12px 25px rgba(3,17,40,.22)!important;
+}
+:root[data-theme="light"] .cp-home-app .cp-register-main svg,
+:root[data-theme="light"] .cp-bottom .cp-add-main svg,
+:root[data-theme="dark"] .cp-bottom .cp-add-main svg{color:#fff!important;stroke:#fff!important}
+:root[data-theme="light"] .cp-home-app .cp-balance-app,
+:root[data-theme="dark"] .cp-home-app .cp-balance-app{
+  isolation:isolate;position:relative;overflow:hidden;
+  border-radius:26px!important;
+  background:
+    radial-gradient(ellipse at 103% -5%,rgba(62,151,230,.26),transparent 48%),
+    linear-gradient(125deg,#153e6f 0%,#102f56 53%,#0a213f 100%)!important;
+  border:1px solid rgba(117,185,247,.24)!important;
+  box-shadow:0 21px 47px rgba(8,34,69,.19),inset 0 1px rgba(240,249,255,.13)!important;
+  color:#fff!important;
+}
+:root[data-theme="light"] .cp-home-app .cp-balance-app:before,
+:root[data-theme="dark"] .cp-home-app .cp-balance-app:before{
+  content:"";position:absolute;z-index:0;pointer-events:none;
+  right:-20%;top:-74%;width:85%;height:130%;border-radius:50%;
+  transform:rotate(-18deg);
+  background:linear-gradient(140deg,rgba(47,137,217,.40),rgba(16,72,136,.18) 60%,rgba(16,65,117,.05));
+  border-bottom:1px solid rgba(99,180,255,.45);
+  box-shadow:0 16px 40px rgba(22,108,195,.12);
+}
+:root[data-theme="light"] .cp-home-app .cp-balance-app:after,
+:root[data-theme="dark"] .cp-home-app .cp-balance-app:after{
+  content:"";position:absolute;z-index:0;pointer-events:none;
+  right:-37%;top:-52%;width:77%;height:100%;border-radius:50%;
+  border:1px solid rgba(124,200,254,.24);
+  box-shadow:0 0 0 37px rgba(138,195,255,.021),0 0 0 81px rgba(138,195,255,.014)!important;
+}
+:root[data-theme="light"] .cp-home-app .cp-balance-app-top,
+:root[data-theme="dark"] .cp-home-app .cp-balance-app-top,
+:root[data-theme="light"] .cp-home-app .cp-today-sales,
+:root[data-theme="dark"] .cp-home-app .cp-today-sales{position:relative;z-index:1}
+:root[data-theme="light"] .cp-home-app .cp-balance-app-top>div>span,
+:root[data-theme="dark"] .cp-home-app .cp-balance-app-top>div>span{
+  color:#e8f4ff!important;
+}
+:root[data-theme="light"] .cp-home-app .cp-balance-app-top strong,
+:root[data-theme="dark"] .cp-home-app .cp-balance-app-top strong{color:#fff!important}
+:root[data-theme="light"] .cp-home-app .cp-balance-app-badge,
+:root[data-theme="dark"] .cp-home-app .cp-balance-app-badge{
+  background:rgba(232,244,255,.08)!important;
+  color:#f2faff!important;
+  border:1px solid rgba(228,245,255,.56)!important;
+}
+:root[data-theme="light"] .cp-home-app .cp-today-sales,
+:root[data-theme="dark"] .cp-home-app .cp-today-sales{
+  background:linear-gradient(145deg,rgba(5,27,57,.42),rgba(12,44,87,.38))!important;
+  border:1px solid rgba(168,210,255,.31)!important;
+  box-shadow:inset 0 1px rgba(242,250,255,.055)!important;
+}
+:root[data-theme="light"] .cp-home-app .cp-today-sales-head>div>span,
+:root[data-theme="dark"] .cp-home-app .cp-today-sales-head>div>span{color:#98d8ff!important}
+:root[data-theme="light"] .cp-home-app .cp-today-sales-head>div>small,
+:root[data-theme="dark"] .cp-home-app .cp-today-sales-head>div>small{color:#d8e6f7!important}
+:root[data-theme="light"] .cp-home-app .cp-today-sales-head>div>b,
+:root[data-theme="dark"] .cp-home-app .cp-today-sales-head>div>b{color:#fff!important}
+:root[data-theme="light"] .cp-home-app .cp-today-sales-head>button,
+:root[data-theme="dark"] .cp-home-app .cp-today-sales-head>button{
+  background:#f5f9ff!important;color:#133963!important;
+  border:1px solid rgba(255,255,255,.75)!important;
+  box-shadow:0 8px 20px rgba(5,18,39,.17)!important;
+}
+:root[data-theme="light"] .cp-home-app .cp-today-sales-head>button svg,
+:root[data-theme="dark"] .cp-home-app .cp-today-sales-head>button svg{color:#133963!important}
+:root[data-theme="light"] .cp-reference-metrics,
+:root[data-theme="dark"] .cp-reference-metrics{
+  background:var(--cp-line)!important;
+  border-color:var(--cp-line-strong)!important;
+  box-shadow:0 11px 27px rgba(14,51,91,.055);
+}
+:root[data-theme="light"] .cp-reference-metric{
+  background:#fff!important;
+}
+:root[data-theme="light"] .cp-reference-metric-icon{
+  background:linear-gradient(145deg,#eff5fe,#e0edfa)!important;
+  color:#295d92!important;
+}
+:root[data-theme="light"] .cp-reference-metric>div>span{color:#53667a!important}
+:root[data-theme="light"] .cp-reference-metric b{
+  color:#1c456d!important;
+}
+:root[data-theme="light"] .cp-reference-metric b.positive,
+:root[data-theme="dark"] .cp-reference-metric b.positive{color:var(--cp-success)!important}
+:root[data-theme="light"] .cp-reference-metric b.negative,
+:root[data-theme="dark"] .cp-reference-metric b.negative{color:var(--cp-danger)!important}
+:root[data-theme="light"] .cp-home-app .cp-reference-capital{
+  background:linear-gradient(105deg,#e8f0f9,#f0f5fb)!important;
+  border:1px solid #e0e8f2!important;
+}
+:root[data-theme="light"] .cp-home-app .cp-reference-capital .cp-capital-track{
+  background:#d1deee!important;
+}
+:root[data-theme="light"] .cp-home-app .cp-reference-capital .cp-capital-track i{
+  background:linear-gradient(90deg,#265f98,#3e81be)!important;
+}
+:root[data-theme="light"] .cp-home-app .cp-reference-capital .cp-capital-track em{
+  background:#a5bdd8!important;
+}
+:root[data-theme="light"] .cp-home-app .cp-reference-capital .cp-capital-track-labels span{
+  color:#214a72!important;
+}
+:root[data-theme="light"] .cp-home-app .cp-quick-app button,
+:root[data-theme="light"] .cp-v3-insights>button,
+:root[data-theme="light"] .cp-home-app .cp-month-app-grid>div,
+:root[data-theme="light"] .cp-product-card,
+:root[data-theme="light"] .cp-stock-summary>div,
+:root[data-theme="light"] .cp-sales-hero>div,
+:root[data-theme="light"] .cp-cash-breakdown>div,
+:root[data-theme="light"] .cp-report-panel,
+:root[data-theme="light"] .cp-business-tool,
+:root[data-theme="light"] .cp-kpi,
+:root[data-theme="light"] .cp-smart-card,
+:root[data-theme="light"] .cp-empty,
+:root[data-theme="light"] .cp-sale-row,
+:root[data-theme="light"] .cp-cash-row{
+  background:#fff!important;
+  color:#172a42!important;
+  border-color:#e0e7f0!important;
+  box-shadow:0 9px 26px rgba(13,41,83,.06)!important;
+}
+:root[data-theme="light"] .cp-home-app .cp-quick-app button:hover,
+:root[data-theme="light"] .cp-v3-insights>button:hover{
+  border-color:#a9c9e9!important;box-shadow:0 14px 30px rgba(12,55,105,.12)!important;
+}
+:root[data-theme="light"] .cp-home-app .cp-quick-app button>span,
+:root[data-theme="light"] .cp-v3-insight-icon,
+:root[data-theme="light"] .cp-smart-icon{
+  background:linear-gradient(145deg,#edf5fd,#e3effb)!important;
+  color:#326a9f!important;
+}
+:root[data-theme="light"] .cp-home-app .cp-quick-app button>span svg,
+:root[data-theme="light"] .cp-v3-insights .cp-v3-insight-icon svg{color:#326a9f!important}
+:root[data-theme="light"] .cp-home-app .cp-quick-app button b,
+:root[data-theme="light"] .cp-home-app .cp-smart-card h2{
+  color:#172a42!important;
+}
+:root[data-theme="light"] .cp-home-app .cp-quick-app button small,
+:root[data-theme="light"] .cp-v3-insights em,
+:root[data-theme="light"] .cp-v3-insights small,
+:root[data-theme="light"] .cp-home-app .cp-smart-card p{
+  color:#687b8e!important;
+}
+:root[data-theme="light"] .cp-home-app .cp-smart-card--brand,
+:root[data-theme="light"] .cp-home-app .cp-smart-card--soft{
+  background:linear-gradient(112deg,#edf5ff,#fff 58%)!important;
+  border-color:#d7e8f9!important;
+}
+:root[data-theme="light"] .cp-home-app .cp-smart-card--brand::before{
+  background:linear-gradient(#399ade,#1e5c95)!important;
+}
+:root[data-theme="light"] .cp-home-app .cp-smart-card>div:nth-child(2)>span,
+:root[data-theme="light"] .cp-home-app .cp-smart-card>button{
+  color:#2c689e!important;
+}
+:root[data-theme="light"] .cp-home-app .cp-smart-card>button{
+  background:#e7f2fc!important;border-radius:12px!important;
+}
+:root[data-theme="light"] .cp-home-app .cp-smart-card--warn{
+  background:linear-gradient(112deg,#fff8ed,#fff 56%)!important;
+  border-color:#f1dfc8!important;
+}
+:root[data-theme="light"] .cp-home-app .cp-opp-home-link,
+:root[data-theme="dark"] .cp-home-app .cp-opp-home-link{
+  background:linear-gradient(120deg,rgba(20,76,142,.95),rgba(9,37,75,.98) 66%,rgba(13,47,91,.97))!important;
+  border:1px solid rgba(112,185,255,.33)!important;
+  box-shadow:0 14px 31px rgba(4,32,77,.21)!important;
+  color:#fff!important;
+}
+:root[data-theme="light"] .cp-home-app .cp-opp-home-copy small,
+:root[data-theme="dark"] .cp-home-app .cp-opp-home-copy small{color:#8fd8ff!important}
+:root[data-theme="light"] .cp-home-app .cp-opp-home-copy em,
+:root[data-theme="dark"] .cp-home-app .cp-opp-home-copy em{color:#d3e6f8!important}
+:root[data-theme="light"] .cp-home-app .cp-opp-home-icon,
+:root[data-theme="dark"] .cp-home-app .cp-opp-home-icon{
+  background:rgba(59,145,234,.23)!important;
+  border-color:rgba(146,215,255,.31)!important;
+  color:#9bd6ff!important;
+}
+:root[data-theme="light"] .cp-v3-sim-shortcut,
+:root[data-theme="dark"] .cp-v3-sim-shortcut{
+  background:radial-gradient(circle at 92% 0%,rgba(73,152,231,.20),transparent 43%),
+    linear-gradient(115deg,#143d70,#09254c)!important;
+  border:1px solid rgba(124,185,247,.30)!important;
+  box-shadow:0 14px 33px rgba(3,28,69,.18)!important;
+  color:#f6fbff!important;
+}
+:root[data-theme="light"] .cp-v3-sim-shortcut-icon,
+:root[data-theme="dark"] .cp-v3-sim-shortcut-icon{
+  background:rgba(101,163,226,.19)!important;
+  color:#a1d7ff!important;
+}
+:root[data-theme="light"] .cp-v3-sim-shortcut small,
+:root[data-theme="dark"] .cp-v3-sim-shortcut small{color:#94d8ff!important}
+:root[data-theme="light"] .cp-v3-sim-shortcut strong,
+:root[data-theme="dark"] .cp-v3-sim-shortcut strong{color:#fff!important}
+:root[data-theme="light"] .cp-v3-sim-shortcut em,
+:root[data-theme="dark"] .cp-v3-sim-shortcut em{color:#d5e6f7!important}
+:root[data-theme="light"] .cp-v3-sim-shortcut>svg,
+:root[data-theme="dark"] .cp-v3-sim-shortcut>svg{color:#a0d8ff!important}
+:root[data-theme="light"] .cp-bottom .cp-bottom-inner{
+  background:rgba(255,255,255,.97)!important;
+  border-color:#dce6f2!important;
+  box-shadow:0 15px 35px rgba(14,40,82,.14)!important;
+}
+:root[data-theme="light"] .cp-bottom button.active,
+:root[data-theme="light"] .cp-bottom button.active svg{
+  color:#164575!important;
+}
+:root[data-theme="light"] .cp-bottom button:not(.active):not(.cp-add-main){
+  color:#7b8897!important;
+}
+:root[data-theme="dark"] .cp-bottom .cp-bottom-inner{
+  background:rgba(13,30,53,.97)!important;
+  border-color:var(--cp-line-strong)!important;
+}
+:root[data-theme="dark"] .cp-bottom button.active,
+:root[data-theme="dark"] .cp-bottom button.active svg{color:#a4d7ff!important}
+:root[data-theme="light"] .cp-eyebrow,
+:root[data-theme="light"] .cp-card-kicker,
+:root[data-theme="light"] .cp-page-title span,
+:root[data-theme="light"] .cp-section-head span,
+:root[data-theme="light"] .cp-app-section-head span{color:#2b679d!important}
+:root[data-theme="light"] .cp-filter-tabs button,
+:root[data-theme="light"] .cp-search,
+:root[data-theme="light"] .cp-secondary,
+:root[data-theme="light"] .cp-modal,
+:root[data-theme="light"] .cp-action-sheet>button,
+:root[data-theme="light"] .cp-v3-sim-panel,
+:root[data-theme="light"] .cp-input-icon,
+:root[data-theme="light"] .cp-v3-sim-control{
+  background:#fff!important;
+  color:#1a344f!important;
+  border-color:#dbe6f2!important;
+}
+:root[data-theme="light"] .cp-filter-tabs button.active,
+:root[data-theme="light"] .cp-kind-toggle button.active{
+  background:#eaf3fd!important;
+  border-color:#b7d4f0!important;
+  color:#1b568b!important;
+}
+:root[data-theme="light"] .cp-field input,
+:root[data-theme="light"] .cp-field select,
+:root[data-theme="light"] .cp-field textarea,
+:root[data-theme="light"] .cp-money-input,
+:root[data-theme="light"] .cp-input-suffix{
+  background:#f9fbfe!important;
+  color:#172d48!important;
+  border-color:#dbe6f2!important;
+}
+:root[data-theme="light"] .cp-field input:focus,
+:root[data-theme="light"] .cp-field select:focus,
+:root[data-theme="light"] .cp-field textarea:focus{
+  border-color:#8bb8e4!important;
+  box-shadow:0 0 0 3px rgba(49,132,211,.13)!important;
+}
+:root[data-theme="light"] .cp-app button:focus-visible{
+  outline:2px solid #3789d2!important;outline-offset:3px;
+}
+:root[data-theme="light"] .cp-action-sheet>button{
+  background:#fff!important;
+  border-color:#dbe8f7!important;
+  box-shadow:0 6px 18px rgba(11,55,111,.065)!important;
+}
+:root[data-theme="light"] .cp-action-sheet>button>span{
+  background:#e6f1fb!important;
+  color:#29699e!important;
+  border-color:#cfdef2!important;
+}
+:root[data-theme="light"] .cp-action-sheet>button b,
+:root[data-theme="light"] .cp-modal-head h2{color:#152d47!important}
+:root[data-theme="light"] .cp-action-sheet>button small{color:#64788a!important}
+:root[data-theme="light"] .cp-cash-card{
+  background:radial-gradient(ellipse at 94% 2%,rgba(45,143,234,.21),transparent 43%),
+    linear-gradient(132deg,#173f70,#0b2a50)!important;
+  border-color:rgba(132,185,245,.26)!important;
+  box-shadow:0 18px 36px rgba(10,47,97,.17)!important;
+}
+:root[data-theme="light"] .cp-cash-card>span,
+:root[data-theme="light"] .cp-cash-card>p{color:#dceafb!important}
+:root[data-theme="light"] .cp-cash-card>strong{color:#fff!important}
+:root[data-theme="light"] .cp-auth,
+:root[data-theme="light"] .cp-onboarding,
+:root[data-theme="light"] .cp-loading,
+:root[data-theme="light"] .cp-fatal{
+  background:linear-gradient(136deg,#f9fcff,#eaf2fa)!important;
+  color:#162c48!important;
+}
+:root[data-theme="light"] .cp-auth-card,
+:root[data-theme="light"] .cp-onboarding-card{
+  background:#fff!important;
+  border:1px solid #dce7f2!important;
+  box-shadow:0 24px 61px rgba(14,51,104,.09)!important;
+}
+:root[data-theme="light"] .cp-auth-promise h1,
+:root[data-theme="light"] .cp-onboarding-body h1,
+:root[data-theme="light"] .cp-auth-card h2{
+  color:#132d4b!important;
+}
+:root[data-theme="light"] .cp-auth-promise em{color:#2a6c9d!important}
+:root[data-theme="light"] .cp-auth-promise p,
+:root[data-theme="light"] .cp-auth-sub,
+:root[data-theme="light"] .cp-onboarding-body p{color:#6b7e90!important}
+:root[data-theme="light"] .cp-auth-theme,
+:root[data-theme="light"] .cp-onboarding-theme{
+  background:#fff!important;
+  border-color:#d6e5f5!important;
+  color:#265c8c!important;
+}
+:root[data-theme="light"] .cp-auth-glow,
+:root[data-theme="light"] .cp-onboarding-glow{opacity:.075!important}
+:root[data-theme="light"] .cp-v3-profit-hero.is-positive{
+  background:linear-gradient(130deg,#164577,#0b2a50)!important;
+  color:#fff!important;
+}
+:root[data-theme="light"] .cp-v3-projection>button{
+  background:linear-gradient(130deg,#255c95,#123c69)!important;
+  color:#fff!important;
+}
+:root[data-theme="light"] .cp-v3-sim-page .cp-v3-price-guides>div{
+  background:#f2f7fc!important;
+}
+:root[data-theme="light"] .cp-v3-sim-field>span,
+:root[data-theme="light"] .cp-v3-section-title h2{color:#203e62!important}
+:root[data-theme="light"] .cp-business-title,
+:root[data-theme="light"] .cp-business-tool{
+  border-color:#dce6f0!important;
+}
+@media(max-width:580px){
+  :root[data-theme="light"] .cp-home-app .cp-balance-app,
+  :root[data-theme="dark"] .cp-home-app .cp-balance-app{border-radius:24px!important}
+}
+@media(prefers-reduced-motion:reduce){
+  :root[data-theme="light"] .cp-home-app .cp-balance-app{animation:none!important}
+}
