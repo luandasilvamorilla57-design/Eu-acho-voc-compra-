@@ -21,6 +21,7 @@ import {ProfitSimulatorPage} from './ProfitSimulatorPage'
 import {FeedbackPrompt} from './FeedbackPrompt'
 import './control-home-refinement.css'
 import './next-premium.css'
+import './reference-light.css'
 import type {CashEntry,ControlView,Product,Sale} from './types'
 
 type Data=ReturnType<typeof useControlData>
@@ -60,13 +61,12 @@ export function ControlApp({userId,email}:{userId:string;email?:string}){
   const [trialWelcomeDismissed,setTrialWelcomeDismissed]=useState(false)
   const [theme,setTheme]=useState<'dark'|'light'>(()=>{
     const saved=window.localStorage.getItem('controle-plus-theme')
-    if(saved==='light'||saved==='dark')return saved
-    return window.matchMedia?.('(prefers-color-scheme: light)').matches?'light':'dark'
+    return saved==='dark'?'dark':'light'
   })
   useEffect(()=>{
     window.localStorage.setItem('controle-plus-theme',theme)
     document.documentElement.dataset.theme=theme
-    document.querySelector('meta[name="theme-color"]')?.setAttribute('content',theme==='light'?'#f3f6f2':'#0b1512')
+    document.querySelector('meta[name="theme-color"]')?.setAttribute('content',theme==='light'?'#ffffff':'#0b1512')
   },[theme])
   const calc=useMemo(()=>buildMetrics(data),[data.settings,data.products,data.expenses,data.sales,data.saleItems,data.cashEntries])
 
@@ -381,12 +381,27 @@ function HomePage({data,calc,onOpenProduct,onView,onAction,onCheckListing}:{data
           </div>
         </>}
       </section>
-      <div className="cp-balance-app-stats cp-balance-app-stats--four">
+    </section>
+
+    <section className="cp-reference-metrics" aria-label="Indicadores de desempenho">
+      <div className="cp-reference-metric">
+        <span className="cp-reference-metric-icon"><CircleDollarSign size={22}/></span>
         <div><span>Capital em estoque</span><b>{money.format(calc.stockCapital)}</b></div>
+      </div>
+      <div className="cp-reference-metric">
+        <span className="cp-reference-metric-icon"><ArrowUpRight size={22}/></span>
         <div><span>Lucro no mês</span><b className={calc.monthProfit>=0?'positive':'negative'}>{money.format(calc.monthProfit)}</b></div>
+      </div>
+      <div className="cp-reference-metric">
+        <span className="cp-reference-metric-icon"><ShoppingBag size={22}/></span>
         <div><span>Itens vendidos</span><b>{calc.monthUnitsSold} un.</b></div>
+      </div>
+      <div className="cp-reference-metric">
+        <span className="cp-reference-metric-icon"><Package size={22}/></span>
         <div><span>Pedidos fechados</span><b>{calc.monthOrders}</b></div>
       </div>
+    </section>
+    <section className="cp-reference-capital" aria-label="Distribuição do capital">
       <div className="cp-capital-track"><i style={{width:cashPct+'%'}}/><em style={{width:stockPct+'%'}}/></div>
       <div className="cp-capital-track-labels"><span>{cashPct.toFixed(0)}% livre</span><span>{stockPct.toFixed(0)}% em produtos</span></div>
     </section>
