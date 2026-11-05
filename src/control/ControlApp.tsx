@@ -404,6 +404,7 @@ function HomePage({data,calc,onOpenProduct,onView,onAction,onCheckListing}:{data
     <section className="cp-reference-capital" aria-label="Distribuição do capital">
       <div className="cp-capital-track"><i style={{width:cashPct+'%'}}/><em style={{width:stockPct+'%'}}/></div>
       <div className="cp-capital-track-labels"><span>{cashPct.toFixed(0)}% livre</span><span>{stockPct.toFixed(0)}% em produtos</span></div>
+    </section>
 
     <section className="cp-v3-insights" aria-label="Resumo de gestão">
       <button onClick={()=>onView('receivables')}><span className="cp-v3-insight-icon"><ReceiptText size={20}/></span><span><small>A RECEBER</small><strong>{money.format(amountToReceive)}</strong><em>{overdueInstallments.length?overdueInstallments.length+' parcela(s) atrasada(s)':'Parcelas sob controle'}</em></span><ChevronRight size={16}/></button>
