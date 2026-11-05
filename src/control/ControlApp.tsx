@@ -22,6 +22,7 @@ import {FeedbackPrompt} from './FeedbackPrompt'
 import './control-home-refinement.css'
 import './next-premium.css'
 import './reference-light.css'
+import './selection-navy.css'
 import type {CashEntry,ControlView,Product,Sale} from './types'
 
 type Data=ReturnType<typeof useControlData>
@@ -66,7 +67,7 @@ export function ControlApp({userId,email}:{userId:string;email?:string}){
   useEffect(()=>{
     window.localStorage.setItem('controle-plus-theme',theme)
     document.documentElement.dataset.theme=theme
-    document.querySelector('meta[name="theme-color"]')?.setAttribute('content',theme==='light'?'#ffffff':'#0b1512')
+    document.querySelector('meta[name="theme-color"]')?.setAttribute('content',theme==='light'?'#f3f6fa':'#081321')
   },[theme])
   const calc=useMemo(()=>buildMetrics(data),[data.settings,data.products,data.expenses,data.sales,data.saleItems,data.cashEntries])
 

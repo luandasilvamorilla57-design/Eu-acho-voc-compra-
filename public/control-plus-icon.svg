@@ -1,17 +1,17 @@
 <svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
 <defs>
   <linearGradient id="bg" x1="70" y1="55" x2="455" y2="470" gradientUnits="userSpaceOnUse">
-    <stop stop-color="#0B1913"/>
-    <stop offset=".55" stop-color="#174532"/>
-    <stop offset="1" stop-color="#296C4C"/>
+    <stop stop-color="#0A1D36"/>
+    <stop offset=".55" stop-color="#153C68"/>
+    <stop offset="1" stop-color="#22568E"/>
   </linearGradient>
   <linearGradient id="plus" x1="295" y1="180" x2="430" y2="340" gradientUnits="userSpaceOnUse">
-    <stop stop-color="#CCEBD3"/>
-    <stop offset="1" stop-color="#76B791"/>
+    <stop stop-color="#D7ECFF"/>
+    <stop offset="1" stop-color="#6FB9ED"/>
   </linearGradient>
 </defs>
 <rect width="512" height="512" rx="116" fill="url(#bg)"/>
 <rect x="42" y="42" width="428" height="428" rx="94" fill="none" stroke="#FFFFFF" stroke-opacity=".09" stroke-width="4"/>
-<path d="M292 161C271 145 246 137 218 137C150 137 99 187 99 256C99 325 150 375 218 375C246 375 271 367 292 351" stroke="#F5FAF4" stroke-width="40" stroke-linecap="round"/>
+<path d="M292 161C271 145 246 137 218 137C150 137 99 187 99 256C99 325 150 375 218 375C246 375 271 367 292 351" stroke="#F7FAFF" stroke-width="40" stroke-linecap="round"/>
 <path d="M365 188V324M297 256H433" stroke="url(#plus)" stroke-width="38" stroke-linecap="round"/>
 </svg>
