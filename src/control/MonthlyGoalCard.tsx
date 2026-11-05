@@ -1,5 +1,5 @@
 import {useState} from 'react'
-import {ArrowRight,Check,ChevronRight,Pencil,Target,TrendingUp,X} from 'lucide-react'
+import {ArrowRight,Check,Pencil,Target,X} from 'lucide-react'
 import type {Goal,GoalInput} from './types'
 import './monthly-goal.css'
 
@@ -111,7 +111,7 @@ export function MonthlyGoalCard({goal,month,revenue,canWrite,onBlocked,onSave}:P
         <div className="cp-month-goal-total"><span>META DEFINIDA</span><strong>{hasGoal?currency.format(target):'A definir'}</strong></div>
       </div>
       <div className="cp-month-goal-progress-top">
-        <span>{!hasGoal?'Defina sua meta para começar':achieved?'Meta alcançada!':onPace?'Você está no ritmo':'Cada venda aproxima você da meta'}</span>
+        <span>{!hasGoal?'Defina sua meta para começar':achieved?'Meta alcançada!':earned===0?'Comece pela primeira venda':onPace?'Acima do ritmo do mês':'Abaixo do ritmo esperado'}</span>
         <strong>{percentLabel}</strong>
       </div>
       <div className="cp-month-goal-track" role="progressbar" aria-label="Progresso da meta de faturamento" aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(barPercent)}><div style={{width:barPercent+'%'}}/></div>
