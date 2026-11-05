@@ -16,13 +16,12 @@ export function ControlAuth({reset=false}:{reset?:boolean}){
   const [error,setError]=useState<string|null>(null)
   const [theme,setTheme]=useState<'dark'|'light'>(()=>{
     const saved=window.localStorage.getItem('controle-plus-theme')
-    if(saved==='light'||saved==='dark')return saved
-    return window.matchMedia?.('(prefers-color-scheme: light)').matches?'light':'dark'
+    return saved==='dark'?'dark':'light'
   })
   useEffect(()=>{
     window.localStorage.setItem('controle-plus-theme',theme)
     document.documentElement.dataset.theme=theme
-    document.querySelector('meta[name="theme-color"]')?.setAttribute('content',theme==='light'?'#f3f7fc':'#07111f')
+    document.querySelector('meta[name="theme-color"]')?.setAttribute('content',theme==='light'?'#ffffff':'#0b1512')
   },[theme])
 
   const title=useMemo(()=>({
