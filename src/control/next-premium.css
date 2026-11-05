@@ -1,11 +1,11 @@
 /* CONTROLE+ NEXT — design system incremental, acessível e reversível. */
 :root[data-theme="dark"]{
-  --cp-bg:#0b1316;
-  --cp-bg-2:#101c1f;
-  --cp-panel:#142025;
-  --cp-panel-2:#192a2d;
-  --cp-panel-3:#203337;
-  --cp-elevated:#203337;
+  --cp-bg:#0b1512;
+  --cp-bg-2:#0e1c17;
+  --cp-panel:#14221d;
+  --cp-panel-2:#1a2b23;
+  --cp-panel-3:#23372c;
+  --cp-elevated:#23372c;
   --cp-line:rgba(192,226,220,.12);
   --cp-line-strong:rgba(192,226,220,.21);
   --cp-text:#f5f8f6;
