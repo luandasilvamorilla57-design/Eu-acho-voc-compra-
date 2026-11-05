@@ -18,6 +18,7 @@ import {OpportunitiesPage} from './OpportunitiesPage'
 import {BriqueGuidePage} from './BriqueGuidePage'
 import {PersonalRankingCard,PersonalRankingPage} from './PersonalRanking'
 import {ProfitSimulatorPage} from './ProfitSimulatorPage'
+import {MonthlyGoalCard} from './MonthlyGoalCard'
 import {FeedbackPrompt} from './FeedbackPrompt'
 import './control-home-refinement.css'
 import './next-premium.css'
@@ -130,7 +131,7 @@ export function ControlApp({userId,email}:{userId:string;email?:string}){
     {(!data.isAdmin||!canWrite)&&<TrialBanner access={access} onSubscribe={()=>void billing.subscribe()} onOpen={()=>canWrite?setTrialInfoOpen(true):setExpiredModalOpen(true)}/>}
     <main className="cp-main">
       {!canWrite&&!readOnlyMode?<SubscriptionGate access={access} products={data.products.length} sales={data.sales.length} stockValue={calc.stockCapital} onSubscribe={()=>void billing.subscribe()} onRefresh={()=>void billing.refresh(true)} onReadOnly={()=>{setReadOnlyMode(true);setView('home')}} busy={billing.busy} error={billing.error}/>:<>
-        {view==='home'&&<HomePage data={data} calc={calc} onOpenProduct={setSelected} onView={openView} onAction={openModal} onCheckListing={openListingCheckin}/>}
+        {view==='home'&&<HomePage data={data} calc={calc} canWrite={canWrite} onBlocked={showBlocked} onOpenProduct={setSelected} onView={openView} onAction={openModal} onCheckListing={openListingCheckin}/>}
         {view==='stock'&&<StockPage data={data} calc={calc} onOpenProduct={setSelected} onAdd={()=>openModal('stockAdd')}/>}
         {view==='sales'&&<SalesPage data={data} calc={calc} onSale={()=>openModal('sale')} onOpenProduct={setSelected}/>}
         {view==='cash'&&<CashPage data={data} calc={calc} onCash={()=>openModal('cash')} onSettings={()=>setModal('settings')}/>}
@@ -278,7 +279,7 @@ function TopBar({business,email,theme,isAdmin,adminActive,onTheme,onSettings,onM
 }
 function Brand(){return <div className="cp-brand"><span className="cp-brand-mark">C<span>+</span></span><span className="cp-brand-word">CONTROLE<span>+</span></span></div>}
 
-function HomePage({data,calc,onOpenProduct,onView,onAction,onCheckListing}:{data:Data;calc:Metrics;onOpenProduct:(p:Product)=>void;onView:(v:ControlView)=>void;onAction:(m:Modal)=>void;onCheckListing:(p:Product)=>void}){
+function HomePage({data,calc,canWrite,onBlocked,onOpenProduct,onView,onAction,onCheckListing}:{data:Data;calc:Metrics;canWrite:boolean;onBlocked:()=>void;onOpenProduct:(p:Product)=>void;onView:(v:ControlView)=>void;onAction:(m:Modal)=>void;onCheckListing:(p:Product)=>void}){
   const recent=data.products.slice(0,4)
   const totalCapital=Math.max(0,calc.cash)+calc.stockCapital
   const cashPct=totalCapital>0?Math.max(0,Math.min(100,calc.cash/totalCapital*100)):0
@@ -384,6 +385,15 @@ function HomePage({data,calc,onOpenProduct,onView,onAction,onCheckListing}:{data
         </>}
       </section>
     </section>
+
+    <MonthlyGoalCard
+      goal={data.goals.find(item=>item.period_month.slice(0,7)===todayKey.slice(0,7))}
+      month={todayKey.slice(0,7)}
+      revenue={calc.monthRevenue}
+      canWrite={canWrite}
+      onBlocked={onBlocked}
+      onSave={data.saveGoal}
+    />
 
     <section className="cp-reference-metrics" aria-label="Indicadores de desempenho">
       <div className="cp-reference-metric">
