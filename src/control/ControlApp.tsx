@@ -17,8 +17,10 @@ import {OneDayTrialModal} from './OneDayTrialModal'
 import {OpportunitiesPage} from './OpportunitiesPage'
 import {BriqueGuidePage} from './BriqueGuidePage'
 import {PersonalRankingCard,PersonalRankingPage} from './PersonalRanking'
+import {ProfitSimulatorPage} from './ProfitSimulatorPage'
 import {FeedbackPrompt} from './FeedbackPrompt'
 import './control-home-refinement.css'
+import './next-premium.css'
 import type {CashEntry,ControlView,Product,Sale} from './types'
 
 type Data=ReturnType<typeof useControlData>
@@ -99,7 +101,7 @@ export function ControlApp({userId,email}:{userId:string;email?:string}){
     requireWrite(()=>setModal(next))
   }
   function openView(next:ControlView){
-    if(canWrite||['home','stock','sales','cash','reports','backup','guide','ranking','opportunities','admin'].includes(next)){
+    if(canWrite||['home','stock','sales','cash','reports','backup','guide','ranking','opportunities','simulator','admin'].includes(next)){
       setView(next)
       return
     }
@@ -138,6 +140,7 @@ export function ControlApp({userId,email}:{userId:string;email?:string}){
         {canWrite&&view==='closures'&&<ClosuresPage data={data} onBack={()=>setView('manage')}/>}
         {view==='backup'&&<BackupPage data={data} onBack={()=>setView('home')}/>}
         {view==='guide'&&<BriqueGuidePage onBack={()=>setView(canWrite?'manage':'home')}/>}
+        {view==='simulator'&&<ProfitSimulatorPage onBack={()=>setView('home')}/>}
         {view==='opportunities'&&<OpportunitiesPage isAdmin={data.isAdmin} onBack={()=>setView('home')}/>}
         {view==='ranking'&&<PersonalRankingPage products={data.products} sales={data.sales} saleItems={data.saleItems} onBack={()=>setView('home')}/>}
         {view==='admin'&&data.isAdmin&&<AdminCenter onBack={()=>setView('home')}/>}
@@ -307,6 +310,9 @@ function HomePage({data,calc,onOpenProduct,onView,onAction,onCheckListing}:{data
     .filter(p=>p.quantity_available>0&&p.listing_status==='listed'&&!!p.listing_next_checkin_at&&p.listing_next_checkin_at<=localDate())
     .sort((a,b)=>(a.listing_next_checkin_at||'').localeCompare(b.listing_next_checkin_at||''))
   const dueListing=dueListings[0]
+  const openInstallments=data.installments.filter(item=>item.status==='open')
+  const amountToReceive=openInstallments.reduce((total,item)=>total+item.amount,0)
+  const overdueInstallments=openInstallments.filter(item=>item.due_date<todayKey)
 
   let guide={
     tone:'good',
@@ -384,6 +390,13 @@ function HomePage({data,calc,onOpenProduct,onView,onAction,onCheckListing}:{data
       <div className="cp-capital-track"><i style={{width:cashPct+'%'}}/><em style={{width:stockPct+'%'}}/></div>
       <div className="cp-capital-track-labels"><span>{cashPct.toFixed(0)}% livre</span><span>{stockPct.toFixed(0)}% em produtos</span></div>
     </section>
+
+    <section className="cp-v3-insights" aria-label="Resumo de gestão">
+      <button onClick={()=>onView('receivables')}><span className="cp-v3-insight-icon"><ReceiptText size={20}/></span><span><small>A RECEBER</small><strong>{money.format(amountToReceive)}</strong><em>{overdueInstallments.length?overdueInstallments.length+' parcela(s) atrasada(s)':'Parcelas sob controle'}</em></span><ChevronRight size={16}/></button>
+      <button onClick={()=>onView('stock')}><span className="cp-v3-insight-icon"><Package size={20}/></span><span><small>CAPITAL PARADO</small><strong>{money.format(calc.agedCapital)}</strong><em>{calc.agedProducts.length?calc.agedProducts.length+' produto(s) aguardando venda':'Sem produtos parados'}</em></span><ChevronRight size={16}/></button>
+    </section>
+
+    <button type="button" className="cp-v3-sim-shortcut" onClick={()=>onView('simulator')}><span className="cp-v3-sim-shortcut-icon"><BadgeDollarSign size={28}/></span><span><small>NOVA FERRAMENTA</small><strong>Simulador de lucro</strong><em>Descubra se vale a pena comprar antes de investir.</em></span><ChevronRight size={22}/></button>
 
     <section className="cp-quick-app">
       <button onClick={()=>onAction('purchase')}><span><ShoppingBag/></span><b>Registrar compra</b><small>Produto entra no estoque</small></button>
