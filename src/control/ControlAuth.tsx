@@ -21,7 +21,7 @@ export function ControlAuth({reset=false}:{reset?:boolean}){
   useEffect(()=>{
     window.localStorage.setItem('controle-plus-theme',theme)
     document.documentElement.dataset.theme=theme
-    document.querySelector('meta[name="theme-color"]')?.setAttribute('content',theme==='light'?'#ffffff':'#0b1512')
+    document.querySelector('meta[name="theme-color"]')?.setAttribute('content',theme==='light'?'#f3f6fa':'#081321')
   },[theme])
 
   const title=useMemo(()=>({
