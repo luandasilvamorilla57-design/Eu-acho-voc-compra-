@@ -56,7 +56,7 @@ export function ManagePage({data,onView,onBack}:{data:Data;onView:(v:ControlView
     {view:'cash' as ControlView,icon:<WalletCards/>,name:'Caixa',desc:'Dinheiro livre e movimentações.',value:money.format(cashBalance(data))},
     {view:'receivables' as ControlView,icon:<ReceiptText/>,name:'A receber',desc:'Parcelas, vencimentos e atrasos.',value:money.format(openReceivables(data)),alert:overdue.length?overdue.length+' atrasada(s)':''},
     {view:'reports' as ControlView,icon:<BarChart3/>,name:'Relatórios',desc:'Lucro, giro e categorias.',value:money.format(s.net)+' no mês'},
-    {view:'simulator' as ControlView,icon:<Calculator/>,name:'Simulador de lucro',desc:'Calcule taxas, margem e preço antes de comprar.',value:'Simular negócio'}
+    {view:'simulator' as ControlView,icon:<Calculator/>,name:'Simulador de lucro',desc:'Calcule taxas, margem e preço antes de comprar.',value:'Simular negócio'},
     {view:'people' as ControlView,icon:<UsersRound/>,name:'Pessoas',desc:'Clientes e fornecedores.',value:(data.customers.length+data.suppliers.length)+' contatos'},
     {view:'goals' as ControlView,icon:<Target/>,name:'Metas',desc:'Objetivos e progresso mensal.',value:goal?'Meta ativa':'Definir meta'},
     {view:'closures' as ControlView,icon:<CalendarCheck/>,name:'Fechamento',desc:'Resultado congelado de cada mês.',value:data.closures.length+' fechamento(s)'},
