@@ -23,6 +23,7 @@ import './control-home-refinement.css'
 import './next-premium.css'
 import './reference-light.css'
 import './selection-navy.css'
+import './mobile-refinement.css'
 import type {CashEntry,ControlView,Product,Sale} from './types'
 
 type Data=ReturnType<typeof useControlData>
