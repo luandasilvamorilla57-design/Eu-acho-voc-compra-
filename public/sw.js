@@ -1,5 +1,5 @@
-const CACHE='controle-plus-v33'
-const SHELL=['/','/manifest.webmanifest?v=14','/control-plus-icon.svg','/control-plus-maskable.svg']
+const CACHE='controle-plus-v34'
+const SHELL=['/','/manifest.webmanifest?v=15','/control-plus-icon.svg','/control-plus-maskable.svg']
 
 self.addEventListener('install',event=>{
   event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(SHELL)))
