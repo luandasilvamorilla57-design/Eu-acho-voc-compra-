@@ -587,3 +587,59 @@
     animation:none!important;
   }
 }
+
+/* Componentes novos também mantêm legibilidade caso o usuário escolha o tema escuro. */
+:root[data-theme="dark"] .cp-reference-metrics{
+  display:grid;grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:1px;overflow:hidden;
+  border:1px solid var(--cp-line);
+  border-radius:22px;
+  background:var(--cp-line);
+  margin:0 0 15px;
+}
+:root[data-theme="dark"] .cp-reference-metric{
+  display:flex;align-items:center;min-width:0;gap:12px;
+  background:var(--cp-panel);
+  min-height:102px;padding:17px;
+}
+:root[data-theme="dark"] .cp-reference-metric-icon{
+  display:grid;place-items:center;flex:0 0 41px;
+  width:41px;height:41px;border-radius:13px;
+  color:var(--cp-accent-light);
+  background:var(--cp-accent-soft);
+}
+:root[data-theme="dark"] .cp-reference-metric>div{display:grid;gap:6px;min-width:0}
+:root[data-theme="dark"] .cp-reference-metric>div>span{font-size:12px;color:var(--cp-muted)}
+:root[data-theme="dark"] .cp-reference-metric b{
+  font-weight:800;font-size:clamp(15px,2.3vw,21px);
+  font-variant-numeric:tabular-nums;color:var(--cp-text);
+  overflow-wrap:anywhere;
+}
+:root[data-theme="dark"] .cp-reference-capital{
+  background:var(--cp-panel);border:1px solid var(--cp-line);
+  border-radius:18px;padding:16px 20px;margin:0 0 20px;
+}
+:root[data-theme="dark"] .cp-reference-capital .cp-capital-track{
+  height:9px;background:var(--cp-panel-3);margin-top:0;border-radius:99px
+}
+:root[data-theme="dark"] .cp-reference-capital .cp-capital-track-labels{
+  margin-top:12px;
+}
+:root[data-theme="dark"] .cp-reference-capital .cp-capital-track-labels span{
+  font-size:12px!important;color:var(--cp-text-2)!important;
+}
+@media (max-width:820px){
+  :root[data-theme="dark"] .cp-reference-metrics{
+    grid-template-columns:repeat(2,minmax(0,1fr));
+  }
+}
+@media (max-width:580px){
+  :root[data-theme="dark"] .cp-reference-metric{
+    min-height:92px;padding:13px 11px;gap:8px;
+  }
+  :root[data-theme="dark"] .cp-reference-metric-icon{
+    flex-basis:37px;width:37px;height:37px
+  }
+  :root[data-theme="dark"] .cp-reference-metric>div>span{font-size:11px}
+  :root[data-theme="dark"] .cp-reference-metric b{font-size:15px}
+}
