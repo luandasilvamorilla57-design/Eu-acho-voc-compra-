@@ -2105,6 +2105,16 @@ body{transition:background .22s ease,color .22s ease}
   color:#fff;display:grid;place-items:center;backdrop-filter:blur(8px)
 }
 .cp-photo-manager>div button svg{width:15px}
+.cp-photo-manager>div .cp-photo-actions{
+  position:absolute;top:7px;right:7px;display:flex;align-items:center;gap:6px;z-index:1
+}
+.cp-photo-manager>div .cp-photo-actions button{
+  position:static;width:34px;height:34px;min-width:34px;border-radius:9px;cursor:pointer
+}
+.cp-photo-manager>div .cp-photo-actions .cp-photo-download{
+  background:rgba(11,54,40,.85);border-color:rgba(185,242,211,.35)
+}
+.cp-photo-manager>div .cp-photo-actions button:disabled{opacity:.55;cursor:wait}
 .cp-photo-add-tile{
   aspect-ratio:1/1;border-radius:14px;border:1px dashed rgba(92,202,152,.34);
   background:var(--cp-accent-soft);display:grid;place-items:center;align-content:center;
