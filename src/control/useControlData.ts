@@ -301,6 +301,15 @@ export function useControlData(userId:string){
     }finally{setBusy(false)}
   },[photos,userId])
 
+  const downloadProductPhoto=useCallback(async(photoId:string)=>{
+    const photo=photos.find(item=>item.id===photoId)
+    if(!photo)throw new Error('Foto não encontrada.')
+    const result=await supabase.storage.from(PHOTO_BUCKET).download(photo.storage_path)
+    if(result.error)throw result.error
+    if(!result.data)throw new Error('Não foi possível baixar a foto.')
+    return result.data
+  },[photos])
+
   const deleteProductPhoto=useCallback(async(photoId:string)=>{
     setBusy(true);setError(null)
     try{
@@ -451,7 +460,7 @@ export function useControlData(userId:string){
     settings,products,photos,expenses,sales,saleItems,cashEntries,customers,suppliers,
     receivables,installments,goals,closures,listingCheckins,grouped,isAdmin,
     loading,busy,error,load,createProduct,registerSale,addExpense,addCashEntry,updateSettings,
-    updateProduct,addProductPhotos,deleteProductPhoto,deleteProduct,createCustomer,updateCustomer,createSupplier,updateSupplier,payInstallment,
+    updateProduct,addProductPhotos,downloadProductPhoto,deleteProductPhoto,deleteProduct,createCustomer,updateCustomer,createSupplier,updateSupplier,payInstallment,
     recordListingCheckin,saveGoal,closeMonth
   }
 }
