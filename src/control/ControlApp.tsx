@@ -2,7 +2,7 @@ import {useEffect,useMemo,useState} from 'react'
 import {
   AlertTriangle,ArrowDownRight,ArrowUpRight,BadgeDollarSign,Banknote,BarChart3,Box,
   Check,ChevronRight,CircleDollarSign,Clock3,Home,ImagePlus,LogOut,Package,Plus,
-  ReceiptText,Search,Settings2,ShoppingBag,Tag,WalletCards,X,Moon,Sun,Megaphone,RefreshCw,TrendingDown,Trash2,Pencil,ShieldCheck,Sparkles
+  ReceiptText,Search,Settings2,ShoppingBag,Tag,WalletCards,X,Moon,Sun,Megaphone,RefreshCw,TrendingDown,Trash2,Download,Pencil,ShieldCheck,Sparkles
 } from 'lucide-react'
 import {supabase} from '../lib/supabase'
 import {useControlData} from './useControlData'
@@ -25,7 +25,7 @@ import './next-premium.css'
 import './reference-light.css'
 import './selection-navy.css'
 import './mobile-refinement.css'
-import type {CashEntry,ControlView,Product,Sale} from './types'
+import type {CashEntry,ControlView,Product,ProductPhoto,Sale} from './types'
 
 type Data=ReturnType<typeof useControlData>
 type Metrics=ReturnType<typeof buildMetrics>
@@ -831,6 +831,7 @@ function ProductDetail({product,data,calc,readOnly,onClose,onSale,onExpense,onSa
   const [listingDate,setListingDate]=useState(product.listing_started_at||localDate())
   const [confirmDelete,setConfirmDelete]=useState(false)
   const [error,setError]=useState<string|null>(null)
+  const [downloadingPhotoId,setDownloadingPhotoId]=useState<string|null>(null)
   const potential=product.listed_price!==null?(product.listed_price-cost)*product.quantity_available:null
   const listingDays=product.listing_status==='listed'?daysSince(product.listing_started_at||product.purchase_date):0
   const listingDue=product.listing_status==='listed'&&!!product.listing_next_checkin_at&&product.listing_next_checkin_at<=localDate()
@@ -859,6 +860,25 @@ function ProductDetail({product,data,calc,readOnly,onClose,onSale,onExpense,onSa
       const count=await data.addProductPhotos(product.id,files)
       if(count>0)onSaved()
     }catch(err:any){setError(err?.message||'Não foi possível adicionar as fotos.')}
+  }
+  async function downloadPhoto(photo:ProductPhoto,index:number){
+    setError(null)
+    setDownloadingPhotoId(photo.id)
+    try{
+      const blob=await data.downloadProductPhoto(photo.id)
+      const extension=photo.storage_path.split('.').pop()?.toLowerCase()||'jpg'
+      const safeExtension=['jpg','jpeg','png','webp','heic','heif'].includes(extension)?extension:'jpg'
+      const safeName=product.name.normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-zA-Z0-9_-]+/g,'-').replace(/^-+|-+$/g,'').slice(0,60)||'produto'
+      const url=URL.createObjectURL(blob)
+      const link=document.createElement('a')
+      link.href=url
+      link.download=`${safeName}-foto-${index+1}.${safeExtension}`
+      document.body.appendChild(link)
+      link.click()
+      link.remove()
+      window.setTimeout(()=>URL.revokeObjectURL(url),60000)
+    }catch(err:any){setError(err?.message||'Não foi possível baixar a foto.')}
+    finally{setDownloadingPhotoId(null)}
   }
   async function removePhoto(photoId:string){
     setError(null)
@@ -904,10 +924,10 @@ function ProductDetail({product,data,calc,readOnly,onClose,onSale,onExpense,onSa
     <section className="cp-detail-section">
       <div className="cp-section-head"><div><span>FOTOS</span><h2>{photos.length?photos.length+' foto(s) do produto':'Adicione fotos desse produto'}</h2></div>{readOnly?<button className="cp-detail-add-photo" onClick={onBlocked}><ImagePlus size={16}/> Adicionar</button>:<label className="cp-detail-add-photo"><ImagePlus size={16}/> Adicionar<input type="file" accept="image/*" multiple onChange={e=>{const files=Array.from(e.target.files||[]);void addPhotos(files);e.currentTarget.value=''}}/></label>}</div>
       <div className="cp-photo-manager">
-        {photos.map(photo=><div key={photo.id}><img src={photo.signed_url||''} alt=""/>{!readOnly&&<button type="button" disabled={data.busy} onClick={()=>void removePhoto(photo.id)} aria-label="Excluir foto"><Trash2/></button>}</div>)}
+        {photos.map((photo,index)=><div key={photo.id}><img src={photo.signed_url||''} alt={`Foto ${index+1} de ${product.name}`}/><div className="cp-photo-actions"><button type="button" className="cp-photo-download" disabled={downloadingPhotoId!==null} onClick={()=>void downloadPhoto(photo,index)} title="Baixar foto" aria-label={`Baixar foto ${index+1}`}><Download/></button>{!readOnly&&<button type="button" className="cp-photo-delete" disabled={data.busy} onClick={()=>void removePhoto(photo.id)} title="Excluir foto" aria-label={`Excluir foto ${index+1}`}><Trash2/></button>}</div></div>)}
         {!readOnly&&photos.length<12&&<label className="cp-photo-add-tile"><ImagePlus/><b>Adicionar fotos</b><small>até {12-photos.length} nova(s)</small><input type="file" accept="image/*" multiple onChange={e=>{const files=Array.from(e.target.files||[]);void addPhotos(files);e.currentTarget.value=''}}/></label>}
       </div>
-      <p className="cp-muted">{readOnly?'Modo leitura: suas fotos continuam disponíveis.':'Você pode manter até 12 fotos por produto e remover qualquer imagem individualmente.'}</p>
+      <p className="cp-muted">{readOnly?'Modo leitura: suas fotos continuam disponíveis para download.':'Você pode manter até 12 fotos por produto, baixar ou remover cada imagem individualmente.'}</p>
     </section>
 
     <section className="cp-detail-section">
