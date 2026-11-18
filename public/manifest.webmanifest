@@ -8,7 +8,7 @@
   "display":"standalone",
   "display_override":["standalone","minimal-ui"],
   "background_color":"#f3f6fa",
-  "theme_color":"#f3f6fa",
+  "theme_color":"#092543",
   "orientation":"portrait-primary",
   "categories":["business","finance","productivity"],
   "prefer_related_applications":false,
