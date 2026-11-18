@@ -705,3 +705,542 @@
 :root[data-theme="dark"] .cp-app[data-theme="dark"] .cp-vision-profit{background:#193e39;color:#80e4b7}
 :root[data-theme="dark"] .cp-app[data-theme="dark"] .cp-vision-stock-count{background:#254967;color:#b6d4ee}
 :root[data-theme="dark"] .cp-app[data-theme="dark"] .cp-vision-stock-count b{color:#fff}
+
+
+/* VENDAS — gráfico e cartões derivam dos lançamentos reais. */
+:root[data-theme] .cp-app[data-theme] .cp-vision-sales-hero,
+:root[data-theme] .cp-app[data-theme] .cp-vision-cash-hero,
+:root[data-theme] .cp-app[data-theme] .cp-vision-business-strip,
+:root[data-theme] .cp-app[data-theme] .cp-vision-manage-alert{
+ position:relative;isolation:isolate;
+ background:radial-gradient(ellipse at 76% 15%,rgba(37,133,219,.20),transparent 46%),linear-gradient(135deg,#10447c,#072f5e 59%,#06254c)!important;
+ border:1px solid rgba(127,190,252,.29)!important;
+ border-radius:23px!important;
+ box-shadow:0 12px 29px rgba(11,49,99,.16)!important;
+ color:#fff!important;
+ overflow:hidden;
+}
+:root[data-theme] .cp-app[data-theme] .cp-vision-sales-hero{
+ display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr);
+ gap:18px;align-items:center;
+ min-height:203px;padding:25px 28px;
+ margin-bottom:16px;
+}
+:root[data-theme] .cp-app[data-theme] .cp-vision-sales-hero-info{min-width:0;display:grid;align-content:center}
+:root[data-theme] .cp-app[data-theme] .cp-vision-sales-hero-info>span{
+ display:flex;align-items:center;gap:10px;
+ font-size:15px;font-weight:800;color:#e7f2ff;
+}
+:root[data-theme] .cp-app[data-theme] .cp-vision-sales-hero-info>span svg{
+ width:36px;height:36px;padding:8px;
+ border-radius:11px;background:rgba(201,228,255,.12);
+}
+:root[data-theme] .cp-app[data-theme] .cp-vision-sales-hero-info small{
+ font-size:12px;color:#b3d0eb;margin:8px 0;
+}
+:root[data-theme] .cp-app[data-theme] .cp-vision-sales-hero-info strong{
+ display:block;color:#fff;font:850 clamp(25px,3.6vw,41px)/1.13 'Manrope',system-ui,sans-serif;
+ letter-spacing:-.055em;font-variant-numeric:tabular-nums;
+ overflow-wrap:anywhere;
+}
+:root[data-theme] .cp-app[data-theme] .cp-vision-sales-hero-info em{
+ font-size:11px;color:#bbd9f5;font-style:normal;margin-top:10px;
+}
+:root[data-theme] .cp-app[data-theme] .cp-vision-chart{width:100%;min-width:0;position:relative}
+:root[data-theme] .cp-app[data-theme] .cp-vision-chart svg{display:block;width:100%;height:160px}
+:root[data-theme] .cp-app[data-theme] .cp-vision-chart-labels{
+ display:flex;justify-content:space-between;
+ gap:6px;margin:0 12px;
+ color:var(--vision-muted);font-size:10px;
+}
+:root[data-theme] .cp-app[data-theme] .cp-vision-chart--dark .cp-vision-chart-labels{color:#adcee9}
+:root[data-theme] .cp-app[data-theme] .cp-vision-sales-stats{
+ display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:13px;
+ margin-bottom:18px;
+}
+:root[data-theme] .cp-app[data-theme] .cp-vision-sales-stats>div{
+ display:grid!important;grid-template-columns:43px minmax(0,1fr);
+ align-items:center;column-gap:12px;row-gap:3px;
+ padding:17px!important;min-height:91px!important;
+}
+:root[data-theme] .cp-app[data-theme] .cp-vision-sales-stats .cp-vision-stat-icon{
+ grid-column:1;grid-row:1/4;margin:0;
+}
+:root[data-theme] .cp-app[data-theme] .cp-vision-sales-stats small{grid-column:2;grid-row:1}
+:root[data-theme] .cp-app[data-theme] .cp-vision-sales-stats strong{grid-column:2;grid-row:2}
+:root[data-theme] .cp-app[data-theme] .cp-vision-sales-stats em{
+ grid-column:2;grid-row:3;
+ font-size:10px;color:var(--vision-green);font-weight:650;font-style:normal;
+}
+:root[data-theme] .cp-app[data-theme] .cp-vision-sales-filters{
+ display:grid;grid-template-columns:repeat(4,minmax(0,1fr))!important;
+ gap:9px;margin:0 0 16px!important;
+}
+:root[data-theme] .cp-app[data-theme] .cp-vision-sales-filters button{
+ width:100%;min-width:0;min-height:42px!important;
+}
+:root[data-theme] .cp-app[data-theme] .cp-vision-list-heading{
+ display:flex;align-items:center;justify-content:space-between;
+ margin-bottom:12px!important;
+}
+:root[data-theme] .cp-app[data-theme] .cp-vision-list-heading h2{
+ font-size:21px!important;letter-spacing:-.05em!important;
+ color:var(--vision-ink)!important;
+}
+:root[data-theme] .cp-app[data-theme] .cp-vision-list-heading>span{
+ color:var(--vision-muted);font-size:11px;
+}
+:root[data-theme] .cp-app[data-theme] .cp-vision-sale-list{
+ display:grid;gap:10px;
+}
+:root[data-theme] .cp-app[data-theme] .cp-vision-sale-row{
+ width:100%;min-width:0;
+ display:grid!important;
+ grid-template-columns:60px minmax(0,1.5fr) minmax(78px,.8fr) minmax(95px,.75fr) 14px!important;
+ gap:12px!important;align-items:center;
+ min-height:91px;padding:11px 16px!important;
+ background:var(--vision-surface)!important;
+ border:1px solid var(--vision-line)!important;
+ border-radius:17px!important;
+ color:var(--vision-ink)!important;
+ box-shadow:var(--vision-shadow)!important;
+ text-align:left;
+}
+:root[data-theme] .cp-app[data-theme] .cp-vision-sale-row:hover{border-color:#9bc5ed!important}
+:root[data-theme] .cp-app[data-theme] .cp-vision-sale-row .cp-sale-thumb{
+ width:57px!important;height:57px!important;flex:0 0 57px;
+ border-radius:12px!important;
+ color:#2b73b1;background:var(--vision-soft)!important;
+ overflow:hidden;
+}
+:root[data-theme] .cp-app[data-theme] .cp-vision-sale-row .cp-sale-thumb img{
+ display:block;width:100%;height:100%;object-fit:contain;
+}
+:root[data-theme] .cp-app[data-theme] .cp-vision-sale-row .cp-sale-main{min-width:0}
+:root[data-theme] .cp-app[data-theme] .cp-vision-sale-row .cp-sale-main strong{
+ color:var(--vision-ink)!important;
+ font:800 13px/1.3 'DM Sans',system-ui,sans-serif!important;
+ overflow-wrap:anywhere;
+}
+:root[data-theme] .cp-app[data-theme] .cp-vision-sale-row .cp-sale-main span{
+ color:var(--vision-muted)!important;
+ font-size:11px!important;line-height:1.25;
+}
+:root[data-theme] .cp-app[data-theme] .cp-vision-sale-badges{
+ min-width:0;display:flex;flex-direction:column;align-items:flex-start;gap:5px;
+}
+:root[data-theme] .cp-app[data-theme] .cp-vision-sale-badges span{
+ display:inline-block;max-width:100%;
+ border-radius:999px;background:var(--vision-soft);
+ color:#315c86;padding:5px 9px;
+ font-size:10px;font-weight:800;
+ white-space:nowrap;
+}
+:root[data-theme] .cp-app[data-theme] .cp-vision-sale-badges .is-paid{
+ color:#067843;background:#dcf9e7;
+}
+:root[data-theme] .cp-app[data-theme] .cp-vision-sale-badges .is-receivable{
+ color:#9c680f;background:#fff2c9;
+}
+:root[data-theme] .cp-app[data-theme] .cp-vision-sale-badges .is-cancelled{
+ color:#af3546;background:#ffe2e6;
+}
+:root[data-theme] .cp-app[data-theme] .cp-vision-sale-row .cp-sale-money{
+ text-align:right;min-width:0;
+}
+:root[data-theme] .cp-app[data-theme] .cp-vision-sale-row .cp-sale-money b{
+ color:var(--vision-green)!important;
+ font:850 16px/1.2 'Manrope',system-ui,sans-serif!important;
+ letter-spacing:-.05em;overflow-wrap:anywhere;
+}
+:root[data-theme] .cp-app[data-theme] .cp-vision-sale-row .cp-sale-money span{
+ font-size:10px!important;
+ color:var(--vision-muted)!important;
+ margin-top:5px;
+}
+:root[data-theme] .cp-app[data-theme] .cp-vision-row-chevron{color:var(--vision-muted);width:14px}
+
+/* CAIXA — a identidade de fintech, sem modificar lançamentos */
+:root[data-theme] .cp-app[data-theme] .cp-vision-cash-hero{
+ padding:24px 28px 20px;
+ margin-bottom:16px;
+}
+:root[data-theme] .cp-app[data-theme] .cp-vision-cash-balance{
+ display:flex;align-items:center;gap:16px;min-width:0;margin-bottom:18px;
+}
+:root[data-theme] .cp-app[data-theme] .cp-vision-cash-balance>div{min-width:0}
+:root[data-theme] .cp-app[data-theme] .cp-vision-cash-balance small,
+:root[data-theme] .cp-app[data-theme] .cp-vision-cash-pair small{
+ color:#b9d7f0;font-size:13px;display:block;
+}
+:root[data-theme] .cp-app[data-theme] .cp-vision-cash-balance strong{
+ font:850 clamp(31px,4.5vw,46px)/1.18 'Manrope',system-ui,sans-serif;
+ display:block;letter-spacing:-.06em;color:#fff;overflow-wrap:anywhere;
+}
+:root[data-theme] .cp-app[data-theme] .cp-vision-cash-pair{
+ display:grid;grid-template-columns:repeat(2,minmax(0,1fr));
+ gap:0;
+ border:1px solid rgba(203,233,255,.2);
+ background:rgba(4,24,51,.22);
+ border-radius:17px;
+ padding:15px 12px;
+}
+:root[data-theme] .cp-app[data-theme] .cp-vision-cash-pair>div{
+ min-width:0;display:flex;align-items:center;gap:12px;
+ padding:4px 14px;
+}
+:root[data-theme] .cp-app[data-theme] .cp-vision-cash-pair>div:first-child{border-right:1px solid rgba(204,230,255,.25)}
+:root[data-theme] .cp-app[data-theme] .cp-vision-in,
+:root[data-theme] .cp-app[data-theme] .cp-vision-out{
+ display:grid;place-items:center;
+ flex:0 0 37px;width:37px;height:37px;border-radius:12px;
+ background:rgba(27,164,108,.27);color:#c7ffe5;
+}
+:root[data-theme] .cp-app[data-theme] .cp-vision-out{background:rgba(233,102,123,.22);color:#ffd0d7}
+:root[data-theme] .cp-app[data-theme] .cp-vision-cash-pair strong{
+ color:#fff;display:block;
+ font:800 clamp(17px,2.6vw,25px)/1.2 'Manrope',system-ui,sans-serif;
+ letter-spacing:-.04em;overflow-wrap:anywhere;margin-top:3px;
+}
+:root[data-theme] .cp-app[data-theme] .cp-vision-cash-settings{
+ display:inline-flex;align-items:center;gap:4px;
+ color:#b9d8f5!important;background:transparent!important;
+ border:0!important;padding:7px 0 0!important;
+ font-size:11px!important;
+}
+:root[data-theme] .cp-app[data-theme] .cp-vision-cash-stats{
+ display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:11px;margin-bottom:16px;
+}
+:root[data-theme] .cp-app[data-theme] .cp-vision-cash-stats>div{
+ min-height:115px;padding:14px!important;
+}
+:root[data-theme] .cp-app[data-theme] .cp-vision-cash-stats strong{
+ font-size:clamp(17px,2.4vw,24px)!important;
+}
+:root[data-theme] .cp-app[data-theme] .cp-vision-cash-stats strong.positive{color:var(--vision-green)!important}
+:root[data-theme] .cp-app[data-theme] .cp-vision-cash-stats strong.negative{color:var(--vision-red)!important}
+:root[data-theme] .cp-app[data-theme] .cp-vision-positive{color:#087a4d;background:#e0f9ed}
+:root[data-theme] .cp-app[data-theme] .cp-vision-negative{color:#c33b48;background:#ffeaeb}
+:root[data-theme] .cp-app[data-theme] .cp-vision-cash-chart,
+:root[data-theme] .cp-app[data-theme] .cp-vision-cash-history{
+ background:var(--vision-surface);
+ border:1px solid var(--vision-line);
+ border-radius:21px;
+ box-shadow:var(--vision-shadow);
+ padding:19px 22px;
+ margin-bottom:15px;
+}
+:root[data-theme] .cp-app[data-theme] .cp-vision-panel-heading{
+ display:flex;align-items:center;gap:12px;margin-bottom:9px;
+}
+:root[data-theme] .cp-app[data-theme] .cp-vision-panel-heading h2,
+:root[data-theme] .cp-app[data-theme] .cp-vision-history-head h2{
+ color:var(--vision-ink)!important;
+ margin:0!important;
+ font-size:19px!important;line-height:1.2!important;
+}
+:root[data-theme] .cp-app[data-theme] .cp-vision-panel-heading small{
+ color:var(--vision-muted);font-size:11px;
+}
+:root[data-theme] .cp-app[data-theme] .cp-vision-cash-chart .cp-vision-chart svg{height:190px}
+:root[data-theme] .cp-app[data-theme] .cp-vision-history-head{
+ display:flex;align-items:center;justify-content:space-between;gap:12px;
+ margin-bottom:11px;
+}
+:root[data-theme] .cp-app[data-theme] .cp-vision-cash-filters{
+ display:flex;gap:6px;align-items:center;
+ margin:0!important;
+}
+:root[data-theme] .cp-app[data-theme] .cp-vision-cash-filters button{
+ min-height:33px!important;padding:0 13px!important;font-size:11px!important;
+}
+:root[data-theme] .cp-app[data-theme] .cp-vision-cash-list{display:grid;gap:0}
+:root[data-theme] .cp-app[data-theme] .cp-vision-cash-list .cp-cash-row{
+ background:transparent!important;
+ border:0!important;border-bottom:1px solid var(--vision-line)!important;
+ box-shadow:none!important;
+ border-radius:0!important;
+ padding:12px 3px!important;
+ grid-template-columns:40px minmax(0,1fr) auto!important;
+ gap:11px!important;
+}
+:root[data-theme] .cp-app[data-theme] .cp-vision-cash-list .cp-cash-row:last-child{border-bottom:0!important}
+:root[data-theme] .cp-app[data-theme] .cp-vision-cash-list .cp-move-icon{
+ display:grid;place-items:center;
+ background:#e1f9eb!important;color:#088651!important;
+ border-radius:12px!important;
+ width:39px!important;height:39px!important;
+}
+:root[data-theme] .cp-app[data-theme] .cp-vision-cash-list .cp-move-icon.negative{
+ background:#ffecee!important;color:#c83e4e!important;
+}
+:root[data-theme] .cp-app[data-theme] .cp-vision-cash-list .cp-cash-row>div strong{
+ color:var(--vision-ink)!important;font-size:13px!important;
+}
+:root[data-theme] .cp-app[data-theme] .cp-vision-cash-list .cp-cash-row>div span{
+ color:var(--vision-muted)!important;font-size:11px!important;
+}
+:root[data-theme] .cp-app[data-theme] .cp-vision-cash-list .cp-cash-row>b{
+ font:850 14px/1.2 'Manrope',system-ui,sans-serif!important;
+ white-space:nowrap;
+}
+:root[data-theme] .cp-app[data-theme] .cp-vision-cash-list .cp-cash-row>b.positive{color:var(--vision-green)!important}
+:root[data-theme] .cp-app[data-theme] .cp-vision-cash-list .cp-cash-row>b.negative{color:var(--vision-red)!important}
+
+/* Gestão: mesmo padrão de sumário + avisos + grade de módulos reais */
+:root[data-theme] .cp-app[data-theme] .cp-vision-management .cp-business-title{
+ margin-bottom:20px!important;
+}
+:root[data-theme] .cp-app[data-theme] .cp-vision-business-strip{
+ display:grid;grid-template-columns:repeat(3,minmax(0,1fr));
+ gap:0;padding:20px 12px;margin-bottom:16px;
+}
+:root[data-theme] .cp-app[data-theme] .cp-vision-business-strip>div{
+ background:transparent!important;
+ border:0!important;
+ border-right:1px solid rgba(203,227,251,.22)!important;
+ padding:8px 18px!important;
+}
+:root[data-theme] .cp-app[data-theme] .cp-vision-business-strip>div:last-child{border-right:0!important}
+:root[data-theme] .cp-app[data-theme] .cp-vision-business-strip span{
+ display:block;color:#c0dcf6!important;font-size:10px!important;letter-spacing:.12em;
+}
+:root[data-theme] .cp-app[data-theme] .cp-vision-business-strip strong{
+ display:block;color:#fff!important;
+ font:850 clamp(18px,2.7vw,26px)/1.2 'Manrope',system-ui,sans-serif!important;
+ letter-spacing:-.055em!important;overflow-wrap:anywhere;margin:6px 0!important;
+}
+:root[data-theme] .cp-app[data-theme] .cp-vision-business-strip small{
+ color:#c0d7ed!important;font-size:11px!important;
+}
+:root[data-theme] .cp-app[data-theme] .cp-vision-manage-alert{
+ display:flex;align-items:center;gap:16px;
+ width:100%;padding:22px 25px;margin-bottom:20px;
+ text-align:left;
+}
+:root[data-theme] .cp-app[data-theme] .cp-vision-manage-alert-icon{
+ display:grid;place-items:center;flex:0 0 49px;
+ width:49px;height:49px;
+ border-radius:15px;
+ color:#f1f9ff;background:rgba(191,226,255,.15);
+ border:1px solid rgba(205,228,253,.18);
+}
+:root[data-theme] .cp-app[data-theme] .cp-vision-manage-alert>div{min-width:0;flex:1}
+:root[data-theme] .cp-app[data-theme] .cp-vision-manage-alert small{
+ display:block;color:#bedaf4;font-size:10px;
+ letter-spacing:.14em;font-weight:850;
+}
+:root[data-theme] .cp-app[data-theme] .cp-vision-manage-alert strong{
+ display:block;font:850 clamp(17px,2.5vw,24px)/1.25 'Manrope',system-ui,sans-serif;
+ color:#fff;letter-spacing:-.04em;margin:6px 0;
+}
+:root[data-theme] .cp-app[data-theme] .cp-vision-manage-alert p{
+ color:#ccdeee;font-size:12px;margin:0 0 9px;
+}
+:root[data-theme] .cp-app[data-theme] .cp-vision-manage-alert em{
+ font-style:normal;font-size:11px;
+ color:#fff;background:rgba(226,241,255,.16);
+ border:1px solid rgba(224,242,255,.21);
+ padding:7px 11px;border-radius:10px;
+ display:inline-flex;gap:5px;align-items:center;
+}
+:root[data-theme] .cp-app[data-theme] .cp-vision-manage-alert-arrow{width:21px;flex:0 0 21px;color:#fff}
+:root[data-theme] .cp-app[data-theme] .cp-vision-management-heading{
+ display:flex;justify-content:space-between;gap:15px;align-items:center;
+ margin:0 0 13px;
+}
+:root[data-theme] .cp-app[data-theme] .cp-vision-management-heading h2{
+ font-size:21px!important;margin:0!important;color:var(--vision-ink)!important;
+}
+:root[data-theme] .cp-app[data-theme] .cp-vision-management-heading span{
+ color:var(--vision-muted);font-size:11px;
+}
+:root[data-theme] .cp-app[data-theme] .cp-vision-management-grid{
+ display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:14px!important;
+}
+:root[data-theme] .cp-app[data-theme] .cp-vision-management-grid .cp-business-tool{
+ position:relative;
+ grid-template-columns:51px minmax(0,1fr) 18px!important;
+ align-items:start!important;
+ gap:11px!important;
+ border:1px solid var(--vision-line)!important;
+ background:var(--vision-surface)!important;
+ border-radius:20px!important;
+ min-height:144px!important;
+ width:100%!important;
+ padding:18px!important;
+ box-shadow:var(--vision-shadow)!important;
+ text-align:left;
+}
+:root[data-theme] .cp-app[data-theme] .cp-vision-management-grid .cp-business-index{display:none!important}
+:root[data-theme] .cp-app[data-theme] .cp-vision-management-grid .cp-business-icon{
+ width:45px!important;height:45px!important;
+ border-radius:14px!important;
+ color:#0c4e88!important;background:var(--vision-soft)!important;
+ flex:0 0 45px;
+}
+:root[data-theme] .cp-app[data-theme] .cp-vision-management-grid .cp-business-icon svg{width:23px!important;height:23px!important}
+:root[data-theme] .cp-app[data-theme] .cp-vision-business-copy{min-width:0}
+:root[data-theme] .cp-app[data-theme] .cp-vision-business-copy b{
+ color:var(--vision-ink)!important;
+ font:850 clamp(15px,2.3vw,20px)/1.2 'Manrope',system-ui,sans-serif!important;
+ letter-spacing:-.04em;
+}
+:root[data-theme] .cp-app[data-theme] .cp-vision-business-copy p{
+ font-size:12px!important;line-height:1.45!important;
+ color:var(--vision-muted)!important;
+ margin:7px 0!important;
+}
+:root[data-theme] .cp-app[data-theme] .cp-vision-business-copy small{
+ display:block;font-size:10px;color:#2c71ad;font-weight:700;
+}
+:root[data-theme] .cp-app[data-theme] .cp-vision-business-chevron{
+ color:var(--vision-ink);
+ width:17px!important;margin-top:4px;
+}
+
+/* Ações rápidas — mantém as seis ações que já existem no sistema */
+:root[data-theme] .cp-app[data-theme] .cp-modal-layer:has(.cp-vision-actions){
+ align-items:flex-end!important;
+ justify-content:center!important;
+ padding:0!important;
+}
+:root[data-theme] .cp-app[data-theme] .cp-modal:has(.cp-vision-actions){
+ width:min(850px,100%)!important;
+ max-width:850px!important;
+ max-height:min(88dvh,790px)!important;
+ border-radius:27px 27px 0 0!important;
+ background:linear-gradient(153deg,#edf5ff,#ffffff 37%,#edf5ff)!important;
+ border:1px solid #e0eaf7!important;
+ box-shadow:0 -14px 65px rgba(2,24,51,.31)!important;
+}
+:root[data-theme] .cp-app[data-theme] .cp-modal:has(.cp-vision-actions) .cp-modal-scroll{
+ padding:35px 26px max(30px,env(safe-area-inset-bottom))!important;
+ max-height:min(88dvh,790px)!important;
+}
+:root[data-theme] .cp-app[data-theme] .cp-modal:has(.cp-vision-actions)::before{
+ content:'';
+ position:absolute;top:10px;left:50%;transform:translateX(-50%);
+ background:#a9bfd6;width:60px;height:5px;border-radius:99px;
+ z-index:2;
+}
+:root[data-theme] .cp-app[data-theme] .cp-modal:has(.cp-vision-actions) .cp-modal-x{
+ background:#eef5fe!important;color:#1a4875!important;
+ border:1px solid #d8e6f4!important;
+ border-radius:50%!important;
+}
+:root[data-theme] .cp-app[data-theme] .cp-vision-actions{display:block}
+:root[data-theme] .cp-app[data-theme] .cp-vision-actions-head{
+ display:flex;align-items:center;gap:14px;
+ margin:0 40px 21px 0;
+}
+:root[data-theme] .cp-app[data-theme] .cp-vision-actions-mark{
+ display:grid;place-items:center;flex:0 0 48px;
+ width:48px;height:48px;border-radius:15px;
+ color:#fff;background:linear-gradient(145deg,#2672b1,#092d5d);
+ box-shadow:0 7px 19px rgba(11,53,104,.17);
+}
+:root[data-theme] .cp-app[data-theme] .cp-vision-actions-head h2{
+ font-size:clamp(24px,3.4vw,33px)!important;
+ margin:0 0 2px!important;color:#0a2b51!important;
+}
+:root[data-theme] .cp-app[data-theme] .cp-vision-actions-head p{
+ font-size:12px!important;color:#667f9a!important;margin:0!important;
+}
+:root[data-theme] .cp-app[data-theme] .cp-vision-action-grid{
+ display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;
+}
+:root[data-theme] .cp-app[data-theme] .cp-vision-action-grid>button{
+ display:grid!important;grid-template-columns:minmax(0,1fr) 24px!important;
+ grid-template-rows:45px auto!important;
+ gap:8px!important;align-items:start!important;
+ background:linear-gradient(145deg,#fff,#f5f9fe)!important;
+ border:1px solid #dbe7f4!important;
+ color:#0a2b51!important;
+ border-radius:18px!important;
+ min-height:126px!important;
+ padding:17px!important;
+ box-shadow:0 5px 15px rgba(23,61,103,.07)!important;
+ text-align:left;
+}
+:root[data-theme] .cp-app[data-theme] .cp-vision-action-grid>button:first-child{
+ background:linear-gradient(140deg,#155b9d,#062c59)!important;
+ border-color:#155e9d!important;
+ color:#fff!important;
+}
+:root[data-theme] .cp-app[data-theme] .cp-vision-action-grid>button>span{
+ grid-column:1;grid-row:1;display:grid;place-items:center;
+ width:42px!important;height:42px!important;
+ background:#e5f1ff!important;color:#104c83!important;
+ border-radius:13px!important;
+ margin:0!important;
+ border:0!important;
+}
+:root[data-theme] .cp-app[data-theme] .cp-vision-action-grid>button:first-child>span{
+ background:rgba(255,255,255,.15)!important;color:#fff!important;
+}
+:root[data-theme] .cp-app[data-theme] .cp-vision-action-grid>button>div{
+ grid-column:1;grid-row:2;min-width:0;
+}
+:root[data-theme] .cp-app[data-theme] .cp-vision-action-grid>button b{
+ color:#0c2948!important;
+ font-size:15px!important;line-height:1.2!important;letter-spacing:-.03em;
+ display:block;
+}
+:root[data-theme] .cp-app[data-theme] .cp-vision-action-grid>button small{
+ color:#66809b!important;line-height:1.4!important;
+ font-size:11px!important;margin-top:6px!important;display:block;
+}
+:root[data-theme] .cp-app[data-theme] .cp-vision-action-grid>button:first-child b{color:#fff!important}
+:root[data-theme] .cp-app[data-theme] .cp-vision-action-grid>button:first-child small{color:#d8eafa!important}
+:root[data-theme] .cp-app[data-theme] .cp-vision-action-grid>button>svg{
+ grid-column:2;grid-row:2;align-self:center;
+ width:19px;height:19px;
+ color:#31658e!important;
+}
+:root[data-theme] .cp-app[data-theme] .cp-vision-action-grid>button:first-child>svg{color:#fff!important}
+
+/* Outras telas, modais e inputs seguem a mesma família */
+:root[data-theme] .cp-app[data-theme] .cp-product-card:not(.cp-vision-product),
+:root[data-theme] .cp-app[data-theme] .cp-report-panel,
+:root[data-theme] .cp-app[data-theme] .cp-goal-editor,
+:root[data-theme] .cp-app[data-theme] .cp-receivable-row,
+:root[data-theme] .cp-app[data-theme] .cp-contact-list>button,
+:root[data-theme] .cp-app[data-theme] .cp-stock-summary>div,
+:root[data-theme] .cp-app[data-theme] .cp-report-strip>div,
+:root[data-theme] .cp-app[data-theme] .cp-empty{
+ border:1px solid var(--vision-line)!important;
+ border-radius:17px!important;
+ color:var(--vision-ink)!important;
+ background:var(--vision-surface)!important;
+ box-shadow:var(--vision-shadow)!important;
+}
+:root[data-theme] .cp-app[data-theme] .cp-field input,
+:root[data-theme] .cp-app[data-theme] .cp-field select,
+:root[data-theme] .cp-app[data-theme] .cp-field textarea,
+:root[data-theme] .cp-app[data-theme] .cp-money-input{
+ background:var(--vision-surface)!important;
+ color:var(--vision-ink)!important;
+ border:1px solid var(--vision-line)!important;
+ border-radius:12px!important;
+ font-size:16px!important;
+}
+:root[data-theme] .cp-app[data-theme] .cp-modal:not(:has(.cp-vision-actions)){
+ background:var(--vision-surface)!important;
+ border:1px solid var(--vision-line)!important;
+ border-radius:20px!important;
+ box-shadow:0 23px 75px rgba(3,24,47,.28)!important;
+}
+:root[data-theme] .cp-app[data-theme] .cp-modal-head h2,
+:root[data-theme] .cp-app[data-theme] .cp-action-sheet:not(.cp-vision-actions) h2{
+ color:var(--vision-ink)!important;
+}
+:root[data-theme] .cp-app[data-theme] .cp-modal-head p,
+:root[data-theme] .cp-app[data-theme] .cp-action-sheet:not(.cp-vision-actions) p{
+ color:var(--vision-muted)!important;
+}
+:root[data-theme] .cp-app[data-theme] .cp-filter-tabs:not(.cp-vision-filters):not(.cp-vision-sales-filters):not(.cp-vision-cash-filters) button.active{
+ background:var(--vision-soft)!important;
+ border-color:#adcde9!important;
+ color:#135b98!important;
+}
