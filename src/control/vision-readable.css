@@ -1105,3 +1105,42 @@
    border-radius:19px!important;
  }
 }
+
+
+/* Último passe de microtipografia: informações úteis não ficam apagadas ou microscópicas. */
+:root[data-theme] .cp-app[data-theme] .cp-balance-app-badge{
+  font-size:11px!important;
+  letter-spacing:.11em!important;
+}
+:root[data-theme] .cp-app[data-theme] .cp-today-sales-head>div>span{
+  font-size:11px!important;
+}
+:root[data-theme] .cp-app[data-theme] .cp-month-goal-amounts span{
+  font-size:12px!important;
+}
+:root[data-theme] .cp-app[data-theme] .cp-vision-chart-labels,
+:root[data-theme] .cp-app[data-theme] .cp-vision-sales-hero .cp-vision-chart-labels{
+  font-size:11px!important;
+}
+:root[data-theme] .cp-app[data-theme] .cp-vision-manage-alert small{
+  font-size:11px!important;
+  letter-spacing:.08em!important;
+}
+:root[data-theme] .cp-app[data-theme] .cp-vision-business-strip small{
+  font-size:11px!important;
+}
+:root[data-theme] .cp-app[data-theme] .cp-vision-product-prices strong,
+:root[data-theme] .cp-app[data-theme] .cp-vision-sale-row .cp-sale-money b{
+  font-variant-numeric:tabular-nums;
+}
+@media(max-width:640px){
+ :root[data-theme] .cp-app[data-theme] .cp-balance-app-badge{
+   font-size:10px!important;
+ }
+ :root[data-theme] .cp-app[data-theme] .cp-month-goal-amounts span{
+   font-size:11px!important;
+ }
+ :root[data-theme] .cp-app[data-theme] .cp-vision-sales-hero .cp-vision-chart-labels{
+   font-size:10px!important;
+ }
+}
