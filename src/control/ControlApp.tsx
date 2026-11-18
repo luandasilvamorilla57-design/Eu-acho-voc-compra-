@@ -161,7 +161,7 @@ export function ControlApp({userId,email}:{userId:string;email?:string}){
     {modal==='stockAdd'&&<StockAddSheet data={data} onClose={()=>setModal(null)} onOwn={()=>setModal('inventory')} onRegisterPurchase={()=>setModal('purchase')} onOpenPurchased={product=>{setModal(null);setSelected(product)}}/>}
     {modal==='purchase'&&<PurchaseModal data={data} onClose={()=>setModal(null)} onDone={()=>{setModal(null);notify('Compra salva e adicionada ao estoque.')}}/>}
     {modal==='inventory'&&<InventoryModal data={data} onClose={()=>setModal(null)} onDone={()=>{setModal(null);notify('Produto adicionado ao estoque sem movimentar o caixa.')}}/>}
-    {modal==='sale'&&<SaleModal data={data} initialProduct={selected} onClose={()=>setModal(null)} onDone={()=>{setModal(null);setSelected(null);notify('Venda registrada. Caixa e estoque atualizados.')}}/>}
+    {modal==='sale'&&<SaleModal data={data} initialProduct={selected} onClose={()=>setModal(null)} onDone={()=>{setModal(null);setSelected(null);notify('Venda registrada. Caixa e estoque atualizados.')}} onTradeDone={()=>{setModal(null);setSelected(null);setView('stock');notify('Troca registrada. O recebido está no estoque.')}}/>}
     {modal==='expense'&&<ExpenseModal data={data} initialProduct={selected} onClose={()=>setModal(null)} onDone={()=>{setModal(null);notify('Gasto somado ao custo real do produto.')}}/>}
     {modal==='cash'&&<CashModal data={data} onClose={()=>setModal(null)} onDone={()=>{setModal(null);notify('Movimentação adicionada ao caixa.')}}/>}
     {modal==='settings'&&<SettingsModal data={data} email={email} access={access} billingBusy={billing.busy} onSubscribe={()=>void billing.subscribe()} onCancel={()=>void billing.cancel()} readOnly={!canWrite} onClose={()=>setModal(null)} onDone={notify}/>} 
@@ -738,7 +738,7 @@ function InventoryModal({data,onClose,onDone}:{data:Data;onClose:()=>void;onDone
   </ModalShell>
 }
 
-function SaleModal({data,initialProduct,onClose,onDone}:{data:Data;initialProduct:Product|null;onClose:()=>void;onDone:()=>void}){
+function SaleModal({data,initialProduct,onClose,onDone,onTradeDone}:{data:Data;initialProduct:Product|null;onClose:()=>void;onDone:()=>void;onTradeDone:()=>void}){
   const available=data.products.filter(p=>p.quantity_available>0)
   const first=initialProduct&&initialProduct.quantity_available>0?initialProduct:available[0]
   const [productId,setProductId]=useState(first?.id||'')
@@ -790,7 +790,7 @@ function SaleModal({data,initialProduct,onClose,onDone}:{data:Data;initialProduc
     }catch(err:any){setError(err?.message||'Não foi possível registrar a venda.')}
   }
 
-  if(transactionType==='trade'&&product?.inventory_mode==='single')return <TradeModal data={data} initialProduct={product} onClose={onClose} onBack={()=>setTransactionType('sale')} onDone={onDone}/>
+  if(transactionType==='trade'&&product?.inventory_mode==='single')return <TradeModal data={data} initialProduct={product} onClose={onClose} onBack={()=>setTransactionType('sale')} onDone={onTradeDone}/>
 
   return <ModalShell onClose={onClose}>
     <ModalHeader eyebrow="REGISTRAR VENDA" title="O dinheiro entrou agora ou vai entrar depois?" text="Essa escolha faz o caixa ficar real. Venda a prazo entra em A receber, não no saldo livre."/>
