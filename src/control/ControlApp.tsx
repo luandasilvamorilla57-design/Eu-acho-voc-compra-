@@ -474,10 +474,12 @@ function ProductCard({product,data,calc,onClick}:{product:Product;data:Data;calc
   const margin=price!==null&&product.cost_basis_known?price-cost:null
   const days=daysSince(product.purchase_date)
   const listingDue=product.listing_status==='listed'&&!!product.listing_next_checkin_at&&product.listing_next_checkin_at<=localDate()
-  const lowStock=product.quantity_available>0&&product.quantity_available<=3
-  const alert=product.quantity_available>0&&days>=calc.alertDays
-  const status=product.quantity_available===0?'Vendido':listingDue?'Revisar anúncio':product.listing_status==='listed'?'Anunciado':alert?'Atenção':''
-  return <button type="button" className="cp-product-card cp-vision-product" onClick={onClick} aria-label={'Ver detalhes de '+product.name}>
+  const isSold=product.quantity_available===0
+  const lowStock=!isSold&&product.quantity_available<=3
+  const alert=!isSold&&days>=calc.alertDays
+  const status=isSold?'':listingDue?'Revisar anúncio':product.listing_status==='listed'?'Anunciado':alert?'Atenção':''
+  return <button type="button" className={'cp-product-card cp-vision-product'+(isSold?' cp-vision-product--sold':'')} onClick={onClick} aria-label={'Ver detalhes de '+product.name+(isSold?', vendido':'')}>
+    {isSold&&<span className="cp-vision-sold-ribbon"><img src="/selo-vendido.webp" alt="Vendido" width="170" height="57" loading="lazy" decoding="async"/></span>}
     <div className="cp-vision-product-top">
       <span className="cp-vision-product-image">{photo?<img src={photo} alt={'Foto de '+product.name}/>:<Box size={38}/>}</span>
       <div className="cp-vision-product-info">
