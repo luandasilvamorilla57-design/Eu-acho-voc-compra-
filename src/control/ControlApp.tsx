@@ -670,13 +670,14 @@ function PurchaseModal({data,onClose,onDone}:{data:Data;onClose:()=>void;onDone:
   const [step,setStep]=useState(1)
   const [name,setName]=useState(''),[category,setCategory]=useState(''),[source,setSource]=useState('Marketplace'),[date,setDate]=useState(localDate()),[supplierId,setSupplierId]=useState('')
   const [inventoryMode,setInventoryMode]=useState<'single'|'stock'>('single')
-   const [cost,setCost]=useState(''),[qty,setQty]=useState('1'),[listed,setListed]=useState(''),[minimum,setMinimum]=useState(''),[notes,setNotes]=useState('')
+  const [cost,setCost]=useState(''),[qty,setQty]=useState('1'),[listed,setListed]=useState(''),[minimum,setMinimum]=useState(''),[notes,setNotes]=useState('')
   const [isListed,setIsListed]=useState(false),[channels,setChannels]=useState<string[]>([]),[listingDate,setListingDate]=useState(localDate())
   const [files,setFiles]=useState<File[]>([]),[error,setError]=useState<string|null>(null)
   async function save(){
     setError(null)
     try{
       if(!name.trim())throw new Error('Dê um nome para o produto.')
+      if(inventoryMode==='stock'&&(!Number.isInteger(Number(qty))||Number(qty)<1))throw new Error('Informe uma quantidade inteira maior que zero.')
       const purchase=Number(cost.replace(',','.'))
       if(!Number.isFinite(purchase)||purchase<0)throw new Error('Informe quanto você pagou.')
       const listPrice=listed?Number(listed.replace(',','.')):null
@@ -704,7 +705,7 @@ function PurchaseModal({data,onClose,onDone}:{data:Data;onClose:()=>void;onDone:
 function InventoryModal({data,onClose,onDone}:{data:Data;onClose:()=>void;onDone:()=>void}){
   const [step,setStep]=useState(1)
   const [name,setName]=useState(''),[category,setCategory]=useState(''),[qty,setQty]=useState('1')
-   const [inventoryMode,setInventoryMode]=useState<'single'|'stock'>('single')
+  const [inventoryMode,setInventoryMode]=useState<'single'|'stock'>('single')
   const [knowCost,setKnowCost]=useState(false),[cost,setCost]=useState(''),[listed,setListed]=useState(''),[minimum,setMinimum]=useState('')
   const [isListed,setIsListed]=useState(false),[channels,setChannels]=useState<string[]>([]),[listingDate,setListingDate]=useState(localDate())
   const [files,setFiles]=useState<File[]>([]),[notes,setNotes]=useState(''),[error,setError]=useState<string|null>(null)
@@ -712,6 +713,7 @@ function InventoryModal({data,onClose,onDone}:{data:Data;onClose:()=>void;onDone
     setError(null)
     try{
       if(!name.trim())throw new Error('Dê um nome para o produto.')
+      if(inventoryMode==='stock'&&(!Number.isInteger(Number(qty))||Number(qty)<1))throw new Error('Informe uma quantidade inteira maior que zero.')
       const originalCost=knowCost?(Number(cost.replace(',','.'))||0):0
       const listPrice=listed?Number(listed.replace(',','.')):null
       if(knowCost&&originalCost<0)throw new Error('Informe um custo válido.')
@@ -905,6 +907,7 @@ function ProductDetail({product,data,calc,readOnly,onClose,onSale,onExpense,onSa
   const [categoryGroup,setCategoryGroup]=useState(product.category_group||'Outros')
   const [itemType,setItemType]=useState<'main'|'accessory'|'part'>(product.item_type||'main')
   const [classificationTouched,setClassificationTouched]=useState(false)
+  const [inventoryMode,setInventoryMode]=useState<'single'|'stock'>(product.inventory_mode)
   const [notes,setNotes]=useState(product.notes||'')
   const [listingEditing,setListingEditing]=useState(false)
   const [isListed,setIsListed]=useState(product.listing_status==='listed')
@@ -923,7 +926,8 @@ function ProductDetail({product,data,calc,readOnly,onClose,onSale,onExpense,onSa
     setError(null)
     try{
       if(!name.trim())throw new Error('Informe o nome do produto.')
-      const patch:Partial<Product>={name:name.trim(),category:category.trim()||null,notes:notes.trim()||null}
+      if(inventoryMode==='single'&&product.quantity_initial!==1)throw new Error('Este produto já teve várias unidades. Para torná-lo item único, cadastre a peça separadamente.')
+      const patch:Partial<Product>={name:name.trim(),category:category.trim()||null,notes:notes.trim()||null,inventory_mode:inventoryMode}
       if(classificationTouched){
         patch.category_group=categoryGroup.trim()||'Outros'
         patch.item_type=itemType
@@ -1000,7 +1004,7 @@ function ProductDetail({product,data,calc,readOnly,onClose,onSale,onExpense,onSa
   }
 
   return <ModalShell onClose={onClose}>
-    <div className="cp-detail-hero"><div className="cp-detail-photo">{photos[0]?.signed_url?<img src={photos[0].signed_url} alt=""/>:<Package/>}</div><div><span className="cp-eyebrow">{product.acquisition_type==='owned'?'PRODUTO PRÓPRIO':product.category||'PRODUTO'}</span><h2>{name}</h2><p>{product.quantity_available>0?product.quantity_available+' de '+product.quantity_initial+' unidade(s) disponíveis':'Produto vendido'}</p></div></div>
+    <div className="cp-detail-hero"><div className="cp-detail-photo">{photos[0]?.signed_url?<img src={photos[0].signed_url} alt=""/>:<Package/>}</div><div><span className="cp-eyebrow">{product.acquisition_type==='owned'?'PRODUTO PRÓPRIO':product.category||'PRODUTO'}</span><h2>{name}</h2><p>{product.quantity_available===0?'Produto vendido':product.inventory_mode==='single'?'Item único · disponível':product.quantity_available+' de '+product.quantity_initial+' unidade(s) disponíveis'}</p></div></div>
 
     <section className="cp-detail-section">
       <div className="cp-section-head"><div><span>FOTOS</span><h2>{photos.length?photos.length+' foto(s) do produto':'Adicione fotos desse produto'}</h2></div>{readOnly?<button className="cp-detail-add-photo" onClick={onBlocked}><ImagePlus size={16}/> Adicionar</button>:<label className="cp-detail-add-photo"><ImagePlus size={16}/> Adicionar<input type="file" accept="image/*" multiple onChange={e=>{const files=Array.from(e.target.files||[]);void addPhotos(files);e.currentTarget.value=''}}/></label>}</div>
@@ -1016,6 +1020,7 @@ function ProductDetail({product,data,calc,readOnly,onClose,onSale,onExpense,onSa
       {editingInfo?<div className="cp-inline-edit cp-product-edit-grid">
         <Field label="Nome" full><input value={name} onChange={e=>setName(e.target.value)}/></Field>
         <Field label="Categoria informada"><input value={category} onChange={e=>setCategory(e.target.value)} placeholder="Ex.: eletrônicos"/></Field>
+         <InventoryModePicker mode={inventoryMode} onChange={setInventoryMode}/>
         <Field label="Tipo no ranking"><select value={itemType} onChange={e=>{setItemType(e.target.value as 'main'|'accessory'|'part');setClassificationTouched(true)}}><option value="main">Produto principal</option><option value="accessory">Acessório</option><option value="part">Peça</option></select></Field>
         <Field label="Categoria do ranking" full><input list="cp-ranking-categories" value={categoryGroup} onChange={e=>{setCategoryGroup(e.target.value);setClassificationTouched(true)}} placeholder="Ex.: Cabos e carregadores"/><datalist id="cp-ranking-categories"><option value="Cabos e carregadores"/><option value="Acessórios para celular"/><option value="iPhones"/><option value="Celulares"/><option value="PlayStation"/><option value="Xbox"/><option value="Controles e acessórios"/><option value="Áudio"/><option value="Televisões"/><option value="Ferramentas"/><option value="Eletrodomésticos"/><option value="Casa e cozinha"/><option value="Computadores"/><option value="Tablets"/><option value="Relógios e smartwatches"/><option value="Bicicletas"/><option value="Motos"/><option value="Carros"/></datalist></Field>
         <div className="cp-classification-tip"><Sparkles size={16}/><span>O CONTROLE+ classifica automaticamente. Altere apenas se quiser corrigir como este produto aparece no Ranking Pessoal.</span></div>
@@ -1024,12 +1029,13 @@ function ProductDetail({product,data,calc,readOnly,onClose,onSale,onExpense,onSa
       </div>:<div className="cp-product-info-read">
         <div><span>Categoria</span><b>{category||'Não informada'}</b></div>
         <div><span>Origem</span><b>{product.acquisition_type==='owned'?'Produto próprio':product.source||'Compra'}</b></div>
+         <div><span>Tipo de venda</span><b>{product.inventory_mode==='single'?'Item único':'Produto com estoque'}</b></div>
         <div className="cp-ranking-classification"><span>Ranking pessoal</span><b>{product.category_group||categoryGroup||'Outros'}</b><small>{product.item_type==='accessory'?'Acessório':product.item_type==='part'?'Peça':'Produto principal'} · {product.category_source==='manual'?'corrigido manualmente':'classificação automática'}</small></div>
         {notes&&<div className="cp-product-notes"><span>Observações</span><p>{notes}</p></div>}
       </div>}
     </section>
 
-    <div className="cp-detail-numbers"><div><span>Custo por un.</span><b>{product.cost_basis_known?money.format(product.purchase_unit_cost):'Não informado'}</b></div><div><span>Custo real</span><b>{product.cost_basis_known?money.format(cost):'Sem base'}</b></div><div><span>Lucro possível</span><b className={potential!==null&&potential>=0?'positive':''}>{potential===null?'—':money.format(potential)}</b></div><div><span>Tempo no estoque</span><b>{daysSince(product.purchase_date)} dias</b></div></div>
+    <div className="cp-detail-numbers"><div><span>{product.inventory_mode==='single'?'Custo da peça':'Custo por un.'}</span><b>{product.cost_basis_known?money.format(product.purchase_unit_cost):'Não informado'}</b></div><div><span>Custo real</span><b>{product.cost_basis_known?money.format(cost):'Sem base'}</b></div><div><span>{product.inventory_mode==='single'?'Lucro da venda':'Lucro possível'}</span><b className={potential!==null&&potential>=0?'positive':''}>{potential===null?'—':money.format(potential)}</b></div><div><span>Tempo no estoque</span><b>{daysSince(product.purchase_date)} dias</b></div></div>
     <div className="cp-detail-actions">{product.quantity_available>0&&<button className="cp-primary" onClick={onSale}><Banknote/> Registrar venda</button>}<button className="cp-secondary" onClick={onExpense}><Plus/> Adicionar gasto</button></div>
 
     <section className="cp-detail-section">
