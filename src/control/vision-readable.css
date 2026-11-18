@@ -1146,52 +1146,47 @@
 }
 
 
-/* Selo VENDIDO aprovado — faixa original com fundo transparente.
-   Renderizada exclusivamente em produtos com 0 unidades disponíveis.
-   Faixa no topo, sem cobrir foto, preço ou título, e sem bloquear o clique. */
-:root[data-theme] .cp-app[data-theme] .cp-vision-product--sold{
-  position:relative;
-}
-:root[data-theme] .cp-app[data-theme] .cp-vision-product--sold .cp-vision-sold-ribbon{
-  display:flex!important;
-  align-items:center!important;
-  justify-content:center!important;
-  width:100%;
-  padding:0 2px;
-  margin:0 0 8px;
-  min-height:48px;
-  pointer-events:none;
-  background:transparent!important;
-  overflow:visible;
+/* VENDIDO — selo transparente sobre a própria fotografia.
+   Não ocupa uma linha nova, preserva a altura e alinhamento dos cards. */
+:root[data-theme] .cp-app[data-theme] .cp-vision-stock-grid .cp-vision-product--sold .cp-vision-product-image{
+  position:relative!important;
   isolation:isolate;
 }
-:root[data-theme] .cp-app[data-theme] .cp-vision-sold-ribbon img{
-  display:block!important;
-  width:min(100%,185px)!important;
-  max-width:100%!important;
+:root[data-theme] .cp-app[data-theme] .cp-vision-stock-grid .cp-vision-product-image .cp-vision-sold-ribbon{
+  position:absolute!important;
+  z-index:2!important;
+  top:5px!important;
+  left:3px!important;
+  width:calc(100% - 6px)!important;
   height:auto!important;
-  max-height:64px!important;
-  object-fit:contain!important;
-  object-position:center;
+  max-height:none!important;
+  padding:0!important;
+  margin:0!important;
+  min-height:0!important;
+  display:block!important;
+  background:none!important;
+  pointer-events:none!important;
+  filter:drop-shadow(0 2px 3px rgba(42,17,14,.25));
+}
+:root[data-theme] .cp-app[data-theme] .cp-vision-stock-grid .cp-vision-product-image .cp-vision-sold-ribbon img{
+  display:block!important;
+  position:static!important;
+  width:100%!important;
+  height:auto!important;
+  max-width:100%!important;
+  max-height:none!important;
+  aspect-ratio:auto!important;
   opacity:1!important;
-  filter:drop-shadow(0 4px 6px rgba(75,13,12,.12));
+  object-fit:contain!important;
+  filter:none!important;
 }
 :root[data-theme] .cp-app[data-theme] .cp-vision-product--sold .cp-vision-product-flags:empty{
   display:none!important;
 }
 @media(max-width:640px){
-  :root[data-theme] .cp-app[data-theme] .cp-vision-product--sold .cp-vision-sold-ribbon{
-    min-height:41px;
-    margin:0 0 5px;
-    padding:0;
-  }
-  :root[data-theme] .cp-app[data-theme] .cp-vision-sold-ribbon img{
-    width:min(100%,155px)!important;
-    max-height:52px!important;
-  }
-}
-@media(max-width:365px){
-  :root[data-theme] .cp-app[data-theme] .cp-vision-sold-ribbon img{
-    width:min(100%,142px)!important;
+  :root[data-theme] .cp-app[data-theme] .cp-vision-stock-grid .cp-vision-product-image .cp-vision-sold-ribbon{
+    top:4px!important;
+    left:2px!important;
+    width:calc(100% - 4px)!important;
   }
 }
