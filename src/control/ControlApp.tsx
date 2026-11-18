@@ -842,7 +842,7 @@ function TradeModal({data,initialProduct,onClose,onBack,onDone}:{data:Data;initi
   const [incomingProductId]=useState(()=>crypto.randomUUID())
   const previewUrls=useMemo(()=>files.map(f=>URL.createObjectURL(f)),[files])
   useEffect(()=>()=>{previewUrls.forEach(url=>URL.revokeObjectURL(url))},[previewUrls])
-  const readAmount=(v:string)=>Number(v.replace(',','.'))
+  const readAmount=(v:string)=>{const value=v.trim().replace(/\s/g,'');return Number(value.includes(',')?value.replace(/\./g,'').replace(',','.'):value)}
   const agreed=receivedValue.trim()?readAmount(receivedValue):0
   const cashback=cashDirection==='none'?0:(cashAmount.trim()?readAmount(cashAmount):0)
   const net=agreed+(cashDirection==='received'?cashback:cashDirection==='paid'?-cashback:0)
@@ -1170,4 +1170,4 @@ function Tip({text}:{text:string}){return <div className="cp-form-tip"><span>+</
 function LoadingScreen(){return <div className="cp-loading"><Brand/><div className="cp-loading-line"><span/></div><p>Organizando seu negócio...</p></div>}
 function paymentLabel(v:string){return ({pix:'Pix',cash:'Dinheiro',card:'Cartão',transfer:'Transferência',receivable:'A prazo',other:'Outro'} as Record<string,string>)[v]||v}
 function expenseLabel(v:string){return ({repair:'Reparo',transport:'Transporte',cleaning:'Limpeza',fee:'Taxa',accessory:'Acessório/peça',other:'Outro'} as Record<string,string>)[v]||v}
-function cashCategory(v:string){return ({purchase:'Compra',sale:'Venda',product_expense:'Gasto de produto',manual:'Manual'} as Record<string,string>)[v]||v}
+function cashCategory(v:string){return ({purchase:'Compra',sale:'Venda',trade:'Troca',product_expense:'Gasto de produto',manual:'Manual'} as Record<string,string>)[v]||v}
