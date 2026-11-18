@@ -817,6 +817,99 @@ function SaleModal({data,initialProduct,onClose,onDone,onTradeDone}:{data:Data;i
   </ModalShell>
 }
 
+
+function TradeModal({data,initialProduct,onClose,onBack,onDone}:{data:Data;initialProduct:Product;onClose:()=>void;onBack:()=>void;onDone:()=>void}){
+  const eligible=data.products.filter(p=>p.inventory_mode==='single'&&p.quantity_available===1)
+  const [outgoingId,setOutgoingId]=useState(initialProduct.id)
+  const outgoing=eligible.find(p=>p.id===outgoingId)
+  const [receivedName,setReceivedName]=useState('')
+  const [receivedCategory,setReceivedCategory]=useState('')
+  const [receivedValue,setReceivedValue]=useState('')
+  const [resalePrice,setResalePrice]=useState('')
+  const [cashDirection,setCashDirection]=useState<'none'|'received'|'paid'>('none')
+  const [cashAmount,setCashAmount]=useState('')
+  const [paymentMethod,setPaymentMethod]=useState('pix')
+  const [date,setDate]=useState(localDate())
+  const [customerId,setCustomerId]=useState('')
+  const [counterparty,setCounterparty]=useState('')
+  const [notes,setNotes]=useState('')
+  const [files,setFiles]=useState<File[]>([])
+  const [error,setError]=useState<string|null>(null)
+  const [operationId]=useState(()=>crypto.randomUUID())
+  const [incomingProductId]=useState(()=>crypto.randomUUID())
+  const previewUrls=useMemo(()=>files.map(f=>URL.createObjectURL(f)),[files])
+  useEffect(()=>()=>{previewUrls.forEach(url=>URL.revokeObjectURL(url))},[previewUrls])
+  const readAmount=(v:string)=>Number(v.replace(',','.'))
+  const agreed=receivedValue.trim()?readAmount(receivedValue):0
+  const cashback=cashDirection==='none'?0:(cashAmount.trim()?readAmount(cashAmount):0)
+  const net=agreed+(cashDirection==='received'?cashback:cashDirection==='paid'?-cashback:0)
+  const itemCost=outgoing?buildMetrics(data).unitCost(outgoing):0
+  const projectedProfit=net-itemCost
+  async function saveTrade(){
+    setError(null)
+    try{
+      if(!outgoing)throw new Error('Escolha um item disponível para entregar.')
+      if(!receivedName.trim())throw new Error('Informe o nome do produto recebido.')
+      if(!Number.isFinite(agreed)||agreed<=0)throw new Error('Informe o valor combinado do produto recebido.')
+      if(cashDirection!=='none'&&(!Number.isFinite(cashback)||cashback<=0))throw new Error('Informe o valor da volta em dinheiro.')
+      if(net<0)throw new Error('A volta que você pagou supera o valor avaliado do item recebido.')
+      const desired=resalePrice.trim()?readAmount(resalePrice):null
+      if(desired!==null&&(!Number.isFinite(desired)||desired<0))throw new Error('Preço de revenda inválido.')
+      if(!files.length)throw new Error('Adicione ao menos uma foto do produto recebido.')
+      if(date>localDate())throw new Error('A data da troca não pode ser futura.')
+      const extra=[counterparty.trim()?'Outra pessoa: '+counterparty.trim():'',notes.trim()].filter(Boolean).join(' · ')
+      await data.registerTrade({
+        requestId:operationId,outgoingProductId:outgoing.id,incomingProductId,
+        incomingName:receivedName.trim(),incomingCategory:receivedCategory.trim(),
+        incomingValue:agreed,cashDirection,cashAmount:cashDirection==='none'?0:cashback,
+        tradeDate:date,paymentMethod,incomingListedPrice:desired,
+        customerId:customerId||null,notes:extra
+      },files)
+      onDone()
+    }catch(err:any){setError(err?.message||'Não foi possível registrar a troca.')}
+  }
+  return <ModalShell onClose={onClose}>
+    <ModalHeader eyebrow="TROCA DE ITEM ÚNICO" title="O que entrou no lugar?" text="Dê baixa no item entregue e receba o novo produto no Estoque, com foto e histórico ligados."/>
+    <div className="cp-trade-flow"><span><RefreshCw size={19}/> Item entregue</span><span>Troca registrada com histórico</span><span><Package size={19}/> Item recebido</span></div>
+    <div className="cp-form-grid cp-trade-form">
+      <div className="cp-field cp-field--full"><span>Tipo de operação</span><div className="cp-trade-type-switch"><button type="button" onClick={onBack}><Banknote size={19}/><b>Venda</b></button><button type="button" className="active" aria-pressed="true"><RefreshCw size={19}/><b>Troca</b></button></div></div>
+      <Field label="Qual item você vai entregar?" full><select value={outgoingId} onChange={e=>setOutgoingId(e.target.value)}>{eligible.map(p=><option key={p.id} value={p.id}>{p.name}</option>)}</select></Field>
+      <div className="cp-trade-section-label"><Package size={19}/><div><b>Produto que você vai receber</b><small>Ele será cadastrado automaticamente como Item único</small></div></div>
+      <Field label="Nome do produto recebido" full><input value={receivedName} onChange={e=>setReceivedName(e.target.value)} placeholder="Ex.: iPhone 11 128 GB"/></Field>
+      <Field label="Categoria"><input value={receivedCategory} onChange={e=>setReceivedCategory(e.target.value)} placeholder="Celular, bicicleta..."/></Field>
+      <Field label="Valor acordado do item recebido"><input inputMode="decimal" value={receivedValue} onChange={e=>setReceivedValue(e.target.value)} placeholder="Ex.: 800,00"/></Field>
+      <Field label="Preço que pretende vender (opcional)" full><input inputMode="decimal" value={resalePrice} onChange={e=>setResalePrice(e.target.value)} placeholder="Ex.: 1.000,00"/></Field>
+      <div className="cp-trade-photos cp-field cp-field--full"><span>Fotos do item recebido <b>· obrigatório</b></span><label className="cp-trade-photo-picker"><ImagePlus size={24}/><div><b>{files.length?files.length+' foto(s) selecionada(s)':'Adicionar fotos do item'}</b><small>Da câmera ou galeria · até 5 imagens</small></div><input type="file" accept="image/*" multiple onChange={e=>{
+        const selected=Array.from(e.target.files||[]).slice(0,5)
+        setFiles(selected);e.currentTarget.value=''
+      }}/></label>
+      {previewUrls.length>0&&<div className="cp-trade-photo-previews">{previewUrls.map((url,i)=><div key={url}><img src={url} alt={'Foto recebida '+(i+1)}/><button type="button" aria-label={'Remover foto '+(i+1)} onClick={()=>setFiles(list=>list.filter((_,index)=>index!==i))}><X size={16}/></button></div>)}</div>}</div>
+      <div className="cp-trade-section-label"><WalletCards size={19}/><div><b>Teve volta em dinheiro?</b><small>Informe quem pagou a diferença na troca</small></div></div>
+      <div className="cp-field cp-field--full"><span>Volta em dinheiro</span><div className="cp-trade-cash-options">
+        <button type="button" className={cashDirection==='none'?'active':''} onClick={()=>setCashDirection('none')}>Sem volta</button>
+        <button type="button" className={cashDirection==='received'?'active':''} onClick={()=>setCashDirection('received')}><ArrowDownRight size={16}/> Recebi</button>
+        <button type="button" className={cashDirection==='paid'?'active':''} onClick={()=>setCashDirection('paid')}><ArrowUpRight size={16}/> Paguei</button>
+      </div></div>
+      {cashDirection!=='none'&&<><Field label="Valor da volta"><input inputMode="decimal" value={cashAmount} onChange={e=>setCashAmount(e.target.value)} placeholder="Ex.: 100,00"/></Field><Field label="Forma da volta"><select value={paymentMethod} onChange={e=>setPaymentMethod(e.target.value)}><option value="pix">Pix</option><option value="cash">Dinheiro</option><option value="transfer">Transferência</option><option value="card">Cartão</option><option value="other">Outro</option></select></Field></>}
+      <Field label="Data da troca"><input type="date" max={localDate()} value={date} onChange={e=>setDate(e.target.value)}/></Field>
+      <Field label="Cliente cadastrado (opcional)"><select value={customerId} onChange={e=>setCustomerId(e.target.value)}><option value="">Não vincular</option>{data.customers.map(c=><option key={c.id} value={c.id}>{c.name}</option>)}</select></Field>
+      <Field label="Nome de quem trocou (opcional)" full><input value={counterparty} onChange={e=>setCounterparty(e.target.value)} placeholder="Ex.: João, do Marketplace"/></Field>
+      <Field label="Observações (opcional)" full><textarea value={notes} onChange={e=>setNotes(e.target.value)} placeholder="Estado do aparelho, bateria, acessórios, defeitos..."/></Field>
+      <div className="cp-trade-summary">
+        <div className="cp-trade-summary-heading"><RefreshCw size={18}/><strong>Resumo da troca</strong></div>
+        <div><span>Você entrega</span><b>{outgoing?.name||'Selecione o item'}</b></div>
+        <div><span>Você recebe</span><b>{receivedName||'Novo item'} {agreed>0?'· '+money.format(agreed):''}</b></div>
+        <div><span>Movimento no caixa</span><b className={cashDirection==='paid'?'negative':cashDirection==='received'?'positive':''}>{cashDirection==='received'?'+ ':cashDirection==='paid'?'- ':''}{money.format(cashDirection==='none'?0:cashback)}</b></div>
+        <div><span>Valor negociado</span><b>{money.format(Number.isFinite(net)?net:0)}</b></div>
+        {outgoing?.cost_basis_known?<div><span>Resultado estimado*</span><b className={projectedProfit>=0?'positive':'negative'}>{money.format(Number.isFinite(projectedProfit)?projectedProfit:0)}</b></div>:<div><span>Resultado estimado*</span><b>Sem custo informado</b></div>}
+        <small>*A avaliação do item recebido não é dinheiro no caixa. Apenas a volta movimenta o saldo. O resultado depende do valor atribuído ao item recebido.</small>
+      </div>
+    </div>
+    {error&&<div className="cp-form-error">{error}</div>}
+    <div className="cp-modal-actions"><button type="button" className="cp-secondary" onClick={onBack}>Voltar à venda</button><button type="button" className="cp-primary" disabled={data.busy||!outgoing} onClick={()=>void saveTrade()}>{data.busy?'Registrando troca...':'Confirmar troca e colocar no estoque'}</button></div>
+  </ModalShell>
+}
+
 function ExpenseModal({data,initialProduct,onClose,onDone}:{data:Data;initialProduct:Product|null;onClose:()=>void;onDone:()=>void}){
   const available=data.products.filter(p=>p.quantity_available>0||p.status==='reserved')
   const [productId,setProductId]=useState(initialProduct?.id||available[0]?.id||''),[type,setType]=useState('repair'),[amount,setAmount]=useState(''),[description,setDescription]=useState(''),[date,setDate]=useState(localDate()),[error,setError]=useState<string|null>(null)
