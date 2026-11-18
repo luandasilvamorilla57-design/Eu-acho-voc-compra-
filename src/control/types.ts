@@ -42,6 +42,7 @@ export type Product={
   sku:string|null
   quantity_initial:number
   quantity_available:number
+  inventory_mode:'single'|'stock'
   purchase_unit_cost:number
   purchase_date:string
   source:string|null
@@ -217,6 +218,7 @@ export type NewProductInput={
   name:string
   category?:string
   quantity:number
+  inventoryMode:'single'|'stock'
   purchaseUnitCost:number
   purchaseDate:string
   source?:string
