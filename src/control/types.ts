@@ -143,6 +143,38 @@ export type SaleItem={
   created_at:string
 }
 
+export type TradeIn={
+  id:string
+  user_id:string
+  sale_id:string
+  outgoing_product_id:string
+  incoming_product_id:string
+  incoming_value:number
+  cash_direction:'none'|'received'|'paid'
+  cash_amount:number
+  payment_method:string
+  trade_date:string
+  request_id:string
+  notes:string|null
+  created_at:string
+}
+
+export type RegisterTradeInput={
+  requestId:string
+  outgoingProductId:string
+  incomingProductId:string
+  incomingName:string
+  incomingCategory:string
+  incomingValue:number
+  cashDirection:'none'|'received'|'paid'
+  cashAmount:number
+  tradeDate:string
+  paymentMethod:string
+  incomingListedPrice:number|null
+  customerId?:string|null
+  notes?:string
+}
+
 export type CashEntry={
   id:string
   user_id:string
