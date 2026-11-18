@@ -581,9 +581,28 @@ function SalesPage({data,calc,onSale,onOpenProduct}:{data:Data;calc:Metrics;onSa
 }
 
 function CashPage({data,calc,onCash,onSettings}:{data:Data;calc:Metrics;onCash:()=>void;onSettings:()=>void}){
+  const [filter,setFilter]=useState<'all'|'income'|'expense'>('all')
   const incoming=data.cashEntries.filter(x=>x.kind==='income').reduce((s,x)=>s+x.amount,0)
   const outgoing=data.cashEntries.filter(x=>x.kind==='expense').reduce((s,x)=>s+x.amount,0)
-  return <div className="cp-page"><PageTitle eyebrow="CAIXA" title="Saiba quanto pode reinvestir." text="Entradas e saídas ficam em uma linha do tempo simples, sem linguagem de contabilidade." action={<button className="cp-primary cp-small" onClick={onCash}><Plus size={18}/> Movimento</button>}/><section className="cp-cash-card"><span>Saldo disponível</span><strong>{money.format(calc.cash)}</strong><p>{calc.cash>=0?'Esse é o valor livre considerando tudo que você registrou.':'Seu caixa está negativo. Confira se o saldo inicial e as movimentações estão completos.'}</p><button onClick={onSettings}>Ajustar saldo inicial <ChevronRight size={16}/></button></section><div className="cp-cash-breakdown"><div><span><ArrowUpRight/> Entradas</span><b>{money.format(incoming)}</b></div><div><span><ArrowDownRight/> Saídas</span><b>{money.format(outgoing)}</b></div></div><div className="cp-section-head"><div><span>MOVIMENTAÇÕES</span><h2>O que aconteceu com seu dinheiro</h2></div></div>{data.cashEntries.length?<div className="cp-cash-list">{data.cashEntries.map(e=><CashRow key={e.id} entry={e}/>)}</div>:<Empty icon={<WalletCards/>} title="Seu caixa está limpo" text="Compras, vendas e gastos registrados aparecem aqui automaticamente." action="Adicionar movimentação" onAction={onCash}/>}</div>
+  const month=localDate().slice(0,7)
+  const monthEntries=data.cashEntries.filter(e=>e.occurred_at.startsWith(month))
+  const monthIn=monthEntries.filter(e=>e.kind==='income').reduce((s,e)=>s+e.amount,0)
+  const monthOut=monthEntries.filter(e=>e.kind==='expense').reduce((s,e)=>s+e.amount,0)
+  const chart=recentDailyValues(data.cashEntries.map(e=>({date:e.occurred_at,amount:e.kind==='income'?e.amount:-e.amount})),15,true,data.settings?.initial_cash||0)
+  const rows=data.cashEntries.filter(e=>filter==='all'||e.kind===filter)
+  return <div className="cp-page cp-vision-cash-page">
+    <PageTitle eyebrow="CAIXA" title="Caixa" text="Acompanhe entradas, saídas e seu dinheiro disponível." action={<button className="cp-primary cp-small" onClick={onCash}><ArrowUpRight size={18}/> Movimentar</button>}/>
+    <section className="cp-vision-cash-hero">
+      <div className="cp-vision-cash-balance"><span className="cp-vision-balance-symbol"><WalletCards/></span><div><small>Saldo do caixa</small><strong>{money.format(calc.cash)}</strong></div></div>
+      <div className="cp-vision-cash-pair"><div><span className="cp-vision-in"><ArrowUpRight/></span><div><small>Entradas registradas</small><strong>{money.format(incoming)}</strong></div></div><div><span className="cp-vision-out"><ArrowDownRight/></span><div><small>Saídas registradas</small><strong>{money.format(outgoing)}</strong></div></div></div>
+      <button className="cp-vision-cash-settings" onClick={onSettings}>Ajustar saldo inicial <ChevronRight size={14}/></button>
+    </section>
+    <section className="cp-vision-cash-stats"><div><span className="cp-vision-stat-icon cp-vision-positive"><ArrowUpRight/></span><small>Entradas do mês</small><strong className="positive">{money.format(monthIn)}</strong></div><div><span className="cp-vision-stat-icon cp-vision-negative"><ArrowDownRight/></span><small>Saídas do mês</small><strong className="negative">{money.format(monthOut)}</strong></div><div><span className="cp-vision-stat-icon"><WalletCards/></span><small>Saldo atual</small><strong>{money.format(calc.cash)}</strong></div></section>
+    <section className="cp-vision-cash-chart"><div className="cp-vision-panel-heading"><span className="cp-vision-stat-icon"><BarChart3/></span><div><h2>Movimentação diária do caixa</h2><small>Saldo acumulado nos últimos 15 dias</small></div></div><PremiumAreaChart values={chart.values} labels={chart.labels}/></section>
+    <section className="cp-vision-cash-history"><div className="cp-vision-history-head"><h2>Movimentações recentes</h2><div className="cp-filter-tabs cp-vision-cash-filters" role="group" aria-label="Filtrar movimentos">{([['all','Tudo'],['income','Entradas'],['expense','Saídas']] as const).map(([key,label])=><button key={key} className={filter===key?'active':''} onClick={()=>setFilter(key)}>{label}</button>)}</div></div>
+      {rows.length?<div className="cp-cash-list cp-vision-cash-list">{rows.map(e=><CashRow key={e.id} entry={e}/>)}</div>:<Empty icon={<WalletCards/>} title="Nenhuma movimentação" text="As entradas e saídas registradas aparecem aqui." action="Adicionar movimentação" onAction={onCash}/>}
+    </section>
+  </div>
 }
 
 function CashRow({entry}:{entry:CashEntry}){
