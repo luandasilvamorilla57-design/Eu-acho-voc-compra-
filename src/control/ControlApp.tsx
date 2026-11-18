@@ -482,9 +482,9 @@ function ProductCard({product,data,calc,onClick}:{product:Product;data:Data;calc
     <div className="cp-vision-product-top">
       <span className="cp-vision-product-image">
         {photo?<img src={photo} alt={'Foto de '+product.name}/>:<Box size={38}/>}
-        {isSold&&<span className="cp-vision-sold-ribbon"><img src="/selo-vendido.webp" alt="Vendido" width="160" height="52" loading="lazy" decoding="async"/></span>}
       </span>
       <div className="cp-vision-product-info">
+        {isSold&&<span className="cp-vision-sold-ribbon"><img src="/selo-vendido.webp" alt="Vendido" width="122" height="40" loading="lazy" decoding="async"/></span>}
         <div className="cp-vision-product-flags">
           {lowStock&&<span className="cp-vision-low"><AlertTriangle size={13}/> Baixo estoque</span>}
           {status&&<span className="cp-vision-status">{status}</span>}
