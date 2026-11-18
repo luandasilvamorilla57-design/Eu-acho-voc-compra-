@@ -517,9 +517,9 @@ function StockPage({data,calc,onOpenProduct,onAdd}:{data:Data;calc:Metrics;onOpe
     if(filter==='attention')return p.quantity_available>0&&(daysSince(p.purchase_date)>=calc.alertDays||(p.listing_status==='listed'&&!!p.listing_next_checkin_at&&p.listing_next_checkin_at<=localDate()))
     if(filter==='sold')return p.quantity_available===0
     return true
-  })
+  }).sort((a,b)=>Number(b.quantity_available>0)-Number(a.quantity_available>0))
   return <div className="cp-page cp-vision-stock-page">
-    <PageTitle eyebrow="ESTOQUE" title="Estoque" text="Controle completo do seu inventário." action={<button className="cp-primary cp-small" onClick={onAdd}><Plus size={18}/> Adicionar item</button>}/>
+    <PageTitle eyebrow={new Date().toLocaleDateString('pt-BR',{weekday:'long',day:'numeric',month:'short'})} title="Estoque" text="Controle completo do seu inventário." action={<button className="cp-primary cp-small" onClick={onAdd}><Plus size={18}/> Adicionar item</button>}/>
     <div className="cp-vision-stock-toolbar">
       <label className="cp-search cp-vision-stock-search"><Search size={21}/><input value={q} onChange={e=>setQ(e.target.value)} placeholder="Buscar produto por nome, modelo ou referência..."/></label>
       <div className="cp-filter-tabs cp-vision-filters" role="group" aria-label="Filtrar estoque">
@@ -543,12 +543,13 @@ function SalesPage({data,calc,onSale,onOpenProduct}:{data:Data;calc:Metrics;onSa
   const todaySales=completed.filter(s=>s.sale_date===today)
   const todayTotal=todaySales.reduce((sum,s)=>sum+calc.saleStats(s).revenue,0)
   const ticket=completed.length?completed.reduce((sum,s)=>sum+calc.saleStats(s).revenue,0)/completed.length:0
-  const chart=recentDailyValues(completed.map(s=>({date:s.sale_date,amount:calc.saleStats(s).revenue})),15)
-  const filtered=data.sales.filter(s=>period==='all'||period==='today'&&s.sale_date===today||period==='week'&&s.sale_date>=addDays(today,-6)||period==='month'&&s.sale_date.startsWith(today.slice(0,7)))
+  const monthSales=completed.filter(s=>s.sale_date.startsWith(today.slice(0,7)))
+  const chart=recentDailyValues(monthSales.map(s=>({date:s.sale_date,amount:calc.saleStats(s).revenue})),15,true,0)
+  const filtered=data.sales.filter(s=>period==='all'||period==='today'&&s.sale_date===today||period==='week'&&s.sale_date>=addDays(today,-6)||period==='month'&&s.sale_date.startsWith(today.slice(0,7))).sort((a,b)=>b.sale_date.localeCompare(a.sale_date)||b.created_at.localeCompare(a.created_at))
   return <div className="cp-page cp-vision-sales-page">
-    <PageTitle eyebrow="VENDAS" title="Vendas" text="Acompanhe o desempenho da sua operação." action={<button className="cp-primary cp-small" onClick={onSale}><Plus size={18}/> Nova venda</button>}/>
+    <PageTitle eyebrow={new Date().toLocaleDateString('pt-BR',{weekday:'long',day:'numeric',month:'short'})} title="Vendas" text="Acompanhe o desempenho da sua operação." action={<button className="cp-primary cp-small" onClick={onSale}><Plus size={18}/> Nova venda</button>}/>
     <section className="cp-vision-sales-hero">
-      <div className="cp-vision-sales-hero-info"><span><BarChart3 size={21}/> Desempenho de vendas</span><small>Faturamento deste mês</small><strong>{money.format(calc.monthRevenue)}</strong><em>{calc.monthOrders} pedido(s) fechado(s) no mês</em></div>
+      <div className="cp-vision-sales-hero-info"><span><BarChart3 size={21}/> Desempenho de vendas</span><small>Acumulado de vendas no mês</small><strong>{money.format(calc.monthRevenue)}</strong><em>{calc.monthOrders} pedido(s) fechado(s) no mês</em></div>
       <PremiumAreaChart values={chart.values} labels={chart.labels} variant="dark"/>
     </section>
     <section className="cp-vision-sales-stats">
@@ -591,7 +592,7 @@ function CashPage({data,calc,onCash,onSettings}:{data:Data;calc:Metrics;onCash:(
   const chart=recentDailyValues(data.cashEntries.map(e=>({date:e.occurred_at,amount:e.kind==='income'?e.amount:-e.amount})),15,true,data.settings?.initial_cash||0)
   const rows=data.cashEntries.filter(e=>filter==='all'||e.kind===filter)
   return <div className="cp-page cp-vision-cash-page">
-    <PageTitle eyebrow="CAIXA" title="Caixa" text="Acompanhe entradas, saídas e seu dinheiro disponível." action={<button className="cp-primary cp-small" onClick={onCash}><ArrowUpRight size={18}/> Movimentar</button>}/>
+    <PageTitle eyebrow={new Date().toLocaleDateString('pt-BR',{weekday:'long',day:'numeric',month:'short'})} title="Caixa" text="Acompanhe entradas, saídas e seu dinheiro disponível." action={<button className="cp-primary cp-small" onClick={onCash}><ArrowUpRight size={18}/> Movimentar</button>}/>
     <section className="cp-vision-cash-hero">
       <div className="cp-vision-cash-balance"><span className="cp-vision-balance-symbol"><WalletCards/></span><div><small>Saldo do caixa</small><strong>{money.format(calc.cash)}</strong></div></div>
       <div className="cp-vision-cash-pair"><div><span className="cp-vision-in"><ArrowUpRight/></span><div><small>Entradas registradas</small><strong>{money.format(incoming)}</strong></div></div><div><span className="cp-vision-out"><ArrowDownRight/></span><div><small>Saídas registradas</small><strong>{money.format(outgoing)}</strong></div></div></div>
