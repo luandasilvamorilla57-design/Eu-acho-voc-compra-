@@ -71,7 +71,7 @@ export function ManagePage({data,onView,onBack}:{data:Data;onView:(v:ControlView
       <div><span>RESULTADO DO MÊS</span><strong className={s.net>=0?'positive':'negative'}>{money.format(s.net)}</strong><small>Após gastos gerais</small></div>
     </section>
     <button type="button" className="cp-vision-manage-alert" onClick={()=>onView('receivables')}>
-      <span className="cp-vision-manage-alert-icon"><AlertTriangle/></span>
+      <span className="cp-vision-manage-alert-icon" data-premium-icon={overdue.length>0?"alert":undefined}><AlertTriangle/></span>
       <div><small>ATENÇÃO DA OPERAÇÃO</small><strong>{overdue.length?'Você tem '+overdue.length+' parcela(s) atrasada(s)':'Seus recebíveis estão em dia'}</strong><p>{overdue.length?'Confira os clientes e acompanhe os vencimentos.':'Acompanhe os próximos pagamentos e mantenha sua operação organizada.'}</p><em>Ver recebíveis <ChevronRight size={15}/></em></div>
       <ChevronRight className="cp-vision-manage-alert-arrow"/>
     </button>
