@@ -469,39 +469,70 @@ function HomePage({data,calc,canWrite,onBlocked,onOpenProduct,onView,onAction,on
 function ProductCard({product,data,calc,onClick}:{product:Product;data:Data;calc:Metrics;onClick:()=>void}){
   const photo=(data.grouped.photosByProduct.get(product.id)||[])[0]?.signed_url
   const cost=calc.unitCost(product)
-  const potential=product.listed_price!==null?(product.listed_price-cost)*product.quantity_available:null
+  const price=product.listed_price
+  const margin=price!==null&&product.cost_basis_known?price-cost:null
   const days=daysSince(product.purchase_date)
-  const listedDays=daysSince(product.listing_started_at||product.purchase_date)
   const listingDue=product.listing_status==='listed'&&!!product.listing_next_checkin_at&&product.listing_next_checkin_at<=localDate()
+  const lowStock=product.quantity_available>0&&product.quantity_available<=3
   const alert=product.quantity_available>0&&days>=calc.alertDays
-  const pill=product.quantity_available===0?'Vendido':listingDue?'Revisar anúncio':product.listing_status==='listed'?'Anunciado · '+listedDays+'d':alert?days+' dias':'Em estoque'
-  const pillClass=product.quantity_available===0?'cp-pill cp-pill--muted':listingDue?'cp-pill cp-pill--warn':product.listing_status==='listed'?'cp-pill cp-pill--listed':alert?'cp-pill cp-pill--warn':'cp-pill'
-  return <button className="cp-product-card" onClick={onClick}>
-    <div className="cp-product-photo">{photo?<img src={photo} alt=""/>:<Box size={32}/>}<span className={pillClass}>{pill}</span></div>
-    <div className="cp-product-body">
-      <span>{product.acquisition_type==='owned'?'Produto próprio':product.category||'Produto'}</span>
-      <h3>{product.name}</h3>
-      <div className="cp-product-meta-line"><span>{product.quantity_available} un. disponível(is)</span><span>{product.listed_price!==null?'Anúncio '+money.format(product.listed_price):'Sem preço de anúncio'}</span></div>
-      <div className="cp-product-values"><div><small>Custo real</small><b>{product.cost_basis_known?money.format(cost):'Não informado'}</b></div><div><small>{potential===null?'Lucro possível':'Lucro possível'}</small><b className={potential!==null&&potential>=0?'positive':''}>{potential===null?'—':money.format(potential)}</b></div></div>
+  const status=product.quantity_available===0?'Vendido':listingDue?'Revisar anúncio':product.listing_status==='listed'?'Anunciado':alert?'Atenção':''
+  return <button type="button" className="cp-product-card cp-vision-product" onClick={onClick} aria-label={'Ver detalhes de '+product.name}>
+    <div className="cp-vision-product-top">
+      <span className="cp-vision-product-image">{photo?<img src={photo} alt={'Foto de '+product.name}/>:<Box size={38}/>}</span>
+      <div className="cp-vision-product-info">
+        <div className="cp-vision-product-flags">
+          {lowStock&&<span className="cp-vision-low"><AlertTriangle size={13}/> Baixo estoque</span>}
+          {status&&<span className="cp-vision-status">{status}</span>}
+        </div>
+        <h3>{product.name}</h3>
+        <p>{product.acquisition_type==='owned'?'Produto próprio':product.category||'Produto'}</p>
+        <span className="cp-vision-stock-count"><Package size={14}/> Estoque: <b>{product.quantity_available} un.</b></span>
+      </div>
+      <span className="cp-vision-dots" aria-hidden="true">•••</span>
+    </div>
+    <div className="cp-vision-product-prices">
+      <div><span>Custo</span><strong>{product.cost_basis_known?money.format(cost):'Não informado'}</strong></div>
+      <div><span>Venda</span><strong>{price!==null?money.format(price):'Não definido'}</strong></div>
+    </div>
+    <div className="cp-vision-profit" data-tone={margin!==null&&margin<0?'negative':'positive'}>
+      <span><ArrowUpRight size={16}/> Lucro por unidade</span>
+      <strong>{margin===null?'—':money.format(margin)}</strong>
     </div>
   </button>
 }
 
 function StockPage({data,calc,onOpenProduct,onAdd}:{data:Data;calc:Metrics;onOpenProduct:(p:Product)=>void;onAdd:()=>void}){
   const [q,setQ]=useState('')
-  const [filter,setFilter]=useState<'all'|'stock'|'listed'|'attention'|'sold'>('all')
-  const listedCount=data.products.filter(p=>p.quantity_available>0&&p.listing_status==='listed').length
-  const reviewCount=data.products.filter(p=>p.quantity_available>0&&p.listing_status==='listed'&&!!p.listing_next_checkin_at&&p.listing_next_checkin_at<=localDate()).length
+  const [filter,setFilter]=useState<'all'|'stock'|'low'|'listed'|'attention'|'sold'>('all')
+  const active=data.products.filter(p=>p.quantity_available>0)
+  const lowCount=active.filter(p=>p.quantity_available<=3).length
+  const listedCount=active.filter(p=>p.listing_status==='listed').length
+  const reviewCount=active.filter(p=>p.listing_status==='listed'&&!!p.listing_next_checkin_at&&p.listing_next_checkin_at<=localDate()).length
   const list=data.products.filter(p=>{
-    const match=(p.name+' '+(p.category||'')).toLowerCase().includes(q.toLowerCase())
-    if(!match)return false
+    if(!(p.name+' '+(p.category||'')).toLowerCase().includes(q.toLowerCase()))return false
     if(filter==='stock')return p.quantity_available>0
+    if(filter==='low')return p.quantity_available>0&&p.quantity_available<=3
     if(filter==='listed')return p.quantity_available>0&&p.listing_status==='listed'
     if(filter==='attention')return p.quantity_available>0&&(daysSince(p.purchase_date)>=calc.alertDays||(p.listing_status==='listed'&&!!p.listing_next_checkin_at&&p.listing_next_checkin_at<=localDate()))
     if(filter==='sold')return p.quantity_available===0
     return true
   })
-  return <div className="cp-page"><PageTitle eyebrow="ESTOQUE" title="Seus produtos em um só lugar." text="Comprados para revenda ou produtos que você já tinha: acompanhe custo, anúncio e tempo parado." action={<button className="cp-primary cp-small" onClick={onAdd}><Plus size={18}/> Adicionar produto</button>}/><div className="cp-stock-summary cp-stock-summary--four"><div><span>Capital no estoque</span><strong>{money.format(calc.stockCapital)}</strong></div><div><span>Unidades disponíveis</span><strong>{calc.stockUnits}</strong></div><div><span>Anunciados</span><strong>{listedCount}</strong></div><div><span>Revisar anúncio</span><strong>{reviewCount}</strong></div></div><div className="cp-tools"><label className="cp-search"><Search size={18}/><input value={q} onChange={e=>setQ(e.target.value)} placeholder="Buscar produto..."/></label><div className="cp-filter-tabs">{([['all','Todos'],['stock','Disponíveis'],['listed','Anunciados'],['attention','Atenção'],['sold','Vendidos']] as const).map(([key,label])=><button key={key} className={filter===key?'active':''} onClick={()=>setFilter(key)}>{label}</button>)}</div></div>{list.length?<div className="cp-stock-grid">{list.map(p=><ProductCard key={p.id} product={p} data={data} calc={calc} onClick={()=>onOpenProduct(p)}/>)}</div>:<Empty icon={<Search/>} title="Nada por aqui" text={q?'Nenhum produto combina com essa busca.':'Adicione uma compra ou um produto que você já tem.'} action={q?undefined:'Adicionar produto'} onAction={onAdd}/>}</div>
+  return <div className="cp-page cp-vision-stock-page">
+    <PageTitle eyebrow="ESTOQUE" title="Estoque" text="Controle completo do seu inventário." action={<button className="cp-primary cp-small" onClick={onAdd}><Plus size={18}/> Adicionar item</button>}/>
+    <div className="cp-vision-stock-toolbar">
+      <label className="cp-search cp-vision-stock-search"><Search size={21}/><input value={q} onChange={e=>setQ(e.target.value)} placeholder="Buscar produto por nome, modelo ou referência..."/></label>
+      <div className="cp-filter-tabs cp-vision-filters" role="group" aria-label="Filtrar estoque">
+        {([['all','Todos'],['stock','Disponível'],['low','Baixo estoque'],['listed','Anúncios'],['attention','Atenção'],['sold','Vendidos']] as const).map(([key,label])=><button type="button" key={key} className={filter===key?'active':''} onClick={()=>setFilter(key)}>{label}</button>)}
+      </div>
+    </div>
+    <section className="cp-vision-stock-stats" aria-label="Resumo do estoque">
+      <div><span className="cp-vision-stat-icon"><Box/></span><small>Capital em estoque</small><strong>{money.format(calc.stockCapital)}</strong></div>
+      <div><span className="cp-vision-stat-icon"><Tag/></span><small>Produtos ativos</small><strong>{number.format(active.length)}</strong></div>
+      <div><span className="cp-vision-stat-icon cp-vision-stat-alert"><AlertTriangle/></span><small>Baixo estoque</small><strong>{number.format(lowCount)}</strong></div>
+    </section>
+    <div className="cp-vision-stock-note"><span><Package size={15}/> {calc.stockUnits} unidades disponíveis</span><span>{listedCount} anúncios ativos · {reviewCount} revisão(ões)</span></div>
+    {list.length?<div className="cp-stock-grid cp-vision-stock-grid">{list.map(p=><ProductCard key={p.id} product={p} data={data} calc={calc} onClick={()=>onOpenProduct(p)}/>)}</div>:<Empty icon={<Search/>} title="Nada por aqui" text={q?'Nenhum produto combina com essa busca.':'Não há produtos para este filtro.'} action={q?undefined:'Adicionar produto'} onAction={onAdd}/>}
+  </div>
 }
 
 function SalesPage({data,calc,onSale,onOpenProduct}:{data:Data;calc:Metrics;onSale:()=>void;onOpenProduct:(p:Product)=>void}){
