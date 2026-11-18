@@ -962,3 +962,90 @@
    transition:none!important;
  }
 }
+
+/* Revisão de precedência das folhas legadas — títulos e atalhos. */
+@media(max-width:640px){
+ :root[data-theme] .cp-app[data-theme] .cp-vision-stock-page .cp-page-title h1,
+ :root[data-theme] .cp-app[data-theme] .cp-vision-sales-page .cp-page-title h1,
+ :root[data-theme] .cp-app[data-theme] .cp-vision-cash-page .cp-page-title h1{
+    font-size:30px!important;
+    line-height:1.12!important;
+ }
+ :root[data-theme] .cp-app[data-theme] .cp-vision-stock-page .cp-page-title p,
+ :root[data-theme] .cp-app[data-theme] .cp-vision-sales-page .cp-page-title p,
+ :root[data-theme] .cp-app[data-theme] .cp-vision-cash-page .cp-page-title p{
+    font-size:12px!important;
+    max-width:230px!important;
+ }
+ :root[data-theme] .cp-app[data-theme] .cp-home-app .cp-quick-app button{
+    min-height:106px!important;
+    padding:14px!important;
+ }
+ :root[data-theme] .cp-app[data-theme] .cp-home-app .cp-quick-app b{
+    font-size:13px!important;
+    line-height:1.25!important;
+ }
+ :root[data-theme] .cp-app[data-theme] .cp-home-app .cp-quick-app small{
+    display:block!important;
+    font-size:11px!important;
+    line-height:1.4!important;
+ }
+ :root[data-theme] .cp-app[data-theme] .cp-home-app .cp-v3-insights small,
+ :root[data-theme] .cp-app[data-theme] .cp-home-app .cp-v3-insights em{
+    font-size:11px!important;
+    line-height:1.4!important;
+ }
+ :root[data-theme] .cp-app[data-theme] .cp-vision-stock-grid .cp-vision-product-prices{
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+ }
+ :root[data-theme] .cp-app[data-theme] .cp-vision-stock-grid .cp-vision-product-prices strong{
+    overflow-wrap:anywhere!important;
+    word-break:normal!important;
+ }
+ :root[data-theme] .cp-app[data-theme] .cp-vision-stock-grid .cp-vision-product-info h3{
+    hyphens:auto;
+ }
+}
+/* Cadastro, administração, simulador e telas complementares */
+:root[data-theme] .cp-app[data-theme] .cp-business-title h1{
+ font-size:clamp(28px,4vw,39px)!important;
+}
+:root[data-theme] .cp-app[data-theme] .cp-report-panel h2,
+:root[data-theme] .cp-app[data-theme] .cp-goal-editor h2,
+:root[data-theme] .cp-app[data-theme] .cp-admin-section h2,
+:root[data-theme] .cp-app[data-theme] .cp-v3-sim-page h2{
+ font-size:clamp(19px,2.7vw,25px)!important;
+ line-height:1.25!important;
+}
+:root[data-theme] .cp-app[data-theme] .cp-report-panel p,
+:root[data-theme] .cp-app[data-theme] .cp-business-empty p,
+:root[data-theme] .cp-app[data-theme] .cp-v3-sim-page p{
+ font-size:13px!important;
+ line-height:1.48!important;
+}
+:root[data-theme] .cp-app[data-theme] .cp-report-panel button,
+:root[data-theme] .cp-app[data-theme] .cp-goal-editor button,
+:root[data-theme] .cp-app[data-theme] .cp-v3-sim-page button,
+:root[data-theme] .cp-app[data-theme] .cp-admin-section button{
+ min-height:44px!important;
+}
+:root[data-theme] .cp-app[data-theme] .cp-auth-card .cp-field input,
+:root[data-theme] .cp-app[data-theme] .cp-onboarding-card .cp-field input{
+ min-height:49px!important;
+ font-size:16px!important;
+}
+:root[data-theme] .cp-app[data-theme] .cp-auth-card button,
+:root[data-theme] .cp-app[data-theme] .cp-onboarding-card button{
+ min-height:44px!important;
+}
+@media(max-width:640px){
+ :root[data-theme] .cp-app[data-theme] .cp-business-title h1{
+   font-size:29px!important;
+ }
+ :root[data-theme] .cp-app[data-theme] .cp-business-title p{
+   font-size:12px!important;
+ }
+ :root[data-theme] .cp-app[data-theme] .cp-vision-management-grid .cp-business-icon{
+   width:40px!important;height:40px!important;flex:0 0 40px!important;
+ }
+}
