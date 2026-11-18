@@ -1,0 +1,902 @@
+/*
+ * CONTROLE+ / APP SURFACE 2026.11
+ * Camada de design visual, sem alterações em lógica ou comportamento.
+ * Importada por último em ControlApp.tsx para unificar os estilos legados.
+ */
+
+/* 01 — Identidade */
+:root[data-theme="light"]{
+  --cp-bg:#f4f6fa;
+  --cp-bg-2:#eef2f7;
+  --cp-panel:#ffffff;
+  --cp-panel-2:#f8fafd;
+  --cp-panel-3:#edf3fa;
+  --cp-elevated:#ffffff;
+  --cp-line:rgba(32,57,84,.105);
+  --cp-line-strong:rgba(32,57,84,.17);
+  --cp-text:#172b43;
+  --cp-text-2:#3f556d;
+  --cp-muted:#708198;
+  --cp-muted-2:#8898a9;
+  --cp-accent:#225887;
+  --cp-accent-strong:#143a64;
+  --cp-accent-light:#3979ad;
+  --cp-accent-soft:#eaf2fa;
+  --cp-success:#12865f;
+  --cp-danger:#c64c5b;
+  --cp-shadow:0 4px 18px rgba(18,46,80,.045);
+  --ui-bg:#f4f6fa;
+  --ui-surface:#fff;
+  --ui-border:#e2e8f0;
+  --ui-field:#f9fbfd;
+  --ui-title:#172b43;
+  --ui-subtitle:#697d90;
+  --ui-elevation:0 5px 20px rgba(21,51,86,.045);
+  --ui-navy:#14365e;
+  --ui-track:#e6edf5;
+}
+:root[data-theme="dark"]{
+  --cp-bg:#0c1625;
+  --cp-bg-2:#111e30;
+  --cp-panel:#16263b;
+  --cp-panel-2:#1a2d43;
+  --cp-panel-3:#203852;
+  --cp-elevated:#1a2c42;
+  --cp-line:rgba(193,216,243,.10);
+  --cp-line-strong:rgba(193,216,243,.17);
+  --cp-text:#f1f5fc;
+  --cp-text-2:#c1d0df;
+  --cp-muted:#98adc2;
+  --cp-muted-2:#829cb6;
+  --cp-accent:#8cbdeb;
+  --cp-accent-strong:#5799cf;
+  --cp-accent-light:#aed8ff;
+  --cp-accent-soft:rgba(105,163,221,.13);
+  --cp-success:#70d7ae;
+  --cp-danger:#ffa1ae;
+  --cp-shadow:0 5px 24px rgba(0,0,0,.17);
+  --ui-bg:#0c1625;
+  --ui-surface:#16263b;
+  --ui-border:#2b4056;
+  --ui-field:#1d3047;
+  --ui-title:#f1f5fc;
+  --ui-subtitle:#a3b6ca;
+  --ui-elevation:0 8px 28px rgba(0,0,0,.15);
+  --ui-navy:#112a46;
+  --ui-track:#293c52;
+}
+
+:root[data-theme] .cp-app{
+  font-family:'DM Sans',system-ui,-apple-system,sans-serif!important;
+  background:var(--ui-bg)!important;
+  color:var(--cp-text)!important;
+  letter-spacing:-.006em;
+  -webkit-font-smoothing:antialiased;
+}
+:root[data-theme] .cp-noise{display:none!important}
+:root[data-theme] .cp-page{
+  width:100%;
+  max-width:1100px!important;
+  padding:28px 24px 40px!important;
+}
+:root[data-theme] .cp-main{background:transparent!important}
+:root[data-theme] .cp-page h1,
+:root[data-theme] .cp-page h2,
+:root[data-theme] .cp-page h3{
+  font-family:'Manrope','DM Sans',system-ui,sans-serif;
+  letter-spacing:-.035em;
+}
+:root[data-theme] .cp-page-title,
+:root[data-theme] .cp-business-title,
+:root[data-theme] .cp-admin-title{
+  margin-bottom:21px!important;
+}
+:root[data-theme] .cp-page-title h1,
+:root[data-theme] .cp-business-title h1,
+:root[data-theme] .cp-admin-title h1{
+  font-size:clamp(25px,3.1vw,38px)!important;
+  letter-spacing:-.055em!important;
+  line-height:1.16!important;
+  margin:5px 0 7px!important;
+  color:var(--ui-title)!important;
+}
+:root[data-theme] .cp-page-title p,
+:root[data-theme] .cp-business-title p,
+:root[data-theme] .cp-admin-title p{
+  font-size:13px!important;
+  line-height:1.55!important;
+  color:var(--ui-subtitle)!important;
+}
+:root[data-theme] .cp-eyebrow{
+  color:var(--cp-accent)!important;
+  font-size:10px!important;
+  font-weight:800;
+  letter-spacing:.115em!important;
+}
+
+/* 02 — Header compacto, estável e com aparência nativa */
+:root[data-theme] .cp-topbar{
+  height:66px!important;
+  min-height:66px!important;
+  background:color-mix(in srgb,var(--ui-surface) 96%,transparent)!important;
+  border-bottom:1px solid var(--ui-border)!important;
+  box-shadow:none!important;
+  backdrop-filter:blur(18px);
+}
+:root[data-theme] .cp-top-inner{
+  max-width:1100px!important;
+  height:100%!important;
+  padding:0 24px!important;
+  gap:14px!important;
+}
+:root[data-theme] .cp-brand-mark{
+  width:37px!important;height:37px!important;
+  border-radius:12px!important;
+  background:linear-gradient(150deg,#1c4b79,#0e2a4b)!important;
+  border:1px solid rgba(255,255,255,.14)!important;
+  box-shadow:inset 0 1px rgba(255,255,255,.16),0 3px 8px rgba(8,36,70,.10)!important;
+  color:#fff!important;
+}
+:root[data-theme] .cp-brand-mark span{color:#fff!important}
+:root[data-theme] .cp-brand-word{
+  font-family:'Manrope',system-ui,sans-serif!important;
+  color:var(--ui-title)!important;
+  font-size:15px!important;
+  font-weight:850!important;
+  letter-spacing:-.05em!important;
+}
+:root[data-theme] .cp-brand-word span{color:var(--cp-accent)!important}
+:root[data-theme] .cp-top-actions{gap:7px!important}
+:root[data-theme] .cp-top-actions>button,
+:root[data-theme] .cp-top-actions .cp-manage-top,
+:root[data-theme] .cp-top-actions .cp-theme-toggle{
+  min-height:36px!important;
+  height:36px!important;
+  border:1px solid var(--ui-border)!important;
+  border-radius:12px!important;
+  background:var(--ui-field)!important;
+  box-shadow:none!important;
+  color:var(--cp-text-2)!important;
+}
+:root[data-theme] .cp-top-actions>button:focus-visible,
+:root[data-theme] .cp-bottom button:focus-visible{
+  outline:2px solid var(--cp-accent)!important;
+  outline-offset:2px;
+}
+
+/* 03 — Cards mais leves, hierarquia de informação */
+:root[data-theme] .cp-home-app{padding-top:24px!important}
+:root[data-theme] .cp-app-greeting{
+  margin:0 0 17px!important;
+  align-items:center!important;
+}
+:root[data-theme] .cp-app-greeting>div>span{
+  color:var(--ui-subtitle)!important;
+  font-size:12px!important;
+  font-weight:650!important;
+  text-transform:capitalize;
+}
+:root[data-theme] .cp-app-greeting h1{
+  color:var(--ui-title)!important;
+  font-size:clamp(26px,3.4vw,34px)!important;
+  line-height:1.13!important;
+  letter-spacing:-.065em!important;
+  margin:5px 0 4px!important;
+}
+:root[data-theme] .cp-app-greeting p{
+  color:var(--ui-subtitle)!important;
+  font-size:12px!important;
+  font-weight:500!important;
+}
+:root[data-theme] .cp-home-app .cp-register-main,
+:root[data-theme] .cp-primary,
+:root[data-theme] .cp-desktop-add{
+  border-radius:12px!important;
+  border:1px solid rgba(255,255,255,.07)!important;
+  color:#fff!important;
+  background:linear-gradient(135deg,#20598d,#143861)!important;
+  box-shadow:0 5px 12px rgba(18,58,102,.12)!important;
+  font-weight:750!important;
+  letter-spacing:-.01em;
+}
+:root[data-theme] .cp-home-app .cp-register-main{
+  padding:0 17px!important;
+  min-height:43px!important;
+}
+:root[data-theme] .cp-primary:active,
+:root[data-theme] .cp-register-main:active{transform:translateY(1px)!important}
+
+/* Saldo: um único bloco executivo, sem círculos decorativos. */
+:root[data-theme] .cp-home-app .cp-balance-app{
+  padding:24px!important;
+  margin-bottom:15px!important;
+  border-radius:20px!important;
+  border:1px solid #254e77!important;
+  color:#fff!important;
+  background:linear-gradient(135deg,#1b4674 0%,#14365d 53%,#102c50 100%)!important;
+  box-shadow:0 10px 25px rgba(14,45,81,.13)!important;
+  animation:none!important;
+}
+:root[data-theme] .cp-home-app .cp-balance-app::before,
+:root[data-theme] .cp-home-app .cp-balance-app::after{content:none!important;display:none!important}
+:root[data-theme] .cp-home-app .cp-balance-app-top{position:relative;z-index:1}
+:root[data-theme] .cp-home-app .cp-balance-app-top>div>span{
+  font-size:12px!important;
+  font-weight:650!important;
+  color:#d4e3f2!important;
+}
+:root[data-theme] .cp-home-app .cp-balance-app-top strong{
+  margin-top:8px!important;
+  font-size:clamp(34px,4.5vw,49px)!important;
+  line-height:1.05!important;
+  font-weight:800!important;
+  letter-spacing:-.057em!important;
+  font-variant-numeric:tabular-nums;
+}
+:root[data-theme] .cp-home-app .cp-balance-app-badge{
+  padding:8px 10px!important;
+  font-size:9px!important;
+  letter-spacing:.13em!important;
+  border-radius:10px!important;
+  background:rgba(255,255,255,.08)!important;
+  border:1px solid rgba(225,239,255,.27)!important;
+  color:#e4f1ff!important;
+}
+:root[data-theme] .cp-home-app .cp-today-sales,
+:root[data-theme] .cp-home-app .cp-today-sales.is-empty{
+  margin-top:18px!important;
+  padding:17px 18px!important;
+  border-radius:15px!important;
+  background:rgba(4,25,48,.32)!important;
+  border:1px solid rgba(202,226,252,.16)!important;
+  box-shadow:none!important;
+}
+:root[data-theme] .cp-home-app .cp-today-sales-head>div>span{
+  color:#b5dafa!important;
+  font-size:10px!important;
+  letter-spacing:.10em!important;
+}
+:root[data-theme] .cp-home-app .cp-today-sales-head>div>b{
+  font-size:clamp(18px,2.2vw,22px)!important;
+  letter-spacing:-.035em!important;
+  line-height:1.24!important;
+  color:#fff!important;
+}
+:root[data-theme] .cp-home-app .cp-today-sales-head>div>small{
+  color:#bbccdf!important;
+  font-size:12px!important;
+  line-height:1.45!important;
+}
+:root[data-theme] .cp-home-app .cp-today-sales-head>button{
+  min-height:35px!important;
+  border-radius:10px!important;
+  border-color:rgba(201,225,248,.24)!important;
+  background:rgba(255,255,255,.10)!important;
+  color:#fff!important;
+  font-size:12px!important;
+  box-shadow:none!important;
+}
+:root[data-theme] .cp-today-sales-metrics,
+:root[data-theme] .cp-today-sales-products{border-color:rgba(206,226,250,.14)!important}
+
+/* Meta: mantém dados, reduz o peso visual e traz coerência ao dashboard. */
+:root[data-theme] .cp-month-goal{
+  margin:0 0 15px!important;
+  padding:19px 20px!important;
+  border-radius:18px!important;
+  border:1px solid var(--ui-border)!important;
+  background:var(--ui-surface)!important;
+  color:var(--ui-title)!important;
+  box-shadow:var(--ui-elevation)!important;
+}
+:root[data-theme] .cp-month-goal::before{
+  height:2px!important;
+  background:linear-gradient(90deg,#1e558c,#74aada)!important;
+}
+:root[data-theme] .cp-month-goal-identity h2{
+  font-size:16px!important;
+  color:var(--ui-title)!important;
+}
+:root[data-theme] .cp-month-goal-identity small{
+  font-size:9px!important;
+  letter-spacing:.11em!important;
+  color:var(--cp-accent)!important;
+}
+:root[data-theme] .cp-month-goal-icon{
+  width:37px!important;height:37px!important;flex-basis:37px!important;
+  border-radius:11px!important;
+  background:var(--cp-accent-soft)!important;
+  color:var(--cp-accent)!important;
+  border:0!important;
+}
+:root[data-theme] .cp-month-goal-edit{
+  min-height:33px!important;
+  background:var(--cp-accent-soft)!important;
+  color:var(--cp-accent)!important;
+  border:1px solid var(--ui-border)!important;
+  border-radius:10px!important;
+}
+:root[data-theme] .cp-month-goal-amounts{margin-top:16px!important}
+:root[data-theme] .cp-month-goal-amounts span{
+  color:var(--ui-subtitle)!important;
+  font-size:10px!important;
+  letter-spacing:.05em!important;
+}
+:root[data-theme] .cp-month-goal-earned strong{
+  font-size:clamp(25px,3.2vw,32px)!important;
+  color:var(--ui-title)!important;
+}
+:root[data-theme] .cp-month-goal-total strong{
+  font-size:clamp(17px,2.1vw,22px)!important;
+  color:var(--cp-accent)!important;
+}
+:root[data-theme] .cp-month-goal-progress-top{
+  margin-top:14px!important;
+}
+:root[data-theme] .cp-month-goal-progress-top span{color:var(--ui-subtitle)!important}
+:root[data-theme] .cp-month-goal-progress-top strong{
+  color:var(--cp-accent)!important;
+  font-size:18px!important;
+}
+:root[data-theme] .cp-month-goal-track{
+  height:8px!important;
+  background:var(--ui-track)!important;
+  border:0!important;
+}
+:root[data-theme] .cp-month-goal-details{
+  gap:8px!important;
+  margin-top:13px!important;
+}
+:root[data-theme] .cp-month-goal-details>div{
+  border-radius:11px!important;
+  border:1px solid var(--ui-border)!important;
+  padding:10px!important;
+  background:var(--ui-field)!important;
+}
+:root[data-theme] .cp-month-goal-details small{
+  font-size:10px!important;
+  color:var(--ui-subtitle)!important;
+}
+:root[data-theme] .cp-month-goal-details b{
+  color:var(--ui-title)!important;
+  font-size:12px!important;
+}
+:root[data-theme] .cp-month-goal-form>label{color:var(--cp-text)!important}
+
+/* Indicadores: colunas leves, sem caixa gigante em cada métrica. */
+:root[data-theme] .cp-reference-metrics{
+  overflow:hidden;
+  border-radius:17px!important;
+  border:1px solid var(--ui-border)!important;
+  background:var(--ui-border)!important;
+  box-shadow:var(--ui-elevation)!important;
+  gap:1px!important;
+  margin-bottom:13px!important;
+}
+:root[data-theme] .cp-reference-metric{
+  background:var(--ui-surface)!important;
+  min-width:0;
+  min-height:87px!important;
+  padding:13px!important;
+  gap:10px!important;
+}
+:root[data-theme] .cp-reference-metric-icon{
+  display:grid;place-items:center;
+  flex:0 0 36px!important;
+  width:36px!important;height:36px!important;
+  border-radius:11px!important;
+  background:var(--cp-accent-soft)!important;
+  color:var(--cp-accent)!important;
+}
+:root[data-theme] .cp-reference-metric-icon svg{width:19px!important;height:19px!important}
+:root[data-theme] .cp-reference-metric>div>span{
+  color:var(--ui-subtitle)!important;
+  font-size:11px!important;
+  font-weight:600!important;
+}
+:root[data-theme] .cp-reference-metric b{
+  font-size:clamp(15px,2vw,19px)!important;
+  line-height:1.22!important;
+  color:var(--ui-title)!important;
+  font-weight:800!important;
+  overflow-wrap:anywhere;
+}
+:root[data-theme] .cp-reference-capital{
+  border:1px solid var(--ui-border)!important;
+  border-radius:15px!important;
+  background:var(--ui-surface)!important;
+  box-shadow:none!important;
+  padding:13px 17px!important;
+  margin-bottom:16px!important;
+}
+:root[data-theme] .cp-reference-capital .cp-capital-track{
+  height:7px!important;
+  background:var(--ui-track)!important;
+}
+:root[data-theme] .cp-reference-capital .cp-capital-track-labels span{
+  color:var(--ui-subtitle)!important;
+  font-size:11px!important;
+}
+
+/* Demais áreas da home */
+:root[data-theme] .cp-v3-insights>button,
+:root[data-theme] .cp-home-app .cp-quick-app button,
+:root[data-theme] .cp-home-app .cp-month-app-grid>div,
+:root[data-theme] .cp-smart-card,
+:root[data-theme] .cp-v3-sim-shortcut,
+:root[data-theme] .cp-home-app .cp-opp-home-link{
+  border-radius:16px!important;
+  border:1px solid var(--ui-border)!important;
+  box-shadow:var(--ui-elevation)!important;
+}
+:root[data-theme] .cp-home-app .cp-quick-app button{
+  padding:13px 10px!important;
+  min-height:107px!important;
+  background:var(--ui-surface)!important;
+  color:var(--cp-text)!important;
+}
+:root[data-theme] .cp-home-app .cp-quick-app b{
+  font-size:12px!important;
+  color:var(--ui-title)!important;
+  line-height:1.3!important;
+}
+:root[data-theme] .cp-home-app .cp-quick-app small{
+  font-size:10px!important;
+  color:var(--ui-subtitle)!important;
+  line-height:1.35!important;
+}
+:root[data-theme] .cp-home-app .cp-quick-app button>span,
+:root[data-theme] .cp-v3-insight-icon,
+:root[data-theme] .cp-smart-icon{
+  background:var(--cp-accent-soft)!important;
+  color:var(--cp-accent)!important;
+  border-radius:12px!important;
+}
+:root[data-theme] .cp-home-app .cp-month-app-grid>div{
+  padding:15px!important;
+  background:var(--ui-surface)!important;
+  color:var(--cp-text)!important;
+}
+:root[data-theme] .cp-month-app-grid span,
+:root[data-theme] .cp-month-app-grid small{color:var(--ui-subtitle)!important}
+:root[data-theme] .cp-month-app-grid b{
+  color:var(--ui-title)!important;
+  font-size:17px!important;
+}
+:root[data-theme] .cp-v3-insights>button{
+  background:var(--ui-surface)!important;
+  color:var(--cp-text)!important;
+}
+:root[data-theme] .cp-v3-insights strong,
+:root[data-theme] .cp-v3-sim-shortcut strong,
+:root[data-theme] .cp-opp-home-copy b{
+  color:var(--ui-title)!important;
+}
+:root[data-theme] .cp-home-app .cp-app-section-head h2,
+:root[data-theme] .cp-section-head h2{
+  color:var(--ui-title)!important;
+  font-size:18px!important;
+  letter-spacing:-.04em!important;
+}
+
+/* 04 — Estoque, vendas, caixa e central de gestão */
+:root[data-theme] .cp-product-card,
+:root[data-theme] .cp-stock-summary>div,
+:root[data-theme] .cp-sales-hero>div,
+:root[data-theme] .cp-cash-breakdown>div,
+:root[data-theme] .cp-report-panel,
+:root[data-theme] .cp-business-tool,
+:root[data-theme] .cp-sale-row,
+:root[data-theme] .cp-cash-row,
+:root[data-theme] .cp-empty,
+:root[data-theme] .cp-kpi,
+:root[data-theme] .cp-admin-section,
+:root[data-theme] .cp-admin-kpis>div{
+  border-radius:16px!important;
+  background:var(--ui-surface)!important;
+  border:1px solid var(--ui-border)!important;
+  color:var(--cp-text)!important;
+  box-shadow:var(--ui-elevation)!important;
+}
+:root[data-theme] .cp-stock-summary>div,
+:root[data-theme] .cp-sales-hero>div,
+:root[data-theme] .cp-cash-breakdown>div{
+  padding:16px!important;
+}
+:root[data-theme] .cp-stock-summary strong,
+:root[data-theme] .cp-sales-hero strong,
+:root[data-theme] .cp-cash-breakdown b{
+  color:var(--ui-title)!important;
+  font-size:clamp(17px,2.7vw,23px)!important;
+  letter-spacing:-.047em!important;
+}
+:root[data-theme] .cp-stock-summary span,
+:root[data-theme] .cp-sales-hero span,
+:root[data-theme] .cp-cash-breakdown span{
+  color:var(--ui-subtitle)!important;
+  font-size:11px!important;
+}
+:root[data-theme] .cp-product-photo{
+  height:158px;
+  background:var(--ui-field)!important;
+}
+:root[data-theme] .cp-product-body{padding:15px!important}
+:root[data-theme] .cp-product-body h3{color:var(--ui-title)!important}
+:root[data-theme] .cp-sale-row,
+:root[data-theme] .cp-cash-row{
+  padding:13px!important;
+  gap:12px!important;
+}
+:root[data-theme] .cp-cash-card{
+  background:linear-gradient(135deg,#1d4672,#102f53)!important;
+  border:1px solid #31577c!important;
+  border-radius:18px!important;
+  box-shadow:0 8px 24px rgba(9,35,70,.12)!important;
+}
+:root[data-theme] .cp-business-strip{
+  margin-bottom:17px!important;
+  border-color:var(--ui-border)!important;
+}
+:root[data-theme] .cp-business-list{gap:9px!important}
+:root[data-theme] .cp-business-tool{
+  grid-template-columns:30px 42px minmax(0,1fr) auto 18px!important;
+  gap:11px!important;
+  min-height:80px!important;
+  padding:11px 14px!important;
+  text-align:left;
+}
+:root[data-theme] .cp-business-tool:first-child{border-top:1px solid var(--ui-border)!important}
+:root[data-theme] .cp-business-icon{
+  background:var(--cp-accent-soft)!important;
+  color:var(--cp-accent)!important;
+  border-radius:12px!important;
+  width:40px!important;height:40px!important;
+}
+:root[data-theme] .cp-business-index{color:var(--ui-subtitle)!important}
+:root[data-theme] .cp-business-tool b{color:var(--ui-title)!important}
+:root[data-theme] .cp-business-tool p{color:var(--ui-subtitle)!important}
+:root[data-theme] .cp-business-value strong{color:var(--cp-accent)!important}
+:root[data-theme] .cp-business-strip strong{color:var(--ui-title)!important}
+:root[data-theme] .cp-admin-page h1,
+:root[data-theme] .cp-admin-section h2{color:var(--ui-title)!important}
+
+/* 05 — Formulários, pesquisas e modais */
+:root[data-theme] .cp-modal{
+  background:var(--ui-surface)!important;
+  color:var(--cp-text)!important;
+  border:1px solid var(--ui-border)!important;
+  box-shadow:0 25px 85px rgba(5,20,42,.24)!important;
+}
+:root[data-theme] .cp-modal-head h2,
+:root[data-theme] .cp-action-sheet h2{color:var(--ui-title)!important}
+:root[data-theme] .cp-modal-head p,
+:root[data-theme] .cp-action-sheet p{color:var(--ui-subtitle)!important}
+:root[data-theme] .cp-modal-x,
+:root[data-theme] .cp-secondary{
+  background:var(--ui-field)!important;
+  color:var(--cp-text)!important;
+  border:1px solid var(--ui-border)!important;
+  border-radius:11px!important;
+}
+:root[data-theme] .cp-field>span{
+  color:var(--cp-text-2)!important;
+  font-size:12px!important;
+  font-weight:700!important;
+}
+:root[data-theme] .cp-field input,
+:root[data-theme] .cp-field select,
+:root[data-theme] .cp-field textarea,
+:root[data-theme] .cp-search,
+:root[data-theme] .cp-input-icon,
+:root[data-theme] .cp-money-input{
+  background:var(--ui-field)!important;
+  color:var(--ui-title)!important;
+  border:1px solid var(--ui-border)!important;
+  border-radius:12px!important;
+  box-shadow:none!important;
+}
+:root[data-theme] .cp-field input:focus,
+:root[data-theme] .cp-field select:focus,
+:root[data-theme] .cp-field textarea:focus,
+:root[data-theme] .cp-search:focus-within,
+:root[data-theme] .cp-input-icon:focus-within{
+  border-color:#5591c6!important;
+  box-shadow:0 0 0 3px rgba(55,129,193,.13)!important;
+}
+:root[data-theme] .cp-search input,
+:root[data-theme] .cp-search input::placeholder{color:var(--cp-text-2)!important}
+:root[data-theme] .cp-filter-tabs button{
+  background:var(--ui-surface)!important;
+  border:1px solid var(--ui-border)!important;
+  color:var(--cp-text-2)!important;
+  border-radius:10px!important;
+}
+:root[data-theme] .cp-filter-tabs button.active{
+  background:var(--cp-accent-soft)!important;
+  border-color:color-mix(in srgb,var(--cp-accent) 25%,var(--ui-border))!important;
+  color:var(--cp-accent)!important;
+}
+:root[data-theme] .cp-action-sheet>button{
+  background:var(--ui-surface)!important;
+  border:1px solid var(--ui-border)!important;
+  color:var(--cp-text)!important;
+  border-radius:13px!important;
+  box-shadow:none!important;
+}
+:root[data-theme] .cp-action-sheet>button>span{
+  background:var(--cp-accent-soft)!important;
+  color:var(--cp-accent)!important;
+  border:0!important;
+  box-shadow:none!important;
+}
+
+/* 06 — Navegação inferior, o elemento mais parecido com app nativo */
+:root[data-theme] .cp-bottom{
+  padding:0 12px calc(11px + env(safe-area-inset-bottom))!important;
+}
+:root[data-theme] .cp-bottom .cp-bottom-inner{
+  height:68px!important;
+  max-width:610px!important;
+  padding:7px 8px!important;
+  border-radius:21px!important;
+  border:1px solid var(--ui-border)!important;
+  background:color-mix(in srgb,var(--ui-surface) 97%,transparent)!important;
+  box-shadow:0 9px 30px rgba(17,46,81,.12)!important;
+  backdrop-filter:blur(22px);
+}
+:root[data-theme] .cp-bottom button:not(.cp-add-main){
+  color:var(--ui-subtitle)!important;
+  font-size:10px!important;
+  font-weight:650!important;
+  border-radius:12px!important;
+}
+:root[data-theme] .cp-bottom button.active:not(.cp-add-main),
+:root[data-theme] .cp-bottom button.active:not(.cp-add-main) svg{
+  color:var(--cp-accent)!important;
+}
+:root[data-theme] .cp-bottom .cp-add-main{
+  background:linear-gradient(145deg,#205b91,#12365e)!important;
+  color:white!important;
+  border:1px solid rgba(255,255,255,.10)!important;
+  box-shadow:0 5px 16px rgba(12,47,90,.22)!important;
+  border-radius:15px!important;
+}
+
+/* 07 — Responsividade real: sem zoom, sem corte, alvos confortáveis */
+@media(max-width:820px){
+  :root[data-theme] .cp-page{
+    max-width:100%!important;
+    padding:21px 18px 113px!important;
+  }
+  :root[data-theme] .cp-month-app-grid--four,
+  :root[data-theme] .cp-stock-summary,
+  :root[data-theme] .cp-sales-hero,
+  :root[data-theme] .cp-cash-breakdown{
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  }
+  :root[data-theme] .cp-product-card{border-radius:15px!important}
+  :root[data-theme] .cp-business-strip{gap:8px!important}
+  :root[data-theme] .cp-modal-layer .cp-modal{
+    background:var(--ui-surface)!important;
+    border-radius:20px!important;
+  }
+}
+@media(max-width:640px){
+  :root[data-theme] .cp-topbar,
+  :root[data-theme] .cp-top-inner{
+    height:57px!important;
+    min-height:57px!important;
+  }
+  :root[data-theme] .cp-top-inner{
+    padding:0 13px!important;
+    gap:7px!important;
+  }
+  :root[data-theme] .cp-brand-mark{
+    width:31px!important;height:31px!important;
+    flex:0 0 31px!important;border-radius:10px!important;
+    font-size:14px!important;
+  }
+  :root[data-theme] .cp-brand-word{font-size:13px!important}
+  :root[data-theme] .cp-top-actions{
+    gap:5px!important;
+    min-width:0;
+  }
+  :root[data-theme] .cp-top-actions>button,
+  :root[data-theme] .cp-top-actions .cp-manage-top,
+  :root[data-theme] .cp-top-actions .cp-user-btn{
+    width:33px!important;min-width:33px!important;max-width:33px!important;
+    height:33px!important;min-height:33px!important;
+    flex:0 0 33px!important;
+    border-radius:10px!important;
+    padding:0!important;
+  }
+  :root[data-theme] .cp-page{
+    padding:19px 15px 108px!important;
+  }
+  :root[data-theme] .cp-home-app{padding-top:17px!important}
+  :root[data-theme] .cp-app-greeting{margin-bottom:14px!important}
+  :root[data-theme] .cp-home-app .cp-app-greeting h1{
+    font-size:clamp(24px,6vw,28px)!important;
+    letter-spacing:-.055em!important;
+  }
+  :root[data-theme] .cp-home-app .cp-app-greeting>div>span{font-size:11px!important}
+  :root[data-theme] .cp-home-app .cp-app-greeting p{font-size:11px!important}
+  :root[data-theme] .cp-home-app .cp-register-main{
+    min-height:38px!important;height:38px!important;
+    padding:0 12px!important;
+    border-radius:11px!important;
+    font-size:12px!important;
+  }
+  :root[data-theme] .cp-home-app .cp-balance-app{
+    padding:18px!important;
+    border-radius:18px!important;
+    margin-bottom:13px!important;
+  }
+  :root[data-theme] .cp-home-app .cp-balance-app-top strong{
+    font-size:clamp(29px,7.5vw,37px)!important;
+    margin-top:6px!important;
+  }
+  :root[data-theme] .cp-home-app .cp-balance-app-top>div>span{font-size:11px!important}
+  :root[data-theme] .cp-home-app .cp-today-sales,
+  :root[data-theme] .cp-home-app .cp-today-sales.is-empty{
+    margin-top:15px!important;
+    padding:13px 14px!important;
+    border-radius:13px!important;
+  }
+  :root[data-theme] .cp-home-app .cp-today-sales-head{
+    gap:10px!important;
+  }
+  :root[data-theme] .cp-home-app .cp-today-sales-head>div>b{
+    font-size:17px!important;
+    margin-top:5px!important;
+  }
+  :root[data-theme] .cp-home-app .cp-today-sales-head>div>small{font-size:11px!important}
+  :root[data-theme] .cp-home-app .cp-today-sales-head>button{
+    min-height:34px!important;
+    height:auto!important;
+    padding:6px 11px!important;
+  }
+  :root[data-theme] .cp-month-goal{
+    padding:15px!important;
+    margin-bottom:13px!important;
+    border-radius:16px!important;
+  }
+  :root[data-theme] .cp-month-goal-identity h2{font-size:15px!important}
+  :root[data-theme] .cp-month-goal-identity small{font-size:9px!important}
+  :root[data-theme] .cp-month-goal-icon{
+    width:34px!important;height:34px!important;flex-basis:34px!important;
+  }
+  :root[data-theme] .cp-month-goal-amounts{margin-top:15px!important}
+  :root[data-theme] .cp-month-goal-earned strong{font-size:clamp(23px,6vw,28px)!important}
+  :root[data-theme] .cp-month-goal-total strong{font-size:clamp(16px,4.5vw,21px)!important}
+  :root[data-theme] .cp-month-goal-progress-top{margin-top:13px!important}
+  :root[data-theme] .cp-month-goal-details{gap:7px!important;margin-top:13px!important}
+  :root[data-theme] .cp-month-goal-details>div{padding:9px 8px!important}
+  :root[data-theme] .cp-month-goal-details small{font-size:9px!important}
+  :root[data-theme] .cp-month-goal-details b{font-size:11px!important}
+  :root[data-theme] .cp-reference-metrics{
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+    border-radius:15px!important;
+  }
+  :root[data-theme] .cp-reference-metric{
+    min-height:83px!important;
+    padding:11px!important;
+    gap:8px!important;
+  }
+  :root[data-theme] .cp-reference-metric-icon{
+    width:33px!important;height:33px!important;flex:0 0 33px!important;
+    border-radius:10px!important;
+  }
+  :root[data-theme] .cp-reference-metric>div>span{font-size:10px!important}
+  :root[data-theme] .cp-reference-metric b{font-size:14px!important}
+  :root[data-theme] .cp-reference-capital{
+    padding:12px 13px!important;
+    margin-bottom:15px!important;
+  }
+  :root[data-theme] .cp-home-app .cp-quick-app{
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+    gap:9px!important;
+    margin-bottom:15px!important;
+  }
+  :root[data-theme] .cp-home-app .cp-quick-app button{
+    min-height:87px!important;
+    border-radius:14px!important;
+    padding:10px!important;
+  }
+  :root[data-theme] .cp-quick-app button>span{
+    width:32px!important;height:32px!important;
+    border-radius:10px!important;
+  }
+  :root[data-theme] .cp-home-app .cp-quick-app b{font-size:11px!important}
+  :root[data-theme] .cp-home-app .cp-quick-app small{font-size:10px!important}
+  :root[data-theme] .cp-page-title h1,
+  :root[data-theme] .cp-business-title h1,
+  :root[data-theme] .cp-admin-title h1{
+    font-size:25px!important;
+    line-height:1.16!important;
+  }
+  :root[data-theme] .cp-page-title p,
+  :root[data-theme] .cp-business-title p{font-size:12px!important}
+  :root[data-theme] .cp-business-tool{
+    grid-template-columns:30px 39px minmax(0,1fr) 16px!important;
+    gap:9px!important;
+    min-height:74px!important;
+    padding:11px!important;
+    border-radius:14px!important;
+  }
+  :root[data-theme] .cp-business-tool .cp-business-value{display:none!important}
+  :root[data-theme] .cp-business-tool .cp-business-icon{
+    width:37px!important;height:37px!important;
+  }
+  :root[data-theme] .cp-business-tool p{font-size:11px!important}
+  :root[data-theme] .cp-stock-summary>div,
+  :root[data-theme] .cp-sales-hero>div,
+  :root[data-theme] .cp-cash-breakdown>div{
+    padding:12px!important;
+    border-radius:14px!important;
+  }
+  :root[data-theme] .cp-stock-summary strong,
+  :root[data-theme] .cp-sales-hero strong,
+  :root[data-theme] .cp-cash-breakdown b{font-size:17px!important}
+  :root[data-theme] .cp-product-photo{height:140px!important}
+  :root[data-theme] .cp-product-body{padding:12px!important}
+  :root[data-theme] .cp-bottom .cp-bottom-inner{
+    height:61px!important;
+    padding:5px 6px!important;
+    border-radius:19px!important;
+  }
+  :root[data-theme] .cp-bottom button:not(.cp-add-main){
+    height:49px!important;
+    font-size:10px!important;
+    gap:3px!important;
+  }
+  :root[data-theme] .cp-bottom .cp-add-main{
+    width:47px!important;height:47px!important;
+    margin-top:-14px!important;
+    border-radius:13px!important;
+  }
+  :root[data-theme] .cp-modal-layer{
+    padding:4dvh 13px!important;
+  }
+  :root[data-theme] .cp-modal-layer .cp-modal{
+    width:calc(100vw - 26px)!important;
+    max-height:90dvh!important;
+    border-radius:19px!important;
+  }
+  :root[data-theme] .cp-modal-scroll{
+    max-height:90dvh!important;
+    padding:22px 16px max(24px,env(safe-area-inset-bottom))!important;
+  }
+}
+@media(max-width:365px){
+  :root[data-theme] .cp-top-inner{padding:0 9px!important;gap:5px!important}
+  :root[data-theme] .cp-brand-word{font-size:12px!important}
+  :root[data-theme] .cp-top-actions{gap:3px!important}
+  :root[data-theme] .cp-top-actions>button,
+  :root[data-theme] .cp-top-actions .cp-manage-top,
+  :root[data-theme] .cp-top-actions .cp-user-btn{
+    flex:0 0 30px!important;
+    width:30px!important;min-width:30px!important;max-width:30px!important;
+  }
+  :root[data-theme] .cp-reference-metric-icon{
+    width:30px!important;height:30px!important;flex-basis:30px!important;
+  }
+  :root[data-theme] .cp-reference-metric b{font-size:13px!important}
+  :root[data-theme] .cp-month-goal-details{grid-template-columns:repeat(3,minmax(0,1fr))!important}
+  :root[data-theme] .cp-month-goal-details>div{padding:8px 6px!important}
+  :root[data-theme] .cp-month-goal-details b{font-size:10px!important}
+}
+
+/* 08 — Respeito ao tema escuro e à acessibilidade */
+:root[data-theme="dark"] .cp-month-goal-details>div,
+:root[data-theme="dark"] .cp-month-goal,
+:root[data-theme="dark"] .cp-business-tool{
+  color:var(--cp-text)!important;
+}
+:root[data-theme="dark"] .cp-today-sales{
+  color:#fff!important;
+}
+@media(prefers-reduced-motion:reduce){
+  :root[data-theme] .cp-app button,
+  :root[data-theme] .cp-home-app .cp-balance-app{transition:none!important;animation:none!important}
+}
