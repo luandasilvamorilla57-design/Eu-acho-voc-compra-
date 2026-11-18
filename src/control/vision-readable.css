@@ -1144,3 +1144,54 @@
    font-size:10px!important;
  }
 }
+
+
+/* Selo VENDIDO aprovado — faixa original com fundo transparente.
+   Renderizada exclusivamente em produtos com 0 unidades disponíveis.
+   Faixa no topo, sem cobrir foto, preço ou título, e sem bloquear o clique. */
+:root[data-theme] .cp-app[data-theme] .cp-vision-product--sold{
+  position:relative;
+}
+:root[data-theme] .cp-app[data-theme] .cp-vision-product--sold .cp-vision-sold-ribbon{
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  width:100%;
+  padding:0 2px;
+  margin:0 0 8px;
+  min-height:48px;
+  pointer-events:none;
+  background:transparent!important;
+  overflow:visible;
+  isolation:isolate;
+}
+:root[data-theme] .cp-app[data-theme] .cp-vision-sold-ribbon img{
+  display:block!important;
+  width:min(100%,185px)!important;
+  max-width:100%!important;
+  height:auto!important;
+  max-height:64px!important;
+  object-fit:contain!important;
+  object-position:center;
+  opacity:1!important;
+  filter:drop-shadow(0 4px 6px rgba(75,13,12,.12));
+}
+:root[data-theme] .cp-app[data-theme] .cp-vision-product--sold .cp-vision-product-flags:empty{
+  display:none!important;
+}
+@media(max-width:640px){
+  :root[data-theme] .cp-app[data-theme] .cp-vision-product--sold .cp-vision-sold-ribbon{
+    min-height:41px;
+    margin:0 0 5px;
+    padding:0;
+  }
+  :root[data-theme] .cp-app[data-theme] .cp-vision-sold-ribbon img{
+    width:min(100%,155px)!important;
+    max-height:52px!important;
+  }
+}
+@media(max-width:365px){
+  :root[data-theme] .cp-app[data-theme] .cp-vision-sold-ribbon img{
+    width:min(100%,142px)!important;
+  }
+}
