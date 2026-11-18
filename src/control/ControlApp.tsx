@@ -475,7 +475,7 @@ function ProductCard({product,data,calc,onClick}:{product:Product;data:Data;calc
   const days=daysSince(product.purchase_date)
   const listingDue=product.listing_status==='listed'&&!!product.listing_next_checkin_at&&product.listing_next_checkin_at<=localDate()
   const isSold=product.quantity_available===0
-  const lowStock=!isSold&&product.quantity_available<=3
+  const lowStock=!isSold&&product.inventory_mode==='stock'&&product.quantity_available<=3
   const alert=!isSold&&days>=calc.alertDays
   const status=isSold?'':listingDue?'Revisar anúncio':product.listing_status==='listed'?'Anunciado':alert?'Atenção':''
   return <button type="button" className={'cp-product-card cp-vision-product'+(isSold?' cp-vision-product--sold':'')} onClick={onClick} aria-label={'Ver detalhes de '+product.name+(isSold?', vendido':'')}>
@@ -486,12 +486,13 @@ function ProductCard({product,data,calc,onClick}:{product:Product;data:Data;calc
       <div className="cp-vision-product-info">
         {isSold&&<span className="cp-vision-sold-ribbon"><img src="/selo-vendido.webp" alt="Vendido" width="122" height="40" loading="lazy" decoding="async"/></span>}
         <div className="cp-vision-product-flags">
+          {!isSold&&product.inventory_mode==='single'&&<span className="cp-vision-unique"><Tag size={13}/> Item único</span>}
           {lowStock&&<span className="cp-vision-low"><AlertTriangle size={13}/> Baixo estoque</span>}
           {status&&<span className="cp-vision-status">{status}</span>}
         </div>
         <h3>{product.name}</h3>
         <p>{product.acquisition_type==='owned'?'Produto próprio':product.category||'Produto'}</p>
-        <span className="cp-vision-stock-count"><Package size={14}/> Estoque: <b>{product.quantity_available} un.</b></span>
+        {product.inventory_mode==='stock'?<span className="cp-vision-stock-count"><Package size={14}/> Estoque: <b>{product.quantity_available} un.</b></span>:<span className="cp-vision-stock-count cp-vision-single-count"><Tag size={14}/>{isSold?'Item vendido':'Peça disponível'}</span>}
       </div>
       <span className="cp-vision-dots" aria-hidden="true">•••</span>
     </div>
@@ -500,7 +501,7 @@ function ProductCard({product,data,calc,onClick}:{product:Product;data:Data;calc
       <div><span>Venda</span><strong>{price!==null?money.format(price):'Não definido'}</strong></div>
     </div>
     <div className="cp-vision-profit" data-tone={margin!==null&&margin<0?'negative':'positive'}>
-      <span><ArrowUpRight size={16}/> Lucro por unidade</span>
+      <span><ArrowUpRight size={16}/> {product.inventory_mode==='single'?'Lucro da venda':'Lucro por unidade'}</span>
       <strong>{margin===null?'—':money.format(margin)}</strong>
     </div>
   </button>
@@ -510,13 +511,13 @@ function StockPage({data,calc,onOpenProduct,onAdd}:{data:Data;calc:Metrics;onOpe
   const [q,setQ]=useState('')
   const [filter,setFilter]=useState<'all'|'stock'|'low'|'listed'|'attention'|'sold'>('all')
   const active=data.products.filter(p=>p.quantity_available>0)
-  const lowCount=active.filter(p=>p.quantity_available<=3).length
+  const lowCount=active.filter(p=>p.inventory_mode==='stock'&&p.quantity_available<=3).length
   const listedCount=active.filter(p=>p.listing_status==='listed').length
   const reviewCount=active.filter(p=>p.listing_status==='listed'&&!!p.listing_next_checkin_at&&p.listing_next_checkin_at<=localDate()).length
   const list=data.products.filter(p=>{
     if(!(p.name+' '+(p.category||'')).toLowerCase().includes(q.toLowerCase()))return false
     if(filter==='stock')return p.quantity_available>0
-    if(filter==='low')return p.quantity_available>0&&p.quantity_available<=3
+    if(filter==='low')return p.inventory_mode==='stock'&&p.quantity_available>0&&p.quantity_available<=3
     if(filter==='listed')return p.quantity_available>0&&p.listing_status==='listed'
     if(filter==='attention')return p.quantity_available>0&&(daysSince(p.purchase_date)>=calc.alertDays||(p.listing_status==='listed'&&!!p.listing_next_checkin_at&&p.listing_next_checkin_at<=localDate()))
     if(filter==='sold')return p.quantity_available===0
@@ -661,10 +662,15 @@ function ListingSetup({isListed,setIsListed,channels,setChannels,listingDate,set
   </div>
 }
 
+function InventoryModePicker({mode,onChange}:{mode:'single'|'stock';onChange:(v:'single'|'stock')=>void}){
+  return <div className="cp-field cp-field--full cp-inventory-mode-field"><span>Você tem estoque deste produto?</span><div className="cp-inventory-mode-choices" role="group" aria-label="Tipo de produto"><button type="button" aria-pressed={mode==='single'} className={mode==='single'?'active':''} onClick={()=>onChange('single')}><b>Item único</b><small>Uma peça para vender uma vez</small></button><button type="button" aria-pressed={mode==='stock'} className={mode==='stock'?'active':''} onClick={()=>onChange('stock')}><b>Tenho estoque</b><small>Controle de quantidades e reposição</small></button></div></div>
+}
+
 function PurchaseModal({data,onClose,onDone}:{data:Data;onClose:()=>void;onDone:()=>void}){
   const [step,setStep]=useState(1)
   const [name,setName]=useState(''),[category,setCategory]=useState(''),[source,setSource]=useState('Marketplace'),[date,setDate]=useState(localDate()),[supplierId,setSupplierId]=useState('')
-  const [cost,setCost]=useState(''),[qty,setQty]=useState('1'),[listed,setListed]=useState(''),[minimum,setMinimum]=useState(''),[notes,setNotes]=useState('')
+  const [inventoryMode,setInventoryMode]=useState<'single'|'stock'>('single')
+   const [cost,setCost]=useState(''),[qty,setQty]=useState('1'),[listed,setListed]=useState(''),[minimum,setMinimum]=useState(''),[notes,setNotes]=useState('')
   const [isListed,setIsListed]=useState(false),[channels,setChannels]=useState<string[]>([]),[listingDate,setListingDate]=useState(localDate())
   const [files,setFiles]=useState<File[]>([]),[error,setError]=useState<string|null>(null)
   async function save(){
@@ -678,7 +684,7 @@ function PurchaseModal({data,onClose,onDone}:{data:Data;onClose:()=>void;onDone:
       if(isListed&&channels.length===0)throw new Error('Selecione onde o produto está anunciado.')
       await data.createProduct({
         name:name.trim(),category:category.trim(),source,supplierId:supplierId||null,
-        purchaseDate:date,purchaseUnitCost:purchase,quantity:Math.max(1,Number(qty)||1),
+        purchaseDate:date,purchaseUnitCost:purchase,inventoryMode,quantity:inventoryMode==='single'?1:Math.max(1,Number(qty)||1),
         listedPrice:listPrice,minimumPrice:minimum?Number(minimum.replace(',','.')):null,notes,
         acquisitionType:'purchase',costBasisKnown:true,
         listingStatus:isListed?'listed':'not_listed',listingChannels:channels,
@@ -689,8 +695,8 @@ function PurchaseModal({data,onClose,onDone}:{data:Data;onClose:()=>void;onDone:
   }
   return <ModalShell onClose={onClose}><ModalHeader eyebrow="NOVA COMPRA" title={step===1?'O que você comprou?':step===2?'Valores e anúncio':'Fotos e detalhes'} text={step===1?'Comece pelo básico. Você pode detalhar depois.':step===2?'Separe o que é custo, preço de venda e situação do anúncio.':'Guarde fotos e observações do estado do produto.'}/><Stepper step={step}/>
     {step===1&&<div className="cp-form-grid"><Field label="Produto" full><input autoFocus value={name} onChange={e=>setName(e.target.value)} placeholder="Ex.: iPhone 11 128GB"/></Field><Field label="Categoria"><input value={category} onChange={e=>setCategory(e.target.value)} placeholder="Celular, ferramenta..."/></Field><Field label="Onde comprou?"><select value={source} onChange={e=>setSource(e.target.value)}><option>Marketplace</option><option>OLX</option><option>Fornecedor</option><option>Loja</option><option>Outro</option></select></Field><Field label="Data da compra"><input type="date" value={date} onChange={e=>setDate(e.target.value)}/></Field><Field label="Fornecedor salvo (opcional)" full><select value={supplierId} onChange={e=>setSupplierId(e.target.value)}><option value="">Não vincular</option>{data.suppliers.map(s=><option key={s.id} value={s.id}>{s.name}{s.source?' · '+s.source:''}</option>)}</select></Field><Tip text="Essa compra sai do caixa automaticamente e entra no estoque."/></div>}
-    {step===2&&<div className="cp-form-grid"><Field label="Quanto pagou por unidade?"><MoneyInput value={cost} setValue={setCost} placeholder="0,00"/></Field><Field label="Quantidade"><input type="number" min="1" value={qty} onChange={e=>setQty(e.target.value)}/></Field><Field label={isListed?'Preço anunciado':'Preço que pretende anunciar'}><MoneyInput value={listed} setValue={setListed} placeholder="Opcional"/></Field><Field label="Menor valor que aceitaria"><MoneyInput value={minimum} setValue={setMinimum} placeholder="Opcional"/></Field><ListingSetup isListed={isListed} setIsListed={setIsListed} channels={channels} setChannels={setChannels} listingDate={listingDate} setListingDate={setListingDate}/><div className="cp-live-summary"><span>Investimento inicial</span><strong>{money.format((Number(cost.replace(',','.'))||0)*(Number(qty)||1))}</strong><small>Será registrado automaticamente como saída do caixa.</small></div></div>}
-    {step===3&&<div className="cp-form-grid"><label className="cp-photo-drop"><ImagePlus size={28}/><b>{files.length?files.length+' foto(s) selecionada(s)':'Adicionar fotos'}</b><span>Até 8 imagens · 10 MB cada</span><input type="file" accept="image/*" multiple onChange={e=>setFiles(Array.from(e.target.files||[]).slice(0,8))}/></label>{files.length>0&&<div className="cp-photo-preview">{files.map((file,i)=><div key={file.name+i}><img src={URL.createObjectURL(file)} alt=""/><button type="button" onClick={()=>setFiles(list=>list.filter((_,index)=>index!==i))}><X/></button></div>)}</div>}<Field label="Observações" full><textarea value={notes} onChange={e=>setNotes(e.target.value)} placeholder="Defeito, acessório, detalhe da compra..."/></Field><div className="cp-review-box"><b>{name||'Seu produto'}</b><span>{(qty||1)+' un. · '+money.format(Number(cost.replace(',','.'))||0)+' cada'}</span><span>{isListed?'Anunciado em '+channels.join(', '):'Ainda não anunciado'}</span><span>{files.length+' foto(s) no histórico'}</span></div></div>}
+    {step===2&&<div className="cp-form-grid"><Field label="Quanto pagou por unidade?"><MoneyInput value={cost} setValue={setCost} placeholder="0,00"/></Field><InventoryModePicker mode={inventoryMode} onChange={setInventoryMode}/>{inventoryMode==='stock'&&<Field label="Quantidade em estoque"><input type="number" min="1" step="1" value={qty} onChange={e=>setQty(e.target.value)}/></Field>}<Field label={isListed?'Preço anunciado':'Preço que pretende anunciar'}><MoneyInput value={listed} setValue={setListed} placeholder="Opcional"/></Field><Field label="Menor valor que aceitaria"><MoneyInput value={minimum} setValue={setMinimum} placeholder="Opcional"/></Field><ListingSetup isListed={isListed} setIsListed={setIsListed} channels={channels} setChannels={setChannels} listingDate={listingDate} setListingDate={setListingDate}/><div className="cp-live-summary"><span>Investimento inicial</span><strong>{money.format((Number(cost.replace(',','.'))||0)*(inventoryMode==='single'?1:(Number(qty)||1)))}</strong><small>Será registrado automaticamente como saída do caixa.</small></div></div>}
+    {step===3&&<div className="cp-form-grid"><label className="cp-photo-drop"><ImagePlus size={28}/><b>{files.length?files.length+' foto(s) selecionada(s)':'Adicionar fotos'}</b><span>Até 8 imagens · 10 MB cada</span><input type="file" accept="image/*" multiple onChange={e=>setFiles(Array.from(e.target.files||[]).slice(0,8))}/></label>{files.length>0&&<div className="cp-photo-preview">{files.map((file,i)=><div key={file.name+i}><img src={URL.createObjectURL(file)} alt=""/><button type="button" onClick={()=>setFiles(list=>list.filter((_,index)=>index!==i))}><X/></button></div>)}</div>}<Field label="Observações" full><textarea value={notes} onChange={e=>setNotes(e.target.value)} placeholder="Defeito, acessório, detalhe da compra..."/></Field><div className="cp-review-box"><b>{name||'Seu produto'}</b><span>{(inventoryMode==='single'?'Item único':qty+' un. em estoque')+' · '+money.format(Number(cost.replace(',','.'))||0)+' cada'}</span><span>{isListed?'Anunciado em '+channels.join(', '):'Ainda não anunciado'}</span><span>{files.length+' foto(s) no histórico'}</span></div></div>}
     {error&&<div className="cp-form-error">{error}</div>}<div className="cp-modal-actions">{step>1&&<button className="cp-secondary" onClick={()=>setStep(s=>s-1)}>Voltar</button>}<button className="cp-primary" disabled={data.busy} onClick={()=>step<3?setStep(s=>s+1):void save()}>{data.busy?'Salvando...':step<3?'Continuar':'Salvar compra'}</button></div>
   </ModalShell>
 }
@@ -698,6 +704,7 @@ function PurchaseModal({data,onClose,onDone}:{data:Data;onClose:()=>void;onDone:
 function InventoryModal({data,onClose,onDone}:{data:Data;onClose:()=>void;onDone:()=>void}){
   const [step,setStep]=useState(1)
   const [name,setName]=useState(''),[category,setCategory]=useState(''),[qty,setQty]=useState('1')
+   const [inventoryMode,setInventoryMode]=useState<'single'|'stock'>('single')
   const [knowCost,setKnowCost]=useState(false),[cost,setCost]=useState(''),[listed,setListed]=useState(''),[minimum,setMinimum]=useState('')
   const [isListed,setIsListed]=useState(false),[channels,setChannels]=useState<string[]>([]),[listingDate,setListingDate]=useState(localDate())
   const [files,setFiles]=useState<File[]>([]),[notes,setNotes]=useState(''),[error,setError]=useState<string|null>(null)
@@ -712,7 +719,7 @@ function InventoryModal({data,onClose,onDone}:{data:Data;onClose:()=>void;onDone
       if(isListed&&channels.length===0)throw new Error('Selecione onde o produto está anunciado.')
       await data.createProduct({
         name:name.trim(),category:category.trim(),source:'Produto próprio',
-        purchaseDate:localDate(),purchaseUnitCost:originalCost,quantity:Math.max(1,Number(qty)||1),
+        purchaseDate:localDate(),purchaseUnitCost:originalCost,inventoryMode,quantity:inventoryMode==='single'?1:Math.max(1,Number(qty)||1),
         listedPrice:listPrice,minimumPrice:minimum?Number(minimum.replace(',','.')):null,notes,
         acquisitionType:'owned',costBasisKnown:knowCost,
         listingStatus:isListed?'listed':'not_listed',listingChannels:channels,
@@ -722,7 +729,7 @@ function InventoryModal({data,onClose,onDone}:{data:Data;onClose:()=>void;onDone
     }catch(err:any){setError(err?.message||'Não foi possível adicionar o produto.')}
   }
   return <ModalShell onClose={onClose}><ModalHeader eyebrow="PRODUTO QUE JÁ É SEU" title={step===1?'O que você quer vender?':step===2?'Preço e anúncio':'Fotos e detalhes'} text={step===1?'Cadastre algo que você já tem em casa ou já possuía. Isso não tira dinheiro do caixa.':step===2?'Se já estiver anunciado, o CONTROLE+ começa a acompanhar o desempenho.':'Fotos ajudam a reconhecer o item no estoque e acompanhar a venda.'}/><Stepper step={step}/>
-    {step===1&&<div className="cp-form-grid"><Field label="Produto" full><input autoFocus value={name} onChange={e=>setName(e.target.value)} placeholder="Ex.: TV Samsung 43, bicicleta, ferramenta..."/></Field><Field label="Categoria"><input value={category} onChange={e=>setCategory(e.target.value)} placeholder="Eletrônico, ferramenta..."/></Field><Field label="Quantidade"><input type="number" min="1" value={qty} onChange={e=>setQty(e.target.value)}/></Field><Tip text="Produto próprio entra no estoque, mas não gera saída no caixa."/></div>}
+    {step===1&&<div className="cp-form-grid"><Field label="Produto" full><input autoFocus value={name} onChange={e=>setName(e.target.value)} placeholder="Ex.: TV Samsung 43, bicicleta, ferramenta..."/></Field><Field label="Categoria"><input value={category} onChange={e=>setCategory(e.target.value)} placeholder="Eletrônico, ferramenta..."/></Field><InventoryModePicker mode={inventoryMode} onChange={setInventoryMode}/>{inventoryMode==='stock'&&<Field label="Quantidade em estoque"><input type="number" min="1" step="1" value={qty} onChange={e=>setQty(e.target.value)}/></Field>}<Tip text="Produto próprio entra no estoque, mas não gera saída no caixa."/></div>}
     {step===2&&<div className="cp-form-grid"><div className="cp-field cp-field--full"><span>Quer considerar quanto esse produto te custou?</span><div className="cp-cost-choice"><button type="button" className={!knowCost?'active':''} onClick={()=>setKnowCost(false)}>Não sei / não considerar</button><button type="button" className={knowCost?'active':''} onClick={()=>setKnowCost(true)}>Sim, sei o valor</button></div></div>{knowCost&&<Field label="Custo original por unidade"><MoneyInput value={cost} setValue={setCost} placeholder="0,00"/></Field>}<Field label={isListed?'Preço anunciado':'Preço que pretende vender'}><MoneyInput value={listed} setValue={setListed} placeholder="Opcional"/></Field><Field label="Menor valor que aceitaria"><MoneyInput value={minimum} setValue={setMinimum} placeholder="Opcional"/></Field><ListingSetup isListed={isListed} setIsListed={setIsListed} channels={channels} setChannels={setChannels} listingDate={listingDate} setListingDate={setListingDate}/></div>}
     {step===3&&<div className="cp-form-grid"><label className="cp-photo-drop"><ImagePlus size={28}/><b>{files.length?files.length+' foto(s) selecionada(s)':'Adicionar fotos'}</b><span>Até 8 imagens · 10 MB cada</span><input type="file" accept="image/*" multiple onChange={e=>setFiles(Array.from(e.target.files||[]).slice(0,8))}/></label>{files.length>0&&<div className="cp-photo-preview">{files.map((file,i)=><div key={file.name+i}><img src={URL.createObjectURL(file)} alt=""/><button type="button" onClick={()=>setFiles(list=>list.filter((_,index)=>index!==i))}><X/></button></div>)}</div>}<Field label="Observações" full><textarea value={notes} onChange={e=>setNotes(e.target.value)} placeholder="Estado, acessórios, defeitos, motivo da venda..."/></Field><div className="cp-review-box"><b>{name||'Seu produto'}</b><span>Produto próprio · não movimenta o caixa</span><span>{isListed?'Anunciado há '+daysSince(listingDate)+' dia(s)':'Ainda não anunciado'}</span></div></div>}
     {error&&<div className="cp-form-error">{error}</div>}<div className="cp-modal-actions">{step>1&&<button className="cp-secondary" onClick={()=>setStep(s=>s-1)}>Voltar</button>}<button className="cp-primary" disabled={data.busy} onClick={()=>step<3?setStep(s=>s+1):void save()}>{data.busy?'Salvando...':step<3?'Continuar':'Adicionar ao estoque'}</button></div>
