@@ -1,0 +1,964 @@
+/*
+ CONTROLE+ • REFINAMENTO DE LEGIBILIDADE — NOV/2026
+ Referência: 6 telas de aplicativo aprovadas (Visão geral, Estoque,
+ Vendas, Caixa, Central de gestão, Registrar).
+ Última camada de apresentação: nenhuma lógica/dado/evento alterado.
+ Acessibilidade: alvos de toque 44 px onde viável, fontes legíveis,
+ contraste com fundos reais e sem ampliar artificialmente a interface.
+*/
+:root[data-theme] .cp-app[data-theme]{
+  --cp-ui-target:44px;
+  --cp-ui-copy:13px;
+  --cp-ui-small:12px;
+  --cp-ui-heading:#112c4d;
+  letter-spacing:-.005em!important;
+}
+:root[data-theme="dark"] .cp-app[data-theme]{
+  --cp-ui-heading:#f4f9ff;
+}
+:root[data-theme] .cp-app[data-theme] .cp-page{
+  max-width:1100px!important;
+}
+:root[data-theme] .cp-app[data-theme] .cp-topbar{
+  background:linear-gradient(110deg,#092543,#0b2c51 60%,#061d3b)!important;
+}
+:root[data-theme] .cp-app[data-theme] .cp-page-title h1,
+:root[data-theme] .cp-app[data-theme] .cp-business-title h1{
+  font-weight:850!important;
+  letter-spacing:-.055em!important;
+}
+:root[data-theme] .cp-app[data-theme] .cp-page-title p,
+:root[data-theme] .cp-app[data-theme] .cp-business-title p{
+  font-size:13px!important;
+  color:var(--vision-muted)!important;
+  line-height:1.45!important;
+}
+:root[data-theme] .cp-app[data-theme] .cp-page-title>.cp-primary{
+  min-height:48px!important;
+  padding:0 19px!important;
+  font-size:14px!important;
+  font-weight:800!important;
+  white-space:nowrap!important;
+  border-radius:15px!important;
+  margin:0!important;
+  width:auto!important;
+  max-width:49%!important;
+  box-shadow:0 9px 20px rgba(8,50,100,.18)!important;
+}
+:root[data-theme] .cp-app[data-theme] .cp-page-title>.cp-primary svg{
+  width:21px!important;height:21px!important;
+}
+:root[data-theme] .cp-app[data-theme] .cp-primary,
+:root[data-theme] .cp-app[data-theme] .cp-secondary,
+:root[data-theme] .cp-app[data-theme] .cp-month-goal-edit{
+  min-height:44px!important;
+  font-size:13px!important;
+}
+:root[data-theme] .cp-app[data-theme] button:focus-visible,
+:root[data-theme] .cp-app[data-theme] input:focus-visible,
+:root[data-theme] .cp-app[data-theme] select:focus-visible{
+  outline:2px solid #58adf0!important;
+  outline-offset:3px!important;
+}
+
+/* Home – Tipografia visível e cards fiéis à composição referência */
+:root[data-theme] .cp-app[data-theme] .cp-home-app .cp-app-greeting h1{
+  font-size:clamp(29px,5vw,40px)!important;
+}
+:root[data-theme] .cp-app[data-theme] .cp-home-app .cp-register-main{
+  min-height:48px!important;
+  padding:0 18px!important;
+  font-size:14px!important;
+}
+:root[data-theme] .cp-app[data-theme] .cp-home-app .cp-balance-app{
+  padding:24px 25px!important;
+}
+:root[data-theme] .cp-app[data-theme] .cp-home-app .cp-balance-app-top strong{
+  font-size:clamp(34px,5.5vw,50px)!important;
+}
+:root[data-theme] .cp-app[data-theme] .cp-today-sales-head>div>small{
+  font-size:13px!important;
+  line-height:1.45!important;
+}
+:root[data-theme] .cp-app[data-theme] .cp-today-sales-head>button{
+  min-height:44px!important;
+  padding:0 14px!important;
+  font-size:13px!important;
+}
+:root[data-theme] .cp-app[data-theme] .cp-month-goal-identity h2{
+  font-size:20px!important;
+}
+:root[data-theme] .cp-app[data-theme] .cp-month-goal-identity small{
+  font-size:11px!important;
+}
+:root[data-theme] .cp-app[data-theme] .cp-month-goal-details small{
+  font-size:12px!important;
+  line-height:1.35!important;
+}
+:root[data-theme] .cp-app[data-theme] .cp-month-goal-details b{
+  font-size:14px!important;
+  line-height:1.3!important;
+}
+:root[data-theme] .cp-app[data-theme] .cp-reference-metric{
+  min-height:96px!important;
+  padding:16px!important;
+  gap:13px!important;
+}
+:root[data-theme] .cp-app[data-theme] .cp-reference-metric>div>span{
+  font-size:12px!important;
+  line-height:1.3!important;
+}
+:root[data-theme] .cp-app[data-theme] .cp-reference-metric b{
+  font-size:19px!important;
+}
+:root[data-theme] .cp-app[data-theme] .cp-v3-insights>button,
+:root[data-theme] .cp-app[data-theme] .cp-quick-app button{
+  min-height:98px!important;
+}
+:root[data-theme] .cp-app[data-theme] .cp-v3-insights small,
+:root[data-theme] .cp-app[data-theme] .cp-quick-app small{
+  font-size:12px!important;
+  line-height:1.4!important;
+}
+:root[data-theme] .cp-app[data-theme] .cp-quick-app b{
+  font-size:14px!important;
+  line-height:1.25!important;
+}
+:root[data-theme] .cp-app[data-theme] .cp-v3-insights em{
+  font-size:12px!important;line-height:1.45!important;
+}
+:root[data-theme] .cp-app[data-theme] .cp-v3-sim-shortcut{
+  min-height:105px!important;
+  padding:18px!important;
+}
+:root[data-theme] .cp-app[data-theme] .cp-v3-sim-shortcut strong{
+  font-size:21px!important;
+}
+:root[data-theme] .cp-app[data-theme] .cp-v3-sim-shortcut em{
+  font-size:13px!important;line-height:1.4!important;
+}
+:root[data-theme] .cp-app[data-theme] .cp-opp-home-copy b{
+  font-size:20px!important;
+}
+:root[data-theme] .cp-app[data-theme] .cp-opp-home-copy em,
+:root[data-theme] .cp-app[data-theme] .cp-smart-card p,
+:root[data-theme] .cp-app[data-theme] .cp-brique-shortcut p{
+  font-size:13px!important;
+  line-height:1.45!important;
+}
+:root[data-theme] .cp-app[data-theme] .cp-smart-card>button,
+:root[data-theme] .cp-app[data-theme] .cp-app-section-head button{
+  min-height:44px!important;
+  font-size:13px!important;
+}
+:root[data-theme] .cp-app[data-theme] .cp-smart-card>button{
+  padding:8px 13px!important;
+}
+/* Estoque – preserve as duas colunas da imagem, mas sem microtextos. */
+:root[data-theme] .cp-app[data-theme] .cp-vision-stock-search{
+  min-height:52px!important;
+}
+:root[data-theme] .cp-app[data-theme] .cp-vision-stock-search input{
+  font-size:15px!important;
+}
+:root[data-theme] .cp-app[data-theme] .cp-vision-filters button{
+  min-height:44px!important;
+  font-size:13px!important;
+  font-weight:750!important;
+  padding:0 15px!important;
+}
+:root[data-theme] .cp-app[data-theme] .cp-vision-stock-stats>div{
+  min-height:113px!important;
+  padding:15px!important;
+}
+:root[data-theme] .cp-app[data-theme] .cp-vision-stock-stats small{
+  font-size:12px!important;
+  line-height:1.3!important;
+}
+:root[data-theme] .cp-app[data-theme] .cp-vision-stock-stats strong{
+  font-size:clamp(18px,2.6vw,26px)!important;
+}
+:root[data-theme] .cp-app[data-theme] .cp-vision-stock-note{
+  font-size:12px!important;line-height:1.35!important;
+}
+:root[data-theme] .cp-app[data-theme] .cp-vision-stock-grid{
+  gap:12px!important;
+}
+:root[data-theme] .cp-app[data-theme] .cp-vision-stock-grid .cp-vision-product{
+  padding:13px!important;border-radius:18px!important;
+  min-width:0;
+}
+:root[data-theme] .cp-app[data-theme] .cp-vision-stock-grid .cp-vision-product-top{
+  min-height:145px!important;
+  gap:10px!important;
+}
+:root[data-theme] .cp-app[data-theme] .cp-vision-stock-grid .cp-vision-product-image{
+  height:138px!important;
+  border-radius:12px!important;
+}
+:root[data-theme] .cp-app[data-theme] .cp-vision-stock-grid .cp-vision-product-info{
+  padding-top:9px!important;
+}
+:root[data-theme] .cp-app[data-theme] .cp-vision-stock-grid .cp-vision-product-info h3{
+  font-size:clamp(16px,2.2vw,20px)!important;
+  line-height:1.22!important;
+  font-weight:800!important;
+}
+:root[data-theme] .cp-app[data-theme] .cp-vision-stock-grid .cp-vision-product-info p{
+  font-size:12px!important;line-height:1.35!important;
+}
+:root[data-theme] .cp-app[data-theme] .cp-vision-low,
+:root[data-theme] .cp-app[data-theme] .cp-vision-status{
+  font-size:11px!important;
+  line-height:1.35!important;
+}
+:root[data-theme] .cp-app[data-theme] .cp-vision-stock-count,
+:root[data-theme] .cp-app[data-theme] .cp-vision-stock-count b{
+  font-size:12px!important;
+  white-space:normal!important;
+}
+:root[data-theme] .cp-app[data-theme] .cp-vision-product-prices span{
+  font-size:12px!important;
+}
+:root[data-theme] .cp-app[data-theme] .cp-vision-product-prices strong{
+  font-size:clamp(14px,1.9vw,18px)!important;
+  line-height:1.25!important;
+}
+:root[data-theme] .cp-app[data-theme] .cp-vision-profit{
+  min-height:44px!important;
+  padding:10px!important;
+  gap:8px!important;
+}
+:root[data-theme] .cp-app[data-theme] .cp-vision-profit span{
+  font-size:12px!important;
+}
+:root[data-theme] .cp-app[data-theme] .cp-vision-profit strong{
+  font-size:15px!important;
+}
+
+/* Vendas – título/gráfico/KPIs, filtros e registros tocáveis */
+:root[data-theme] .cp-app[data-theme] .cp-vision-sales-hero{
+  min-height:195px!important;
+}
+:root[data-theme] .cp-app[data-theme] .cp-vision-sales-hero-info>span{
+  font-size:15px!important;
+}
+:root[data-theme] .cp-app[data-theme] .cp-vision-sales-hero-info small{
+  font-size:12px!important;
+}
+:root[data-theme] .cp-app[data-theme] .cp-vision-sales-hero-info strong{
+  font-size:clamp(27px,3vw,40px)!important;
+}
+:root[data-theme] .cp-app[data-theme] .cp-vision-sales-stats>div{
+  min-height:106px!important;
+  padding:16px!important;
+}
+:root[data-theme] .cp-app[data-theme] .cp-vision-sales-stats small{
+  font-size:13px!important;
+}
+:root[data-theme] .cp-app[data-theme] .cp-vision-sales-stats strong{
+  font-size:clamp(18px,2.6vw,25px)!important;
+}
+:root[data-theme] .cp-app[data-theme] .cp-vision-sales-stats em{
+  font-size:12px!important;
+}
+:root[data-theme] .cp-app[data-theme] .cp-vision-sales-filters button{
+  min-height:46px!important;
+  font-size:13px!important;
+}
+:root[data-theme] .cp-app[data-theme] .cp-vision-list-heading h2{
+  font-size:22px!important;
+}
+:root[data-theme] .cp-app[data-theme] .cp-vision-list-heading>span{
+  font-size:12px!important;
+  letter-spacing:0!important;
+}
+:root[data-theme] .cp-app[data-theme] .cp-vision-sale-row{
+  min-height:94px!important;
+}
+:root[data-theme] .cp-app[data-theme] .cp-vision-sale-row .cp-sale-main strong{
+  font-size:14px!important;
+}
+:root[data-theme] .cp-app[data-theme] .cp-vision-sale-row .cp-sale-main span{
+  font-size:12px!important;
+}
+:root[data-theme] .cp-app[data-theme] .cp-vision-sale-badges span{
+  font-size:11px!important;
+}
+:root[data-theme] .cp-app[data-theme] .cp-vision-sale-row .cp-sale-money b{
+  font-size:18px!important;
+}
+:root[data-theme] .cp-app[data-theme] .cp-vision-sale-row .cp-sale-money span{
+  font-size:11px!important;
+}
+
+/* Caixa – cards legíveis e lista com valores destacados. */
+:root[data-theme] .cp-app[data-theme] .cp-vision-cash-balance small{
+  font-size:15px!important;
+}
+:root[data-theme] .cp-app[data-theme] .cp-vision-cash-stats>div{
+  min-height:119px!important;
+}
+:root[data-theme] .cp-app[data-theme] .cp-vision-cash-stats small{
+  font-size:12px!important;
+}
+:root[data-theme] .cp-app[data-theme] .cp-vision-cash-stats strong{
+  font-size:clamp(17px,2.5vw,25px)!important;
+}
+:root[data-theme] .cp-app[data-theme] .cp-vision-history-head h2,
+:root[data-theme] .cp-app[data-theme] .cp-vision-panel-heading h2{
+  font-size:19px!important;
+}
+:root[data-theme] .cp-app[data-theme] .cp-vision-cash-filters button{
+  min-height:42px!important;
+  font-size:12px!important;
+}
+:root[data-theme] .cp-app[data-theme] .cp-vision-cash-list .cp-cash-row{
+  min-height:64px!important;
+}
+:root[data-theme] .cp-app[data-theme] .cp-vision-cash-list .cp-cash-row>div strong{
+  font-size:14px!important;
+}
+:root[data-theme] .cp-app[data-theme] .cp-vision-cash-list .cp-cash-row>div span{
+  font-size:12px!important;
+}
+:root[data-theme] .cp-app[data-theme] .cp-vision-cash-list .cp-cash-row>b{
+  font-size:15px!important;
+}
+
+/* Gestão – cartões, avisos e telas internas com texto útil. */
+:root[data-theme] .cp-app[data-theme] .cp-vision-business-strip span{
+  font-size:12px!important;
+}
+:root[data-theme] .cp-app[data-theme] .cp-vision-business-strip small{
+  font-size:11px!important;
+}
+:root[data-theme] .cp-app[data-theme] .cp-vision-manage-alert{
+  min-height:127px!important;
+}
+:root[data-theme] .cp-app[data-theme] .cp-vision-manage-alert strong{
+  font-size:21px!important;
+}
+:root[data-theme] .cp-app[data-theme] .cp-vision-manage-alert p{
+  font-size:13px!important;
+}
+:root[data-theme] .cp-app[data-theme] .cp-vision-manage-alert em{
+  display:inline-flex;
+  min-height:40px!important;
+  align-items:center;
+  font-size:12px!important;
+}
+:root[data-theme] .cp-app[data-theme] .cp-vision-management-grid .cp-business-tool{
+  min-height:155px!important;
+  padding:18px!important;
+  gap:12px!important;
+}
+:root[data-theme] .cp-app[data-theme] .cp-vision-business-copy b{
+  font-size:17px!important;
+}
+:root[data-theme] .cp-app[data-theme] .cp-vision-business-copy p{
+  font-size:13px!important;
+}
+:root[data-theme] .cp-app[data-theme] .cp-vision-business-copy small{
+  font-size:11px!important;
+}
+:root[data-theme] .cp-app[data-theme] .cp-business-title>button{
+  min-width:44px!important;
+  min-height:44px!important;
+}
+:root[data-theme] .cp-app[data-theme] .cp-business-page .cp-receivable-row,
+:root[data-theme] .cp-app[data-theme] .cp-business-page .cp-goal-row,
+:root[data-theme] .cp-app[data-theme] .cp-business-page .cp-business-tool{
+  min-height:64px;
+}
+
+/* Registrar: mantém ações originais. Mais espaço e escrita legível. */
+:root[data-theme] .cp-app[data-theme] .cp-modal:has(.cp-vision-actions) .cp-modal-x{
+  min-width:44px!important;min-height:44px!important;
+}
+:root[data-theme] .cp-app[data-theme] .cp-vision-actions-head h2{
+  font-size:29px!important;
+}
+:root[data-theme] .cp-app[data-theme] .cp-vision-actions-head p{
+  font-size:13px!important;
+}
+:root[data-theme] .cp-app[data-theme] .cp-vision-action-grid>button{
+  min-height:149px!important;
+  padding:18px!important;
+}
+:root[data-theme] .cp-app[data-theme] .cp-vision-action-grid>button>span{
+  width:43px!important;height:43px!important;
+}
+:root[data-theme] .cp-app[data-theme] .cp-vision-action-grid>button b{
+  font-size:17px!important;
+}
+:root[data-theme] .cp-app[data-theme] .cp-vision-action-grid>button small{
+  font-size:13px!important;
+}
+:root[data-theme] .cp-app[data-theme] .cp-modal-x{
+  min-width:44px!important;min-height:44px!important;
+}
+:root[data-theme] .cp-app[data-theme] .cp-modal-head p{
+  font-size:13px!important;
+}
+:root[data-theme] .cp-app[data-theme] .cp-field>span{
+  font-size:13px!important;
+}
+:root[data-theme] .cp-app[data-theme] .cp-field input,
+:root[data-theme] .cp-app[data-theme] .cp-field select,
+:root[data-theme] .cp-app[data-theme] .cp-field textarea{
+  min-height:48px!important;
+  font-size:16px!important;
+}
+:root[data-theme] .cp-app[data-theme] .cp-modal-actions button{
+  min-height:48px!important;
+  font-size:14px!important;
+}
+:root[data-theme] .cp-app[data-theme] .cp-empty p{
+  font-size:13px!important;
+}
+
+/* Rodapé app: tamanho acessível sem roubar a tela inteira. */
+:root[data-theme] .cp-app[data-theme] .cp-bottom-inner{
+  height:76px!important;
+}
+:root[data-theme] .cp-app[data-theme] .cp-bottom button:not(.cp-add-main){
+  min-height:59px!important;
+  font-size:12px!important;
+  gap:5px!important;
+}
+:root[data-theme] .cp-app[data-theme] .cp-bottom button:not(.cp-add-main) svg{
+  height:24px!important;width:24px!important;
+}
+:root[data-theme] .cp-app[data-theme] .cp-bottom .cp-add-main{
+  width:59px!important;height:59px!important;
+}
+:root[data-theme] .cp-app[data-theme] .cp-bottom .cp-add-main svg{
+  height:30px!important;width:30px!important;
+}
+
+/* Tela de largura de telefone: proporções próximas às referências 9:16. */
+@media(max-width:640px){
+ :root[data-theme] .cp-app[data-theme] .cp-page{
+   padding:23px 15px 124px!important;
+ }
+ :root[data-theme] .cp-app[data-theme] .cp-topbar{
+   height:64px!important;min-height:64px!important;
+ }
+ :root[data-theme] .cp-app[data-theme] .cp-top-inner{
+   height:64px!important;min-height:64px!important;
+   padding:0 13px!important;gap:7px!important;
+ }
+ :root[data-theme] .cp-app[data-theme] .cp-brand-mark{
+   width:38px!important;height:38px!important;flex:0 0 38px!important;
+ }
+ :root[data-theme] .cp-app[data-theme] .cp-brand-word{
+   font-size:14px!important;
+ }
+ :root[data-theme] .cp-app[data-theme] .cp-top-actions{
+   gap:4px!important;
+ }
+ :root[data-theme] .cp-app[data-theme] .cp-top-actions>button,
+ :root[data-theme] .cp-app[data-theme] .cp-top-actions .cp-manage-top,
+ :root[data-theme] .cp-app[data-theme] .cp-top-actions .cp-user-btn{
+   width:38px!important;min-width:38px!important;max-width:38px!important;
+   height:38px!important;min-height:38px!important;
+   flex:0 0 38px!important;
+   border-radius:11px!important;
+ }
+ :root[data-theme] .cp-app[data-theme] .cp-top-actions svg{
+   width:21px!important;height:21px!important;
+ }
+ :root[data-theme] .cp-app[data-theme] .cp-page-title{
+   align-items:center!important;
+   flex-direction:row!important;
+   gap:10px!important;
+   margin-bottom:18px!important;
+ }
+ :root[data-theme] .cp-app[data-theme] .cp-page-title>div{
+   min-width:0!important;max-width:none!important;
+   flex:1 1 0!important;
+ }
+ :root[data-theme] .cp-app[data-theme] .cp-page-title .cp-eyebrow{
+   font-size:12px!important;
+   font-weight:650!important;
+   line-height:1.4!important;
+ }
+ :root[data-theme] .cp-app[data-theme] .cp-page-title h1{
+   font-size:clamp(29px,7vw,34px)!important;
+   line-height:1.1!important;
+   margin:5px 0 5px!important;
+ }
+ :root[data-theme] .cp-app[data-theme] .cp-page-title p{
+   font-size:12px!important;
+   line-height:1.45!important;
+ }
+ :root[data-theme] .cp-app[data-theme] .cp-page-title>.cp-primary{
+   max-width:52%!important;
+   min-height:46px!important;
+   height:auto!important;
+   padding:0 14px!important;
+   font-size:13px!important;
+   line-height:1.2!important;
+   border-radius:13px!important;
+ }
+ :root[data-theme] .cp-app[data-theme] .cp-page-title>.cp-primary svg{
+   width:19px!important;height:19px!important;
+ }
+ :root[data-theme] .cp-app[data-theme] .cp-home-app{
+   padding-top:21px!important;
+ }
+ :root[data-theme] .cp-app[data-theme] .cp-app-greeting h1{
+   font-size:29px!important;
+ }
+ :root[data-theme] .cp-app[data-theme] .cp-home-app .cp-register-main{
+   min-height:45px!important;
+   height:45px!important;
+   padding:0 14px!important;
+   font-size:13px!important;
+ }
+ :root[data-theme] .cp-app[data-theme] .cp-home-app .cp-balance-app{
+   padding:22px!important;
+   border-radius:20px!important;
+ }
+ :root[data-theme] .cp-app[data-theme] .cp-home-app .cp-balance-app-top strong{
+   font-size:clamp(32px,8.5vw,40px)!important;
+ }
+ :root[data-theme] .cp-app[data-theme] .cp-home-app .cp-today-sales,
+ :root[data-theme] .cp-app[data-theme] .cp-home-app .cp-today-sales.is-empty{
+   padding:16px!important;
+   border-radius:15px!important;
+ }
+ :root[data-theme] .cp-app[data-theme] .cp-today-sales-head>div>b{
+   font-size:19px!important;
+ }
+ :root[data-theme] .cp-app[data-theme] .cp-today-sales-head>div>small{
+   font-size:12px!important;
+ }
+ :root[data-theme] .cp-app[data-theme] .cp-today-sales-head>button{
+   min-height:44px!important;
+   font-size:12px!important;
+   padding:0 11px!important;
+ }
+ :root[data-theme] .cp-app[data-theme] .cp-month-goal{
+   padding:19px!important;
+ }
+ :root[data-theme] .cp-app[data-theme] .cp-month-goal-identity h2{
+   font-size:18px!important;
+ }
+ :root[data-theme] .cp-app[data-theme] .cp-month-goal-earned strong{
+   font-size:clamp(24px,6.2vw,30px)!important;
+ }
+ :root[data-theme] .cp-app[data-theme] .cp-month-goal-total strong{
+   font-size:clamp(19px,5.1vw,25px)!important;
+ }
+ :root[data-theme] .cp-app[data-theme] .cp-month-goal-details{
+   gap:8px!important;
+ }
+ :root[data-theme] .cp-app[data-theme] .cp-month-goal-details>div{
+   padding:11px 9px!important;
+ }
+ :root[data-theme] .cp-app[data-theme] .cp-month-goal-details small{
+   font-size:11px!important;
+ }
+ :root[data-theme] .cp-app[data-theme] .cp-month-goal-details b{
+   font-size:12px!important;
+   overflow-wrap:anywhere;
+ }
+ :root[data-theme] .cp-app[data-theme] .cp-reference-metrics{
+   gap:11px!important;
+ }
+ :root[data-theme] .cp-app[data-theme] .cp-reference-metric{
+   min-height:97px!important;
+   padding:13px!important;
+   gap:9px!important;
+ }
+ :root[data-theme] .cp-app[data-theme] .cp-reference-metric-icon{
+   width:40px!important;height:40px!important;flex:0 0 40px!important;
+ }
+ :root[data-theme] .cp-app[data-theme] .cp-reference-metric-icon svg{
+   width:21px!important;height:21px!important;
+ }
+ :root[data-theme] .cp-app[data-theme] .cp-reference-metric>div>span{
+   font-size:11px!important;
+ }
+ :root[data-theme] .cp-app[data-theme] .cp-reference-metric b{
+   font-size:17px!important;
+ }
+ :root[data-theme] .cp-app[data-theme] .cp-quick-app button{
+   min-height:104px!important;
+   padding:14px!important;
+ }
+ :root[data-theme] .cp-app[data-theme] .cp-quick-app b{
+   font-size:13px!important;
+ }
+ :root[data-theme] .cp-app[data-theme] .cp-quick-app small,
+ :root[data-theme] .cp-app[data-theme] .cp-v3-insights em{
+   font-size:11px!important;
+ }
+ :root[data-theme] .cp-app[data-theme] .cp-v3-sim-shortcut strong{
+   font-size:19px!important;
+ }
+ :root[data-theme] .cp-app[data-theme] .cp-v3-sim-shortcut em{
+   font-size:12px!important;
+ }
+ :root[data-theme] .cp-app[data-theme] .cp-v3-sim-shortcut small{
+   font-size:11px!important;
+ }
+ :root[data-theme] .cp-app[data-theme] .cp-opp-home-copy b{
+   font-size:18px!important;
+ }
+ :root[data-theme] .cp-app[data-theme] .cp-opp-home-copy em{
+   font-size:12px!important;
+ }
+ /* Inventário em 2 colunas, agora com nomes legíveis e fotos maiores. */
+ :root[data-theme] .cp-app[data-theme] .cp-vision-stock-search{
+   min-height:51px!important;height:51px!important;
+ }
+ :root[data-theme] .cp-app[data-theme] .cp-vision-stock-search input{
+   font-size:14px!important;
+ }
+ :root[data-theme] .cp-app[data-theme] .cp-vision-filters{
+   gap:9px!important;
+   padding:4px 1px 8px!important;
+ }
+ :root[data-theme] .cp-app[data-theme] .cp-vision-filters button{
+   min-height:43px!important;
+   font-size:12px!important;
+   padding:0 14px!important;
+ }
+ :root[data-theme] .cp-app[data-theme] .cp-vision-stock-stats{
+   gap:9px!important;
+   margin-bottom:11px!important;
+ }
+ :root[data-theme] .cp-app[data-theme] .cp-vision-stock-stats>div{
+   padding:12px 10px!important;
+   min-height:103px!important;
+   border-radius:15px!important;
+ }
+ :root[data-theme] .cp-app[data-theme] .cp-vision-stock-stats .cp-vision-stat-icon{
+   width:35px!important;height:35px!important;flex-basis:35px!important;
+ }
+ :root[data-theme] .cp-app[data-theme] .cp-vision-stock-stats small{
+   font-size:11px!important;
+ }
+ :root[data-theme] .cp-app[data-theme] .cp-vision-stock-stats strong{
+   font-size:clamp(15px,4vw,20px)!important;
+ }
+ :root[data-theme] .cp-app[data-theme] .cp-vision-stock-note{
+   font-size:11px!important;
+ }
+ :root[data-theme] .cp-app[data-theme] .cp-vision-stock-grid{
+   gap:10px!important;
+   grid-template-columns:repeat(2,minmax(0,1fr))!important;
+ }
+ :root[data-theme] .cp-app[data-theme] .cp-vision-stock-grid .cp-vision-product{
+   padding:10px!important;
+   border-radius:16px!important;
+ }
+ :root[data-theme] .cp-app[data-theme] .cp-vision-stock-grid .cp-vision-product-top{
+   min-height:124px!important;
+   grid-template-columns:39% minmax(0,1fr)!important;
+   gap:7px!important;
+   margin-bottom:8px!important;
+ }
+ :root[data-theme] .cp-app[data-theme] .cp-vision-stock-grid .cp-vision-product-image{
+   height:121px!important;
+   border-radius:10px!important;
+ }
+ :root[data-theme] .cp-app[data-theme] .cp-vision-stock-grid .cp-vision-product-info{
+   padding-top:7px!important;
+ }
+ :root[data-theme] .cp-app[data-theme] .cp-vision-stock-grid .cp-vision-product-info h3{
+   font-size:14px!important;
+   line-height:1.23!important;
+   margin-bottom:5px!important;
+ }
+ :root[data-theme] .cp-app[data-theme] .cp-vision-stock-grid .cp-vision-product-info p{
+   font-size:11px!important;
+   margin-bottom:8px!important;
+ }
+ :root[data-theme] .cp-app[data-theme] .cp-vision-low,
+ :root[data-theme] .cp-app[data-theme] .cp-vision-status{
+   font-size:10px!important;
+   padding:4px 6px!important;
+ }
+ :root[data-theme] .cp-app[data-theme] .cp-vision-stock-grid .cp-vision-stock-count,
+ :root[data-theme] .cp-app[data-theme] .cp-vision-stock-grid .cp-vision-stock-count b{
+   font-size:11px!important;
+   line-height:1.25!important;
+ }
+ :root[data-theme] .cp-app[data-theme] .cp-vision-stock-grid .cp-vision-product-prices{
+   padding:10px 0!important;
+ }
+ :root[data-theme] .cp-app[data-theme] .cp-vision-stock-grid .cp-vision-product-prices>div{
+   padding:0 5px!important;
+ }
+ :root[data-theme] .cp-app[data-theme] .cp-vision-stock-grid .cp-vision-product-prices span{
+   font-size:11px!important;
+ }
+ :root[data-theme] .cp-app[data-theme] .cp-vision-stock-grid .cp-vision-product-prices strong{
+   font-size:clamp(12px,3.2vw,14px)!important;
+   line-height:1.28!important;
+ }
+ :root[data-theme] .cp-app[data-theme] .cp-vision-stock-grid .cp-vision-profit{
+   min-height:44px!important;
+   padding:9px 7px!important;
+   flex-wrap:wrap;
+   gap:3px!important;
+ }
+ :root[data-theme] .cp-app[data-theme] .cp-vision-stock-grid .cp-vision-profit span{
+   font-size:11px!important;
+ }
+ :root[data-theme] .cp-app[data-theme] .cp-vision-stock-grid .cp-vision-profit strong{
+   font-size:13px!important;
+ }
+ :root[data-theme] .cp-app[data-theme] .cp-vision-product-flags{
+   padding-right:7px!important;
+ }
+ :root[data-theme] .cp-app[data-theme] .cp-vision-dots{
+   font-size:12px!important;
+ }
+ /* Vendas: 2×2 KPIs, gráfico sem comprimir valores. */
+ :root[data-theme] .cp-app[data-theme] .cp-vision-sales-hero{
+   padding:20px 16px!important;
+   min-height:172px!important;
+   gap:12px!important;
+ }
+ :root[data-theme] .cp-app[data-theme] .cp-vision-sales-hero-info>span{
+   font-size:13px!important;
+ }
+ :root[data-theme] .cp-app[data-theme] .cp-vision-sales-hero-info strong{
+   font-size:clamp(23px,6vw,29px)!important;
+ }
+ :root[data-theme] .cp-app[data-theme] .cp-vision-sales-hero .cp-vision-chart svg{
+   height:124px!important;
+ }
+ :root[data-theme] .cp-app[data-theme] .cp-vision-sales-stats{
+   gap:10px!important;
+ }
+ :root[data-theme] .cp-app[data-theme] .cp-vision-sales-stats>div{
+   min-height:100px!important;
+   padding:13px!important;
+   grid-template-columns:36px minmax(0,1fr)!important;
+   column-gap:9px!important;
+ }
+ :root[data-theme] .cp-app[data-theme] .cp-vision-sales-stats .cp-vision-stat-icon{
+   width:36px!important;height:36px!important;flex-basis:36px!important;
+ }
+ :root[data-theme] .cp-app[data-theme] .cp-vision-sales-stats small{
+   font-size:12px!important;
+ }
+ :root[data-theme] .cp-app[data-theme] .cp-vision-sales-stats strong{
+   font-size:clamp(17px,4.2vw,20px)!important;
+ }
+ :root[data-theme] .cp-app[data-theme] .cp-vision-sales-stats em{
+   font-size:11px!important;
+ }
+ :root[data-theme] .cp-app[data-theme] .cp-vision-sales-filters{
+   gap:7px!important;
+   margin-bottom:15px!important;
+ }
+ :root[data-theme] .cp-app[data-theme] .cp-vision-sales-filters button{
+   min-height:44px!important;
+   font-size:12px!important;
+   padding:0 7px!important;
+ }
+ :root[data-theme] .cp-app[data-theme] .cp-vision-list-heading{
+   margin:0 0 12px!important;
+ }
+ :root[data-theme] .cp-app[data-theme] .cp-vision-list-heading h2{
+   font-size:21px!important;
+ }
+ :root[data-theme] .cp-app[data-theme] .cp-vision-list-heading>span{
+   font-size:11px!important;
+ }
+ :root[data-theme] .cp-app[data-theme] .cp-vision-sale-row{
+   min-height:103px!important;
+   padding:12px!important;
+   grid-template-columns:51px minmax(0,1fr) auto!important;
+   gap:6px 11px!important;
+ }
+ :root[data-theme] .cp-app[data-theme] .cp-vision-sale-row .cp-sale-thumb{
+   width:50px!important;height:54px!important;
+ }
+ :root[data-theme] .cp-app[data-theme] .cp-vision-sale-row .cp-sale-main strong{
+   font-size:13px!important;
+ }
+ :root[data-theme] .cp-app[data-theme] .cp-vision-sale-row .cp-sale-main span{
+   font-size:11px!important;
+ }
+ :root[data-theme] .cp-app[data-theme] .cp-vision-sale-row .cp-sale-money b{
+   font-size:15px!important;
+ }
+ :root[data-theme] .cp-app[data-theme] .cp-vision-sale-row .cp-sale-money span{
+   font-size:10px!important;
+ }
+ :root[data-theme] .cp-app[data-theme] .cp-vision-sale-row .cp-vision-sale-badges{
+   gap:6px!important;
+ }
+ :root[data-theme] .cp-app[data-theme] .cp-vision-sale-badges span{
+   font-size:11px!important;
+   padding:5px 9px!important;
+ }
+ /* Caixa */
+ :root[data-theme] .cp-app[data-theme] .cp-vision-cash-hero{
+   padding:20px!important;
+ }
+ :root[data-theme] .cp-app[data-theme] .cp-vision-cash-balance strong{
+   font-size:clamp(30px,8vw,39px)!important;
+ }
+ :root[data-theme] .cp-app[data-theme] .cp-vision-cash-pair small{
+   font-size:11px!important;
+ }
+ :root[data-theme] .cp-app[data-theme] .cp-vision-cash-pair strong{
+   font-size:clamp(15px,4.2vw,20px)!important;
+ }
+ :root[data-theme] .cp-app[data-theme] .cp-vision-cash-stats{
+   gap:9px!important;
+ }
+ :root[data-theme] .cp-app[data-theme] .cp-vision-cash-stats>div{
+   padding:13px 10px!important;
+   min-height:108px!important;
+ }
+ :root[data-theme] .cp-app[data-theme] .cp-vision-cash-stats small{
+   font-size:11px!important;
+ }
+ :root[data-theme] .cp-app[data-theme] .cp-vision-cash-stats strong{
+   font-size:clamp(14px,3.7vw,19px)!important;
+ }
+ :root[data-theme] .cp-app[data-theme] .cp-vision-panel-heading h2,
+ :root[data-theme] .cp-app[data-theme] .cp-vision-history-head h2{
+   font-size:17px!important;
+ }
+ :root[data-theme] .cp-app[data-theme] .cp-vision-cash-filters button{
+   min-height:42px!important;
+   font-size:12px!important;
+ }
+ :root[data-theme] .cp-app[data-theme] .cp-vision-cash-list .cp-cash-row{
+   min-height:62px!important;
+ }
+ :root[data-theme] .cp-app[data-theme] .cp-vision-cash-list .cp-cash-row>div strong{
+   font-size:13px!important;
+ }
+ :root[data-theme] .cp-app[data-theme] .cp-vision-cash-list .cp-cash-row>div span{
+   font-size:11px!important;
+ }
+ :root[data-theme] .cp-app[data-theme] .cp-vision-cash-list .cp-cash-row>b{
+   font-size:14px!important;
+ }
+ /* Central de gestão */
+ :root[data-theme] .cp-app[data-theme] .cp-vision-business-strip span{
+   font-size:10px!important;
+ }
+ :root[data-theme] .cp-app[data-theme] .cp-vision-manage-alert strong{
+   font-size:18px!important;
+ }
+ :root[data-theme] .cp-app[data-theme] .cp-vision-manage-alert p{
+   font-size:12px!important;
+ }
+ :root[data-theme] .cp-app[data-theme] .cp-vision-management-grid{
+   gap:11px!important;
+ }
+ :root[data-theme] .cp-app[data-theme] .cp-vision-management-grid .cp-business-tool{
+   display:grid!important;
+   grid-template-columns:40px minmax(0,1fr) 14px!important;
+   min-height:165px!important;
+   padding:13px!important;
+   gap:8px!important;
+ }
+ :root[data-theme] .cp-app[data-theme] .cp-vision-management-grid .cp-business-icon{
+   width:39px!important;height:39px!important;
+ }
+ :root[data-theme] .cp-app[data-theme] .cp-vision-business-copy b{
+   font-size:15px!important;
+   line-height:1.25!important;
+ }
+ :root[data-theme] .cp-app[data-theme] .cp-vision-business-copy p{
+   font-size:12px!important;
+   line-height:1.4!important;
+ }
+ :root[data-theme] .cp-app[data-theme] .cp-vision-business-copy small{
+   font-size:11px!important;
+ }
+ /* Registrar sheet: quadros realmente tocáveis. */
+ :root[data-theme] .cp-app[data-theme] .cp-vision-action-grid{
+   gap:10px!important;
+ }
+ :root[data-theme] .cp-app[data-theme] .cp-vision-action-grid>button{
+   min-height:146px!important;
+   padding:14px!important;
+ }
+ :root[data-theme] .cp-app[data-theme] .cp-vision-action-grid>button>span{
+   width:39px!important;height:39px!important;
+ }
+ :root[data-theme] .cp-app[data-theme] .cp-vision-action-grid>button b{
+   font-size:15px!important;
+ }
+ :root[data-theme] .cp-app[data-theme] .cp-vision-action-grid>button small{
+   font-size:12px!important;
+   line-height:1.4!important;
+ }
+ :root[data-theme] .cp-app[data-theme] .cp-modal:has(.cp-vision-actions) .cp-modal-scroll{
+   padding:36px 16px max(22px,env(safe-area-inset-bottom))!important;
+ }
+ :root[data-theme] .cp-app[data-theme] .cp-vision-actions-head h2{
+   font-size:26px!important;
+ }
+ :root[data-theme] .cp-app[data-theme] .cp-vision-actions-head p{
+   font-size:12px!important;
+ }
+ /* Barra inferior */
+ :root[data-theme] .cp-app[data-theme] .cp-bottom-inner{
+   height:70px!important;
+   padding:5px 8px!important;
+   border-radius:22px!important;
+ }
+ :root[data-theme] .cp-app[data-theme] .cp-bottom button:not(.cp-add-main){
+   min-height:58px!important;
+   height:58px!important;
+   font-size:12px!important;
+ }
+ :root[data-theme] .cp-app[data-theme] .cp-bottom button:not(.cp-add-main) svg{
+   width:23px!important;height:23px!important;
+ }
+ :root[data-theme] .cp-app[data-theme] .cp-bottom .cp-add-main{
+   width:55px!important;height:55px!important;
+   border-radius:16px!important;
+   margin-top:-16px!important;
+ }
+ :root[data-theme] .cp-app[data-theme] .cp-bottom .cp-add-main svg{
+   width:29px!important;height:29px!important;
+ }
+}
+/* 360 px ainda deve caber sem reduzir o texto a 9 px. */
+@media(max-width:365px){
+ :root[data-theme] .cp-app[data-theme] .cp-top-actions>button,
+ :root[data-theme] .cp-app[data-theme] .cp-top-actions .cp-manage-top,
+ :root[data-theme] .cp-app[data-theme] .cp-top-actions .cp-user-btn{
+   width:34px!important;min-width:34px!important;max-width:34px!important;flex-basis:34px!important;
+ }
+ :root[data-theme] .cp-app[data-theme] .cp-brand-word{
+   font-size:12px!important;
+ }
+ :root[data-theme] .cp-app[data-theme] .cp-page-title h1{
+   font-size:27px!important;
+ }
+ :root[data-theme] .cp-app[data-theme] .cp-page-title>.cp-primary{
+   font-size:12px!important;
+   padding:0 10px!important;
+ }
+ :root[data-theme] .cp-app[data-theme] .cp-vision-product-info h3{
+   font-size:13px!important;
+ }
+}
+/* Escuro: alvos claros sobre superfícies escuras */
+:root[data-theme="dark"] .cp-app[data-theme="dark"] .cp-vision-management-grid .cp-vision-business-copy b,
+:root[data-theme="dark"] .cp-app[data-theme="dark"] .cp-vision-sale-row .cp-sale-main strong{
+  color:#f4f9ff!important;
+}
+@media(prefers-reduced-motion:reduce){
+ :root[data-theme] .cp-app[data-theme] button{
+   transition:none!important;
+ }
+}
