@@ -1931,3 +1931,243 @@
     padding:0 8px!important;
   }
 }
+
+
+/* ==========================================================
+   CONTROLE+ / AUDITORIA DE CONTRASTE / 2026-11-18
+   Correções específicas dos botões/atalhos da Home.
+   Sem alterações em eventos, navegação, dados ou cálculos.
+   ========================================================== */
+
+/* SIMULADOR DE LUCRO: classe real cp-v3-sim-shortcut
+   O CSS antigo usava ícone/subtítulo azul claríssimo de card escuro
+   depois que vision-app mudou o fundo para branco. */
+:root[data-theme="light"] .cp-app[data-theme="light"] .cp-home-app .cp-v3-sim-shortcut{
+  background:linear-gradient(115deg,#fff 0%,#f7fbff 100%)!important;
+  border:1px solid #c9dced!important;
+  box-shadow:0 7px 24px rgba(21,57,103,.095)!important;
+  color:#0d3155!important;
+  opacity:1!important;
+}
+:root[data-theme="light"] .cp-app[data-theme="light"] .cp-home-app .cp-v3-sim-shortcut strong{
+  color:#0d3155!important;
+  opacity:1!important;
+}
+:root[data-theme="light"] .cp-app[data-theme="light"] .cp-home-app .cp-v3-sim-shortcut small{
+  color:#255f96!important;
+  opacity:1!important;
+}
+:root[data-theme="light"] .cp-app[data-theme="light"] .cp-home-app .cp-v3-sim-shortcut em{
+  color:#445f7c!important;
+  opacity:1!important;
+}
+:root[data-theme="light"] .cp-app[data-theme="light"] .cp-home-app .cp-v3-sim-shortcut-icon{
+  background:#e5f1fd!important;
+  border:1px solid #c8dfef!important;
+  color:#1a5b96!important;
+  opacity:1!important;
+}
+:root[data-theme="light"] .cp-app[data-theme="light"] .cp-home-app .cp-v3-sim-shortcut-icon svg{
+  color:inherit!important;
+  stroke:currentColor!important;
+}
+:root[data-theme="light"] .cp-app[data-theme="light"] .cp-home-app .cp-v3-sim-shortcut>svg{
+  color:#255f96!important;
+  stroke:currentColor!important;
+  opacity:1!important;
+}
+:root[data-theme="light"] .cp-app[data-theme="light"] .cp-home-app .cp-v3-sim-shortcut:hover{
+  border-color:#7caedb!important;
+  box-shadow:0 12px 29px rgba(21,73,126,.13)!important;
+}
+
+/* OPORTUNIDADES: manter o destaque azul-marinho premium e garantir
+   que rótulo, descrição, ícone e seta sejam legíveis sobre ele. */
+:root[data-theme="light"] .cp-app[data-theme="light"] .cp-home-app .cp-opp-home-link{
+  background:linear-gradient(128deg,#174d82 0%,#0a315e 68%,#072649 100%)!important;
+  border:1px solid #275987!important;
+  color:#ffffff!important;
+  box-shadow:0 11px 28px rgba(11,48,93,.16)!important;
+}
+:root[data-theme="light"] .cp-app[data-theme="light"] .cp-home-app .cp-opp-home-copy b{
+  color:#ffffff!important;
+  opacity:1!important;
+}
+:root[data-theme="light"] .cp-app[data-theme="light"] .cp-home-app .cp-opp-home-copy small{
+  color:#9dd4ff!important;
+  opacity:1!important;
+}
+:root[data-theme="light"] .cp-app[data-theme="light"] .cp-home-app .cp-opp-home-copy em{
+  color:#d7e8f8!important;
+  opacity:1!important;
+}
+:root[data-theme="light"] .cp-app[data-theme="light"] .cp-home-app .cp-opp-home-icon{
+  background:rgba(153,207,255,.16)!important;
+  border:1px solid rgba(190,226,255,.22)!important;
+  color:#c5e6ff!important;
+}
+:root[data-theme="light"] .cp-app[data-theme="light"] .cp-home-app .cp-opp-home-icon svg{
+  color:inherit!important;
+  stroke:currentColor!important;
+}
+:root[data-theme="light"] .cp-app[data-theme="light"] .cp-home-app .cp-opp-home-link>svg{
+  color:#daedff!important;
+  stroke:currentColor!important;
+}
+:root[data-theme="light"] .cp-app[data-theme="light"] .cp-home-app .cp-opp-home-link:hover{
+  border-color:#70b4f1!important;
+  box-shadow:0 15px 32px rgba(11,48,93,.22)!important;
+}
+
+/* Atalhos de Registrar / A receber / Capital parado:
+   restaurar leitura de textos secundários e ícones em cards claros. */
+:root[data-theme="light"] .cp-app[data-theme="light"] .cp-home-app .cp-quick-app button,
+:root[data-theme="light"] .cp-app[data-theme="light"] .cp-home-app .cp-v3-insights>button{
+  color:#0d3155!important;
+  border-color:#d9e5f0!important;
+}
+:root[data-theme="light"] .cp-app[data-theme="light"] .cp-home-app .cp-quick-app button b,
+:root[data-theme="light"] .cp-app[data-theme="light"] .cp-home-app .cp-v3-insights strong{
+  color:#0d3155!important;
+  opacity:1!important;
+}
+:root[data-theme="light"] .cp-app[data-theme="light"] .cp-home-app .cp-quick-app button small,
+:root[data-theme="light"] .cp-app[data-theme="light"] .cp-home-app .cp-v3-insights small,
+:root[data-theme="light"] .cp-app[data-theme="light"] .cp-home-app .cp-v3-insights em{
+  color:#445f7c!important;
+  opacity:1!important;
+}
+:root[data-theme="light"] .cp-app[data-theme="light"] .cp-home-app .cp-quick-app button>span,
+:root[data-theme="light"] .cp-app[data-theme="light"] .cp-home-app .cp-v3-insight-icon{
+  color:#255f96!important;
+  background:#e8f2fc!important;
+}
+:root[data-theme="light"] .cp-app[data-theme="light"] .cp-home-app .cp-quick-app button>span svg,
+:root[data-theme="light"] .cp-app[data-theme="light"] .cp-home-app .cp-v3-insight-icon svg{
+  stroke:#255f96!important;
+  color:#255f96!important;
+}
+:root[data-theme="light"] .cp-app[data-theme="light"] .cp-home-app .cp-v3-insights>button>svg{
+  color:#255f96!important;
+}
+:root[data-theme="light"] .cp-app[data-theme="light"] .cp-home-app .cp-quick-app button:hover,
+:root[data-theme="light"] .cp-app[data-theme="light"] .cp-home-app .cp-v3-insights>button:hover{
+  border-color:#93bde3!important;
+}
+
+/* Cards com recomendação de ação e botões 'Ver todos' / 'Relatórios'. */
+:root[data-theme="light"] .cp-app[data-theme="light"] .cp-home-app .cp-smart-card h2,
+:root[data-theme="light"] .cp-app[data-theme="light"] .cp-home-app .cp-brique-shortcut b{
+  color:#0d3155!important;
+}
+:root[data-theme="light"] .cp-app[data-theme="light"] .cp-home-app .cp-smart-card p,
+:root[data-theme="light"] .cp-app[data-theme="light"] .cp-home-app .cp-brique-shortcut p{
+  color:#445f7c!important;
+  opacity:1!important;
+}
+:root[data-theme="light"] .cp-app[data-theme="light"] .cp-home-app .cp-smart-card>div:nth-child(2)>span,
+:root[data-theme="light"] .cp-app[data-theme="light"] .cp-home-app .cp-brique-shortcut div>span{
+  color:#255f96!important;
+}
+:root[data-theme="light"] .cp-app[data-theme="light"] .cp-home-app .cp-smart-card>button{
+  background:#e5f1fd!important;
+  color:#1d5d98!important;
+  border:1px solid #c9ddf0!important;
+  border-radius:10px!important;
+  min-height:35px;
+  padding:7px 11px!important;
+  opacity:1!important;
+}
+:root[data-theme="light"] .cp-app[data-theme="light"] .cp-home-app .cp-smart-card>button svg{
+  color:inherit!important;
+  stroke:currentColor!important;
+}
+:root[data-theme="light"] .cp-app[data-theme="light"] .cp-home-app .cp-brique-shortcut{
+  background:linear-gradient(135deg,#ffffff,#f7fbff)!important;
+  border:1px solid #d9e5f0!important;
+  color:#0d3155!important;
+}
+:root[data-theme="light"] .cp-app[data-theme="light"] .cp-home-app .cp-brique-shortcut-icon{
+  background:#e5f1fd!important;
+  color:#255f96!important;
+  border-color:#c9ddf0!important;
+}
+:root[data-theme="light"] .cp-app[data-theme="light"] .cp-home-app .cp-brique-shortcut>svg{
+  color:#255f96!important;
+}
+:root[data-theme="light"] .cp-app[data-theme="light"] .cp-home-app .cp-app-section-head button{
+  color:#1c598f!important;
+  opacity:1!important;
+}
+:root[data-theme="light"] .cp-app[data-theme="light"] .cp-home-app .cp-app-section-head button:hover{
+  color:#0d3155!important;
+  text-decoration:underline;
+  text-underline-offset:3px;
+}
+
+/* Dark mode: no white surface paired with pale-on-white or
+   dark-on-dark labels; card foregrounds follow their actual backgrounds. */
+:root[data-theme="dark"] .cp-app[data-theme="dark"] .cp-home-app .cp-v3-sim-shortcut{
+  background:linear-gradient(120deg,#1b3d60,#102b47)!important;
+  color:#f5faff!important;
+  border:1px solid #426b92!important;
+}
+:root[data-theme="dark"] .cp-app[data-theme="dark"] .cp-home-app .cp-v3-sim-shortcut strong,
+:root[data-theme="dark"] .cp-app[data-theme="dark"] .cp-home-app .cp-opp-home-copy b{
+  color:#f5faff!important;
+}
+:root[data-theme="dark"] .cp-app[data-theme="dark"] .cp-home-app .cp-v3-sim-shortcut small,
+:root[data-theme="dark"] .cp-app[data-theme="dark"] .cp-home-app .cp-opp-home-copy small{
+  color:#b9ddff!important;
+}
+:root[data-theme="dark"] .cp-app[data-theme="dark"] .cp-home-app .cp-v3-sim-shortcut em,
+:root[data-theme="dark"] .cp-app[data-theme="dark"] .cp-home-app .cp-opp-home-copy em{
+  color:#d5e7f9!important;
+}
+:root[data-theme="dark"] .cp-app[data-theme="dark"] .cp-home-app .cp-v3-sim-shortcut-icon{
+  color:#d5eaff!important;
+  background:rgba(158,206,251,.16)!important;
+  border:1px solid rgba(187,222,255,.2)!important;
+}
+:root[data-theme="dark"] .cp-app[data-theme="dark"] .cp-home-app .cp-v3-sim-shortcut-icon svg{
+  color:inherit!important;
+  stroke:currentColor!important;
+}
+:root[data-theme="dark"] .cp-app[data-theme="dark"] .cp-home-app .cp-v3-sim-shortcut>svg{
+  color:#d5eaff!important;
+}
+:root[data-theme="dark"] .cp-app[data-theme="dark"] .cp-home-app .cp-opp-home-link{
+  background:linear-gradient(125deg,#1b4975,#102e52)!important;
+  border-color:#426b92!important;
+}
+:root[data-theme="dark"] .cp-app[data-theme="dark"] .cp-home-app .cp-opp-home-icon,
+:root[data-theme="dark"] .cp-app[data-theme="dark"] .cp-home-app .cp-opp-home-link>svg{
+  color:#c3e1ff!important;
+}
+:root[data-theme="dark"] .cp-app[data-theme="dark"] .cp-home-app .cp-quick-app button b,
+:root[data-theme="dark"] .cp-app[data-theme="dark"] .cp-home-app .cp-v3-insights strong,
+:root[data-theme="dark"] .cp-app[data-theme="dark"] .cp-home-app .cp-smart-card h2,
+:root[data-theme="dark"] .cp-app[data-theme="dark"] .cp-home-app .cp-brique-shortcut b{
+  color:#f3f8ff!important;
+}
+:root[data-theme="dark"] .cp-app[data-theme="dark"] .cp-home-app .cp-quick-app button small,
+:root[data-theme="dark"] .cp-app[data-theme="dark"] .cp-home-app .cp-v3-insights em,
+:root[data-theme="dark"] .cp-app[data-theme="dark"] .cp-home-app .cp-v3-insights small,
+:root[data-theme="dark"] .cp-app[data-theme="dark"] .cp-home-app .cp-smart-card p,
+:root[data-theme="dark"] .cp-app[data-theme="dark"] .cp-home-app .cp-brique-shortcut p{
+  color:#c0d4e9!important;
+}
+:root[data-theme="dark"] .cp-app[data-theme="dark"] .cp-home-app .cp-brique-shortcut{
+  background:#182e46!important;
+  border-color:#385472!important;
+}
+:root[data-theme="dark"] .cp-app[data-theme="dark"] .cp-home-app .cp-smart-card>button,
+:root[data-theme="dark"] .cp-app[data-theme="dark"] .cp-home-app .cp-app-section-head button{
+  color:#b9ddff!important;
+}
+@media (prefers-reduced-motion:reduce){
+ :root[data-theme] .cp-app[data-theme] .cp-home-app .cp-v3-sim-shortcut,
+ :root[data-theme] .cp-app[data-theme] .cp-home-app .cp-opp-home-link{
+   transition:none!important;
+ }
+}
