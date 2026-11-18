@@ -491,7 +491,7 @@ function ProductCard({product,data,calc,onClick}:{product:Product;data:Data;calc
           {status&&<span className="cp-vision-status">{status}</span>}
         </div>
         <h3>{product.name}</h3>
-        <p>{product.acquisition_type==='owned'?'Produto próprio':product.category||'Produto'}</p>
+        <p>{product.source?.startsWith('Troca por ')?'Recebido · '+product.source:product.acquisition_type==='owned'?'Produto próprio':product.category||'Produto'}</p>
         {product.inventory_mode==='stock'?<span className="cp-vision-stock-count"><Package size={14}/> Estoque: <b>{product.quantity_available} un.</b></span>:<span className="cp-vision-stock-count cp-vision-single-count"><Tag size={14}/>{isSold?'Item vendido':'Peça disponível'}</span>}
       </div>
       <span className="cp-vision-dots" aria-hidden="true">•••</span>
@@ -549,24 +549,25 @@ function SalesPage({data,calc,onSale,onOpenProduct}:{data:Data;calc:Metrics;onSa
   const todayTotal=todaySales.reduce((sum,s)=>sum+calc.saleStats(s).revenue,0)
   const ticket=completed.length?completed.reduce((sum,s)=>sum+calc.saleStats(s).revenue,0)/completed.length:0
   const monthSales=completed.filter(s=>s.sale_date.startsWith(today.slice(0,7)))
+  const includesTrades=data.tradeIns.some(trade=>trade.trade_date.startsWith(today.slice(0,7)))
   const chart=recentDailyValues(monthSales.map(s=>({date:s.sale_date,amount:calc.saleStats(s).revenue})),15,true,0)
   const filtered=data.sales.filter(s=>period==='all'||period==='today'&&s.sale_date===today||period==='week'&&s.sale_date>=addDays(today,-6)||period==='month'&&s.sale_date.startsWith(today.slice(0,7))).sort((a,b)=>b.sale_date.localeCompare(a.sale_date)||b.created_at.localeCompare(a.created_at))
   return <div className="cp-page cp-vision-sales-page">
     <PageTitle eyebrow={new Date().toLocaleDateString('pt-BR',{weekday:'long',day:'numeric',month:'short'})} title="Vendas" text="Acompanhe o desempenho da sua operação." action={<button className="cp-primary cp-small" onClick={onSale}><Plus size={18}/> Nova venda</button>}/>
     <section className="cp-vision-sales-hero">
-      <div className="cp-vision-sales-hero-info"><span><BarChart3 size={21}/> Desempenho de vendas</span><small>Acumulado de vendas no mês</small><strong>{money.format(calc.monthRevenue)}</strong><em>{calc.monthOrders} pedido(s) fechado(s) no mês</em></div>
+      <div className="cp-vision-sales-hero-info"><span><BarChart3 size={21}/> Desempenho de vendas</span><small>{includesTrades?'Vendas e trocas no mês · valor negociado':'Acumulado de vendas no mês'}</small><strong>{money.format(calc.monthRevenue)}</strong><em>{calc.monthOrders} pedido(s) fechado(s) no mês</em></div>
       <PremiumAreaChart values={chart.values} labels={chart.labels} variant="dark"/>
     </section>
     <section className="cp-vision-sales-stats">
       <div><span className="cp-vision-stat-icon"><Clock3/></span><small>Hoje</small><strong>{money.format(todayTotal)}</strong><em>{todaySales.length} venda(s)</em></div>
-      <div><span className="cp-vision-stat-icon"><BarChart3/></span><small>No mês</small><strong>{money.format(calc.monthRevenue)}</strong><em>Faturamento real</em></div>
+      <div><span className="cp-vision-stat-icon"><BarChart3/></span><small>No mês</small><strong>{money.format(calc.monthRevenue)}</strong><em>{includesTrades?'Inclui bens recebidos em trocas':'Faturamento real'}</em></div>
       <div><span className="cp-vision-stat-icon"><Tag/></span><small>Ticket médio</small><strong>{money.format(ticket)}</strong><em>Por venda concluída</em></div>
       <div><span className="cp-vision-stat-icon" data-premium-icon={calc.monthOrders>0?"verified":undefined}><ShoppingBag/></span><small>Pedidos fechados</small><strong>{number.format(calc.monthOrders)}</strong><em>Neste mês</em></div>
     </section>
     <div className="cp-vision-sales-filters cp-filter-tabs" role="group" aria-label="Período das vendas">
       {([['all','Todas'],['today','Hoje'],['week','Semana'],['month','Mês']] as const).map(([key,label])=><button key={key} className={period===key?'active':''} onClick={()=>setPeriod(key)}>{label}</button>)}
     </div>
-    <div className="cp-section-head cp-vision-list-heading"><div><h2>Últimas vendas</h2></div><span>{filtered.length} registro(s)</span></div>
+    <div className="cp-section-head cp-vision-list-heading"><div><h2>Vendas e trocas</h2></div><span>{filtered.length} registro(s)</span></div>
     {filtered.length?<div className="cp-sale-list cp-vision-sale-list">{filtered.map(sale=>{
       const stats=calc.saleStats(sale)
       const items=data.grouped.itemsBySale.get(sale.id)||[]
@@ -574,12 +575,14 @@ function SalesPage({data,calc,onSale,onOpenProduct}:{data:Data;calc:Metrics;onSa
       const product=items[0]?calc.productMap.get(items[0].product_id):undefined
       const photo=product?(data.grouped.photosByProduct.get(product.id)||[])[0]?.signed_url:null
       const customer=sale.customer_id?data.grouped.customerById.get(sale.customer_id):null
-      const status=sale.status==='cancelled'?'Cancelada':sale.payment_mode==='receivable'?'A receber':'Paga'
+      const trade=data.grouped.tradeBySale.get(sale.id)
+      const received=trade?calc.productMap.get(trade.incoming_product_id):null
+      const status=sale.status==='cancelled'?'Cancelada':trade?'Concluída':sale.payment_mode==='receivable'?'A receber':'Paga'
       return <button type="button" key={sale.id} className="cp-sale-row cp-vision-sale-row" onClick={()=>product&&onOpenProduct(product)}>
         <span className="cp-sale-thumb">{photo?<img src={photo} alt=""/>:<ReceiptText/>}</span>
-        <div className="cp-sale-main"><strong>{product?.name||'Venda'}{items.length>1?' + '+(items.length-1)+' item(ns)':''}</strong><span>{customer?.name||quantity+' un. vendida(s)'}</span><span>{new Date(sale.sale_date+'T12:00:00').toLocaleDateString('pt-BR')}</span></div>
-        <div className="cp-vision-sale-badges"><span>{paymentLabel(sale.payment_method)}</span><span className={sale.status==='cancelled'?'is-cancelled':sale.payment_mode==='receivable'?'is-receivable':'is-paid'}>{status}</span></div>
-        <div className="cp-sale-money"><b>{money.format(stats.revenue)}</b><span className={stats.profit>=0?'positive':'negative'}>{money.format(stats.profit)} lucro</span></div>
+        <div className="cp-sale-main"><strong>{trade?'Troca: '+(product?.name||'Produto')+' por '+(received?.name||'item recebido'):product?.name||'Venda'}{!trade&&items.length>1?' + '+(items.length-1)+' item(ns)':''}</strong><span>{trade?(trade.cash_direction==='received'?'Volta recebida: '+money.format(trade.cash_amount):trade.cash_direction==='paid'?'Volta paga: '+money.format(trade.cash_amount):'Sem volta em dinheiro'):customer?.name||quantity+' un. vendida(s)'}</span><span>{new Date(sale.sale_date+'T12:00:00').toLocaleDateString('pt-BR')}</span></div>
+        <div className="cp-vision-sale-badges"><span>{trade?'Troca':paymentLabel(sale.payment_method)}</span><span className={sale.status==='cancelled'?'is-cancelled':sale.payment_mode==='receivable'?'is-receivable':'is-paid'}>{status}</span></div>
+        <div className="cp-sale-money"><b>{money.format(stats.revenue)}</b><span className={stats.profit>=0?'positive':'negative'}>{trade?'Valor negociado':money.format(stats.profit)+' lucro'}</span></div>
         <ChevronRight className="cp-vision-row-chevron" size={17}/>
       </button>
     })}</div>:<Empty icon={<ReceiptText/>} title="Nenhuma venda neste período" text="Os registros aparecerão aqui conforme o filtro selecionado." action="Registrar venda" onAction={onSale}/>}
@@ -1100,7 +1103,7 @@ function ProductDetail({product,data,calc,readOnly,onClose,onSale,onExpense,onSa
   }
 
   return <ModalShell onClose={onClose}>
-    <div className="cp-detail-hero"><div className="cp-detail-photo">{photos[0]?.signed_url?<img src={photos[0].signed_url} alt=""/>:<Package/>}</div><div><span className="cp-eyebrow">{product.acquisition_type==='owned'?'PRODUTO PRÓPRIO':product.category||'PRODUTO'}</span><h2>{name}</h2><p>{product.quantity_available===0?'Produto vendido':product.inventory_mode==='single'?'Item único · disponível':product.quantity_available+' de '+product.quantity_initial+' unidade(s) disponíveis'}</p></div></div>
+    <div className="cp-detail-hero"><div className="cp-detail-photo">{photos[0]?.signed_url?<img src={photos[0].signed_url} alt=""/>:<Package/>}</div><div><span className="cp-eyebrow">{product.source?.startsWith('Troca por ')?'RECEBIDO EM TROCA':product.acquisition_type==='owned'?'PRODUTO PRÓPRIO':product.category||'PRODUTO'}</span><h2>{name}</h2><p>{product.quantity_available===0?'Produto vendido':product.inventory_mode==='single'?'Item único · disponível':product.quantity_available+' de '+product.quantity_initial+' unidade(s) disponíveis'}</p></div></div>
 
     <section className="cp-detail-section">
       <div className="cp-section-head"><div><span>FOTOS</span><h2>{photos.length?photos.length+' foto(s) do produto':'Adicione fotos desse produto'}</h2></div>{readOnly?<button className="cp-detail-add-photo" onClick={onBlocked}><ImagePlus size={16}/> Adicionar</button>:<label className="cp-detail-add-photo"><ImagePlus size={16}/> Adicionar<input type="file" accept="image/*" multiple onChange={e=>{const files=Array.from(e.target.files||[]);void addPhotos(files);e.currentTarget.value=''}}/></label>}</div>
