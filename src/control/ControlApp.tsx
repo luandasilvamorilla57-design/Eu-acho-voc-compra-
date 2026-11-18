@@ -25,6 +25,7 @@ import './next-premium.css'
 import './reference-light.css'
 import './selection-navy.css'
 import './mobile-refinement.css'
+import './app-native-refinement.css'
 import type {CashEntry,ControlView,Product,ProductPhoto,Sale} from './types'
 
 type Data=ReturnType<typeof useControlData>
