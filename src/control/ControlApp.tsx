@@ -743,6 +743,7 @@ function SaleModal({data,initialProduct,onClose,onDone}:{data:Data;initialProduc
   const first=initialProduct&&initialProduct.quantity_available>0?initialProduct:available[0]
   const [productId,setProductId]=useState(first?.id||'')
   const [qty,setQty]=useState('1')
+  const [transactionType,setTransactionType]=useState<'sale'|'trade'>('sale')
   const [price,setPrice]=useState(first?.listed_price?String(first.listed_price):'')
   const [date,setDate]=useState(localDate())
   const [payment,setPayment]=useState('pix')
@@ -789,11 +790,13 @@ function SaleModal({data,initialProduct,onClose,onDone}:{data:Data;initialProduc
     }catch(err:any){setError(err?.message||'Não foi possível registrar a venda.')}
   }
 
+  if(transactionType==='trade'&&product?.inventory_mode==='single')return <TradeModal data={data} initialProduct={product} onClose={onClose} onBack={()=>setTransactionType('sale')} onDone={onDone}/>
+
   return <ModalShell onClose={onClose}>
     <ModalHeader eyebrow="REGISTRAR VENDA" title="O dinheiro entrou agora ou vai entrar depois?" text="Essa escolha faz o caixa ficar real. Venda a prazo entra em A receber, não no saldo livre."/>
     {available.length?<div className="cp-form-grid">
-      <Field label="Produto vendido" full><select value={productId} onChange={e=>{setProductId(e.target.value);const p=available.find(x=>x.id===e.target.value);setPrice(p?.listed_price?String(p.listed_price):'')}}>{available.map(p=><option key={p.id} value={p.id}>{p.name+' · '+p.quantity_available+' disp.'}</option>)}</select></Field>
-      <Field label="Quantidade"><input type="number" min="1" max={product?.quantity_available||1} value={qty} onChange={e=>setQty(e.target.value)}/></Field>
+      <Field label="Produto vendido" full><select value={productId} onChange={e=>{setProductId(e.target.value);setTransactionType('sale');const p=available.find(x=>x.id===e.target.value);setPrice(p?.listed_price?String(p.listed_price):'')}}>{available.map(p=><option key={p.id} value={p.id}>{p.name+' · '+p.quantity_available+' disp.'}</option>)}</select></Field>
+      {product?.inventory_mode==='single'&&<div className="cp-field cp-field--full"><span>Como será a negociação?</span><div className="cp-trade-type-switch"><button type="button" className="active" onClick={()=>setTransactionType('sale')}><Banknote size={18}/><b>Venda</b></button><button type="button" onClick={()=>setTransactionType('trade')}><RefreshCw size={18}/><b>Troca</b></button></div></div>}<Field label="Quantidade"><input type="number" min="1" max={product?.quantity_available||1} value={qty} onChange={e=>setQty(e.target.value)}/></Field>
       <Field label="Valor por unidade"><MoneyInput value={price} setValue={setPrice} placeholder="0,00"/></Field>
       <Field label="Data da venda"><input type="date" value={date} onChange={e=>setDate(e.target.value)}/></Field>
       <div className="cp-field cp-field--full"><span>Como será recebido?</span><div className="cp-sale-mode"><button type="button" className={paymentMode==='paid'?'active':''} onClick={()=>setPaymentMode('paid')}><Banknote/><div><b>Recebi agora</b><small>entra no caixa hoje</small></div></button><button type="button" className={paymentMode==='receivable'?'active':''} onClick={()=>setPaymentMode('receivable')}><Clock3/><div><b>Venda a prazo</b><small>cria parcelas a receber</small></div></button></div></div>
