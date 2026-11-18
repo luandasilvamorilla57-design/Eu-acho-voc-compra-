@@ -1146,47 +1146,58 @@
 }
 
 
-/* VENDIDO — selo transparente sobre a própria fotografia.
-   Não ocupa uma linha nova, preserva a altura e alinhamento dos cards. */
-:root[data-theme] .cp-app[data-theme] .cp-vision-stock-grid .cp-vision-product--sold .cp-vision-product-image{
-  position:relative!important;
-  isolation:isolate;
+/* VENDIDO — selo horizontal na coluna da direita, acima do nome.
+   Não cobre a fotografia e não cria uma faixa de largura inteira no card. */
+:root[data-theme] .cp-app[data-theme] .cp-vision-stock-grid .cp-vision-product--sold .cp-vision-product-info{
+  display:flex!important;
+  flex-direction:column!important;
+  align-items:flex-start!important;
+  min-width:0!important;
 }
-:root[data-theme] .cp-app[data-theme] .cp-vision-stock-grid .cp-vision-product-image .cp-vision-sold-ribbon{
-  position:absolute!important;
-  z-index:2!important;
-  top:5px!important;
-  left:3px!important;
-  width:calc(100% - 6px)!important;
+:root[data-theme] .cp-app[data-theme] .cp-vision-stock-grid .cp-vision-product--sold .cp-vision-product-info .cp-vision-sold-ribbon{
+  display:flex!important;
+  align-items:center!important;
+  justify-content:flex-start!important;
+  position:static!important;
+  z-index:auto!important;
+  width:min(125px,100%)!important;
   height:auto!important;
-  max-height:none!important;
+  min-height:30px!important;
+  max-height:40px!important;
   padding:0!important;
-  margin:0!important;
-  min-height:0!important;
-  display:block!important;
-  background:none!important;
+  margin:0 0 5px!important;
+  background:transparent!important;
+  border:0!important;
   pointer-events:none!important;
-  filter:drop-shadow(0 2px 3px rgba(42,17,14,.25));
+  overflow:visible!important;
+  transform:none!important;
+  filter:none!important;
 }
-:root[data-theme] .cp-app[data-theme] .cp-vision-stock-grid .cp-vision-product-image .cp-vision-sold-ribbon img{
+:root[data-theme] .cp-app[data-theme] .cp-vision-stock-grid .cp-vision-product--sold .cp-vision-product-info .cp-vision-sold-ribbon img{
   display:block!important;
   position:static!important;
   width:100%!important;
   height:auto!important;
   max-width:100%!important;
-  max-height:none!important;
+  max-height:40px!important;
   aspect-ratio:auto!important;
-  opacity:1!important;
   object-fit:contain!important;
-  filter:none!important;
+  object-position:left center!important;
+  opacity:1!important;
+  transform:none!important;
+  filter:drop-shadow(0 2px 3px rgba(45,9,14,.16))!important;
 }
 :root[data-theme] .cp-app[data-theme] .cp-vision-product--sold .cp-vision-product-flags:empty{
   display:none!important;
 }
 @media(max-width:640px){
-  :root[data-theme] .cp-app[data-theme] .cp-vision-stock-grid .cp-vision-product-image .cp-vision-sold-ribbon{
-    top:4px!important;
-    left:2px!important;
-    width:calc(100% - 4px)!important;
+  :root[data-theme] .cp-app[data-theme] .cp-vision-stock-grid .cp-vision-product--sold .cp-vision-product-info .cp-vision-sold-ribbon{
+    width:min(118px,100%)!important;
+    min-height:28px!important;
+    max-height:37px!important;
+    margin-bottom:5px!important;
+  }
+  :root[data-theme] .cp-app[data-theme] .cp-vision-stock-grid .cp-vision-product--sold .cp-vision-product-info .cp-vision-sold-ribbon img{
+    max-height:37px!important;
   }
 }
