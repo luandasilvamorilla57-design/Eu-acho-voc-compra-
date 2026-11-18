@@ -112,10 +112,11 @@ export function useControlData(userId:string){
         if(file.size>10*1024*1024)throw new Error('Cada foto pode ter no máximo 10 MB.')
       }
 
-      const rpc=await db.rpc('control_create_product_v3',{
+      const rpc=await db.rpc('control_create_product_v4',{ 
         p_name:input.name,
         p_purchase_unit_cost:input.purchaseUnitCost,
         p_quantity:input.quantity,
+        p_inventory_mode:input.inventoryMode,
         p_purchase_date:input.purchaseDate,
         p_category:input.category||null,
         p_source:input.source||null,
@@ -254,7 +255,7 @@ export function useControlData(userId:string){
     setBusy(true);setError(null)
     try{
       const allowed:any={}
-      for(const key of ['name','category','item_type','category_group','category_source','brand','model','condition','sku','source','supplier_id','seller_name','listed_price','minimum_price','status','notes','acquisition_type','cost_basis_known','listing_status','listing_channels','listing_started_at','listing_last_checkin_at','listing_next_checkin_at','listing_refresh_count']){
+      for(const key of ['name','category','inventory_mode','item_type','category_group','category_source','brand','model','condition','sku','source','supplier_id','seller_name','listed_price','minimum_price','status','notes','acquisition_type','cost_basis_known','listing_status','listing_channels','listing_started_at','listing_last_checkin_at','listing_next_checkin_at','listing_refresh_count']){
         if(key in patch)allowed[key]=(patch as any)[key]
       }
       const result=await db.from('control_products').update(allowed).eq('id',productId).eq('user_id',userId).select('*').single()
