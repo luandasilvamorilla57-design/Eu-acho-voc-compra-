@@ -3,7 +3,7 @@ import {supabase} from '../lib/supabase'
 import type {
   AddExpenseInput,CashEntry,ControlSettings,Customer,Goal,GoalInput,MonthClosure,
   ListingCheckin,NewProductInput,Product,ProductExpense,ProductPhoto,Receivable,ReceivableInstallment,
-  RegisterSaleInput,Sale,SaleItem,Supplier
+  RegisterSaleInput,RegisterTradeInput,Sale,SaleItem,Supplier,TradeIn
 } from './types'
 
 const db=supabase as any
@@ -24,6 +24,7 @@ export function useControlData(userId:string){
   const [expenses,setExpenses]=useState<ProductExpense[]>([])
   const [sales,setSales]=useState<Sale[]>([])
   const [saleItems,setSaleItems]=useState<SaleItem[]>([])
+  const [tradeIns,setTradeIns]=useState<TradeIn[]>([])
   const [cashEntries,setCashEntries]=useState<CashEntry[]>([])
   const [customers,setCustomers]=useState<Customer[]>([])
   const [suppliers,setSuppliers]=useState<Supplier[]>([])
@@ -56,7 +57,7 @@ export function useControlData(userId:string){
       if(adminResult.error)throw adminResult.error
       setIsAdmin(Boolean(adminResult.data?.enabled&&adminResult.data?.role==='super_admin'))
 
-      const [p,ph,e,s,si,c,cu,su,r,i,g,cl,lc]=await Promise.all([
+      const [p,ph,e,s,si,c,cu,rTrade,su,r,i,g,cl,lc]=await Promise.all([
         db.from('control_products').select('*').eq('user_id',userId).order('created_at',{ascending:false}),
         db.from('control_product_photos').select('*').eq('user_id',userId).order('position',{ascending:true}),
         db.from('control_product_expenses').select('*').eq('user_id',userId).order('occurred_at',{ascending:false}),
@@ -64,6 +65,7 @@ export function useControlData(userId:string){
         db.from('control_sale_items').select('*').eq('user_id',userId).order('created_at',{ascending:false}),
         db.from('control_cash_entries').select('*').eq('user_id',userId).order('occurred_at',{ascending:false}).order('created_at',{ascending:false}),
         db.from('control_customers').select('*').eq('user_id',userId).order('name',{ascending:true}),
+        db.from('control_trade_ins').select('*').eq('user_id',userId).order('trade_date',{ascending:false}),
         db.from('control_suppliers').select('*').eq('user_id',userId).order('name',{ascending:true}),
         db.from('control_receivables').select('*').eq('user_id',userId).order('due_date',{ascending:true}),
         db.from('control_receivable_installments').select('*').eq('user_id',userId).order('due_date',{ascending:true}),
@@ -71,7 +73,7 @@ export function useControlData(userId:string){
         db.from('control_month_closures').select('*').eq('user_id',userId).order('period_month',{ascending:false}),
         db.from('control_listing_checkins').select('*').eq('user_id',userId).order('checkin_date',{ascending:false}).order('created_at',{ascending:false})
       ])
-      for(const result of [p,ph,e,s,si,c,cu,su,r,i,g,cl,lc])if(result.error)throw result.error
+      for(const result of [p,ph,e,s,si,c,cu,rTrade,su,r,i,g,cl,lc])if(result.error)throw result.error
 
       const rawPhotos=(ph.data||[]) as ProductPhoto[]
       const signed=await Promise.all(rawPhotos.map(async photo=>{
@@ -84,6 +86,7 @@ export function useControlData(userId:string){
       setExpenses(asNumber((e.data||[]) as ProductExpense[],['amount']))
       setSales((s.data||[]) as Sale[])
       setSaleItems(asNumber((si.data||[]) as SaleItem[],['unit_price','unit_cost_snapshot']))
+      setTradeIns(asNumber((rTrade.data||[]) as TradeIn[],['incoming_value','cash_amount']))
       setCashEntries(asNumber((c.data||[]) as CashEntry[],['amount']))
       setCustomers((cu.data||[]) as Customer[])
       setSuppliers((su.data||[]) as Supplier[])
@@ -214,6 +217,61 @@ export function useControlData(userId:string){
       return String(result.data)
     }finally{setBusy(false)}
   },[load])
+
+  const registerTrade=useCallback(async(input:RegisterTradeInput,files:File[])=>{
+    setBusy(true);setError(null)
+    const uploadedPaths:string[]=[]
+    let rpcStarted=false
+    try{
+      if(!files.length||files.length>5)throw new Error('Adicione de 1 a 5 fotos do item recebido.')
+      for(const file of files){
+        if(!file.type.startsWith('image/'))throw new Error('Selecione somente imagens.')
+        if(file.size>10*1024*1024)throw new Error('Cada foto pode ter no máximo 10 MB.')
+        const ext=(file.name.split('.').pop()||'jpg').toLowerCase()
+        const safeExt=['jpg','jpeg','png','webp','heic','heif'].includes(ext)?ext:'jpg'
+        const path=[userId,input.incomingProductId,crypto.randomUUID()+'.'+safeExt].join('/')
+        const uploaded=await supabase.storage.from(PHOTO_BUCKET).upload(path,file,{cacheControl:'3600',upsert:false})
+        if(uploaded.error)throw uploaded.error
+        uploadedPaths.push(path)
+      }
+      rpcStarted=true
+      const result=await db.rpc('control_register_trade_v1',{
+        p_request_id:input.requestId,
+        p_outgoing_product_id:input.outgoingProductId,
+        p_incoming_product_id:input.incomingProductId,
+        p_incoming_name:input.incomingName,
+        p_incoming_category:input.incomingCategory||null,
+        p_incoming_value:input.incomingValue,
+        p_cash_direction:input.cashDirection,
+        p_cash_amount:input.cashAmount,
+        p_trade_date:input.tradeDate,
+        p_payment_method:input.paymentMethod,
+        p_incoming_listed_price:input.incomingListedPrice,
+        p_customer_id:input.customerId||null,
+        p_notes:input.notes||null,
+        p_photo_paths:uploadedPaths
+      })
+      if(result.error)throw result.error
+      await load()
+      return result.data
+    }catch(err){
+      // An interrupted response may follow a committed transaction.
+      // Check its idempotency key before deleting uploaded photos.
+      if(rpcStarted){
+        const confirmed=await db.from('control_trade_ins')
+          .select('id,sale_id,incoming_product_id')
+          .eq('user_id',userId).eq('request_id',input.requestId).maybeSingle()
+        if(!confirmed.error&&confirmed.data){
+          await load()
+          return confirmed.data
+        }
+      }
+      if(uploadedPaths.length)await supabase.storage.from(PHOTO_BUCKET).remove(uploadedPaths)
+      throw err
+    }finally{
+      setBusy(false)
+    }
+  },[load,userId])
 
   const addExpense=useCallback(async(input:AddExpenseInput)=>{
     setBusy(true);setError(null)
@@ -445,6 +503,9 @@ export function useControlData(userId:string){
     for(const photo of photos)photosByProduct.set(photo.product_id,[...(photosByProduct.get(photo.product_id)||[]),photo])
     const expensesByProduct=new Map<string,ProductExpense[]>()
     for(const expense of expenses)expensesByProduct.set(expense.product_id,[...(expensesByProduct.get(expense.product_id)||[]),expense])
+    const tradeBySale=new Map<string,TradeIn>()
+    const tradeByIncomingProduct=new Map<string,TradeIn>()
+    for(const trade of tradeIns){tradeBySale.set(trade.sale_id,trade);tradeByIncomingProduct.set(trade.incoming_product_id,trade)}
     const itemsBySale=new Map<string,SaleItem[]>()
     for(const item of saleItems)itemsBySale.set(item.sale_id,[...(itemsBySale.get(item.sale_id)||[]),item])
     const installmentsByReceivable=new Map<string,ReceivableInstallment[]>()
@@ -454,13 +515,13 @@ export function useControlData(userId:string){
     const saleById=new Map(sales.map(item=>[item.id,item]))
     const listingCheckinsByProduct=new Map<string,ListingCheckin[]>()
     for(const item of listingCheckins)listingCheckinsByProduct.set(item.product_id,[...(listingCheckinsByProduct.get(item.product_id)||[]),item])
-    return{photosByProduct,expensesByProduct,itemsBySale,installmentsByReceivable,customerById,supplierById,saleById,listingCheckinsByProduct}
-  },[customers,expenses,installments,listingCheckins,photos,saleItems,sales,suppliers])
+    return{photosByProduct,expensesByProduct,itemsBySale,tradeBySale,tradeByIncomingProduct,installmentsByReceivable,customerById,supplierById,saleById,listingCheckinsByProduct}
+  },[customers,expenses,installments,listingCheckins,photos,saleItems,sales,suppliers,tradeIns])
 
   return{
-    settings,products,photos,expenses,sales,saleItems,cashEntries,customers,suppliers,
+    settings,products,photos,expenses,sales,saleItems,tradeIns,cashEntries,customers,suppliers,
     receivables,installments,goals,closures,listingCheckins,grouped,isAdmin,
-    loading,busy,error,load,createProduct,registerSale,addExpense,addCashEntry,updateSettings,
+    loading,busy,error,load,createProduct,registerSale,registerTrade,addExpense,addCashEntry,updateSettings,
     updateProduct,addProductPhotos,downloadProductPhoto,deleteProductPhoto,deleteProduct,createCustomer,updateCustomer,createSupplier,updateSupplier,payInstallment,
     recordListingCheckin,saveGoal,closeMonth
   }
