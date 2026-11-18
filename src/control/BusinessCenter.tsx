@@ -63,19 +63,24 @@ export function ManagePage({data,onView,onBack}:{data:Data;onView:(v:ControlView
     {view:'backup' as ControlView,icon:<FileArchive/>,name:'Backup',desc:'Leve seus dados com você.',value:'JSON + CSV'},
     {view:'guide' as ControlView,icon:<BookOpenText/>,name:'Guia do Brique',desc:'Compra x venda, testes, fotos e valorização.',value:'Referências práticas'}
   ]
-  return <div className="cp-page cp-business-page">
-    <BackTitle eyebrow="CENTRAL DE GESTÃO" title="O negócio inteiro, sem virar ERP." text="Entre aqui quando quiser entender o que está funcionando e tomar decisões melhores." onBack={onBack}/>
-    <section className="cp-business-strip">
-      <div><span>CAIXA LIVRE</span><strong>{money.format(cashBalance(data))}</strong><small>disponível agora</small></div>
-      <div><span>A RECEBER</span><strong>{money.format(openReceivables(data))}</strong><small>{overdue.length?overdue.length+' parcela(s) atrasada(s)':'nenhum atraso'}</small></div>
-      <div><span>RESULTADO DO MÊS</span><strong className={s.net>=0?'positive':'negative'}>{money.format(s.net)}</strong><small>lucro depois dos gastos gerais</small></div>
+  return <div className="cp-page cp-business-page cp-vision-management">
+    <BackTitle eyebrow="CENTRAL DE GESTÃO" title="Central de gestão" text="Ferramentas avançadas para controlar e crescer sua operação." onBack={onBack}/>
+    <section className="cp-business-strip cp-vision-business-strip">
+      <div><span>CAIXA DISPONÍVEL</span><strong>{money.format(cashBalance(data))}</strong><small>Dinheiro livre</small></div>
+      <div><span>A RECEBER</span><strong>{money.format(openReceivables(data))}</strong><small>{overdue.length?overdue.length+' parcela(s) atrasada(s)':'Valores pendentes'}</small></div>
+      <div><span>RESULTADO DO MÊS</span><strong className={s.net>=0?'positive':'negative'}>{money.format(s.net)}</strong><small>Após gastos gerais</small></div>
     </section>
-    <div className="cp-business-list">{tools.map((tool,i)=><button key={tool.view} onClick={()=>onView(tool.view)} className="cp-business-tool">
+    <button type="button" className="cp-vision-manage-alert" onClick={()=>onView('receivables')}>
+      <span className="cp-vision-manage-alert-icon"><AlertTriangle/></span>
+      <div><small>ATENÇÃO DA OPERAÇÃO</small><strong>{overdue.length?'Você tem '+overdue.length+' parcela(s) atrasada(s)':'Seus recebíveis estão em dia'}</strong><p>{overdue.length?'Confira os clientes e acompanhe os vencimentos.':'Acompanhe os próximos pagamentos e mantenha sua operação organizada.'}</p><em>Ver recebíveis <ChevronRight size={15}/></em></div>
+      <ChevronRight className="cp-vision-manage-alert-arrow"/>
+    </button>
+    <div className="cp-vision-management-heading"><h2>Ferramentas de gestão</h2><span>{tools.length} módulos disponíveis</span></div>
+    <div className="cp-business-list cp-vision-management-grid">{tools.map((tool,i)=><button key={tool.view} onClick={()=>onView(tool.view)} className="cp-business-tool">
       <span className="cp-business-index">{String(i+1).padStart(2,'0')}</span>
       <span className="cp-business-icon">{tool.icon}</span>
-      <div><b>{tool.name}</b><p>{tool.desc}</p></div>
-      <div className="cp-business-value"><strong>{tool.value}</strong>{tool.alert&&<small className="negative">{tool.alert}</small>}</div>
-      <ChevronRight/>
+      <div className="cp-vision-business-copy"><b>{tool.name}</b><p>{tool.desc}</p><small>{tool.value}{tool.alert?' · '+tool.alert:''}</small></div>
+      <ChevronRight className="cp-vision-business-chevron"/>
     </button>)}</div>
   </div>
 }
