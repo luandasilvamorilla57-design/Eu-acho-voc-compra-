@@ -20,6 +20,7 @@ import {PersonalRankingCard,PersonalRankingPage} from './PersonalRanking'
 import {ProfitSimulatorPage} from './ProfitSimulatorPage'
 import {MonthlyGoalCard} from './MonthlyGoalCard'
 import {FeedbackPrompt} from './FeedbackPrompt'
+import {PremiumAreaChart,recentDailyValues} from './PremiumCharts'
 import './control-home-refinement.css'
 import './next-premium.css'
 import './reference-light.css'
@@ -536,30 +537,46 @@ function StockPage({data,calc,onOpenProduct,onAdd}:{data:Data;calc:Metrics;onOpe
 }
 
 function SalesPage({data,calc,onSale,onOpenProduct}:{data:Data;calc:Metrics;onSale:()=>void;onOpenProduct:(p:Product)=>void}){
-  return <div className="cp-page">
-    <PageTitle eyebrow="VENDAS" title="Venda registrada, lucro entendido." text="Veja quantos pedidos você fechou, quantas unidades realmente vendeu e quanto sobrou de lucro." action={<button className="cp-primary cp-small" onClick={onSale}><Plus size={18}/> Registrar venda</button>}/>
-    <section className="cp-sales-hero cp-sales-hero--four">
-      <div><span>Faturamento este mês</span><strong>{money.format(calc.monthRevenue)}</strong><small>valor total vendido</small></div>
-      <div><span>Lucro real</span><strong className={calc.monthProfit>=0?'positive':'negative'}>{money.format(calc.monthProfit)}</strong><small>depois dos custos</small></div>
-      <div><span>Itens vendidos</span><strong>{calc.monthUnitsSold} un.</strong><small>soma das quantidades</small></div>
-      <div><span>Pedidos fechados</span><strong>{calc.monthOrders}</strong><small>quantidade de vendas</small></div>
+  const [period,setPeriod]=useState<'all'|'today'|'week'|'month'>('all')
+  const today=localDate()
+  const completed=data.sales.filter(s=>s.status==='completed')
+  const todaySales=completed.filter(s=>s.sale_date===today)
+  const todayTotal=todaySales.reduce((sum,s)=>sum+calc.saleStats(s).revenue,0)
+  const ticket=completed.length?completed.reduce((sum,s)=>sum+calc.saleStats(s).revenue,0)/completed.length:0
+  const chart=recentDailyValues(completed.map(s=>({date:s.sale_date,amount:calc.saleStats(s).revenue})),15)
+  const filtered=data.sales.filter(s=>period==='all'||period==='today'&&s.sale_date===today||period==='week'&&s.sale_date>=addDays(today,-6)||period==='month'&&s.sale_date.startsWith(today.slice(0,7)))
+  return <div className="cp-page cp-vision-sales-page">
+    <PageTitle eyebrow="VENDAS" title="Vendas" text="Acompanhe o desempenho da sua operação." action={<button className="cp-primary cp-small" onClick={onSale}><Plus size={18}/> Nova venda</button>}/>
+    <section className="cp-vision-sales-hero">
+      <div className="cp-vision-sales-hero-info"><span><BarChart3 size={21}/> Desempenho de vendas</span><small>Faturamento deste mês</small><strong>{money.format(calc.monthRevenue)}</strong><em>{calc.monthOrders} pedido(s) fechado(s) no mês</em></div>
+      <PremiumAreaChart values={chart.values} labels={chart.labels} variant="dark"/>
     </section>
-    <div className="cp-section-head"><div><span>HISTÓRICO</span><h2>Últimas vendas</h2></div></div>
-    {data.sales.length?<div className="cp-sale-list">{data.sales.map(sale=>{
+    <section className="cp-vision-sales-stats">
+      <div><span className="cp-vision-stat-icon"><Clock3/></span><small>Hoje</small><strong>{money.format(todayTotal)}</strong><em>{todaySales.length} venda(s)</em></div>
+      <div><span className="cp-vision-stat-icon"><BarChart3/></span><small>No mês</small><strong>{money.format(calc.monthRevenue)}</strong><em>Faturamento real</em></div>
+      <div><span className="cp-vision-stat-icon"><Tag/></span><small>Ticket médio</small><strong>{money.format(ticket)}</strong><em>Por venda concluída</em></div>
+      <div><span className="cp-vision-stat-icon"><ShoppingBag/></span><small>Pedidos fechados</small><strong>{number.format(calc.monthOrders)}</strong><em>Neste mês</em></div>
+    </section>
+    <div className="cp-vision-sales-filters cp-filter-tabs" role="group" aria-label="Período das vendas">
+      {([['all','Todas'],['today','Hoje'],['week','Semana'],['month','Mês']] as const).map(([key,label])=><button key={key} className={period===key?'active':''} onClick={()=>setPeriod(key)}>{label}</button>)}
+    </div>
+    <div className="cp-section-head cp-vision-list-heading"><div><h2>Últimas vendas</h2></div><span>{filtered.length} registro(s)</span></div>
+    {filtered.length?<div className="cp-sale-list cp-vision-sale-list">{filtered.map(sale=>{
       const stats=calc.saleStats(sale)
       const items=data.grouped.itemsBySale.get(sale.id)||[]
       const quantity=items.reduce((sum,item)=>sum+item.quantity,0)
       const product=items[0]?calc.productMap.get(items[0].product_id):undefined
       const photo=product?(data.grouped.photosByProduct.get(product.id)||[])[0]?.signed_url:null
-      return <button key={sale.id} className="cp-sale-row" onClick={()=>product&&onOpenProduct(product)}>
+      const customer=sale.customer_id?data.grouped.customerById.get(sale.customer_id):null
+      const status=sale.status==='cancelled'?'Cancelada':sale.payment_mode==='receivable'?'A receber':'Paga'
+      return <button type="button" key={sale.id} className="cp-sale-row cp-vision-sale-row" onClick={()=>product&&onOpenProduct(product)}>
         <span className="cp-sale-thumb">{photo?<img src={photo} alt=""/>:<ReceiptText/>}</span>
-        <div className="cp-sale-main">
-          <strong>{product?.name||'Venda'}</strong>
-          <span>{new Date(sale.sale_date+'T12:00:00').toLocaleDateString('pt-BR')} · {quantity} un. · {paymentLabel(sale.payment_method)}</span>
-        </div>
-        <div className="cp-sale-money"><b>{money.format(stats.revenue)}</b><span className={stats.profit>=0?'positive':'negative'}>{(stats.profit>=0?'+':'')+money.format(stats.profit)} lucro</span></div>
+        <div className="cp-sale-main"><strong>{product?.name||'Venda'}{items.length>1?' + '+(items.length-1)+' item(ns)':''}</strong><span>{customer?.name||quantity+' un. vendida(s)'}</span><span>{new Date(sale.sale_date+'T12:00:00').toLocaleDateString('pt-BR')}</span></div>
+        <div className="cp-vision-sale-badges"><span>{paymentLabel(sale.payment_method)}</span><span className={sale.status==='cancelled'?'is-cancelled':sale.payment_mode==='receivable'?'is-receivable':'is-paid'}>{status}</span></div>
+        <div className="cp-sale-money"><b>{money.format(stats.revenue)}</b><span className={stats.profit>=0?'positive':'negative'}>{money.format(stats.profit)} lucro</span></div>
+        <ChevronRight className="cp-vision-row-chevron" size={17}/>
       </button>
-    })}</div>:<Empty icon={<ReceiptText/>} title="Nenhuma venda registrada" text="Quando fechar uma venda, registre aqui. O produto sai do estoque e o valor entra no caixa." action="Registrar primeira venda" onAction={onSale}/>}
+    })}</div>:<Empty icon={<ReceiptText/>} title="Nenhuma venda neste período" text="Os registros aparecerão aqui conforme o filtro selecionado." action="Registrar venda" onAction={onSale}/>}
   </div>
 }
 
