@@ -5,6 +5,7 @@ import {ErrorBoundary} from './components/ErrorBoundary'
 import {reportClientError} from './lib/errorReporter'
 import './styles.css'
 import './control/trial-banner-refinement.css'
+import './control/vision-app.css'
 
 window.addEventListener('beforeinstallprompt',(event:any)=>{
   event.preventDefault()
