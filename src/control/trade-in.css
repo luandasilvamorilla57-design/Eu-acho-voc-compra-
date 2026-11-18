@@ -1,0 +1,138 @@
+/*
+ * CONTROLE+ · TR0CA INTELIGENTE
+ * Visual complementar: vendas, estoque e faixa VENDIDO seguem intactos.
+ */
+:root[data-theme] .cp-app[data-theme] .cp-trade-type-switch,
+:root[data-theme] .cp-app[data-theme] .cp-trade-cash-options{
+  display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;width:100%;margin-top:6px;
+}
+:root[data-theme] .cp-app[data-theme] .cp-trade-type-switch button{
+  display:flex;align-items:center;justify-content:center;gap:10px;min-height:54px;
+  border:1px solid #dbe7f5;border-radius:15px;padding:12px 14px;
+  background:#f7faff;color:#365876;font-size:14px;font-weight:800;
+}
+:root[data-theme] .cp-app[data-theme] .cp-trade-type-switch button svg{height:21px;width:21px;flex-shrink:0}
+:root[data-theme] .cp-app[data-theme] .cp-trade-type-switch button.active{
+  background:linear-gradient(145deg,#154976,#082e57);color:#fff;border-color:#3169a1;
+  box-shadow:0 8px 19px rgba(14,61,106,.17);
+}
+:root[data-theme] .cp-app[data-theme] .cp-trade-form{
+  row-gap:16px!important;
+}
+:root[data-theme] .cp-app[data-theme] .cp-trade-flow{
+  display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:0 0 20px;
+  color:#5b7189;font-weight:750;font-size:11px;
+}
+:root[data-theme] .cp-app[data-theme] .cp-trade-flow>span:first-child,
+:root[data-theme] .cp-app[data-theme] .cp-trade-flow>span:last-child{
+  display:flex;align-items:center;gap:5px;border-radius:999px;
+  background:#eaf3fd;color:#1b598b;padding:8px 10px;
+}
+:root[data-theme] .cp-app[data-theme] .cp-trade-flow svg{width:16px;height:16px}
+:root[data-theme] .cp-app[data-theme] .cp-trade-section-label{
+  display:flex;grid-column:1/-1;align-items:center;gap:12px;
+  padding:15px;border-radius:16px;color:#fff;
+  background:linear-gradient(115deg,#0b315d,#1e6097);
+}
+:root[data-theme] .cp-app[data-theme] .cp-trade-section-label>svg{
+  width:40px;height:40px;padding:10px;flex:0 0 40px;
+  background:rgba(255,255,255,.14);border-radius:12px;
+}
+:root[data-theme] .cp-app[data-theme] .cp-trade-section-label div{min-width:0}
+:root[data-theme] .cp-app[data-theme] .cp-trade-section-label b{font-size:15px;font-weight:850;display:block}
+:root[data-theme] .cp-app[data-theme] .cp-trade-section-label small{
+  display:block;color:#d8edff;line-height:1.4;font-size:12px;margin-top:3px;
+}
+:root[data-theme] .cp-app[data-theme] .cp-trade-cash-options{
+  grid-template-columns:repeat(3,minmax(0,1fr));
+}
+:root[data-theme] .cp-app[data-theme] .cp-trade-cash-options button{
+  display:flex;align-items:center;justify-content:center;gap:4px;
+  min-height:48px;padding:8px 6px;background:#f6f9fd;color:#3a5877;
+  border:1px solid #dbe7f4;border-radius:12px;font-size:12px;font-weight:800;
+}
+:root[data-theme] .cp-app[data-theme] .cp-trade-cash-options button svg{width:16px;height:16px;flex-shrink:0}
+:root[data-theme] .cp-app[data-theme] .cp-trade-cash-options button.active{
+  color:#fff;border-color:#1c5a93;background:#0c457a;
+  box-shadow:0 7px 16px rgba(14,77,131,.14);
+}
+:root[data-theme] .cp-app[data-theme] .cp-trade-photos{grid-column:1/-1}
+:root[data-theme] .cp-app[data-theme] .cp-trade-photos>span b{color:#c5444a;font-size:11px}
+:root[data-theme] .cp-app[data-theme] .cp-trade-photo-picker{
+  display:flex;align-items:center;gap:13px;position:relative;cursor:pointer;
+  width:100%;min-height:95px;padding:17px;
+  border:1.5px dashed #8dbde6;border-radius:17px;
+  background:linear-gradient(120deg,#f3f9ff,#ebf4ff);
+  color:#124a7f;
+}
+:root[data-theme] .cp-app[data-theme] .cp-trade-photo-picker>svg{
+  width:44px;height:44px;padding:9px;background:#dceefe;border-radius:13px;
+}
+:root[data-theme] .cp-app[data-theme] .cp-trade-photo-picker b{
+  display:block;font-size:14px;line-height:1.25;color:#123a66;
+}
+:root[data-theme] .cp-app[data-theme] .cp-trade-photo-picker small{
+  display:block;font-size:12px;margin-top:5px;color:#5b7490;line-height:1.35;
+}
+:root[data-theme] .cp-app[data-theme] .cp-trade-photo-picker input{
+  position:absolute;inset:0;opacity:0;width:100%;height:100%;cursor:pointer;
+}
+:root[data-theme] .cp-app[data-theme] .cp-trade-photo-previews{
+  display:flex;gap:10px;overflow-x:auto;padding:12px 0 4px;
+}
+:root[data-theme] .cp-app[data-theme] .cp-trade-photo-previews>div{
+  width:83px;height:90px;flex:0 0 83px;position:relative;border:1px solid #caddeb;border-radius:12px;overflow:hidden;
+}
+:root[data-theme] .cp-app[data-theme] .cp-trade-photo-previews img{display:block;width:100%;height:100%;object-fit:cover}
+:root[data-theme] .cp-app[data-theme] .cp-trade-photo-previews button{
+  position:absolute;top:4px;right:4px;width:28px;height:28px;min-width:28px;
+  display:grid;place-items:center;border:0;border-radius:9px;
+  color:#fff;background:rgba(15,31,48,.85);
+}
+:root[data-theme] .cp-app[data-theme] .cp-trade-summary{
+  grid-column:1/-1;display:grid;gap:0; padding:18px;
+  border:1px solid #cee1f3;border-radius:17px;
+  background:linear-gradient(160deg,#fbfdff,#edf5ff);
+}
+:root[data-theme] .cp-app[data-theme] .cp-trade-summary-heading{
+  display:flex;align-items:center;gap:9px;padding:0 0 10px;
+  color:#113964;font-size:17px;
+}
+:root[data-theme] .cp-app[data-theme] .cp-trade-summary>div:not(.cp-trade-summary-heading){
+  display:flex;justify-content:space-between;align-items:flex-start;gap:12px;
+  padding:10px 0;border-top:1px solid #dfebf7;
+}
+:root[data-theme] .cp-app[data-theme] .cp-trade-summary>div>span{
+  color:#57708a;font-size:12px;font-weight:700;flex:0 0 38%;
+}
+:root[data-theme] .cp-app[data-theme] .cp-trade-summary>div>b{
+  color:#113052;font-size:13px;text-align:right;overflow-wrap:anywhere;
+}
+:root[data-theme] .cp-app[data-theme] .cp-trade-summary>div>b.positive{color:#12815b}
+:root[data-theme] .cp-app[data-theme] .cp-trade-summary>div>b.negative{color:#b83847}
+:root[data-theme] .cp-app[data-theme] .cp-trade-summary>small{
+  color:#55718d;font-size:11px;line-height:1.5;padding-top:11px;
+}
+:root[data-theme="dark"] .cp-app[data-theme="dark"] .cp-trade-form .cp-trade-type-switch button:not(.active),
+:root[data-theme="dark"] .cp-app[data-theme="dark"] .cp-trade-form .cp-trade-cash-options button:not(.active){
+  background:#173452;color:#d5eaff;border-color:#345571;
+}
+:root[data-theme="dark"] .cp-app[data-theme="dark"] .cp-trade-photo-picker,
+:root[data-theme="dark"] .cp-app[data-theme="dark"] .cp-trade-summary{
+  background:#14324e;border-color:#3a6993;
+}
+:root[data-theme="dark"] .cp-app[data-theme="dark"] .cp-trade-photo-picker b,
+:root[data-theme="dark"] .cp-app[data-theme="dark"] .cp-trade-summary>div>b,
+:root[data-theme="dark"] .cp-app[data-theme="dark"] .cp-trade-summary-heading{color:#e5f4ff}
+:root[data-theme="dark"] .cp-app[data-theme="dark"] .cp-trade-photo-picker small,
+:root[data-theme="dark"] .cp-app[data-theme="dark"] .cp-trade-summary>div>span,
+:root[data-theme="dark"] .cp-app[data-theme="dark"] .cp-trade-summary>small{color:#b0cde5}
+@media(max-width:640px){
+ :root[data-theme] .cp-app[data-theme] .cp-trade-flow>span:nth-child(2){display:none}
+ :root[data-theme] .cp-app[data-theme] .cp-trade-type-switch button{min-height:50px;font-size:13px}
+ :root[data-theme] .cp-app[data-theme] .cp-trade-form{row-gap:13px!important}
+ :root[data-theme] .cp-app[data-theme] .cp-trade-section-label{padding:13px}
+ :root[data-theme] .cp-app[data-theme] .cp-trade-section-label b{font-size:14px}
+ :root[data-theme] .cp-app[data-theme] .cp-trade-photos>span{font-size:13px}
+ :root[data-theme] .cp-app[data-theme] .cp-trade-summary{padding:14px}
+}
