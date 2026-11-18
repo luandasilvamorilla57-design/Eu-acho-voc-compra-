@@ -10,6 +10,7 @@ import './control/vision-readable.css'
 // Pacote opcional: remova apenas esta linha para restaurar todos os ícones originais.
 import './control/premium-icon-pack.css'
 import './control/inventory-mode.css'
+import './control/trade-in.css'
 
 window.addEventListener('beforeinstallprompt',(event:any)=>{
   event.preventDefault()
