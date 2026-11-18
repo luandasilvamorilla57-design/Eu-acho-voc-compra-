@@ -356,7 +356,7 @@ function HomePage({data,calc,canWrite,onBlocked,onOpenProduct,onView,onAction,on
 
     <section className="cp-balance-app">
       <div className="cp-balance-app-top">
-        <div><span>Saldo disponível</span><strong>{money.format(calc.cash)}</strong></div>
+        <div className="cp-vision-balance-title"><span className="cp-vision-balance-symbol"><WalletCards size={26}/></span><div><span>Saldo disponível</span><strong>{money.format(calc.cash)}</strong></div></div>
         <span className="cp-balance-app-badge">CAIXA</span>
       </div>
 
@@ -399,7 +399,7 @@ function HomePage({data,calc,canWrite,onBlocked,onOpenProduct,onView,onAction,on
 
     <section className="cp-reference-metrics" aria-label="Indicadores de desempenho">
       <div className="cp-reference-metric">
-        <span className="cp-reference-metric-icon"><CircleDollarSign size={22}/></span>
+        <span className="cp-reference-metric-icon"><Box size={22}/></span>
         <div><span>Capital em estoque</span><b>{money.format(calc.stockCapital)}</b></div>
       </div>
       <div className="cp-reference-metric">
@@ -630,18 +630,19 @@ function StockAddSheet({data,onClose,onOwn,onRegisterPurchase,onOpenPurchased}:{
 }
 
 function ActionSheet({onClose,onChoose}:{onClose:()=>void;onChoose:(m:Modal)=>void}){
-  return <ModalShell onClose={onClose} compact><div className="cp-action-sheet">
-    <span className="cp-eyebrow">REGISTRAR</span>
-    <h2>O que você quer registrar?</h2>
-    <p>Escolha o movimento certo. O CONTROLE+ atualiza estoque e caixa sem misturar as coisas.</p>
-    <Action icon={<ShoppingBag/>} title="Fiz uma compra" text="Comprei para revender · sai dinheiro do caixa" onClick={()=>onChoose('purchase')}/>
-    <Action icon={<Box/>} title="Adicionar produto que já tenho" text="Produto de casa ou próprio · não mexe no caixa" onClick={()=>onChoose('inventory')}/>
-    <Action icon={<Banknote/>} title="Fiz uma venda" text="Dar baixa no estoque e calcular o lucro" onClick={()=>onChoose('sale')}/>
-    <Action icon={<ArrowDownRight/>} title="Tive um gasto" text="Reparo, transporte, limpeza ou taxa" onClick={()=>onChoose('expense')}/>
-    <Action icon={<WalletCards/>} title="Outro movimento" text="Entrada ou saída manual de caixa" onClick={()=>onChoose('cash')}/>
+  return <ModalShell onClose={onClose} compact><div className="cp-action-sheet cp-vision-actions">
+    <div className="cp-vision-actions-head"><span className="cp-vision-actions-mark"><Plus size={23}/></span><div><h2>Registrar</h2><p>Ações rápidas para o seu dia a dia</p></div></div>
+    <div className="cp-vision-action-grid">
+      <Action icon={<ShoppingBag/>} title="Registrar venda" text="Lance uma venda e atualize seus resultados." onClick={()=>onChoose('sale')}/>
+      <Action icon={<Package/>} title="Adicionar estoque" text="Inclua produtos e mantenha seu controle." onClick={()=>onChoose('stockAdd')}/>
+      <Action icon={<WalletCards/>} title="Movimentar caixa" text="Registre entradas e saídas do caixa." onClick={()=>onChoose('cash')}/>
+      <Action icon={<ArrowDownRight/>} title="Registrar gasto" text="Organize reparos, taxas e outros custos." onClick={()=>onChoose('expense')}/>
+      <Action icon={<ShoppingBag/>} title="Registrar compra" text="Compre para revender e atualize o estoque." onClick={()=>onChoose('purchase')}/>
+      <Action icon={<Box/>} title="Produto próprio" text="Cadastre algo que já é seu, sem mexer no caixa." onClick={()=>onChoose('inventory')}/>
+    </div>
   </div></ModalShell>
 }
-function Action({icon,title,text,onClick}:{icon:React.ReactNode;title:string;text:string;onClick:()=>void}){return <button onClick={onClick}><span>{icon}</span><div><b>{title}</b><small>{text}</small></div><ChevronRight/></button>}
+function Action({icon,title,text,onClick}:{icon:React.ReactNode;title:string;text:string;onClick:()=>void}){return <button type="button" onClick={onClick}><span>{icon}</span><div><b>{title}</b><small>{text}</small></div><ChevronRight/></button>}
 
 function ListingSetup({isListed,setIsListed,channels,setChannels,listingDate,setListingDate}:{isListed:boolean;setIsListed:(v:boolean)=>void;channels:string[];setChannels:(v:string[])=>void;listingDate:string;setListingDate:(v:string)=>void}){
   function toggle(channel:string){setChannels(channels.includes(channel)?channels.filter(x=>x!==channel):[...channels,channel])}
