@@ -1,0 +1,54 @@
+
+/* Item único x estoque — extensão isolada do visual Controle+.
+   Não altera os cards nem a faixa VENDIDO aprovada. */
+:root[data-theme] .cp-app[data-theme] .cp-inventory-mode-field{grid-column:1/-1}
+:root[data-theme] .cp-app[data-theme] .cp-inventory-mode-choices{
+  display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;width:100%;margin-top:7px;
+}
+:root[data-theme] .cp-app[data-theme] .cp-inventory-mode-choices button{
+  min-width:0;min-height:92px;display:flex;flex-direction:column;align-items:flex-start;justify-content:center;
+  gap:7px;padding:16px;border:1px solid var(--vision-line,#dce7f3);
+  border-radius:16px;background:var(--vision-surface,#fff);color:var(--vision-ink,#122e50);
+  text-align:left;box-shadow:0 5px 15px rgba(12,46,82,.045);
+}
+:root[data-theme] .cp-app[data-theme] .cp-inventory-mode-choices button b{
+  font:800 15px/1.2 'DM Sans',system-ui,sans-serif;
+}
+:root[data-theme] .cp-app[data-theme] .cp-inventory-mode-choices button small{
+  font:500 12px/1.4 'DM Sans',system-ui,sans-serif;color:var(--vision-muted,#536e8d);
+}
+:root[data-theme] .cp-app[data-theme] .cp-inventory-mode-choices button.active{
+  border:2px solid #2772b0;
+  padding:15px;
+  background:linear-gradient(145deg,#eaf4ff,#f8fbff);
+  box-shadow:0 5px 16px rgba(32,92,149,.11);
+}
+:root[data-theme] .cp-app[data-theme] .cp-inventory-mode-choices button.active b{color:#124d87}
+:root[data-theme] .cp-app[data-theme] .cp-inventory-mode-choices button:focus-visible{outline:3px solid #69aee6;outline-offset:3px}
+:root[data-theme] .cp-app[data-theme] .cp-vision-unique{
+  display:inline-flex;align-items:center;justify-content:center;gap:5px;
+  max-width:100%;width:max-content;padding:5px 9px;border-radius:999px;
+  background:#e5f0ff;border:1px solid #cee2f7;
+  color:#13548d;font-size:11px;font-weight:850;line-height:1.15;
+  white-space:nowrap;
+}
+:root[data-theme] .cp-app[data-theme] .cp-vision-unique svg{
+  flex:0 0 13px;width:13px;height:13px;color:inherit;
+}
+:root[data-theme] .cp-app[data-theme] .cp-vision-single-count{
+  color:#185c93!important;background:#edf6ff!important;
+  font-weight:750!important;
+}
+:root[data-theme="dark"] .cp-app[data-theme="dark"] .cp-inventory-mode-choices button.active{
+  background:#153a60;border-color:#79bbef;
+}
+:root[data-theme="dark"] .cp-app[data-theme="dark"] .cp-inventory-mode-choices button.active b{color:#e0f2ff}
+:root[data-theme="dark"] .cp-app[data-theme="dark"] .cp-vision-unique{background:#173d64;color:#d5edff;border-color:#396d9d}
+@media(max-width:640px){
+ :root[data-theme] .cp-app[data-theme] .cp-inventory-mode-choices{gap:9px}
+ :root[data-theme] .cp-app[data-theme] .cp-inventory-mode-choices button{min-height:98px;padding:12px;border-radius:14px}
+ :root[data-theme] .cp-app[data-theme] .cp-inventory-mode-choices button.active{padding:11px}
+ :root[data-theme] .cp-app[data-theme] .cp-inventory-mode-choices button b{font-size:14px}
+ :root[data-theme] .cp-app[data-theme] .cp-inventory-mode-choices button small{font-size:11px}
+ :root[data-theme] .cp-app[data-theme] .cp-vision-unique{padding:5px 7px;font-size:10px;gap:4px}
+}
