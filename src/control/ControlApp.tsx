@@ -411,7 +411,7 @@ function HomePage({data,calc,canWrite,onBlocked,onOpenProduct,onView,onAction,on
         <div><span>Itens vendidos</span><b>{calc.monthUnitsSold} un.</b></div>
       </div>
       <div className="cp-reference-metric">
-        <span className="cp-reference-metric-icon"><Package size={22}/></span>
+        <span className="cp-reference-metric-icon" data-premium-icon={calc.monthOrders>0?"verified":undefined}><Package size={22}/></span>
         <div><span>Pedidos fechados</span><b>{calc.monthOrders}</b></div>
       </div>
     </section>
@@ -434,7 +434,7 @@ function HomePage({data,calc,canWrite,onBlocked,onOpenProduct,onView,onAction,on
       <button onClick={()=>onView('receivables')}><span><ReceiptText/></span><b>A receber</b><small>Parcelas e valores pendentes</small></button>
     </section>
 
-    <button className="cp-opp-home-link" type="button" onClick={()=>onView('opportunities')}><span className="cp-opp-home-icon"><Sparkles size={24}/></span><span className="cp-opp-home-copy"><small>SELEÇÃO CONTROLE+</small><b>Oportunidades para revender</b><em>Ideias de produtos para começar com pouco e avaliar novos negócios.</em></span><ChevronRight size={22}/></button>
+    <button className="cp-opp-home-link" type="button" onClick={()=>onView('opportunities')}><span className="cp-opp-home-icon" data-premium-icon="featured"><Sparkles size={24}/></span><span className="cp-opp-home-copy"><small>SELEÇÃO CONTROLE+</small><b>Oportunidades para revender</b><em>Ideias de produtos para começar com pouco e avaliar novos negócios.</em></span><ChevronRight size={22}/></button>
 
     <section className={'cp-smart-card cp-smart-card--'+guide.tone}>
       <div className="cp-smart-icon">{guide.tone==='warn'?<AlertTriangle/>:guide.tone==='brand'?<Package/>:<Check/>}</div>
@@ -533,7 +533,7 @@ function StockPage({data,calc,onOpenProduct,onAdd}:{data:Data;calc:Metrics;onOpe
     <section className="cp-vision-stock-stats" aria-label="Resumo do estoque">
       <div><span className="cp-vision-stat-icon"><Box/></span><small>Capital em estoque</small><strong>{money.format(calc.stockCapital)}</strong></div>
       <div><span className="cp-vision-stat-icon"><Tag/></span><small>Produtos ativos</small><strong>{number.format(active.length)}</strong></div>
-      <div><span className="cp-vision-stat-icon cp-vision-stat-alert"><AlertTriangle/></span><small>Baixo estoque</small><strong>{number.format(lowCount)}</strong></div>
+      <div><span className="cp-vision-stat-icon cp-vision-stat-alert" data-premium-icon={lowCount>0?"low-stock":undefined}><AlertTriangle/></span><small>Baixo estoque</small><strong>{number.format(lowCount)}</strong></div>
     </section>
     <div className="cp-vision-stock-note"><span><Package size={15}/> {calc.stockUnits} unidades disponíveis</span><span>{listedCount} anúncios ativos · {reviewCount} revisão(ões)</span></div>
     {list.length?<div className="cp-stock-grid cp-vision-stock-grid">{list.map(p=><ProductCard key={p.id} product={p} data={data} calc={calc} onClick={()=>onOpenProduct(p)}/>)}</div>:<Empty icon={<Search/>} title="Nada por aqui" text={q?'Nenhum produto combina com essa busca.':'Não há produtos para este filtro.'} action={q?undefined:'Adicionar produto'} onAction={onAdd}/>}
@@ -560,7 +560,7 @@ function SalesPage({data,calc,onSale,onOpenProduct}:{data:Data;calc:Metrics;onSa
       <div><span className="cp-vision-stat-icon"><Clock3/></span><small>Hoje</small><strong>{money.format(todayTotal)}</strong><em>{todaySales.length} venda(s)</em></div>
       <div><span className="cp-vision-stat-icon"><BarChart3/></span><small>No mês</small><strong>{money.format(calc.monthRevenue)}</strong><em>Faturamento real</em></div>
       <div><span className="cp-vision-stat-icon"><Tag/></span><small>Ticket médio</small><strong>{money.format(ticket)}</strong><em>Por venda concluída</em></div>
-      <div><span className="cp-vision-stat-icon"><ShoppingBag/></span><small>Pedidos fechados</small><strong>{number.format(calc.monthOrders)}</strong><em>Neste mês</em></div>
+      <div><span className="cp-vision-stat-icon" data-premium-icon={calc.monthOrders>0?"verified":undefined}><ShoppingBag/></span><small>Pedidos fechados</small><strong>{number.format(calc.monthOrders)}</strong><em>Neste mês</em></div>
     </section>
     <div className="cp-vision-sales-filters cp-filter-tabs" role="group" aria-label="Período das vendas">
       {([['all','Todas'],['today','Hoje'],['week','Semana'],['month','Mês']] as const).map(([key,label])=><button key={key} className={period===key?'active':''} onClick={()=>setPeriod(key)}>{label}</button>)}
