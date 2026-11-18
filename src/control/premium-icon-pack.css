@@ -1,0 +1,74 @@
+/*
+ * CONTROLE+ / PACOTE PREMIUM DE ÍCONES (opcional, reversível)
+ *
+ * Para desfazer TODOS os novos ícones, remova somente:
+ *    import './control/premium-icon-pack.css'
+ * de src/main.tsx.
+ *
+ * Os ícones Lucide originais permanecem no JSX, assim como o selo VENDIDO.
+ * A faixa VENDIDO usa /selo-vendido.webp e NÃO é afetada por este arquivo.
+ * Sprite WebP otimizado, transparente, aprox. 6 KB.
+ *
+ * Posições: [baixo estoque | verificado]
+ *           [destaque      | alerta]
+ */
+:root[data-theme] .cp-app[data-theme] [data-premium-icon]{
+  position:relative!important;
+  isolation:isolate;
+  overflow:visible;
+}
+:root[data-theme] .cp-app[data-theme] [data-premium-icon] > svg{
+  visibility:hidden!important;
+}
+:root[data-theme] .cp-app[data-theme] [data-premium-icon]::after{
+  content:"";
+  position:absolute!important;
+  inset:3px!important;
+  width:auto!important;
+  height:auto!important;
+  display:block!important;
+  z-index:1!important;
+  pointer-events:none!important;
+  background-image:url('/controle-premium-icon-pack.webp');
+  background-repeat:no-repeat;
+  background-size:200% 200%;
+  filter:drop-shadow(0 2px 3px rgba(10,33,57,.12));
+}
+:root[data-theme] .cp-app[data-theme] [data-premium-icon="low-stock"]::after{
+  background-position:0% 0%;
+}
+:root[data-theme] .cp-app[data-theme] [data-premium-icon="verified"]::after{
+  background-position:100% 0%;
+}
+:root[data-theme] .cp-app[data-theme] [data-premium-icon="featured"]::after{
+  background-position:0% 100%;
+}
+:root[data-theme] .cp-app[data-theme] [data-premium-icon="alert"]::after{
+  background-position:100% 100%;
+}
+
+/* Não cria novos blocos nem aumenta a altura dos cards */
+:root[data-theme] .cp-app[data-theme] .cp-reference-metric-icon[data-premium-icon]::after,
+:root[data-theme] .cp-app[data-theme] .cp-vision-stat-icon[data-premium-icon]::after{
+  inset:2px!important;
+}
+:root[data-theme] .cp-app[data-theme] .cp-opp-home-icon[data-premium-icon]::after{
+  inset:4px!important;
+}
+:root[data-theme] .cp-app[data-theme] .cp-vision-manage-alert-icon[data-premium-icon]::after{
+  inset:3px!important;
+}
+
+/* Mantém os estados críticos identificáveis também pelo texto */
+:root[data-theme] .cp-app[data-theme] [data-premium-icon="alert"]{
+  background:rgba(255,255,255,.10)!important;
+}
+:root[data-theme] .cp-app[data-theme] .cp-vision-stat-alert[data-premium-icon]{
+  background:#fff0ee!important;
+}
+@media(prefers-reduced-motion:reduce){
+  :root[data-theme] .cp-app[data-theme] [data-premium-icon]::after{
+    animation:none!important;
+    transition:none!important;
+  }
+}
