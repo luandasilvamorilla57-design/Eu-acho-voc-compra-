@@ -1118,3 +1118,52 @@
  :root[data-theme] .cp-app .cp-sale-channel-line{gap:8px;padding:9px}
  :root[data-theme] .cp-app .cp-sale-channel-line>strong{font-size:11px}
 }
+
+
+/* Recebido em troca: etiqueta abaixo da foto, lado a lado com disponibilidade.
+   O grid permite quebra segura em telas pequenas sem escapar do balão. */
+:root[data-theme] .cp-app .cp-trade-bottom-badges{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) minmax(0,1fr);
+  align-items:stretch;
+  gap:8px;
+  width:100%;
+  min-width:0;
+  margin:4px 0 11px;
+}
+:root[data-theme] .cp-app .cp-trade-bottom-badges .cp-vision-trade-in,
+:root[data-theme] .cp-app .cp-trade-bottom-badges .cp-vision-stock-count{
+  box-sizing:border-box;
+  display:flex!important;
+  align-items:center;
+  justify-content:center;
+  width:100%;
+  max-width:100%;
+  min-width:0;
+  min-height:34px;
+  padding:7px 8px!important;
+  margin:0!important;
+  border-radius:12px!important;
+  font-size:11px!important;
+  font-weight:800;
+  line-height:1.23!important;
+  text-align:center;
+  white-space:normal!important;
+  overflow-wrap:break-word;
+  word-break:normal;
+}
+:root[data-theme] .cp-app .cp-trade-bottom-badges svg{
+  flex:0 0 13px;
+  width:13px!important;
+  height:13px!important;
+}
+@media(max-width:640px){
+  :root[data-theme] .cp-app .cp-trade-bottom-badges{gap:6px;margin:3px 0 10px}
+  :root[data-theme] .cp-app .cp-trade-bottom-badges .cp-vision-trade-in,
+  :root[data-theme] .cp-app .cp-trade-bottom-badges .cp-vision-stock-count{
+    min-height:39px;
+    padding:6px 5px!important;
+    font-size:10px!important;
+    letter-spacing:-.015em;
+  }
+}
