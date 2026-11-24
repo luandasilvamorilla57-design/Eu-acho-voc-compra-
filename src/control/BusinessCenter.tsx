@@ -151,6 +151,18 @@ export function ReportsPage({data,onBack}:{data:Data;onBack:()=>void}){
     }
     return [...map.values()].map(x=>({...x,avgDays:x.days.length?x.days.reduce((a,b)=>a+b,0)/x.days.length:0}))
   },[data.grouped.itemsBySale,data.products,s.sales])
+  const salesByChannel=useMemo(()=>{
+    const byChannel=new Map<string,{count:number;revenue:number;profit:number}>()
+    for(const sale of s.sales){
+      if(data.grouped.tradeBySale.has(sale.id))continue
+      const channel=sale.sale_channel==='other'?(sale.sale_channel_other?.trim()||'Outro') : ({boca_a_boca:'Boca a boca',whatsapp:'WhatsApp',marketplace:'Facebook Marketplace',olx:'OLX',instagram:'Instagram',conhecido:'Conhecido',loja_fisica:'Loja física',indicacao:'Indicação'} as Record<string,string>)[sale.sale_channel||'']||'Não informado'
+      const row=byChannel.get(channel)||{count:0,revenue:0,profit:0}
+      row.count++
+      for(const item of data.grouped.itemsBySale.get(sale.id)||[]){row.revenue+=item.unit_price*item.quantity;row.profit+=(item.unit_price-item.unit_cost_snapshot)*item.quantity}
+      byChannel.set(channel,row)
+    }
+    return [...byChannel.entries()].map(([name,v])=>({name,...v})).sort((a,b)=>b.count-a.count||b.revenue-a.revenue)
+  },[s.sales,data.grouped.tradeBySale,data.grouped.itemsBySale])
   const topProfit=[...products].sort((a,b)=>b.profit-a.profit).slice(0,5)
   const topSpeed=[...products].sort((a,b)=>a.avgDays-b.avgDays).slice(0,5)
   const max=Math.max(1,...topProfit.map(x=>Math.abs(x.profit)))
@@ -163,6 +175,7 @@ export function ReportsPage({data,onBack}:{data:Data;onBack:()=>void}){
       <div><span>GASTOS GERAIS</span><strong>{money.format(s.general)}</strong><small>fora dos produtos</small></div>
       <div><span>RESULTADO LÍQUIDO</span><strong className={s.net>=0?'positive':'negative'}>{money.format(s.net)}</strong><small>{s.margin.toFixed(1)}% sobre o faturamento</small></div>
     </section>
+    <section className="cp-report-panel cp-sale-channel-report"><div className="cp-section-title-v4"><span>ORIGEM DAS VENDAS</span><h2>Por onde você vende mais</h2><p>Somente vendas diretas; trocas não são contabilizadas como venda por canal.</p></div>{salesByChannel.length?<div className="cp-sale-channel-list">{salesByChannel.map((r,i)=><div className="cp-sale-channel-line" key={r.name}><span className="cp-sale-channel-rank">{i+1}</span><div><b>{r.name}</b><small>{r.count} venda(s) · {money.format(r.revenue)} faturados</small></div><strong className={r.profit>=0?'positive':'negative'}>{money.format(r.profit)}<small>lucro bruto</small></strong></div>)}</div>:<EmptyState icon={<BarChart3/>} title="Sem vendas por canal neste mês" text="Registre uma venda informando a origem para acompanhar os resultados."/>}</section>
     <div className="cp-report-layout">
       <section className="cp-report-panel"><div className="cp-section-title-v4"><span>CATEGORIAS</span><h2>Onde seu lucro está nascendo</h2></div>{categories.length?categories.map(r=><div className="cp-category-line" key={r.name}><div><b>{r.name}</b><small>{r.qty} un. · {money.format(r.revenue)} vendidos</small></div><strong className={r.profit>=0?'positive':'negative'}>{money.format(r.profit)}</strong></div>):<EmptyState icon={<BarChart3/>} title="Sem vendas no período" text="As categorias aparecem quando houver vendas."/>}</section>
       <section className="cp-report-panel"><div className="cp-section-title-v4"><span>RANKING DE LUCRO</span><h2>Produtos que mais deixaram dinheiro</h2></div>{topProfit.length?topProfit.map((r,i)=><div className="cp-profit-rank" key={r.name}><span>{String(i+1).padStart(2,'0')}</span><div><b>{r.name}</b><i><em style={{width:(Math.abs(r.profit)/max*100)+'%'}}/></i></div><strong>{money.format(r.profit)}</strong></div>):<p className="cp-muted">Ainda não há histórico suficiente.</p>}</section>
