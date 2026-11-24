@@ -127,6 +127,8 @@ export type Sale={
   sale_date:string
   payment_method:string
   payment_mode:'paid'|'receivable'
+  sale_channel:string|null
+  sale_channel_other:string|null
   status:'completed'|'cancelled'
   notes:string|null
   created_at:string
@@ -266,6 +268,8 @@ export type NewProductInput={
 }
 
 export type RegisterSaleInput={
+  saleChannel:string
+  saleChannelOther?:string
   productId:string
   quantity:number
   unitPrice:number
