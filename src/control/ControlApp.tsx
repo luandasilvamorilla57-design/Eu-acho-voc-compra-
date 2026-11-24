@@ -492,17 +492,17 @@ function ProductCard({product,data,calc,onClick}:{product:Product;data:Data;calc
       <div className="cp-vision-product-info">
         {tradeOut?<span className="cp-vision-traded-ribbon" title={'Trocado por '+(linkedOut?.name||'outro item')}>TROCADO</span>:isSold&&<span className="cp-vision-sold-ribbon"><img src="/selo-vendido.webp" alt="Vendido" width="122" height="40" loading="lazy" decoding="async"/></span>}
         <div className="cp-vision-product-flags">
-          {tradeIn&&<span className="cp-vision-trade-in"><RefreshCw size={13}/> Recebido em troca</span>}
           {!isSold&&product.inventory_mode==='single'&&<span className="cp-vision-unique"><Tag size={13}/> Item único</span>}
           {lowStock&&<span className="cp-vision-low"><AlertTriangle size={13}/> Baixo estoque</span>}
           {status&&<span className="cp-vision-status">{status}</span>}
         </div>
         <h3>{product.name}</h3>
         <p>{tradeOut?'Trocado pelo '+(linkedOut?.name||'item recebido'):tradeIn?'Veio na troca do '+(linkedIn?.name||'item entregue'):product.acquisition_type==='owned'?'Produto próprio':product.category||'Produto'}</p>
-        {product.inventory_mode==='stock'?<span className="cp-vision-stock-count"><Package size={14}/> Estoque: <b>{product.quantity_available} un.</b></span>:<span className="cp-vision-stock-count cp-vision-single-count"><Tag size={14}/>{tradeOut?'Item trocado':isSold?'Item vendido':'Peça disponível'}</span>}
+        {!tradeIn&&(product.inventory_mode==='stock'?<span className="cp-vision-stock-count"><Package size={14}/> Estoque: <b>{product.quantity_available} un.</b></span>:<span className="cp-vision-stock-count cp-vision-single-count"><Tag size={14}/>{tradeOut?'Item trocado':isSold?'Item vendido':'Peça disponível'}</span>)}
       </div>
       <span className="cp-vision-dots" aria-hidden="true">•••</span>
     </div>
+    {tradeIn&&<div className="cp-trade-bottom-badges"><span className="cp-vision-trade-in"><RefreshCw size={13}/> Recebido em troca</span><span className="cp-vision-stock-count cp-vision-single-count"><Tag size={14}/>{isSold?'Item vendido':product.inventory_mode==='stock'?product.quantity_available+' em estoque':'Peça disponível'}</span></div>}
     <div className="cp-vision-product-prices">
       <div><span>Custo</span><strong>{product.cost_basis_known?money.format(cost):'Não informado'}</strong></div>
       <div><span>Venda</span><strong>{price!==null?money.format(price):'Não definido'}</strong></div>
