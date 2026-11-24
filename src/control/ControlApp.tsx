@@ -49,6 +49,8 @@ function addDays(date:string,days:number){
   return d.toISOString().slice(0,10)
 }
 const LISTING_CHANNELS=['Facebook Marketplace','OLX','Mercado Livre','WhatsApp','Instagram','Outro']
+const SALE_CHANNELS=[['boca_a_boca','Boca a boca'],['whatsapp','WhatsApp'],['marketplace','Facebook Marketplace'],['olx','OLX'],['instagram','Instagram'],['conhecido','Conhecido'],['loja_fisica','Loja física'],['indicacao','Indicação'],['other','Outro']] as const
+function saleChannelLabel(value:string|null,other?:string|null){return value==='other'?other||'Outro':SALE_CHANNELS.find(([key])=>key===value)?.[1]||'Não informado'}
 
 export function ControlApp({userId,email}:{userId:string;email?:string}){
   const data=useControlData(userId)
@@ -475,6 +477,10 @@ function ProductCard({product,data,calc,onClick}:{product:Product;data:Data;calc
   const days=daysSince(product.purchase_date)
   const listingDue=product.listing_status==='listed'&&!!product.listing_next_checkin_at&&product.listing_next_checkin_at<=localDate()
   const isSold=product.quantity_available===0
+  const tradeOut=data.grouped.tradeByOutgoingProduct.get(product.id)
+  const tradeIn=data.grouped.tradeByIncomingProduct.get(product.id)
+  const linkedOut=tradeOut?calc.productMap.get(tradeOut.incoming_product_id):null
+  const linkedIn=tradeIn?calc.productMap.get(tradeIn.outgoing_product_id):null
   const lowStock=!isSold&&product.inventory_mode==='stock'&&product.quantity_available<=3
   const alert=!isSold&&days>=calc.alertDays
   const status=isSold?'':listingDue?'Revisar anúncio':product.listing_status==='listed'?'Anunciado':alert?'Atenção':''
@@ -484,15 +490,16 @@ function ProductCard({product,data,calc,onClick}:{product:Product;data:Data;calc
         {photo?<img src={photo} alt={'Foto de '+product.name}/>:<Box size={38}/>}
       </span>
       <div className="cp-vision-product-info">
-        {isSold&&<span className="cp-vision-sold-ribbon"><img src="/selo-vendido.webp" alt="Vendido" width="122" height="40" loading="lazy" decoding="async"/></span>}
+        {tradeOut?<span className="cp-vision-traded-ribbon" title={'Trocado por '+(linkedOut?.name||'outro item')}>TROCADO</span>:isSold&&<span className="cp-vision-sold-ribbon"><img src="/selo-vendido.webp" alt="Vendido" width="122" height="40" loading="lazy" decoding="async"/></span>}
         <div className="cp-vision-product-flags">
+          {tradeIn&&<span className="cp-vision-trade-in"><RefreshCw size={13}/> Recebido em troca</span>}
           {!isSold&&product.inventory_mode==='single'&&<span className="cp-vision-unique"><Tag size={13}/> Item único</span>}
           {lowStock&&<span className="cp-vision-low"><AlertTriangle size={13}/> Baixo estoque</span>}
           {status&&<span className="cp-vision-status">{status}</span>}
         </div>
         <h3>{product.name}</h3>
-        <p>{product.source?.startsWith('Troca por ')?'Recebido · '+product.source:product.acquisition_type==='owned'?'Produto próprio':product.category||'Produto'}</p>
-        {product.inventory_mode==='stock'?<span className="cp-vision-stock-count"><Package size={14}/> Estoque: <b>{product.quantity_available} un.</b></span>:<span className="cp-vision-stock-count cp-vision-single-count"><Tag size={14}/>{isSold?'Item vendido':'Peça disponível'}</span>}
+        <p>{tradeOut?'Trocado pelo '+(linkedOut?.name||'item recebido'):tradeIn?'Recebido pelo '+(linkedIn?.name||'item entregue'):product.acquisition_type==='owned'?'Produto próprio':product.category||'Produto'}</p>
+        {product.inventory_mode==='stock'?<span className="cp-vision-stock-count"><Package size={14}/> Estoque: <b>{product.quantity_available} un.</b></span>:<span className="cp-vision-stock-count cp-vision-single-count"><Tag size={14}/>{tradeOut?'Item trocado':isSold?'Item vendido':'Peça disponível'}</span>}
       </div>
       <span className="cp-vision-dots" aria-hidden="true">•••</span>
     </div>
@@ -580,7 +587,7 @@ function SalesPage({data,calc,onSale,onOpenProduct}:{data:Data;calc:Metrics;onSa
       const status=sale.status==='cancelled'?'Cancelada':trade?'Concluída':sale.payment_mode==='receivable'?'A receber':'Paga'
       return <button type="button" key={sale.id} className="cp-sale-row cp-vision-sale-row" onClick={()=>product&&onOpenProduct(product)}>
         <span className="cp-sale-thumb">{photo?<img src={photo} alt=""/>:<ReceiptText/>}</span>
-        <div className="cp-sale-main"><strong>{trade?'Troca: '+(product?.name||'Produto')+' por '+(received?.name||'item recebido'):product?.name||'Venda'}{!trade&&items.length>1?' + '+(items.length-1)+' item(ns)':''}</strong><span>{trade?(trade.cash_direction==='received'?'Volta recebida: '+money.format(trade.cash_amount):trade.cash_direction==='paid'?'Volta paga: '+money.format(trade.cash_amount):'Sem volta em dinheiro'):customer?.name||quantity+' un. vendida(s)'}</span><span>{new Date(sale.sale_date+'T12:00:00').toLocaleDateString('pt-BR')}</span></div>
+        <div className="cp-sale-main"><strong>{trade?'Troca: '+(product?.name||'Produto')+' por '+(received?.name||'item recebido'):product?.name||'Venda'}{!trade&&items.length>1?' + '+(items.length-1)+' item(ns)':''}</strong><span>{trade?(trade.cash_direction==='received'?'Volta recebida: '+money.format(trade.cash_amount):trade.cash_direction==='paid'?'Volta paga: '+money.format(trade.cash_amount):'Sem volta em dinheiro'):saleChannelLabel(sale.sale_channel,sale.sale_channel_other)+' · '+(customer?.name||quantity+' un. vendida(s)')}</span><span>{new Date(sale.sale_date+'T12:00:00').toLocaleDateString('pt-BR')}</span></div>
         <div className="cp-vision-sale-badges"><span>{trade?'Troca':paymentLabel(sale.payment_method)}</span><span className={sale.status==='cancelled'?'is-cancelled':sale.payment_mode==='receivable'?'is-receivable':'is-paid'}>{status}</span></div>
         <div className="cp-sale-money"><b>{money.format(stats.revenue)}</b><span className={stats.profit>=0?'positive':'negative'}>{trade?'Valor negociado':money.format(stats.profit)+' lucro'}</span></div>
         <ChevronRight className="cp-vision-row-chevron" size={17}/>
@@ -751,6 +758,8 @@ function SaleModal({data,initialProduct,onClose,onDone,onTradeDone}:{data:Data;i
   const [date,setDate]=useState(localDate())
   const [payment,setPayment]=useState('pix')
   const [paymentMode,setPaymentMode]=useState<'paid'|'receivable'>('paid')
+  const [saleChannel,setSaleChannel]=useState('')
+  const [saleChannelOther,setSaleChannelOther]=useState('')
   const [customerId,setCustomerId]=useState('')
   const [newCustomer,setNewCustomer]=useState(false)
   const [customerName,setCustomerName]=useState('')
@@ -770,6 +779,8 @@ function SaleModal({data,initialProduct,onClose,onDone,onTradeDone}:{data:Data;i
       if(!product)throw new Error('Escolha o produto vendido.')
       const value=Number(price.replace(',','.'))
       if(!Number.isFinite(value)||value<=0)throw new Error('Informe o valor da venda.')
+      if(!saleChannel)throw new Error('Selecione por onde vendeu o item.')
+      if(saleChannel==='other'&&!saleChannelOther.trim())throw new Error('Informe o canal de venda.')
       let customer=customerId||null
       if(newCustomer){
         if(!customerName.trim())throw new Error('Informe o nome do cliente.')
@@ -778,6 +789,7 @@ function SaleModal({data,initialProduct,onClose,onDone,onTradeDone}:{data:Data;i
       }
       if(paymentMode==='receivable'&&!customer)throw new Error('Para venda a prazo, informe quem vai pagar.')
       await data.registerSale({
+        saleChannel,saleChannelOther:saleChannel==='other'?saleChannelOther.trim():'',
         productId:product.id,
         quantity:Math.max(1,Number(qty)||1),
         unitPrice:value,
@@ -802,6 +814,8 @@ function SaleModal({data,initialProduct,onClose,onDone,onTradeDone}:{data:Data;i
       {product?.inventory_mode==='single'&&<div className="cp-field cp-field--full"><span>Como será a negociação?</span><div className="cp-trade-type-switch"><button type="button" className="active" onClick={()=>setTransactionType('sale')}><Banknote size={18}/><b>Venda</b></button><button type="button" onClick={()=>setTransactionType('trade')}><RefreshCw size={18}/><b>Troca</b></button></div></div>}<Field label="Quantidade"><input type="number" min="1" max={product?.quantity_available||1} value={qty} onChange={e=>setQty(e.target.value)}/></Field>
       <Field label="Valor por unidade"><MoneyInput value={price} setValue={setPrice} placeholder="0,00"/></Field>
       <Field label="Data da venda"><input type="date" value={date} onChange={e=>setDate(e.target.value)}/></Field>
+      <Field label="Por onde vendeu?" full><select required value={saleChannel} onChange={e=>setSaleChannel(e.target.value)}><option value="">Selecione o canal da venda</option>{SALE_CHANNELS.map(([key,label])=><option key={key} value={key}>{label}</option>)}</select></Field>
+      {saleChannel==='other'&&<Field label="Qual canal?" full><input maxLength={120} value={saleChannelOther} onChange={e=>setSaleChannelOther(e.target.value)} placeholder="Ex.: grupo de bairro"/></Field>}
       <div className="cp-field cp-field--full"><span>Como será recebido?</span><div className="cp-sale-mode"><button type="button" className={paymentMode==='paid'?'active':''} onClick={()=>setPaymentMode('paid')}><Banknote/><div><b>Recebi agora</b><small>entra no caixa hoje</small></div></button><button type="button" className={paymentMode==='receivable'?'active':''} onClick={()=>setPaymentMode('receivable')}><Clock3/><div><b>Venda a prazo</b><small>cria parcelas a receber</small></div></button></div></div>
       {paymentMode==='paid'&&<Field label="Pagamento"><select value={payment} onChange={e=>setPayment(e.target.value)}><option value="pix">Pix</option><option value="cash">Dinheiro</option><option value="card">Cartão</option><option value="transfer">Transferência</option><option value="other">Outro</option></select></Field>}
       <Field label={paymentMode==='receivable'?'Quem vai pagar?':'Cliente (opcional)'} full><select value={newCustomer?'new':customerId} onChange={e=>{if(e.target.value==='new'){setNewCustomer(true);setCustomerId('')}else{setNewCustomer(false);setCustomerId(e.target.value)}}}><option value="">Não informar</option>{data.customers.map(c=><option key={c.id} value={c.id}>{c.name}</option>)}<option value="new">+ Novo cliente</option></select></Field>
@@ -859,6 +873,7 @@ function TradeModal({data,initialProduct,onClose,onBack,onDone}:{data:Data;initi
       const desired=resalePrice.trim()?readAmount(resalePrice):null
       if(desired!==null&&(!Number.isFinite(desired)||desired<0))throw new Error('Preço de revenda inválido.')
       
+      if(!files.length)throw new Error('Adicione pelo menos uma foto do produto recebido.')
       if(date>localDate())throw new Error('A data da troca não pode ser futura.')
       const extra=[counterparty.trim()?'Outra pessoa: '+counterparty.trim():'',notes.trim()].filter(Boolean).join(' · ')
       await data.registerTrade({
@@ -882,7 +897,7 @@ function TradeModal({data,initialProduct,onClose,onBack,onDone}:{data:Data;initi
       <Field label="Categoria"><input value={receivedCategory} onChange={e=>setReceivedCategory(e.target.value)} placeholder="Celular, bicicleta..."/></Field>
       <Field label="Valor acordado do item recebido"><input inputMode="decimal" value={receivedValue} onChange={e=>setReceivedValue(e.target.value)} placeholder="Ex.: 800,00"/></Field>
       <Field label="Preço que pretende vender (opcional)" full><input inputMode="decimal" value={resalePrice} onChange={e=>setResalePrice(e.target.value)} placeholder="Ex.: 1.000,00"/></Field>
-      <div className="cp-trade-photos cp-field cp-field--full"><span>Fotos do item recebido <b>· opcional</b></span><label className="cp-trade-photo-picker"><ImagePlus size={24}/><div><b>{files.length?files.length+' foto(s) selecionada(s)':'Adicionar fotos do item'}</b><small>Da câmera ou galeria · até 5 imagens (opcional)</small></div><input type="file" accept="image/*" multiple onChange={e=>{
+      <div className="cp-trade-photos cp-field cp-field--full"><span>Fotos do item recebido <b>· obrigatório</b></span><label className="cp-trade-photo-picker"><ImagePlus size={24}/><div><b>{files.length?files.length+' foto(s) selecionada(s)':'Adicionar fotos do item'}</b><small>Da câmera ou galeria · de 1 a 5 imagens</small></div><input type="file" accept="image/*" multiple onChange={e=>{
         const selected=Array.from(e.target.files||[]).slice(0,5)
         setFiles(selected);e.currentTarget.value=''
       }}/></label>
@@ -1020,6 +1035,11 @@ function ProductDetail({product,data,calc,readOnly,onClose,onSale,onExpense,onSa
   const listingDue=product.listing_status==='listed'&&!!product.listing_next_checkin_at&&product.listing_next_checkin_at<=localDate()
   const checkins=data.grouped.listingCheckinsByProduct.get(product.id)||[]
   const hasSaleHistory=data.saleItems.some(item=>item.product_id===product.id)
+  const tradeOut=data.grouped.tradeByOutgoingProduct.get(product.id)
+  const tradeIn=data.grouped.tradeByIncomingProduct.get(product.id)
+  const relatedTrade=tradeOut||tradeIn
+  const relatedProduct=relatedTrade?data.products.find(p=>p.id===(tradeOut?tradeOut.incoming_product_id:tradeIn!.outgoing_product_id)):null
+  const productSales=data.saleItems.filter(item=>item.product_id===product.id).map(item=>({item,sale:data.grouped.saleById.get(item.sale_id)})).filter(entry=>entry.sale?.status==='completed')
 
   async function saveInfo(){
     setError(null)
@@ -1103,7 +1123,12 @@ function ProductDetail({product,data,calc,readOnly,onClose,onSale,onExpense,onSa
   }
 
   return <ModalShell onClose={onClose}>
-    <div className="cp-detail-hero"><div className="cp-detail-photo">{photos[0]?.signed_url?<img src={photos[0].signed_url} alt=""/>:<Package/>}</div><div><span className="cp-eyebrow">{product.source?.startsWith('Troca por ')?'RECEBIDO EM TROCA':product.acquisition_type==='owned'?'PRODUTO PRÓPRIO':product.category||'PRODUTO'}</span><h2>{name}</h2><p>{product.quantity_available===0?'Produto vendido':product.inventory_mode==='single'?'Item único · disponível':product.quantity_available+' de '+product.quantity_initial+' unidade(s) disponíveis'}</p></div></div>
+    <div className="cp-detail-hero"><div className="cp-detail-photo">{photos[0]?.signed_url?<img src={photos[0].signed_url} alt=""/>:<Package/>}</div><div><span className="cp-eyebrow">{product.source?.startsWith('Troca por ')?'RECEBIDO EM TROCA':product.acquisition_type==='owned'?'PRODUTO PRÓPRIO':product.category||'PRODUTO'}</span><h2>{name}</h2><p>{tradeOut?'Item trocado · '+(relatedProduct?.name||'produto recebido'):product.quantity_available===0?'Produto vendido':tradeIn?'Recebido em troca · disponível':product.inventory_mode==='single'?'Item único · disponível':product.quantity_available+' de '+product.quantity_initial+' unidade(s) disponíveis'}</p></div></div>
+
+    {(relatedTrade||productSales.length>0)&&<section className="cp-detail-section cp-item-history"><div className="cp-section-head"><div><span>HISTÓRICO</span><h2>Movimentações deste produto</h2></div></div>
+      {relatedTrade&&<div className="cp-item-history-entry"><b>{tradeOut?'TROCADO POR':'RECEBIDO EM TROCA'}</b><strong>{relatedProduct?.name||'Produto vinculado'}</strong><span>Data: {new Date(relatedTrade.trade_date+'T12:00:00').toLocaleDateString('pt-BR')} · Avaliação: {money.format(relatedTrade.incoming_value)}</span><span>{relatedTrade.cash_direction==='none'?'Sem volta em dinheiro':relatedTrade.cash_direction==='paid'?'Volta paga: '+money.format(relatedTrade.cash_amount):'Volta recebida: '+money.format(relatedTrade.cash_amount)}</span>{relatedTrade.notes&&<small>{relatedTrade.notes}</small>}</div>}
+      {productSales.filter(entry=>!data.grouped.tradeBySale.has(entry.sale!.id)).map(({item,sale})=><div key={item.id} className="cp-item-history-entry"><b>VENDA CONCLUÍDA</b><strong>{money.format(item.unit_price*item.quantity)}</strong><span>{new Date(sale!.sale_date+'T12:00:00').toLocaleDateString('pt-BR')} · {item.quantity} un. · {paymentLabel(sale!.payment_method)}</span><span>Canal: {saleChannelLabel(sale!.sale_channel,sale!.sale_channel_other)}</span>{sale!.notes&&<small>{sale!.notes}</small>}</div>)}
+    </section>}
 
     <section className="cp-detail-section">
       <div className="cp-section-head"><div><span>FOTOS</span><h2>{photos.length?photos.length+' foto(s) do produto':'Adicione fotos desse produto'}</h2></div>{readOnly?<button className="cp-detail-add-photo" onClick={onBlocked}><ImagePlus size={16}/> Adicionar</button>:<label className="cp-detail-add-photo"><ImagePlus size={16}/> Adicionar<input type="file" accept="image/*" multiple onChange={e=>{const files=Array.from(e.target.files||[]);void addPhotos(files);e.currentTarget.value=''}}/></label>}</div>
@@ -1127,7 +1152,7 @@ function ProductDetail({product,data,calc,readOnly,onClose,onSale,onExpense,onSa
         <button className="cp-primary" disabled={data.busy} onClick={()=>void saveInfo()}>{data.busy?'Salvando...':'Salvar alterações'}</button>
       </div>:<div className="cp-product-info-read">
         <div><span>Categoria</span><b>{category||'Não informada'}</b></div>
-        <div><span>Origem</span><b>{product.acquisition_type==='owned'?'Produto próprio':product.source||'Compra'}</b></div>
+        <div><span>Origem</span><b>{tradeIn?'Recebido em troca de '+(relatedProduct?.name||'outro produto'):product.acquisition_type==='owned'?'Produto próprio':product.source||'Compra'}</b></div>
          <div><span>Tipo de venda</span><b>{product.inventory_mode==='single'?'Item único':'Produto com estoque'}</b></div>
         <div className="cp-ranking-classification"><span>Ranking pessoal</span><b>{product.category_group||categoryGroup||'Outros'}</b><small>{product.item_type==='accessory'?'Acessório':product.item_type==='part'?'Peça':'Produto principal'} · {product.category_source==='manual'?'corrigido manualmente':'classificação automática'}</small></div>
         {notes&&<div className="cp-product-notes"><span>Observações</span><p>{notes}</p></div>}
@@ -1141,7 +1166,7 @@ function ProductDetail({product,data,calc,readOnly,onClose,onSale,onExpense,onSa
       <div className="cp-section-head"><div><span>ANÚNCIO</span><h2>Acompanhar a venda</h2></div>{product.listing_status!=='sold'&&<button onClick={()=>readOnly?onBlocked():setListingEditing(v=>!v)}>{listingEditing?'Cancelar':'Editar'}</button>}</div>
       {listingEditing?<div className="cp-listing-editor"><ListingSetup isListed={isListed} setIsListed={setIsListed} channels={channels} setChannels={setChannels} listingDate={listingDate} setListingDate={setListingDate}/>{isListed&&<Field label="Preço anunciado" full><MoneyInput value={listed} setValue={setListed} placeholder="0,00"/></Field>}<button className="cp-primary" disabled={data.busy} onClick={()=>void saveListing()}>{data.busy?'Salvando...':'Salvar anúncio'}</button></div>:<div className={listingDue?'cp-listing-status-card is-due':'cp-listing-status-card'}>
         <span className="cp-listing-status-icon"><Megaphone/></span>
-        <div><span>{product.listing_status==='listed'?'ANUNCIADO':product.listing_status==='sold'?'VENDIDO':'NÃO ANUNCIADO'}</span><b>{product.listing_status==='listed'?(product.listing_channels.join(' · ')||'Plataforma não informada'):product.listing_status==='sold'?'Venda concluída':'Esse produto ainda não está sendo acompanhado'}</b>{product.listing_status==='listed'&&<small>{listingDays} dia(s) no ar · {listingDue?'revisão pendente':'próxima revisão '+new Date((product.listing_next_checkin_at||localDate())+'T12:00:00').toLocaleDateString('pt-BR')}</small>}</div>
+        <div><span>{tradeOut?'TROCADO':product.listing_status==='listed'?'ANUNCIADO':product.listing_status==='sold'?'VENDIDO':'NÃO ANUNCIADO'}</span><b>{tradeOut?'Entregue em troca de '+(relatedProduct?.name||'outro item'):product.listing_status==='listed'?(product.listing_channels.join(' · ')||'Plataforma não informada'):product.listing_status==='sold'?'Venda concluída':'Esse produto ainda não está sendo acompanhado'}</b>{product.listing_status==='listed'&&<small>{listingDays} dia(s) no ar · {listingDue?'revisão pendente':'próxima revisão '+new Date((product.listing_next_checkin_at||localDate())+'T12:00:00').toLocaleDateString('pt-BR')}</small>}</div>
         {product.listing_status==='listed'&&<strong>{product.listed_price===null?'—':money.format(product.listed_price)}</strong>}
       </div>}
       {checkins.length>0&&<div className="cp-checkin-history"><span>Últimas revisões</span>{checkins.slice(0,3).map(item=><div key={item.id}><b>{item.result==='refreshed'?'Anúncio renovado':item.result==='price_lowered'?'Preço reduzido':item.result==='good'?'Anúncio indo bem':'Mantido por mais 5 dias'}</b><small>{new Date(item.checkin_date+'T12:00:00').toLocaleDateString('pt-BR')}{item.new_price?' · '+money.format(item.new_price):''}</small></div>)}</div>}
@@ -1152,9 +1177,9 @@ function ProductDetail({product,data,calc,readOnly,onClose,onSale,onExpense,onSa
 
     {readOnly&&<section className="cp-detail-danger"><div><Trash2/><div><b>Excluir produto</b><p>Seu plano precisa estar ativo para alterar o estoque.</p></div></div><button className="cp-danger-button" onClick={onBlocked}>Excluir produto</button></section>}
     {!readOnly&&<section className="cp-detail-danger">
-      <div><Trash2/><div><b>Excluir produto do estoque</b><p>{hasSaleHistory?'Este produto possui venda registrada e o histórico financeiro precisa ser preservado.':'Use apenas se o cadastro estiver errado ou se você realmente quiser remover o item e seus movimentos vinculados.'}</p></div></div>
-      {!hasSaleHistory&&!confirmDelete&&<button className="cp-danger-button" onClick={()=>setConfirmDelete(true)}>Excluir produto</button>}
-      {!hasSaleHistory&&confirmDelete&&<div className="cp-delete-confirm"><span>Excluir definitivamente este produto?</span><button className="cp-secondary" onClick={()=>setConfirmDelete(false)}>Cancelar</button><button className="cp-danger-button" disabled={data.busy} onClick={()=>void removeProduct()}>{data.busy?'Excluindo...':'Sim, excluir'}</button></div>}
+      <div><Trash2/><div><b>Excluir produto do estoque</b><p>{hasSaleHistory||relatedTrade?'Este produto possui movimentação registrada e o histórico financeiro precisa ser preservado.':'Use apenas se o cadastro estiver errado ou se você realmente quiser remover o item e seus movimentos vinculados.'}</p></div></div>
+      {!hasSaleHistory&&!relatedTrade&&!confirmDelete&&<button className="cp-danger-button" onClick={()=>setConfirmDelete(true)}>Excluir produto</button>}
+      {!hasSaleHistory&&!relatedTrade&&confirmDelete&&<div className="cp-delete-confirm"><span>Excluir definitivamente este produto?</span><button className="cp-secondary" onClick={()=>setConfirmDelete(false)}>Cancelar</button><button className="cp-danger-button" disabled={data.busy} onClick={()=>void removeProduct()}>{data.busy?'Excluindo...':'Sim, excluir'}</button></div>}
     </section>}
 
     {error&&<div className="cp-form-error">{error}</div>}
