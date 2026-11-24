@@ -200,7 +200,7 @@ export function useControlData(userId:string){
   const registerSale=useCallback(async(input:RegisterSaleInput)=>{
     setBusy(true);setError(null)
     try{
-      const result=await db.rpc('control_register_sale_v2',{
+      const result=await db.rpc('control_register_sale_v3',{
         p_product_id:input.productId,
         p_quantity:input.quantity,
         p_unit_price:input.unitPrice,
@@ -210,7 +210,9 @@ export function useControlData(userId:string){
         p_notes:input.notes||null,
         p_payment_mode:input.paymentMode,
         p_installment_count:input.installmentCount||1,
-        p_first_due_date:input.firstDueDate||null
+        p_first_due_date:input.firstDueDate||null,
+        p_sale_channel:input.saleChannel,
+        p_sale_channel_other:input.saleChannelOther||null
       })
       if(result.error)throw result.error
       await load()
@@ -223,7 +225,7 @@ export function useControlData(userId:string){
     const uploadedPaths:string[]=[]
     let rpcStarted=false
     try{
-      if(files.length>5)throw new Error('Adicione no máximo 5 fotos do item recebido.')
+      if(!files.length||files.length>5)throw new Error('Adicione de 1 a 5 fotos do item recebido.')
       for(const file of files){
         if(!file.type.startsWith('image/'))throw new Error('Selecione somente imagens.')
         if(file.size>10*1024*1024)throw new Error('Cada foto pode ter no máximo 10 MB.')
@@ -505,7 +507,8 @@ export function useControlData(userId:string){
     for(const expense of expenses)expensesByProduct.set(expense.product_id,[...(expensesByProduct.get(expense.product_id)||[]),expense])
     const tradeBySale=new Map<string,TradeIn>()
     const tradeByIncomingProduct=new Map<string,TradeIn>()
-    for(const trade of tradeIns){tradeBySale.set(trade.sale_id,trade);tradeByIncomingProduct.set(trade.incoming_product_id,trade)}
+    const tradeByOutgoingProduct=new Map<string,TradeIn>()
+    for(const trade of tradeIns){tradeBySale.set(trade.sale_id,trade);tradeByIncomingProduct.set(trade.incoming_product_id,trade);tradeByOutgoingProduct.set(trade.outgoing_product_id,trade)}
     const itemsBySale=new Map<string,SaleItem[]>()
     for(const item of saleItems)itemsBySale.set(item.sale_id,[...(itemsBySale.get(item.sale_id)||[]),item])
     const installmentsByReceivable=new Map<string,ReceivableInstallment[]>()
@@ -515,7 +518,7 @@ export function useControlData(userId:string){
     const saleById=new Map(sales.map(item=>[item.id,item]))
     const listingCheckinsByProduct=new Map<string,ListingCheckin[]>()
     for(const item of listingCheckins)listingCheckinsByProduct.set(item.product_id,[...(listingCheckinsByProduct.get(item.product_id)||[]),item])
-    return{photosByProduct,expensesByProduct,itemsBySale,tradeBySale,tradeByIncomingProduct,installmentsByReceivable,customerById,supplierById,saleById,listingCheckinsByProduct}
+    return{photosByProduct,expensesByProduct,itemsBySale,tradeBySale,tradeByIncomingProduct,tradeByOutgoingProduct,installmentsByReceivable,customerById,supplierById,saleById,listingCheckinsByProduct}
   },[customers,expenses,installments,listingCheckins,photos,saleItems,sales,suppliers,tradeIns])
 
   return{
