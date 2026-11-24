@@ -858,7 +858,7 @@ function TradeModal({data,initialProduct,onClose,onBack,onDone}:{data:Data;initi
       if(net<0)throw new Error('A volta que você pagou supera o valor avaliado do item recebido.')
       const desired=resalePrice.trim()?readAmount(resalePrice):null
       if(desired!==null&&(!Number.isFinite(desired)||desired<0))throw new Error('Preço de revenda inválido.')
-      if(!files.length)throw new Error('Adicione ao menos uma foto do produto recebido.')
+      
       if(date>localDate())throw new Error('A data da troca não pode ser futura.')
       const extra=[counterparty.trim()?'Outra pessoa: '+counterparty.trim():'',notes.trim()].filter(Boolean).join(' · ')
       await data.registerTrade({
@@ -882,7 +882,7 @@ function TradeModal({data,initialProduct,onClose,onBack,onDone}:{data:Data;initi
       <Field label="Categoria"><input value={receivedCategory} onChange={e=>setReceivedCategory(e.target.value)} placeholder="Celular, bicicleta..."/></Field>
       <Field label="Valor acordado do item recebido"><input inputMode="decimal" value={receivedValue} onChange={e=>setReceivedValue(e.target.value)} placeholder="Ex.: 800,00"/></Field>
       <Field label="Preço que pretende vender (opcional)" full><input inputMode="decimal" value={resalePrice} onChange={e=>setResalePrice(e.target.value)} placeholder="Ex.: 1.000,00"/></Field>
-      <div className="cp-trade-photos cp-field cp-field--full"><span>Fotos do item recebido <b>· obrigatório</b></span><label className="cp-trade-photo-picker"><ImagePlus size={24}/><div><b>{files.length?files.length+' foto(s) selecionada(s)':'Adicionar fotos do item'}</b><small>Da câmera ou galeria · até 5 imagens</small></div><input type="file" accept="image/*" multiple onChange={e=>{
+      <div className="cp-trade-photos cp-field cp-field--full"><span>Fotos do item recebido <b>· opcional</b></span><label className="cp-trade-photo-picker"><ImagePlus size={24}/><div><b>{files.length?files.length+' foto(s) selecionada(s)':'Adicionar fotos do item'}</b><small>Da câmera ou galeria · até 5 imagens (opcional)</small></div><input type="file" accept="image/*" multiple onChange={e=>{
         const selected=Array.from(e.target.files||[]).slice(0,5)
         setFiles(selected);e.currentTarget.value=''
       }}/></label>
