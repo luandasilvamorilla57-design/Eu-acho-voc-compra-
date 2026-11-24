@@ -498,7 +498,7 @@ function ProductCard({product,data,calc,onClick}:{product:Product;data:Data;calc
           {status&&<span className="cp-vision-status">{status}</span>}
         </div>
         <h3>{product.name}</h3>
-        <p>{tradeOut?'Trocado pelo '+(linkedOut?.name||'item recebido'):tradeIn?'Recebido pelo '+(linkedIn?.name||'item entregue'):product.acquisition_type==='owned'?'Produto próprio':product.category||'Produto'}</p>
+        <p>{tradeOut?'Trocado pelo '+(linkedOut?.name||'item recebido'):tradeIn?'Veio na troca do '+(linkedIn?.name||'item entregue'):product.acquisition_type==='owned'?'Produto próprio':product.category||'Produto'}</p>
         {product.inventory_mode==='stock'?<span className="cp-vision-stock-count"><Package size={14}/> Estoque: <b>{product.quantity_available} un.</b></span>:<span className="cp-vision-stock-count cp-vision-single-count"><Tag size={14}/>{tradeOut?'Item trocado':isSold?'Item vendido':'Peça disponível'}</span>}
       </div>
       <span className="cp-vision-dots" aria-hidden="true">•••</span>
