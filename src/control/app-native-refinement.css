@@ -984,20 +984,101 @@
 }
 
 
-/* CONTROLE+ · Identificação inequívoca de trocas e histórico */
+/* CONTROLE+ · Selos premium de negociação — compactos, claros e sem sobreposição */
 :root[data-theme] .cp-app .cp-vision-traded-ribbon{
-  display:inline-flex;align-items:center;justify-content:center;
-  align-self:flex-start;max-width:100%;padding:7px 12px;
-  transform:rotate(-5deg);border:2px solid #1476af;border-radius:8px;
-  background:linear-gradient(130deg,#0c3766,#176cb3 55%,#0b3a6e);
-  color:#fff;font-size:12px;font-weight:950;letter-spacing:.08em;
-  box-shadow:0 5px 13px rgba(5,37,77,.25);
+  box-sizing:border-box;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  align-self:flex-start;
+  max-width:100%;
+  min-height:31px;
+  padding:7px 13px;
+  border:1px solid rgba(148,208,255,.65);
+  border-radius:9px;
+  background:linear-gradient(135deg,#103d68 0%,#155e9d 50%,#2178b9 100%);
+  color:#fff;
+  font-size:10.5px;
+  font-weight:900;
+  line-height:1.1;
+  letter-spacing:.085em;
+  text-transform:uppercase;
+  white-space:nowrap;
+  transform:rotate(-3deg);
+  transform-origin:center;
+  box-shadow:0 6px 14px rgba(7,46,89,.18),inset 0 1px 0 rgba(255,255,255,.2);
 }
 :root[data-theme] .cp-app .cp-vision-trade-in{
-  display:inline-flex;align-items:center;gap:5px;width:max-content;
-  max-width:100%;border:1px solid #aedfc7;border-radius:999px;
-  background:#e9f9f0;color:#116744;padding:5px 9px;
-  font-size:11px;font-weight:850;
+  box-sizing:border-box;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  align-self:flex-start;
+  gap:6px;
+  width:max-content;
+  max-width:100%;
+  min-height:28px;
+  padding:6px 10px;
+  border:1px solid #b7dfc9;
+  border-radius:999px;
+  background:linear-gradient(180deg,#f1fcf5 0%,#e4f6ec 100%);
+  color:#146945;
+  font-size:10.5px;
+  font-weight:800;
+  line-height:1.15;
+  letter-spacing:-.012em;
+  white-space:nowrap;
+  box-shadow:0 3px 9px rgba(18,107,68,.055);
+}
+:root[data-theme] .cp-app .cp-vision-trade-in svg{
+  flex-shrink:0;
+  width:12px;
+  height:12px;
+  stroke-width:2.4;
+}
+:root[data-theme] .cp-app .cp-vision-product-flags{
+  display:flex;
+  flex-wrap:wrap;
+  gap:6px;
+  align-items:flex-start;
+  margin-bottom:7px;
+}
+:root[data-theme] .cp-app .cp-vision-product-info>p{
+  line-height:1.4;
+  overflow-wrap:anywhere;
+}
+:root[data-theme] .cp-app .cp-vision-product-info .cp-vision-unique,
+:root[data-theme] .cp-app .cp-vision-product-info .cp-vision-single-count{
+  border-radius:999px;
+}
+:root[data-theme] .cp-app .cp-vision-sold-ribbon{
+  filter:drop-shadow(0 5px 8px rgba(129,28,28,.13));
+}
+:root[data-theme="dark"] .cp-app .cp-vision-trade-in{
+  background:linear-gradient(180deg,#123f35,#0e352e);
+  border-color:#357c62;
+  color:#c1f7d6;
+}
+@media(max-width:640px){
+  :root[data-theme] .cp-app .cp-vision-traded-ribbon{
+    min-height:28px;
+    padding:6px 10px;
+    font-size:10px;
+    letter-spacing:.065em;
+  }
+  :root[data-theme] .cp-app .cp-vision-trade-in{
+    min-height:27px;
+    padding:6px 8px;
+    gap:4px;
+    font-size:10px;
+  }
+  :root[data-theme] .cp-app .cp-vision-product-flags{gap:5px}
+}
+@media(max-width:360px){
+  :root[data-theme] .cp-app .cp-vision-trade-in{
+    white-space:normal;
+    text-align:center;
+  }
 }
 :root[data-theme] .cp-app .cp-item-history-entry{
   display:grid;gap:6px;border:1px solid #d8e7f5;border-radius:14px;
@@ -1025,7 +1106,7 @@
 :root[data-theme] .cp-app .cp-sale-channel-line>div>b{display:block;font-size:13px;color:#143a60}
 :root[data-theme] .cp-app .cp-sale-channel-line small{display:block;font-size:11px;line-height:1.4;color:#667e95;margin-top:3px}
 :root[data-theme] .cp-app .cp-sale-channel-line>strong{text-align:right;font-size:13px;white-space:nowrap}
-:root[data-theme="dark"] .cp-app .cp-vision-trade-in{background:#0d4035;border-color:#27735e;color:#b2ffdc}
+
 :root[data-theme="dark"] .cp-app .cp-item-history-entry,
 :root[data-theme="dark"] .cp-app .cp-sale-channel-line{background:#102a46;border-color:#325371}
 :root[data-theme="dark"] .cp-app .cp-item-history-entry>strong,
