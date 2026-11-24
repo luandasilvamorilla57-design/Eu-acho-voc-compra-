@@ -223,7 +223,7 @@ export function useControlData(userId:string){
     const uploadedPaths:string[]=[]
     let rpcStarted=false
     try{
-      if(!files.length||files.length>5)throw new Error('Adicione de 1 a 5 fotos do item recebido.')
+      if(files.length>5)throw new Error('Adicione no máximo 5 fotos do item recebido.')
       for(const file of files){
         if(!file.type.startsWith('image/'))throw new Error('Selecione somente imagens.')
         if(file.size>10*1024*1024)throw new Error('Cada foto pode ter no máximo 10 MB.')
